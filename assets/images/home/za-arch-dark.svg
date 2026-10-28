@@ -1,0 +1,10 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 620 300' preserveAspectRatio='none'>
+<defs>
+<linearGradient id='f' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#a9b8a8' stop-opacity='.3'/><stop offset='1' stop-color='#a9b8a8' stop-opacity='0'/></linearGradient>
+<linearGradient id='s' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='0' y2='300'><stop offset='0' stop-color='#e4c978' stop-opacity='.85'/><stop offset='.6' stop-color='#e4c978' stop-opacity='.85'/><stop offset='1' stop-color='#e4c978' stop-opacity='0'/></linearGradient>
+<linearGradient id='t' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='0' y2='300'><stop offset='0' stop-color='#e4c978' stop-opacity='.45'/><stop offset='.6' stop-color='#e4c978' stop-opacity='.45'/><stop offset='1' stop-color='#e4c978' stop-opacity='0'/></linearGradient>
+</defs>
+<path d='M10 300V130C10 40 270 30 310 4C350 30 610 40 610 130V300Z' fill='url(#f)'/>
+<path d='M10 300V130C10 40 270 30 310 4C350 30 610 40 610 130V300' fill='none' stroke='url(#s)' stroke-width='1.6' vector-effect='non-scaling-stroke'/>
+<path d='M26 300V132C26 54 276 44 310 22C344 44 594 54 594 132V300' fill='none' stroke='url(#t)' stroke-width='.8' vector-effect='non-scaling-stroke'/>
+</svg>
