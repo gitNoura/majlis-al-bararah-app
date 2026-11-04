@@ -93,7 +93,7 @@ Scope correction: everything on the web Hifdh page is in scope (Plan screen, Lis
 
 Checklist (tick each step, commit and push after each):
 - [x] Step 0: this section added and pushed
-- [ ] Step 1: npm install, tsc, lint clean
+- [x] Step 1: npm install, tsc, lint clean (no errors, no changes needed)
 - [ ] Step 2: web inventory table written
 - [ ] Step 3a: tab bar (Listen / My plans / Recite)
 - [ ] Step 3b: Listen
