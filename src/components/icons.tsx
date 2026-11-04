@@ -225,3 +225,16 @@ export function BackIcon({ size = 24, color, rtl }: IconProps & { rtl: boolean }
     </Svg>
   );
 }
+
+// The Hifdh tabs: «Listen» (a play triangle) and «Recite» (a microphone)
+export const PlayIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path fill={p.color} d="M8.5 5.8v12.4a.9.9 0 0 0 1.37.77l9.9-6.2a.9.9 0 0 0 0-1.54l-9.9-6.2A.9.9 0 0 0 8.5 5.8z" />
+  </Line>
+);
+export const MicIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M12 3.5a3 3 0 0 0-3 3V11a3 3 0 0 0 6 0V6.5a3 3 0 0 0-3-3z" />
+    <Path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" />
+  </Line>
+);

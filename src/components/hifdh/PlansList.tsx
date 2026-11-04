@@ -1,35 +1,16 @@
 // «My plans» (plansHTML of the website): a card per plan with Modify / Pause (or Resume) / Delete, and «Add plan».
-// `PlansTile` is the door to it from the plan screen.
+// The «My plans» tab (HifTabs) is the door to it from the plan screen.
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
 import { PrimaryButton, SecondaryButton } from '@/components/hifdh/Section';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
-import { isEnglish } from '@/i18n/i18n';
 import * as core from '@/lib/hifdh/core';
 import { kindOf, paceText, rangeLabel } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/theme';
-
-export function PlansTile({ onPress }: { onPress: () => void }) {
-  const { c } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={[styles.tile, { backgroundColor: c.card, borderColor: c.line }]}
-    >
-      <Txt serif size={18} weight={700} color={c.ink} style={{ flex: 1 }}>
-        {HIF.myPlans()}
-      </Txt>
-      <Txt size={22} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>
-        ›
-      </Txt>
-    </Pressable>
-  );
-}
 
 export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onAdd: () => void }) {
   const { c } = useTheme();

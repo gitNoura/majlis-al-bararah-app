@@ -95,7 +95,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 0: this section added and pushed
 - [x] Step 1: npm install, tsc, lint clean (no errors, no changes needed)
 - [x] Step 2: web inventory table written
-- [ ] Step 3a: tab bar (Listen / My plans / Recite)
+- [x] Step 3a: tab bar (Listen / My plans / Recite) → `components/hifdh/HifTabs.tsx`, shown under the Plan screen; replaces the «My plans» tile. Recite shows «coming soon» exactly as the web does (no web Test code exists). Listen tab calls `useHif().listen(null)` (stub until 3b).
 - [ ] Step 3b: Listen
 - [ ] Step 3c: Test / Recite
 - [ ] Step 3d: history screen

@@ -11,9 +11,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AheadCard } from '@/components/hifdh/AheadCard';
 import { HifHeader } from '@/components/hifdh/HifHeader';
+import { HifTabs, TABS_HEIGHT, useReciteSoon } from '@/components/hifdh/HifTabs';
 import { HifProvider, useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { MemorizedScreen } from '@/components/hifdh/MemorizedScreen';
-import { PlansList, PlansTile } from '@/components/hifdh/PlansList';
+import { PlansList } from '@/components/hifdh/PlansList';
 import { PlanSetup } from '@/components/hifdh/PlanSetup';
 import { PlanSummary } from '@/components/hifdh/PlanSummary';
 import { RevisionCard } from '@/components/hifdh/RevisionCard';
@@ -44,7 +45,8 @@ function Content({
   exit: () => void;
 }) {
   const insets = useSafeAreaInsets();
-  useHif(); // subscribing here redraws the whole screen (summary and cards) when `rev` changes
+  const reciteSoon = useReciteSoon();
+  const { listen } = useHif(); // subscribing here redraws the whole screen (summary and cards) when `rev` changes
 
   // the phone's back button steps out of a screen inside the page before it leaves the page
   // (the plan setup has its own: it steps back through its questions first)
@@ -69,14 +71,14 @@ function Content({
           <PlansList onEdit={(id) => open({ type: null, id })} onAdd={() => open({ type: null, id: null })} />
         </ScrollView>
       ) : (
-        <ScrollView contentContainerStyle={pad}>
+        <ScrollView contentContainerStyle={{ ...pad, paddingBottom: pad.paddingBottom + TABS_HEIGHT }}>
           <PlanSummary onOpenMemorized={() => (plan.markMemorizedAsked(), go('memorized'))} />
           <TodayCard />
           <AheadCard />
           <RevisionCard />
-          <PlansTile onPress={() => go('plans')} />
         </ScrollView>
       )}
+      {view === 'home' && <HifTabs onPlans={() => go('plans')} onListen={() => listen(null)} onRecite={reciteSoon} />}
     </View>
   );
 }
