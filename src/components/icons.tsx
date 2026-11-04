@@ -238,3 +238,8 @@ export const MicIcon = (p: IconProps) => (
     <Path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" />
   </Line>
 );
+export const PauseIcon = (p: IconProps) => (
+  <Line {...p} strokeWidth={3}>
+    <Path d="M8 5.5v13M16 5.5v13" />
+  </Line>
+);

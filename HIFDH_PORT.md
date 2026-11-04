@@ -96,7 +96,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 1: npm install, tsc, lint clean (no errors, no changes needed)
 - [x] Step 2: web inventory table written
 - [x] Step 3a: tab bar (Listen / My plans / Recite) → `components/hifdh/HifTabs.tsx`, shown under the Plan screen; replaces the «My plans» tile. Recite shows «coming soon» exactly as the web does (no web Test code exists). Listen tab calls `useHif().listen(null)` (stub until 3b).
-- [ ] Step 3b: Listen
+- [x] Step 3b: Listen → `components/hifdh/ListenScreen.tsx` (a `'listen'` view in `memorize.tsx`), engine `src/lib/hifdh/listen.js`, `log.js`, `reciters.js`; see notes below
 - [ ] Step 3c: Test / Recite
 - [ ] Step 3d: history screen
 - [ ] Step 3e: importOldMarks (port or note why skipped)
@@ -112,13 +112,21 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 | Memorized picker and «What I've memorized» | done | `MemorizedPicker.tsx`, `MemorizedScreen.tsx` |
 | Plan setup / edit, pause, delete | done | `PlanSetup.tsx`, `DateStepper.tsx` |
 | My plans (list, modify, pause, delete, add) | done | `PlansList.tsx` (reached by a tile under the cards) |
-| Tab bar Listen / My plans / Recite (`tabsHTML`, bottom dock on the Plan screen) | missing (partial: only a «My plans» tile) | to build: `components/hifdh/HifTabs.tsx` in `memorize.tsx` |
-| Listen (`listen.js`: pick ayat, repeat, rounds, methods each/prev/all, reciters, player, session log) | missing (button shows «coming soon») | to build |
-| Listen button on a task row (`listen(row)`) | partial (stub toast in `HifProvider.listen`) | `TaskRow.tsx`, `HifProvider.tsx` |
-| Session log (`log.js`, key `hifdhLog`) | missing | to build with Listen |
+| Tab bar Listen / My plans / Recite (`tabsHTML`, bottom dock on the Plan screen) | done (3a) | `components/hifdh/HifTabs.tsx` in `memorize.tsx` |
+| Listen (`listen.js`: pick ayat, repeat, rounds, methods each/prev/all, reciters, player, session log) | done (3b) | `ListenScreen.tsx`, `src/lib/hifdh/{listen,log,reciters}.js` |
+| Listen button on a task row (`listen(row)`) | done (3b) | `HifProvider.listen` → `memorize.tsx` `openListen` |
+| Session log (`log.js`, key `hifdhLog`) | done (3b) | `src/lib/hifdh/log.js` |
 | Test / Recite | web is itself a «coming soon» toast; nothing to port | kept as the same toast on the Recite tab; `src/app/test.tsx` stays `Coming` |
 | History screen («Past days», `historyHTML`, older days) | missing (logic done: `plan.history()`, `plan.removeEntry()`) | to build |
 | History status sheet (`openStatus`: done / stopped at an ayah / not done / clear) | missing | to build (reuses `StopSheet`) |
 | Extra-revision sessions in history (tap removes, «Session removed») | missing (logic done) | to build |
 | Strings for history, tabs, listen | tabs and history keys exist in `src/i18n/hifdh.js`; Listen strings missing | add to `hifdh.js` as needed |
 | `importOldMarks()` | skipped for now (decided in 3e) | none |
+
+### Notes (Step 3b: Listen)
+- New package: `expo-audio ~58.0.11` (the SDK 58 version from `node_modules/expo/bundledNativeModules.json`). `npx expo install` and docs.expo.dev were unreachable from the sandbox, so it was added with `npm install expo-audio@~58.0.11` and the API was read from the package's own typings. The app's Quran screens use no audio, so nothing existed to reuse. Needs a development build (native module), not Expo Go.
+- Engine `Listener` (`src/lib/hifdh/listen.js`) is the website's logic: steps (`each` / `prev` / `all`), repeat, rounds, loop, speed, the two players taking turns so the next ayah is preloaded, one quiet `listen` record in the log (`hifdhLog`) with `addRecord`. Prefs are kept under the same key, `listenPrefs`. The players are made by `start()` and let go by `release()` (the screen's effect), so a screen unmount stops the sound.
+- Differences from the web, closest-possible: there is no mushaf behind Listen (the web taps ayat on the page). The ayat are chosen with the web's settings-sheet controls (From / To: surah list + ayah − / +), «Whole page» (uses `ayatOn(pageOf(...))` from `lib/boxes`) and «Whole surah». The web's `ls-jump` fahras (jump to a surah/page in the book) is dropped, as there is no book. The «locked» rule (taps ignored while a choice exists) is not needed with a form.
+- Opening from a portion presets the choice to that portion's first ayah (the web only scrolled the book to it and chose nothing). The Listen tab opens at today's first memorize portion, as the web.
+- Warsh has no reciter (`reciters.js`): both the tab and the row button say `HIF.lsWarshSoon()` and do not open the screen, as the web does.
+- The log does not show up anywhere yet; step 3d (history) is where the web showed it only via «last worked», which the app has no map for. Background playback with the screen off is not configured (needs `UIBackgroundModes`/a foreground service); playback uses `playsInSilentMode`.

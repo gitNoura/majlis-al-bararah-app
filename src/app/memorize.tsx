@@ -3,7 +3,8 @@
 // ahead of schedule, revision). 3c-1: «what I've memorized» (the ring opens it). 3c-2: the plan setup and edit
 // (`PlanSetup`, opened by «Set up my plan» / «Start a revision plan»). 3c-3: «My plans» (`PlansList`, with modify / pause /
 // delete / add plan), opened from the tile under the cards; editing a plan returns there.
-// Listen and Test are separate pages, not part of this screen.
+// Listen (`ListenScreen`, the 'listen' view) opens from the Listen tab or a row's listen button and steps back here.
+// Recite has no page on the website yet (it says «coming soon»), so it does the same here.
 // `rev` (in HifProvider) goes up after every mark, so the summary and the cards redraw.
 import { ActivityIndicator, BackHandler, ScrollView, View } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
@@ -11,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AheadCard } from '@/components/hifdh/AheadCard';
 import { HifHeader } from '@/components/hifdh/HifHeader';
+import { ListenScreen } from '@/components/hifdh/ListenScreen';
 import { HifTabs, TABS_HEIGHT, useReciteSoon } from '@/components/hifdh/HifTabs';
 import { HifProvider, useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { MemorizedScreen } from '@/components/hifdh/MemorizedScreen';
@@ -22,12 +24,13 @@ import { TodayCard } from '@/components/hifdh/TodayCard';
 import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
+import { startKey } from '@/lib/hifdh/listen';
 import * as plan from '@/lib/hifdh/plan';
 import { useTheme } from '@/theme/theme';
 
 type Load = 'loading' | 'ready' | 'failed';
 // The screens inside the page: the plan (home), what I've memorized, My plans, and the plan setup / edit.
-type Screen = 'home' | 'memorized' | 'plans' | 'pace';
+type Screen = 'home' | 'memorized' | 'plans' | 'pace' | 'listen';
 // What the plan setup was opened for: a new plan of a type (or none: ask), or an existing plan to edit.
 type Setup = { type: PlanType | null; id: string | null; from: Screen }; // `from`: where to go back to
 
@@ -37,12 +40,14 @@ function Content({
   go,
   open,
   exit,
+  listenAt,
 }: {
   view: Screen;
   setup: Setup;
   go: (v: Screen) => void;
   open: (s: Omit<Setup, 'from'>) => void;
   exit: () => void;
+  listenAt: string | null; // the ayah Listen opens at
 }) {
   const insets = useSafeAreaInsets();
   const reciteSoon = useReciteSoon();
@@ -56,6 +61,7 @@ function Content({
     return () => sub.remove();
   }, [view, go]);
 
+  if (view === 'listen') return <ListenScreen start={listenAt} onBack={() => go('home')} />;
   if (view === 'pace') return <PlanSetup type={setup.type} id={setup.id} onExit={exit} />;
 
   const pad = { padding: 16, paddingBottom: insets.bottom + 32, gap: 14 };
@@ -87,6 +93,7 @@ export default function Memorize() {
   const { c } = useTheme();
   const [load, setLoad] = useState<Load>('loading');
   const [view, setView] = useState<Screen>('home');
+  const [listenAt, setListenAt] = useState<string | null>(null);
   const [setup, setSetup] = useState<Setup>({ type: null, id: null, from: 'home' });
 
   useEffect(() => {
@@ -105,6 +112,15 @@ export default function Memorize() {
     setView('pace');
   }, [view]);
   const startPlan = useCallback((type: PlanType) => open({ type, id: null }), [open]);
+  // «Listen»: open it at the first ayah of a portion (today's first one when none is given)
+  const openListen = useCallback(
+    (row: { segs?: number[][] } | null) => {
+      const r = row ?? (plan.todayRows() as { segs?: number[][] }[]).find((x) => x.segs?.length);
+      setListenAt(startKey(r?.segs?.[0]?.[0] ?? null));
+      setView('listen');
+    },
+    [],
+  );
   const exit = useCallback(() => setView(setup.from), [setup.from]); // back to where it was opened (home or My plans)
 
   return (
@@ -118,8 +134,8 @@ export default function Memorize() {
         </Txt>
       )}
       {load === 'ready' && (
-        <HifProvider onStartPlan={startPlan}>
-          <Content view={view} setup={setup} go={setView} open={open} exit={exit} />
+        <HifProvider onStartPlan={startPlan} onListen={openListen}>
+          <Content view={view} setup={setup} go={setView} open={open} exit={exit} listenAt={listenAt} />
         </HifProvider>
       )}
     </View>

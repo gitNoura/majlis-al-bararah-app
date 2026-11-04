@@ -1,6 +1,6 @@
 // What the daily cards share: `rev` (bumped after every mark or plan change, so the summary and the cards
 // redraw), the toast, the confetti, and the «where did you stop?» sheet. memorize.tsx wraps the screen in it.
-// `startPlan` is the door to the plan setup (3c); until that exists it only says «coming soon».
+// `startPlan` is the door to the plan setup, `listen` the door to Listen; each says «coming soon» when memorize.tsx gives none.
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 
@@ -9,6 +9,7 @@ import { StopSheet, type Row } from '@/components/hifdh/StopSheet';
 import { useToast } from '@/components/hifdh/Toast';
 import { HIF } from '@/i18n/hifdh';
 import { HOME } from '@/i18n/home';
+import { available } from '@/lib/hifdh/listen';
 import * as plan from '@/lib/hifdh/plan';
 
 export type PlanType = 'memorize' | 'revise';
@@ -34,9 +35,11 @@ export function useHif() {
 export function HifProvider({
   children,
   onStartPlan,
+  onListen,
 }: {
   children: ReactNode;
   onStartPlan?: (type: PlanType) => void; // 3c: opens the plan setup
+  onListen?: (row: Row | null) => void; // 3b: opens Listen at a portion (null: today's first one)
 }) {
   const [rev, setRev] = useState(0);
   const [stopRow, setStopRow] = useState<Row | null>(null);
@@ -66,9 +69,9 @@ export function HifProvider({
       burst,
       openStop: setStopRow,
       startPlan: onStartPlan ?? comingSoon,
-      listen: comingSoon, // Listen is another page, out of scope here
+      listen: (row) => (!onListen ? comingSoon() : available().length ? onListen(row) : toast(HIF.lsWarshSoon())), // Warsh has no reciter yet
     }),
-    [rev, refresh, toast, burst, onStartPlan, comingSoon],
+    [rev, refresh, toast, burst, onStartPlan, onListen, comingSoon],
   );
 
   return (
