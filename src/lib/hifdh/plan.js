@@ -4,6 +4,7 @@
 // One saved value, 'hifz2': { v: 2, ledger, plans, log, settings } - see hifz-core.js for the shapes.
 // Nothing leaves the device.
 import { readJSON, writeJSON } from '../storage.js';
+import UNITS_RAW from '../../../assets/data/hifz-units.json';
 import * as core from './core.js';
 
 const KEY = 'hifz2';
@@ -11,7 +12,6 @@ export const TOTAL_AYAT = 6214;
 
 let state = null;
 let U = null;
-let loading = null;
 
 const clean = (s) => ({
   ...core.emptyState(),
@@ -19,19 +19,16 @@ const clean = (s) => ({
   settings: { ...(s?.settings || {}), dayStart: 0 }, // the day always starts at midnight
 });
 
-// The ayah table (/data/hifz-units.json) and the saved state: the screen waits for this.
+// The ayah table (assets/data/hifz-units.json, bundled: 6 KB) and the saved state. Synchronous in the
+// app; ready() stays a promise so the page's code reads as on the website.
+function init() {
+  if (U) return;
+  U = core.makeUnits(UNITS_RAW);
+  state = clean(readJSON(KEY));
+}
 export function ready() {
-  loading ??= fetch('/data/hifz-units.json')
-    .then((r) => r.json())
-    .then((raw) => {
-      U = core.makeUnits(raw);
-      state = clean(readJSON(KEY));
-    })
-    .catch((e) => {
-      loading = null;
-      throw e;
-    });
-  return loading;
+  init();
+  return Promise.resolve();
 }
 
 export const units = () => U;
