@@ -18,9 +18,14 @@ Already ported (no need to resend): `src/hifz/hifz-core.js`, `src/hifz/hifz-plan
 - [x] Stage 2: strings → `src/i18n/hifdh.js` (same `L(ar, en, fr)` style as `src/i18n/home.js`), `HIF.key()`, 115 keys
 - [ ] Stage 3: UI → `src/app/memorize.tsx` + components in `src/components/hifdh/`
   - [x] 3a header and plan summary → `src/app/memorize.tsx`, `src/components/hifdh/{HifHeader,WeekCard,MemorizedRing,PlanSummary}.tsx`
-  - [ ] 3b daily cards
-  - [ ] 3c plan setup/edit flow (finish date, pace, days, pause/delete), plans list, memorized picker
-- [ ] Stage 4: lint + `npx tsc --noEmit`
+  - [x] 3b daily cards
+    - [x] 3b-1 Today card + shared pieces → `src/components/hifdh/{HifProvider,TaskRow,TodayCard,Section,StopSheet,Toast,Confetti}.tsx`, `src/app/memorize.tsx`
+    - [x] 3b-2 RevisionCard, AheadCard → `src/components/hifdh/{RevisionCard,AheadCard}.tsx`, wired in `src/app/memorize.tsx`
+  - [x] 3c plan setup/edit flow (finish date, pace, days, pause/delete), plans list, memorized picker (split in three)
+    - [x] 3c-1 memorized picker + «What I've memorized» screen → `src/components/hifdh/{MemorizedPicker,MemorizedScreen}.tsx`, `src/app/memorize.tsx` (`view` state, ring opens it)
+    - [x] 3c-2 plan setup (questions) and edit page → `src/components/hifdh/{PlanSetup,DateStepper}.tsx`, `src/app/memorize.tsx` (`'pace'` view, `onStartPlan`)
+    - [x] 3c-3 plans list («My plans»: modify / pause / delete / add) → `src/components/hifdh/PlansList.tsx`, tile under the cards, `'plans'` view in `src/app/memorize.tsx`
+- [ ] Stage 4: lint + `npx tsc --noEmit` (first run fixed: Confetti ref-in-render, picker/Today/Revision/TaskRow types; re-run to confirm)
 
 ## Conventions in this app (from AGENTS.md and existing code)
 - Storage: `readJSON/writeJSON` from `src/lib/storage.js` (localStorage shim), so web logic works unchanged.
@@ -43,5 +48,42 @@ Already ported (no need to resend): `src/hifz/hifz-core.js`, `src/hifz/hifz-plan
 - Left out: the web's `importOldMarks()` (migrates the old `hifdhMarks` into the ledger on open); the app has no earlier data. `marks.js` is not needed by 3a; it is for the freshness view / picking something known in 3c.
 - `npx tsc --noEmit` could not run in the chat (no `node_modules`), so 3a is unchecked until Stage 4.
 
+## Notes and decisions (Stage 3b-1)
+- `HifProvider` (wraps the loaded screen in `memorize.tsx`) owns `rev` (bumped by `refresh()` after every mark; `Content` subscribes via `useHif()`, so the summary and the cards redraw), the toast, the confetti and the «where did you stop?» sheet. Cards get `{ rev, refresh, toast, burst, openStop, startPlan, listen }` from `useHif()`.
+- `TaskRow` is the shared `taskHTML` (props `row, locked, ahead, first`): Complete (tap = done / take back, long press 550 ms = stop sheet), undo link for «not done», status lines, weekly «This week is complete». 3b-2's Revision and Ahead cards reuse it (`locked` for revision with nothing memorized, `ahead` for the «For <day>» line).
+- `Section` / `Hint` / `PrimaryButton` / `SecondaryButton` (in `Section.tsx`) are the card shell and buttons for all daily cards.
+- Confetti: `Confetti.tsx` redraws `confetti.js` with `Animated` (native driver, precomputed paths, no new package); skipped when the device asks for reduced motion. All-day-done fires the big burst from screen centre plus the «MashaAllah» toast; otherwise a small burst from the button.
+- Ambiguities, closest to the web: the Listen button shows `HOME.coming()` (Listen is another page); «Set up my plan» (`startPlan`) also shows `HOME.coming()` until 3c passes `onStartPlan` to `HifProvider`. The web put Today and Ahead in one green band; here each is its own card. The `nottoday` action has no button on the web (history sheet only), so it comes with 3c's history/status sheet, if at all.
+- Not run: `tsc` (see 3a). `row` objects are typed `any` (`Row` in `StopSheet.tsx`) as the logic modules are plain JS.
+
+## Notes and decisions (Stage 3b-2)
+- Order on the screen: summary, Today, Ahead, Revision (the web had Ahead inside the green Today band, Revision in the yellow one; here each is its own card).
+- `AheadCard` keeps the web's `aheadOpen` as local state (`open`); it shows the «start tomorrow's plan» offer until opened or until something ahead is done, and draws nothing unless today's rows are all done and `aheadRows()` is not empty.
+- `RevisionCard`: no revision plan gives the hint plus «Start a revision plan» (disabled until `memorizedCount() > 0`); with a plan, rows are `locked` until then and the lock note shows. «Start» goes through `startPlan('revise')` (still «coming soon» until 3c).
+
+## Notes and decisions (Stage 3c-1)
+- `MemorizedPicker({ bits, onSet(from, to, on), quick? })` is controlled: `bits` is one 0/1 per ayah, `onSet` puts the span [from, to) in or out. `MemorizedScreen` feeds it the ledger (`plan.setLedger` + `refresh()`); 3c-2 feeds it the plan's range bits for «Specific surahs» and the first-time «memorized» question (use `quick` there too, as the web's `memorizedBody`).
+- `memorize.tsx` now has a `view` state (`'home' | 'memorized'`; 3c-2/3 add `'pace'`, `'plans'`). `HifHeader`'s back and the Android back button step out to home. Opening it calls `plan.markMemorizedAsked()` as the web did.
+- Surah list: search by number, Arabic or Latin name; a surah opens into «from ayah / to» with Add / Remove. Juz list: 30 rows, a strip of the 16 thumun, two hizb with a whole-hizb button. All rows draw at once (114 surahs, 30 juz), no virtualised list inside the ScrollView.
+- Left out: the web's «Redraw keeping the scroll position» (the app doesn't scroll-jump on re-render).
+
+## Notes and decisions (Stage 3c-2)
+- `PlanSetup({ type, id, onExit })` is both flows: `id` null = the questions (type → «what have you memorized» the first time → scope → amount or finish date → days (only for date mode) → summary «Your plan is ready»); `id` set = the one-page edit (covers, pace, days, «new pace from», finish line, pause, delete, Save). It draws its own head and bottom button, and steps back through the questions (head back and Android back) before `onExit`.
+- `memorize.tsx`: new `'pace'` view; `startPlan(type)` goes to `HifProvider onStartPlan`, so «Set up my plan» and «Start a revision plan» now open the setup (the `HOME.coming()` fallback is no longer reached). To edit a plan from 3c-3, set `setup = { type: null, id }` and `view = 'pace'`.
+- The web's `<input type="date">` is replaced by `DateStepper` (±1 / 7 / 30 / 365 days, never before `min`): no date-picker package added. Closest to the web: finish date minimum is tomorrow, «new pace from» minimum is the plan's start.
+- Amount is a text field (`amtText`) so «0.5» can be typed; ayah rounds to a whole number when chosen. In date mode the unit is picked for the reader (biggest of hizb / thumun / page giving at least 1 a day), as `syncDateUnit`; `calc()` computes it without changing the state.
+- Delete asks with `Alert.alert` (the web used `confirm`). Pause / delete from the edit page return to where the edit was opened.
+- The forecast (`finish`) is only computed when the amount is above 0 (the web computed it anyway; it came out null).
+- Not covered here: the keyboard avoidance on Android relies on the system resize (`KeyboardAvoidingView` only pads on iOS).
+
+## Notes and decisions (Stage 3c-3)
+- `PlansList({ onEdit, onAdd })` is plansHTML: a card per plan (kind, range, pace, «Paused»), Modify / Pause-Resume / Delete (with `Alert` confirm), «+ Add plan» (opens the setup with no type, so it asks «What would you like to do?»). `PlansTile` is the door, last item under the daily cards (the web had it as a bottom tab).
+- `memorize.tsx`: `'plans'` view; `open({ type, id })` remembers `from`, so saving, pausing or deleting in the setup/edit returns to My plans when it came from there, else to the plan screen. Android back steps out of Memorized and My plans.
+- Left out on purpose: the history screen («Past days», `historyHTML`, the status sheet `openStatus`, extra-revision sessions). It was not in the 3c list; the `HIF` strings for it exist (`history`, `pastDays`, `noHistory`, `older`, `sessionRemoved`, `markNotDone`...) if you want it as a later piece. `PlanSummary` has no History tile either.
+
+## Notes (Stage 4, first run)
+- Lint: `Burst` in `Confetti.tsx` keeps its `Animated.Value` in `useState` (the `react-hooks/refs` rule rejects `useRef(...).current`). Left alone: the `no-unused-expressions` warning in `src/lib/hifdh/core.js:214` (copied from the web, not a Hifdh UI file).
+- tsc: rows from the plan logic are typed `Row` (= any) in the cards; `TaskRow`'s Pressable ref is `any` (RN 0.88 does not export the instance type); the surah list takes its type from `SURAHS` (`name` may be a number).
+
 ## What remains
-3b daily cards (`TodayCard`/`RevisionCard`/`AheadCard` from `taskHTML`, `todayHTML`, `revisionHTML`, `aheadHTML`: Complete with long-press «where did you stop?», undo, status lines; confetti on Complete), then 3c, then Stage 4 (`npx expo lint`, `npx tsc --noEmit`). Ambiguity: "date stepper and settings" is read as the plan setup/edit flow (finish date, pace, days, pause/delete).
+Stage 4: `npx expo lint`, `npx tsc --noEmit`, and fix what they report across 3a-3c (none of it has been type-checked: paste the errors). Optional later piece: the history screen.

@@ -211,7 +211,13 @@ function cursor(R, N, cycles) {
     // Uses ayat up. True when the pool has been used up and a revision begins again.
     use(ids) {
       let any = false;
-      for (const g of ids) if (inR[g] && !used[g]) (used[g] = 1), left--, (any = true);
+      for (const g of ids) {
+  if (inR[g] && !used[g]) {
+    used[g] = 1;
+    left--;
+    any = true;
+  }
+}
       if (any) this.cycleDay++;
       if (cycles && left === 0 && R.length) {
         for (const g of R) used[g] = 0;
