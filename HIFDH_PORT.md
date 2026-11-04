@@ -98,7 +98,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 3a: tab bar (Listen / My plans / Recite) → `components/hifdh/HifTabs.tsx`, shown under the Plan screen; replaces the «My plans» tile. Recite shows «coming soon» exactly as the web does (no web Test code exists). Listen tab calls `useHif().listen(null)` (stub until 3b).
 - [x] Step 3b: Listen → `components/hifdh/ListenScreen.tsx` (a `'listen'` view in `memorize.tsx`), engine `src/lib/hifdh/listen.js`, `log.js`, `reciters.js`; see notes below
 - [x] Step 3c: Test / Recite: nothing to port. The web has no Test code (`hifz.js`: `act === 'test'` only toasts «coming soon»; no recite/test file exists in `src/`), so the Recite tab (3a) shows the same toast via `HOME.coming()` and `src/app/test.tsx` stays `Coming`. Revisit when the web builds it.
-- [ ] Step 3d: history screen
+- [x] Step 3d: history → `components/hifdh/HistoryScreen.tsx` (`HistoryTile` under the cards, `'history'` view in `memorize.tsx`, status sheet, extra-revision removal, «Older»)
 - [ ] Step 3e: importOldMarks (port or note why skipped)
 - [ ] Step 4: final tsc and lint clean
 
@@ -117,9 +117,9 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 | Listen button on a task row (`listen(row)`) | done (3b) | `HifProvider.listen` → `memorize.tsx` `openListen` |
 | Session log (`log.js`, key `hifdhLog`) | done (3b) | `src/lib/hifdh/log.js` |
 | Test / Recite | web is itself a «coming soon» toast; nothing to port | kept as the same toast on the Recite tab; `src/app/test.tsx` stays `Coming` |
-| History screen («Past days», `historyHTML`, older days) | missing (logic done: `plan.history()`, `plan.removeEntry()`) | to build |
-| History status sheet (`openStatus`: done / stopped at an ayah / not done / clear) | missing | to build (reuses `StopSheet`) |
-| Extra-revision sessions in history (tap removes, «Session removed») | missing (logic done) | to build |
+| History screen («Past days», `historyHTML`, older days) | done (3d) | `HistoryScreen.tsx`, tile in `memorize.tsx` |
+| History status sheet (`openStatus`: done / stopped at an ayah / not done / clear) | done (3d) | `StatusSheet` in `HistoryScreen.tsx` (partial opens `StopSheet`) |
+| Extra-revision sessions in history (tap removes, «Session removed») | done (3d) | `HistoryScreen.tsx` |
 | Strings for history, tabs, listen | tabs and history keys exist in `src/i18n/hifdh.js`; Listen strings missing | add to `hifdh.js` as needed |
 | `importOldMarks()` | skipped for now (decided in 3e) | none |
 
@@ -130,3 +130,8 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - Opening from a portion presets the choice to that portion's first ayah (the web only scrolled the book to it and chose nothing). The Listen tab opens at today's first memorize portion, as the web.
 - Warsh has no reciter (`reciters.js`): both the tab and the row button say `HIF.lsWarshSoon()` and do not open the screen, as the web does.
 - The log does not show up anywhere yet; step 3d (history) is where the web showed it only via «last worked», which the app has no map for. Background playback with the screen off is not configured (needs `UIBackgroundModes`/a foreground service); playback uses `playsInSilentMode`.
+
+### Notes (Step 3d: history)
+- `HistoryTile` («History / Past days», the web's `progressHTML`) sits under the Revision card; it opens the `'history'` view (back and Android back return to the plan). `HistoryScreen` is `historyHTML`: a card per day, a button per portion (kind, name, status), extra-revision sessions («Extra revision», tap removes them and shows «Session removed.»), 40 days at a time then «Older».
+- `StatusSheet` is `openStatus`: Done / Stopped at an ayah… / Mark as not done (+ hint) / Clear the mark; weekly rows only get Done and Clear, as on the web. «Stopped at an ayah…» closes the sheet and opens the existing `StopSheet` through `HifProvider.openStop`, which marks it. No new strings were needed (the history keys were already in `hifdh.js`).
+- Logged Listen sessions (`hifdhLog`) are not listed in History: the web does not list them there either (they only count toward the map's «last worked», which the app has no map for).

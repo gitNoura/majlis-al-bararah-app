@@ -4,7 +4,7 @@
 // (`PlanSetup`, opened by «Set up my plan» / «Start a revision plan»). 3c-3: «My plans» (`PlansList`, with modify / pause /
 // delete / add plan), opened from the tile under the cards; editing a plan returns there.
 // Listen (`ListenScreen`, the 'listen' view) opens from the Listen tab or a row's listen button and steps back here.
-// Recite has no page on the website yet (it says «coming soon»), so it does the same here.
+// «History» (`HistoryScreen`, the tile under the cards) lists the past days. Recite has no page on the website yet (it says «coming soon»), so it does the same here.
 // `rev` (in HifProvider) goes up after every mark, so the summary and the cards redraw.
 import { ActivityIndicator, BackHandler, ScrollView, View } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AheadCard } from '@/components/hifdh/AheadCard';
 import { HifHeader } from '@/components/hifdh/HifHeader';
 import { ListenScreen } from '@/components/hifdh/ListenScreen';
+import { HistoryScreen, HistoryTile } from '@/components/hifdh/HistoryScreen';
 import { HifTabs, TABS_HEIGHT, useReciteSoon } from '@/components/hifdh/HifTabs';
 import { HifProvider, useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { MemorizedScreen } from '@/components/hifdh/MemorizedScreen';
@@ -30,7 +31,7 @@ import { useTheme } from '@/theme/theme';
 
 type Load = 'loading' | 'ready' | 'failed';
 // The screens inside the page: the plan (home), what I've memorized, My plans, and the plan setup / edit.
-type Screen = 'home' | 'memorized' | 'plans' | 'pace' | 'listen';
+type Screen = 'home' | 'memorized' | 'plans' | 'pace' | 'listen' | 'history';
 // What the plan setup was opened for: a new plan of a type (or none: ask), or an existing plan to edit.
 type Setup = { type: PlanType | null; id: string | null; from: Screen }; // `from`: where to go back to
 
@@ -56,7 +57,7 @@ function Content({
   // the phone's back button steps out of a screen inside the page before it leaves the page
   // (the plan setup has its own: it steps back through its questions first)
   useEffect(() => {
-    if (view !== 'memorized' && view !== 'plans') return;
+    if (view !== 'memorized' && view !== 'plans' && view !== 'history') return;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => (go('home'), true));
     return () => sub.remove();
   }, [view, go]);
@@ -67,10 +68,14 @@ function Content({
   const pad = { padding: 16, paddingBottom: insets.bottom + 32, gap: 14 };
   return (
     <View style={{ flex: 1 }}>
-      <HifHeader title={view === 'memorized' ? HIF.memorizedTitle() : view === 'plans' ? HIF.myPlans() : HIF.title()} onBack={view === 'home' ? undefined : () => go('home')} />
+      <HifHeader title={view === 'memorized' ? HIF.memorizedTitle() : view === 'plans' ? HIF.myPlans() : view === 'history' ? HIF.history() : HIF.title()} onBack={view === 'home' ? undefined : () => go('home')} />
       {view === 'memorized' ? (
         <ScrollView contentContainerStyle={pad} keyboardShouldPersistTaps="handled">
           <MemorizedScreen />
+        </ScrollView>
+      ) : view === 'history' ? (
+        <ScrollView contentContainerStyle={pad}>
+          <HistoryScreen />
         </ScrollView>
       ) : view === 'plans' ? (
         <ScrollView contentContainerStyle={pad}>
@@ -82,6 +87,7 @@ function Content({
           <TodayCard />
           <AheadCard />
           <RevisionCard />
+          <HistoryTile onPress={() => go('history')} />
         </ScrollView>
       )}
       {view === 'home' && <HifTabs onPlans={() => go('plans')} onListen={() => listen(null)} onRecite={reciteSoon} />}
