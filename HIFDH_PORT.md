@@ -15,11 +15,24 @@ Already ported (no need to resend): `src/hifz/hifz-core.js`, `src/hifz/hifz-plan
 
 ## Status (tick as you go)
 - [x] Stage 1: logic modules copied with imports fixed → `src/lib/hifdh/{core,plan,index}.js`
-- [ ] Stage 2: strings → `src/i18n/hifdh.js` (same `L(ar, en, fr)` style as `src/i18n/home.js`)
+- [x] Stage 2: strings → `src/i18n/hifdh.js` (same `L(ar, en, fr)` style as `src/i18n/home.js`), `HIF.key()`, 115 keys
 - [ ] Stage 3: UI → `src/app/memorize.tsx` + components in `src/components/hifdh/`
+  - [ ] 3a header and plan summary
+  - [ ] 3b daily cards
+  - [ ] 3c date stepper and settings
 - [ ] Stage 4: lint + `npx tsc --noEmit`
 
 ## Conventions in this app (from AGENTS.md and existing code)
 - Storage: `readJSON/writeJSON` from `src/lib/storage.js` (localStorage shim), so web logic works unchanged.
 - Language: `L(ar, en, fr)` / `isEnglish` from `src/i18n/i18n.js`; colours from `useTheme()`; text via `Txt`; back button pattern in `src/components/Coming.tsx`.
 - Expo packages: install with `npx expo install`; check docs for SDK 58 before using any Expo API.
+
+## Notes and decisions (Stage 2)
+- `src/i18n/hifdh.js` holds every string of the web page (home, plan setup/edit, plans, history, memorized, stop sheet), not only the Plan screen, so later pieces need no new strings. Unused keys are fine.
+- Not duplicated here because `src/lib/hifdh/labels.js` already has them: unit names and plurals, `STATUS`, `kindOf`, `perWord`, `weekLine`, `startsAt`, `rangeLabel` (also gives «Everything I know» / «The whole Quran»), weekday/date helpers.
+- Left out on purpose: `lsWarshSoon` (Listen, out of scope), `comingSoon` (use `HOME.coming()`), and the `←`/`→` arrow glyph (use `BackIcon` and an icon instead).
+- French strings keep plain spaces before `? ! : ;`, as in `home.js` (the web page did the same for `L()` strings).
+- Parametrised keys take plain values: `dayOfN(k, n)`, `forDay(dayText)`, `nothingTodayNext(dayText)`, `stepOf(i, n)`, `amountQuestion(revise, weekly)`, `scopeQuestion(revise)`, `finishLine(revise)`.
+
+## What remains
+Stage 3a (header + plan summary in `memorize.tsx` and `src/components/hifdh/`), 3b, 3c, then Stage 4 (`npx expo lint`, `npx tsc --noEmit`). Ambiguity: "date stepper and settings" is read as the plan setup/edit flow (finish date, pace, days, pause/delete).
