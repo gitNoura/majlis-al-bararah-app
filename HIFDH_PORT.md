@@ -100,6 +100,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 3c: Test / Recite: nothing to port. The web has no Test code (`hifz.js`: `act === 'test'` only toasts «coming soon»; no recite/test file exists in `src/`), so the Recite tab (3a) shows the same toast via `HOME.coming()` and `src/app/test.tsx` stays `Coming`. Revisit when the web builds it.
 - [x] Step 3d: history → `components/hifdh/HistoryScreen.tsx` (`HistoryTile` under the cards, `'history'` view in `memorize.tsx`, status sheet, extra-revision removal, «Older»)
 - [x] Step 3e: `importOldMarks()` skipped on purpose: it migrates the web's old Hifdh map marks (`marksIn()` from `src/hifdh/marks.js`, once, flag `hifz2ImportedMarks`) into the ledger. The app has no old map and never stored those marks (no `hifdhMarks` / `marks.js` equivalent in `src/`; `src/lib/marks.ts` is highlights and notes), so there is nothing to import. If the app ever gets the old map, port it then.
+- [ ] Step 5 (follow-up): Listen looks like the web: mushaf pages behind it, top bar, ayah taps choose the range, lit ayah, page follows playback, player bar
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
