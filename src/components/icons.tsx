@@ -202,6 +202,39 @@ export const CopyIcon = (p: IconProps) => (
   </Line>
 );
 
+// share: three joined dots
+export const ShareIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Circle cx={18} cy={5.5} r={2.6} />
+    <Circle cx={6} cy={12} r={2.6} />
+    <Circle cx={18} cy={18.5} r={2.6} />
+    <Path d="M8.3 10.8l7.4-4M8.3 13.2l7.4 4" />
+  </Line>
+);
+// save: a bookmark, filled once saved (`on`)
+export function BookmarkIcon({ size = 22, color, strokeWidth = 1.7, on }: IconProps & { on?: boolean }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={on ? color : 'none'} stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M6.5 3.5h11v17l-5.5-4-5.5 4z" />
+    </Svg>
+  );
+}
+
+// language: a globe
+export const LanguageIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Circle cx={12} cy={12} r={8.5} />
+    <Path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.2 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.2-3.6-8.5s1.2-6.1 3.6-8.5z" />
+  </Line>
+);
+
+// back to the top: a line along the top and a chevron pointing up to it
+export const ToTopIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M5 5h14M6.5 17.5L12 12l5.5 5.5" />
+  </Line>
+);
+
 // The index's number badge: an eight-pointed star outlined in gold, filled forest green when chosen
 export function StarBadge({ size = 38, fill, stroke }: { size?: number; fill: string; stroke: string }) {
   return (

@@ -9,6 +9,7 @@ import { View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import Svg, { Circle, Defs, RadialGradient, Stop, SvgXml } from 'react-native-svg';
 
+import { Moths } from '@/components/Moths';
 import { LANTERN_DAY, LANTERN_NIGHT } from '@/lib/lanterns';
 
 export const LANTERN_W = 34;
@@ -36,8 +37,8 @@ const flickerAt = (p: number) => {
 };
 
 // `day`: the day lantern (the home screen by day); `offset`: where in its flicker it starts (0 to 1),
-// so two lanterns side by side do not flicker together
-export function Lantern({ day, width = LANTERN_W, offset = 0 }: { day?: boolean; width?: number; offset?: number }) {
+// so two lanterns side by side do not flicker together; `moths`: moths flying around its light
+export function Lantern({ day, width = LANTERN_W, offset = 0, moths }: { day?: boolean; width?: number; offset?: number; moths?: boolean }) {
   const height = width * RATIO;
   const box = lanternBox(width);
   const phase = useSharedValue(0);
@@ -89,6 +90,8 @@ export function Lantern({ day, width = LANTERN_W, offset = 0 }: { day?: boolean;
           <Circle cx={light / 2} cy={light / 2} r={light / 2} fill="url(#lantern-flame)" />
         </Svg>
       </Animated.View>
+
+      {moths && <Moths width={box.width} height={box.height} cx={box.width / 2} cy={box.y + height * GLASS} />}
     </View>
   );
 }

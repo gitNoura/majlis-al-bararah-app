@@ -76,7 +76,7 @@ function QuranSearch() {
           value={query}
           onChangeText={setQuery}
           placeholder={READER.searchField()}
-          placeholderTextColor={c.meta}
+          placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.78)' : c.meta}
           autoFocus
           autoCorrect={false}
           returnKeyType="search"

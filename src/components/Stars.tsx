@@ -54,14 +54,15 @@ export function Stars({ glow, faint }: { glow?: { x: number; y: number } | null;
 
 // Every screen's background (the home screen's): nearly white by day (a white veil at 90 % over the
 // ivory), the plain dark grey at night, and the stars over it, faint - barely seen at first; `glow`: the
-// stars lit around the Quran page's lantern at night
-export function ScreenBackground({ glow }: { glow?: { x: number; y: number } | null }) {
+// stars lit around the Quran page's lantern at night. Since 2026-11-04 every page is plain, as the home
+// screen (no stars): `stars` brings them back on a page.
+export function ScreenBackground({ glow, stars }: { glow?: { x: number; y: number } | null; stars?: boolean }) {
   const { c, isDark } = useTheme();
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       <View style={[StyleSheet.absoluteFill, { backgroundColor: c.screen }]} />
       {!isDark && <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]} />}
-      <Stars faint glow={glow} />
+      {stars && <Stars faint glow={glow} />}
     </View>
   );
 }

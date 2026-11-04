@@ -9,12 +9,12 @@
 // the calendar, and settings at the right end, in the same order in every language (as the Quran
 // page's). The words read in their language's direction: in Arabic the greeting, the card's words, the
 // tiles and the prayers (al-Fajr first) start on the right, the round and the card's picture go to the
-// left. By day the screen is nearly white (white at 90 % over the cream), at night the dark grey; the
-// Quran page's stars faint over both, barely seen at first.
+// left. By day the screen is nearly white (white at 90 % over the cream), at night the dark grey;
+// plain, without the other pages' stars.
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect, type Href } from 'expo-router';
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -23,7 +23,8 @@ import { PlaceSheet } from '@/components/PlaceSheet';
 import { PrayerSky, type Phase } from '@/components/PrayerSky';
 import { Lantern, lanternBox } from '@/components/Lantern';
 import { AsrIcon, DhuhrIcon, FajrIcon, FlameIcon, IshaIcon, MaghribIcon, PinIcon, PlusIcon, SettingsIcon } from '@/components/icons';
-import { Glass, GlassBackdrop } from '@/components/Glass';
+import { BottomPanel, PANEL_H, PanelTab } from '@/components/BottomPanel';
+import { GlassBackdrop } from '@/components/Glass';
 import { Avatar } from '@/components/Avatar';
 import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
@@ -48,7 +49,6 @@ const IMG = {
   majalis: require('@/assets/images/home/icon-majalis.svg'),
 };
 
-const BAR_H = 62;
 const LAMP_W = 40; // the wird card's lantern at night
 
 // the home screen's own colours, by day and by night
@@ -265,7 +265,7 @@ export default function Home() {
         <ScrollView
           contentContainerStyle={{
             paddingTop: insets.top + 18,
-            paddingBottom: insets.bottom + BAR_H + 24,
+            paddingBottom: insets.bottom + PANEL_H + 24,
           }}
           showsVerticalScrollIndicator={false}
         >
@@ -357,7 +357,7 @@ export default function Home() {
               {/* at night a lantern hangs from the card's top in the sun's place (the far side from the words) */}
               {isDark && (
                 <View style={{ position: 'absolute', top: -lamp.y, [isEnglish ? 'right' : 'left']: heroW * 0.16 - LAMP_W / 2 - lamp.x }}>
-                  <Lantern width={LAMP_W} />
+                  <Lantern width={LAMP_W} moths />
                 </View>
               )}
               <View style={styles.heroOver}>
@@ -415,19 +415,16 @@ export default function Home() {
 
 // ---------- the parts ----------
 
-// the panel along the bottom edge: its top corners rounded, of acrylic glass over the screen
+// the panel along the bottom edge (src/components/BottomPanel.tsx, the same on every screen)
 function Panel({ hc, go }: { hc: HomeColours; go: (href: Href) => () => void }) {
-  const insets = useSafeAreaInsets();
   return (
-    <Glass acrylic style={[styles.bar, { height: BAR_H + insets.bottom, paddingBottom: insets.bottom }]}>
-      <View style={styles.barRow}>
-        <Tab label={HOME.qibla()} onPress={go('/qibla')} icon={<Image source={IMG.qibla} style={styles.tabImg} tintColor={hc.meta} />} />
-        <Tab label={HOME.ahadith()} onPress={go('/ahadith')} icon={<Image source={IMG.ahadith} style={styles.tabImg} tintColor={hc.meta} />} />
-        <Tab label={HOME.adhkar()} onPress={go('/adhkar')} icon={<Image source={IMG.adhkar} style={styles.tabImg} tintColor={hc.meta} />} />
-        <Tab label={HOME.calendar()} onPress={go('/calendar')} icon={<Image source={IMG.calendar} style={styles.tabImg} tintColor={hc.meta} />} />
-        <Tab label={HOME.tabSettings()} onPress={go('/settings')} icon={<SettingsIcon color={hc.meta} />} />
-      </View>
-    </Glass>
+    <BottomPanel>
+      <PanelTab label={HOME.qibla()} onPress={go('/qibla')} icon={<Image source={IMG.qibla} style={styles.tabImg} tintColor={hc.meta} />} />
+      <PanelTab label={HOME.ahadith()} onPress={go('/ahadith')} icon={<Image source={IMG.ahadith} style={styles.tabImg} tintColor={hc.meta} />} />
+      <PanelTab label={HOME.adhkar()} onPress={go('/adhkar')} icon={<Image source={IMG.adhkar} style={styles.tabImg} tintColor={hc.meta} />} />
+      <PanelTab label={HOME.calendar()} onPress={go('/calendar')} icon={<Image source={IMG.calendar} style={styles.tabImg} tintColor={hc.meta} />} />
+      <PanelTab label={HOME.tabSettings()} onPress={go('/settings')} icon={<SettingsIcon color={hc.meta} />} />
+    </BottomPanel>
   );
 }
 
@@ -439,18 +436,6 @@ function Tile({ hc, icon, label, onPress }: { hc: HomeColours; icon: number; lab
     >
       <Image source={icon} style={{ width: 26, height: 26 }} tintColor={hc.ink} />
       <Txt size={12} weight={600} center color={hc.meta} numberOfLines={1}>
-        {label}
-      </Txt>
-    </Pressable>
-  );
-}
-
-function Tab({ label, icon, on, onPress }: { label: string; icon: ReactNode; on?: boolean; onPress?: () => void }) {
-  const { c } = useTheme();
-  return (
-    <Pressable onPress={onPress} disabled={on} style={({ pressed }) => [styles.tab, pressed && { opacity: 0.55 }]} accessibilityLabel={label}>
-      {icon}
-      <Txt size={12} weight={on ? 700 : 500} color={on ? c.ink : c.meta} numberOfLines={1}>
         {label}
       </Txt>
     </Pressable>
@@ -543,8 +528,5 @@ const styles = StyleSheet.create({
   },
   mirror: { transform: [{ scaleX: -1 }] },
   // along the bottom edge, its top corners rounded
-  bar: { position: 'absolute', left: 0, right: 0, bottom: 0, borderTopLeftRadius: 28, borderTopRightRadius: 28, borderBottomWidth: 0 },
-  barRow: { flex: 1, alignSelf: 'stretch', flexDirection: 'row', paddingHorizontal: 4 },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4 },
   tabImg: { width: 22, height: 22 },
 });

@@ -59,7 +59,7 @@ const current = (tab: Tab, page: number) =>
   (tab === 'surahs' ? surahForPage(page) : tab === 'ahzab' ? hizbForPage(page) : juzForPage(page)).number;
 
 export function QuranIndex({ open, page, onClose, onGo }: { open: boolean; page: number; onClose: () => void; onGo: (page: number) => void }) {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const panelW = Math.min(width * 0.88, 420);
@@ -155,7 +155,7 @@ export function QuranIndex({ open, page, onClose, onGo }: { open: boolean; page:
               value={query}
               onChangeText={setQuery}
               placeholder={READER.filter()}
-              placeholderTextColor={c.meta}
+              placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.78)' : c.meta}
               style={[styles.input, { color: c.ink, fontFamily: ui(500), textAlign: isEnglish ? 'left' : 'right' }]}
             />
             <SearchIcon color={c.ink} size={20} />

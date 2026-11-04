@@ -21,6 +21,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AyahSheet, type Ayah } from '@/components/AyahSheet';
+import { BottomPanel, PANEL_H, PanelTab } from '@/components/BottomPanel';
 import { Glass, GlassBackdrop } from '@/components/Glass';
 import {
   BackIcon,
@@ -35,7 +36,7 @@ import {
   SunIcon,
   ZoomOutIcon,
 } from '@/components/icons';
-import { Lantern, LANTERN_H, LANTERN_W, lanternBox } from '@/components/Lantern';
+import { Lantern, lanternBox } from '@/components/Lantern';
 import { AyahMenu, type MenuAt } from '@/components/AyahMenu';
 import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
 import { PageCurl, type Chosen, type Marked, type Pin } from '@/components/PageCurl';
@@ -56,7 +57,6 @@ import { trackPlace } from '@/lib/riwaya';
 import { readJSON, writeJSON } from '@/lib/storage';
 import { QuranTheme, useTheme } from '@/theme/theme';
 
-const BAR_H = 62; // the bottom bar, above the phone's own bottom edge (its gesture line)
 const IDLE_MS = 5000; // full screen: the round buttons fade after this long untouched
 const NAME_DROP = 94; // the surah's name, 1.5 cm lower than the top buttons (about 63 points a cm)
 const NAME_H = 46;
@@ -159,7 +159,7 @@ function Quran() {
   // the page's size: as big as the room between the bars allows (in full screen, the whole screen),
   // the page's own shape kept
   const top = full ? insets.top + 12 : insets.top + 96;
-  const bottom = full ? insets.bottom + 8 : insets.bottom + BAR_H + 6;
+  const bottom = full ? insets.bottom + 8 : insets.bottom + PANEL_H + 6;
   const roomH = height - top - bottom;
   const shape = full ? FULL_SHAPE : PAGE_SHAPE;
   const pageW = full ? Math.min(width - 16, roomH * shape) : Math.min(width - 10, (roomH - 12) * shape);
@@ -213,7 +213,6 @@ function Quran() {
   const startSide = isEnglish ? 'left' : 'right';
   const endSide = isEnglish ? 'right' : 'left';
   const box = lanternBox();
-  const lanternAt = { x: isEnglish ? width - 18 - LANTERN_W / 2 : 18 + LANTERN_W / 2, y: insets.top + LANTERN_H * 0.6 };
 
   // full screen by day: the screen is the page's paper
   const screen = full && !isDark ? c.paper : c.screen;
@@ -279,7 +278,7 @@ function Quran() {
             {/* zoomed in: back to the whole page */}
             {zoomed && (
               <RoundButton
-                at={{ bottom: full ? insets.bottom + 16 : insets.bottom + BAR_H + 12, left: width / 2 - 23 }}
+                at={{ bottom: full ? insets.bottom + 16 : insets.bottom + PANEL_H + 12, left: width / 2 - 23 }}
                 label={READER.wholePage()}
                 onPress={() => setUnzoom((n) => n + 1)}
               >
@@ -289,19 +288,19 @@ function Quran() {
 
             {/* the bar along the bottom edge: full screen, the index, search, my notebook, the settings */}
             {!full && (
-              <View style={[styles.bar, { height: BAR_H + insets.bottom, paddingBottom: insets.bottom, backgroundColor: c.panel, borderTopColor: c.line }]}>
-                <BarButton label={READER.fullscreen()} onPress={enterFull} icon={<ExpandIcon color={c.ink} />} />
-                <BarButton label={READER.surahs()} onPress={() => setIndexOpen(true)} icon={<MenuIcon color={c.ink} />} />
-                <BarButton label={READER.search()} onPress={openSearch} icon={<SearchIcon color={c.ink} />} />
-                <BarButton label={READER.notebook()} onPress={soon} icon={<NotebookIcon color={c.ink} />} />
-                <BarButton label={READER.settings()} onPress={() => router.push('/quran-settings')} icon={<SettingsIcon color={c.ink} />} />
-              </View>
+              <BottomPanel>
+                <PanelTab label={READER.fullscreen()} onPress={enterFull} icon={<ExpandIcon color={c.meta} />} />
+                <PanelTab label={READER.surahs()} onPress={() => setIndexOpen(true)} icon={<MenuIcon color={c.meta} />} />
+                <PanelTab label={READER.search()} onPress={openSearch} icon={<SearchIcon color={c.meta} />} />
+                <PanelTab label={READER.notebook()} onPress={soon} icon={<NotebookIcon color={c.meta} />} />
+                <PanelTab label={READER.settings()} onPress={() => router.push('/quran-settings')} icon={<SettingsIcon color={c.meta} />} />
+              </BottomPanel>
             )}
           </>
         }
       >
         {/* behind the glass: the background, the corner, the pages */}
-        {!full && <ScreenBackground glow={lanternAt} />}
+        {!full && <ScreenBackground />}
         {!full &&
           (isDark ? (
             <View style={[styles.corner, { top: insets.top - box.y, [side]: 18 - box.x }]} pointerEvents="none">
@@ -337,7 +336,7 @@ function Quran() {
         <View
           style={[
             styles.toast,
-            { bottom: full ? insets.bottom + 24 : insets.bottom + BAR_H + 16, backgroundColor: isDark ? '#2f6650' : '#173f32' },
+            { bottom: full ? insets.bottom + 24 : insets.bottom + PANEL_H + 16, backgroundColor: isDark ? '#2f6650' : '#173f32' },
           ]}
         >
           <Txt size={14} weight={600} color="#fff">
@@ -366,18 +365,6 @@ function Quran() {
 }
 
 // one of the bar's buttons: its icon over its name, the five sharing the width
-function BarButton({ label, icon, onPress }: { label: string; icon: React.ReactNode; onPress: () => void }) {
-  const { c } = useTheme();
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.barBtn, pressed && { opacity: 0.55 }]} accessibilityLabel={label}>
-      {icon}
-      <Txt size={12.5} weight={500} color={c.tabInk} numberOfLines={1}>
-        {label}
-      </Txt>
-    </Pressable>
-  );
-}
-
 // a round button of frosted glass over the page (full screen's, «the whole page»), placed at `at`;
 // `bare`: no glass, the icon alone (full screen by day)
 function RoundButton({ at, label, onPress, bare, children }: { at: object; label: string; onPress: () => void; bare?: boolean; children: React.ReactNode }) {
@@ -397,7 +384,5 @@ const styles = StyleSheet.create({
   name: { position: 'absolute', left: 70, right: 70, alignItems: 'center', justifyContent: 'center', zIndex: 5 },
   where: { alignItems: 'center', paddingVertical: 4, paddingHorizontal: 10 },
   corner: { position: 'absolute', zIndex: 4 },
-  bar: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', paddingHorizontal: 4, borderTopWidth: StyleSheet.hairlineWidth },
-  barBtn: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4 },
   toast: { position: 'absolute', alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 18, borderRadius: 999 },
 });
