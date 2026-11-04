@@ -94,10 +94,31 @@ Scope correction: everything on the web Hifdh page is in scope (Plan screen, Lis
 Checklist (tick each step, commit and push after each):
 - [x] Step 0: this section added and pushed
 - [x] Step 1: npm install, tsc, lint clean (no errors, no changes needed)
-- [ ] Step 2: web inventory table written
+- [x] Step 2: web inventory table written
 - [ ] Step 3a: tab bar (Listen / My plans / Recite)
 - [ ] Step 3b: Listen
 - [ ] Step 3c: Test / Recite
 - [ ] Step 3d: history screen
 - [ ] Step 3e: importOldMarks (port or note why skipped)
 - [ ] Step 4: final tsc and lint clean
+
+### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
+Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti.js}`, `src/hifdh/{index.js, listen.js (784), log.js, marks.js, reciters.js}`, `#hifz` and `#listen` sections of `index.html`. There is no separate Test/Recite file: in `hifz.js` the Recite tab does `if (act === 'test') return toast(t('comingSoon'))`.
+
+| Feature (web) | Status | Where in the app |
+|---|---|---|
+| Plan screen: week card, memorized ring, today's heading | done | `src/app/memorize.tsx`, `components/hifdh/{PlanSummary,WeekCard,MemorizedRing}.tsx` |
+| Today / Ahead / Revision cards, Complete, stop sheet, confetti | done | `components/hifdh/{TodayCard,AheadCard,RevisionCard,TaskRow,StopSheet,Confetti,Toast}.tsx` |
+| Memorized picker and «What I've memorized» | done | `MemorizedPicker.tsx`, `MemorizedScreen.tsx` |
+| Plan setup / edit, pause, delete | done | `PlanSetup.tsx`, `DateStepper.tsx` |
+| My plans (list, modify, pause, delete, add) | done | `PlansList.tsx` (reached by a tile under the cards) |
+| Tab bar Listen / My plans / Recite (`tabsHTML`, bottom dock on the Plan screen) | missing (partial: only a «My plans» tile) | to build: `components/hifdh/HifTabs.tsx` in `memorize.tsx` |
+| Listen (`listen.js`: pick ayat, repeat, rounds, methods each/prev/all, reciters, player, session log) | missing (button shows «coming soon») | to build |
+| Listen button on a task row (`listen(row)`) | partial (stub toast in `HifProvider.listen`) | `TaskRow.tsx`, `HifProvider.tsx` |
+| Session log (`log.js`, key `hifdhLog`) | missing | to build with Listen |
+| Test / Recite | web is itself a «coming soon» toast; nothing to port | kept as the same toast on the Recite tab; `src/app/test.tsx` stays `Coming` |
+| History screen («Past days», `historyHTML`, older days) | missing (logic done: `plan.history()`, `plan.removeEntry()`) | to build |
+| History status sheet (`openStatus`: done / stopped at an ayah / not done / clear) | missing | to build (reuses `StopSheet`) |
+| Extra-revision sessions in history (tap removes, «Session removed») | missing (logic done) | to build |
+| Strings for history, tabs, listen | tabs and history keys exist in `src/i18n/hifdh.js`; Listen strings missing | add to `hifdh.js` as needed |
+| `importOldMarks()` | skipped for now (decided in 3e) | none |
