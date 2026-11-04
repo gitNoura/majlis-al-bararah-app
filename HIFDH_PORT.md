@@ -99,7 +99,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 3b: Listen → `components/hifdh/ListenScreen.tsx` (a `'listen'` view in `memorize.tsx`), engine `src/lib/hifdh/listen.js`, `log.js`, `reciters.js`; see notes below
 - [x] Step 3c: Test / Recite: nothing to port. The web has no Test code (`hifz.js`: `act === 'test'` only toasts «coming soon»; no recite/test file exists in `src/`), so the Recite tab (3a) shows the same toast via `HOME.coming()` and `src/app/test.tsx` stays `Coming`. Revisit when the web builds it.
 - [x] Step 3d: history → `components/hifdh/HistoryScreen.tsx` (`HistoryTile` under the cards, `'history'` view in `memorize.tsx`, status sheet, extra-revision removal, «Older»)
-- [ ] Step 3e: importOldMarks (port or note why skipped)
+- [x] Step 3e: `importOldMarks()` skipped on purpose: it migrates the web's old Hifdh map marks (`marksIn()` from `src/hifdh/marks.js`, once, flag `hifz2ImportedMarks`) into the ledger. The app has no old map and never stored those marks (no `hifdhMarks` / `marks.js` equivalent in `src/`; `src/lib/marks.ts` is highlights and notes), so there is nothing to import. If the app ever gets the old map, port it then.
 - [ ] Step 4: final tsc and lint clean
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
@@ -121,7 +121,7 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 | History status sheet (`openStatus`: done / stopped at an ayah / not done / clear) | done (3d) | `StatusSheet` in `HistoryScreen.tsx` (partial opens `StopSheet`) |
 | Extra-revision sessions in history (tap removes, «Session removed») | done (3d) | `HistoryScreen.tsx` |
 | Strings for history, tabs, listen | tabs and history keys exist in `src/i18n/hifdh.js`; Listen strings missing | add to `hifdh.js` as needed |
-| `importOldMarks()` | skipped for now (decided in 3e) | none |
+| `importOldMarks()` | skipped (3e): no old marks exist in the app | none |
 
 ### Notes (Step 3b: Listen)
 - New package: `expo-audio ~58.0.11` (the SDK 58 version from `node_modules/expo/bundledNativeModules.json`). `npx expo install` and docs.expo.dev were unreachable from the sandbox, so it was added with `npm install expo-audio@~58.0.11` and the API was read from the package's own typings. The app's Quran screens use no audio, so nothing existed to reuse. Needs a development build (native module), not Expo Go.
