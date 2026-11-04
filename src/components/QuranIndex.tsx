@@ -1,0 +1,242 @@
+// The index of the mushaf (the website's index panel): a panel from the side of the page with three
+// tabs - the surahs, the 60 ahzab, the 30 ajza - a search field, and the list; the place being read
+// is marked (a green star, the row a little darker, a bar on its edge). A row opens its page.
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, FlatList, Modal, Pressable, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { CloseIcon, SearchIcon, StarBadge } from '@/components/icons';
+import { Txt } from '@/components/Txt';
+import { isEnglish, surahName, surahType, t } from '@/i18n/i18n';
+import { READER } from '@/i18n/reader';
+import { AHZAB, AJZA, hizbForPage, juzForPage, surahForPage, SURAHS } from '@/lib/quran';
+import { HAFS } from '@/lib/riwaya';
+import { ui } from '@/theme/fonts';
+import { useTheme } from '@/theme/theme';
+
+type Tab = 'surahs' | 'ahzab' | 'ajza';
+type Item = { number: number; title: string; other: string; sub: string; page: number; type?: string };
+
+// Search ignores hamza forms, tashkeel and the "ال" prefix, so "انعام" finds "الأنعام"; English names
+// without accents, marks or case, so "fatiha" finds "Al-Fatihah" (as on the website).
+const normalize = (text: string) =>
+  text
+    .replace(/[ً-ْٰ]/g, '')
+    .replace(/[أإآٱ]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/(^|\s)ال/g, '$1')
+    .trim();
+const latin = (text: string) =>
+  text
+    .normalize('NFD')
+    .toLowerCase()
+    .replace(/[^a-z]/g, '');
+
+function items(tab: Tab): Item[] {
+  if (tab === 'surahs')
+    return SURAHS.map((s: any) =>
+      isEnglish
+        ? { number: s.number, title: s.latin, other: s.name, sub: '', page: s.page, type: surahType(s) }
+        : { number: s.number, title: `سورة ${s.name}`, other: s.english, sub: '', page: s.page, type: s.type },
+    );
+  if (tab === 'ahzab')
+    return AHZAB.map((h: any) => ({
+      number: h.number,
+      title: t('hizb', h.number),
+      other: '',
+      sub: HAFS
+        ? ''
+        : h.ayah === 1
+          ? t('hizbStartsSurah', surahName(SURAHS[h.surah - 1]))
+          : t('hizbStartsAyah', surahName(SURAHS[h.surah - 1]), h.ayah),
+      page: h.page,
+    }));
+  return AJZA.map((j: any) => ({ number: j.number, title: t('juz', j.number), other: '', sub: '', page: j.page }));
+}
+
+const current = (tab: Tab, page: number) =>
+  (tab === 'surahs' ? surahForPage(page) : tab === 'ahzab' ? hizbForPage(page) : juzForPage(page)).number;
+
+export function QuranIndex({ open, page, onClose, onGo }: { open: boolean; page: number; onClose: () => void; onGo: (page: number) => void }) {
+  const { c } = useTheme();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const panelW = Math.min(width * 0.88, 420);
+  const [tab, setTab] = useState<Tab>('surahs');
+  const [query, setQuery] = useState('');
+  const [slide] = useState(() => new Animated.Value(0));
+  const list = useRef<FlatList<Item>>(null);
+
+  useEffect(() => {
+    if (open) Animated.timing(slide, { toValue: 1, duration: 240, useNativeDriver: true }).start();
+  }, [open, slide]);
+  const close = () => Animated.timing(slide, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => onClose());
+
+  const shown = useMemo(() => {
+    const q = normalize(query);
+    const lq = latin(query);
+    return items(tab).filter(
+      (it) =>
+        !q ||
+        normalize(it.title).includes(q) ||
+        normalize(it.other).includes(q) ||
+        String(it.number) === q ||
+        (lq && (latin(it.title).includes(lq) || latin(it.other).includes(lq))),
+    );
+  }, [tab, query]);
+  const here = current(tab, page);
+
+  // the place being read in view when the panel opens or the tab changes
+  useEffect(() => {
+    if (!open || query) return;
+    const i = shown.findIndex((it) => it.number === here);
+    if (i > 2) setTimeout(() => list.current?.scrollToIndex({ index: i - 2, animated: false }), 0);
+  }, [open, tab, here, shown, query]);
+
+  // from the start side: the right in Arabic, the left in English and French
+  const from = isEnglish ? -panelW : panelW;
+  const tabs: [Tab, string][] = [
+    ['surahs', READER.tabSurahs()],
+    ['ahzab', READER.tabAhzab()],
+    ['ajza', READER.tabAjza()],
+  ];
+
+  return (
+    <Modal visible={open} transparent animationType="none" onRequestClose={close} statusBarTranslucent>
+      <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: c.dim, opacity: slide }]}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={close} accessibilityLabel={READER.close()} />
+      </Animated.View>
+      <Animated.View
+        style={[
+          styles.panel,
+          {
+            width: panelW,
+            backgroundColor: c.panel,
+            paddingTop: insets.top + 8,
+            [isEnglish ? 'left' : 'right']: 0,
+            // curved at the top only (both top corners: a phone may swap left and right in Arabic,
+            // and the one at the screen's edge is out of sight)
+            borderTopLeftRadius: 28,
+            borderTopRightRadius: 28,
+            transform: [{ translateX: slide.interpolate({ inputRange: [0, 1], outputRange: [from, 0] }) }],
+          },
+        ]}
+      >
+        <View style={styles.head}>
+          <Txt size={22} weight={700} color={c.ink} style={{ flex: 1, textAlign: 'center' }}>
+            {READER.index()}
+          </Txt>
+          <Pressable onPress={close} style={[styles.round, { backgroundColor: c.soft }]} accessibilityLabel={READER.close()}>
+            <CloseIcon color={c.ink} size={20} />
+          </Pressable>
+        </View>
+
+        <View style={[styles.tabs, { backgroundColor: c.soft }]}>
+          {tabs.map(([key, label]) => (
+            <Pressable
+              key={key}
+              onPress={() => {
+                setTab(key);
+                setQuery('');
+              }}
+              style={[styles.tab, tab === key && { backgroundColor: c.on }]}
+            >
+              <Txt size={15} weight={tab === key ? 700 : 500} center color={tab === key ? c.onInk : c.tabInk}>
+                {label}
+              </Txt>
+            </Pressable>
+          ))}
+        </View>
+
+        {tab === 'surahs' && (
+          <View style={[styles.search, { backgroundColor: c.surface, borderColor: c.line }]}>
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder={READER.filter()}
+              placeholderTextColor={c.meta}
+              style={[styles.input, { color: c.ink, fontFamily: ui(500), textAlign: isEnglish ? 'left' : 'right' }]}
+            />
+            <SearchIcon color={c.ink} size={20} />
+          </View>
+        )}
+
+        <FlatList
+          ref={list}
+          data={shown}
+          keyExtractor={(it) => String(it.number)}
+          getItemLayout={(_, index) => ({ length: ROW, offset: ROW * index, index })}
+          onScrollToIndexFailed={() => {}}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
+          keyboardShouldPersistTaps="handled"
+          ListEmptyComponent={
+            <Txt size={15} center color={c.meta} style={{ marginTop: 24 }}>
+              {t('noResults')}
+            </Txt>
+          }
+          renderItem={({ item }) => {
+            const on = item.number === here;
+            return (
+              <Pressable
+                onPress={() => {
+                  onGo(item.page);
+                  close();
+                }}
+                style={({ pressed }) => [
+                  styles.row,
+                  { borderBottomColor: c.divider },
+                  on && { backgroundColor: c.soft, borderColor: c.chosenLine },
+                  pressed && { opacity: 0.7 },
+                ]}
+              >
+                {on && <View style={[styles.edge, { backgroundColor: c.accent }]} />}
+                <View style={styles.num}>
+                  <StarBadge fill={on ? c.on : c.surface} stroke={c.gold} />
+                  <Txt size={13} weight={700} color={on ? c.onInk : c.ink}>
+                    {item.number}
+                  </Txt>
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Txt size={17} weight={700} color={c.ink} numberOfLines={1}>
+                    {item.title}
+                  </Txt>
+                  {!!(item.other || item.sub) && (
+                    <Txt size={12.5} weight={500} color={c.meta} numberOfLines={1}>
+                      {item.other || item.sub}
+                    </Txt>
+                  )}
+                </View>
+                <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                  <Txt size={14} weight={500} color={c.pageNum}>
+                    {t('pageShort', item.page)}
+                  </Txt>
+                  {!!item.type && (
+                    <Txt size={12.5} color={c.meta}>
+                      {item.type}
+                    </Txt>
+                  )}
+                </View>
+              </Pressable>
+            );
+          }}
+        />
+      </Animated.View>
+    </Modal>
+  );
+}
+
+const ROW = 66;
+
+const styles = StyleSheet.create({
+  panel: { position: 'absolute', top: 0, bottom: 0, paddingHorizontal: 16, elevation: 12, shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 24 },
+  head: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
+  round: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  tabs: { flexDirection: 'row', padding: 4, borderRadius: 16, marginTop: 8 },
+  tab: { flex: 1, paddingVertical: 10, borderRadius: 12 },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 12, paddingHorizontal: 16, height: 48, borderRadius: 24, borderWidth: 1 },
+  input: { flex: 1, fontSize: 15, paddingVertical: 0 },
+  row: { height: ROW, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderRadius: 12 },
+  edge: { position: 'absolute', end: 0, top: 10, bottom: 10, width: 3, borderRadius: 2 },
+  num: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
+});

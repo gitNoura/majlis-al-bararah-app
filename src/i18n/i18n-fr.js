@@ -72,7 +72,7 @@ export const FR = {
   wirdKhatmaAgain:
     'La porte est ouverte et l’escalier recommence : votre prochaine khatma commence demain par al-Fatiha. Montez d’une marche chaque jour.',
   wirdKhatmaSoFar: (p) => `${p} % de votre khatma`,
-  wirdSeeYou: 'Terminé',
+  wirdSeeYou: 'Alhamdulillah',
   wirdSkip: 'Passer',
 
   // Memorization

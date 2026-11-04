@@ -160,3 +160,42 @@ export function nextPrayer(p = place()) {
   const tomorrow = times(new Date(now.getTime() + 86400000), p);
   return { key: 'fajr', at: tomorrow.fajr, from: today.isha };
 }
+
+// ---------- The sky ----------
+
+// The sky's own hours at the place, for colours (not for praying): the sun at the horizon (sunrise,
+// sunset - without the country's precaution minutes) and the civil twilights, the sun 6° below the
+// horizon, when the sky's glow begins at dawn and ends at dusk. After the civil dusk the sky is dark,
+// long before al-Isha (18° in Morocco).
+const TWILIGHT = 6;
+
+export function skyTimes(date, p = place()) {
+  if (!p) return null;
+  const here = new Coordinates(p.lat, p.lng);
+  const sky = new PrayerTimes(here, date, new CalculationParameters('Other', TWILIGHT, TWILIGHT));
+  const prayers = new PrayerTimes(here, date, parameters(p.country || calendarCountry()));
+  return { fajr: prayers.fajr, sunrise: sky.sunrise, asr: prayers.asr, sunset: sky.maghrib, dusk: sky.isha };
+}
+
+// The sky now: 'night' (from the civil dusk to al-Fajr), 'dawn' (al-Fajr to a little after sunrise),
+// 'midday' (to al-Asr), 'afternoon' (to the last 40 minutes before sunset), 'sunset' (to the civil dusk)
+export function skyNow(p = place()) {
+  const now = new Date();
+  const t = skyTimes(now, p);
+  if (!t) return null;
+  const min = 60000;
+  if (now < t.fajr || now >= t.dusk) return 'night';
+  if (now < t.sunrise.getTime() + 20 * min) return 'dawn';
+  if (now < t.asr) return 'midday';
+  if (now < t.sunset.getTime() - 40 * min) return 'afternoon';
+  return 'sunset';
+}
+
+// The app's «by prayer time» appearance: night from al-Maghrib until al-Fajr, day from al-Fajr until
+// al-Maghrib (without a place, from 19:00 until 06:00 by the clock)
+export function nightByPrayer(p = place()) {
+  const now = new Date();
+  const t = times(now, p);
+  if (!t) return now.getHours() >= 19 || now.getHours() < 6;
+  return now >= t.maghrib || now < t.fajr;
+}

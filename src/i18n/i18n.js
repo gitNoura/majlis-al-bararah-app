@@ -82,8 +82,8 @@ const STRINGS = {
   noTranslation: ['لم تُختر أي ترجمة. اختر من زر «الترجمات» في الأعلى.', 'No translation chosen. Choose one with «Translations» above.'],
   tafsirsBtn: ['التفاسير', 'Tafsirs'],
   translationsBtn: ['الترجمات', 'Translations'],
-  mushafWarsh: ['مصحف ورش عن نافع', 'Warsh ʿan Nāfiʿ mushaf'],
-  mushafHafs: ['مصحف حفص عن عاصم', 'Hafs ʿan ʿĀṣim mushaf'],
+  mushafWarsh: ['مصحف ورش عن نافع', 'Mushaf of Warsh from Nafi'],
+  mushafHafs: ['مصحف حفص عن عاصم', 'Mushaf of Hafs from Asim'],
   loadFailed: ['تعذّر التحميل، تحقق من الاتصال.', 'Could not load. Check your connection.'],
   copyRef: [(name, a, r) => `[سورة ${name} ${a} — رواية ${r}]`, (name, a, r) => `[${name} ${a} — ${r} narration]`],
   ayahCopied: ['تم نسخ الآية', 'Ayah copied'],
@@ -121,11 +121,11 @@ const STRINGS = {
   // ZAIN is written the same in both languages, with «AI» in gold (the assistant's name hides AI).
   mjZain: ['<span dir="ltr">Z<span class="zain-ai">AI</span>N</span>', 'Z<span class="zain-ai">AI</span>N'],
   mjZainSub: ['مساعدك في المجالس', 'Your assistant in the majalis'],
-  mjZainSoon: ['يُفتح ZAIN قريباً إن شاء الله.', 'ZAIN opens soon, in shāʾ Allāh.'],
+  mjZainSoon: ['يُفتح ZAIN قريباً إن شاء الله.', 'ZAIN opens soon, in sha Allah.'],
   mjOpenNow: ['المجالس المفتوحة الآن', 'Majalis open now'],
-  mjNoRooms: ['لا توجد مجالس مفتوحة بعد. ستُفتح المجالس قريباً إن شاء الله.', 'No majalis are open yet. They open soon, in shāʾ Allāh.'],
+  mjNoRooms: ['لا توجد مجالس مفتوحة بعد. ستُفتح المجالس قريباً إن شاء الله.', 'No majalis are open yet. They open soon, in sha Allah.'],
   mjLessons: ['الدروس', 'Lessons'],
-  mjNoLessons: ['لا توجد دروس بعد. ستبدأ مع أول المعلّمين المعتمدين إن شاء الله.', 'No lessons yet. They start with the first approved teachers, in shāʾ Allāh.'],
+  mjNoLessons: ['لا توجد دروس بعد. ستبدأ مع أول المعلّمين المعتمدين إن شاء الله.', 'No lessons yet. They start with the first approved teachers, in sha Allah.'],
   mjGuestNote: [
     'يمكنك الاطلاع على المجالس. وللمشاركة فيها (التلاوة والمحادثة) أنشئ حساباً.',
     'You can look around the majalis. To take part (recite and chat), create an account.',
@@ -147,7 +147,7 @@ const STRINGS = {
     'The door is open, and the stairs begin again: your next khatma starts tomorrow with al-Fatiha. Rise one step every day.',
   ],
   wirdKhatmaSoFar: [(p) => `${p}٪ من ختمتك`, (p) => `${p}% of your khatma`],
-  wirdSeeYou: ['تمّ', 'Done'],
+  wirdSeeYou: ['الحمد لله', 'Alhamdulillah'],
   wirdSkip: ['تخطّي', 'Skip'],
 
   // Memorization (src/hifz.js, src/hifz-plan.js)
@@ -240,7 +240,7 @@ const STRINGS = {
   hzMore: [(n) => `المزيد (${n})`, (n) => `More (${n})`],
   hzAbout: [(m) => `حوالي ${m} دقيقة`, (m) => `About ${m} minutes`],
   hzDoneToday: ['أتممت ورد اليوم', 'Today’s portion is done'],
-  hzDoneNote: ['بارك الله فيك. نلتقي غداً إن شاء الله.', 'May Allah bless you. See you tomorrow, in shāʾ Allāh.'],
+  hzDoneNote: ['بارك الله فيك. نلتقي غداً إن شاء الله.', 'May Allah bless you. See you tomorrow, in sha Allah.'],
   hzEditPlan: ['تعديل الخطة', 'Change my plan'],
   hzReviewIntro: ['اختبر نفسك في أي صفحة: تُخفى الآيات، وتظهر كل آية حين تضغط عليها.', 'Test yourself on any page: the ayat are hidden, and each one appears when you tap it.'],
   hzRandom: ['صفحة عشوائية من محفوظي', 'A random page I know'],
@@ -304,7 +304,7 @@ const STRINGS = {
   ah_bukhari_cover: ['صحيح البخاري', 'صحيح البخاري'],
   ah_muslim_cover: ['صحيح مسلم', 'صحيح مسلم'],
   ah_nawawi_cover: ['الأربعون النووية', 'الأربعون النووية'],
-  ah_bukhari_by: ['الإمام محمد بن إسماعيل البخاري', 'Imam Muhammad ibn Ismaʿil al-Bukhari'],
+  ah_bukhari_by: ['الإمام محمد بن إسماعيل البخاري', 'Imam Muhammad ibn Isma’il al-Bukhari'],
   ah_muslim_by: ['الإمام مسلم بن الحجاج النيسابوري', 'Imam Muslim ibn al-Hajjaj an-Naysaburi'],
   ah_nawawi_by: ['الإمام يحيى بن شرف النووي', 'Imam Yahya ibn Sharaf an-Nawawi'],
   ahHadithCount: [(n) => arabicCount(n, ['حديث واحد', 'حديثان', 'أحاديث', 'حديثاً']), (n) => `${n} hadiths`],
@@ -395,7 +395,7 @@ const STRINGS = {
   pjAdhkar: ['الأذكار', 'Adhkar'],
   pjStreak: [(n) => `${n} يوماً متتالياً`, (n) => `${n} day streak`],
   pjProgress: ['عرض التقدّم', 'View progress'],
-  pjSoonLine: ['إن شاء الله', 'in shāʾ Allāh'],
+  pjSoonLine: ['إن شاء الله', 'in sha Allah'],
   pjNextMeeting: ['اللقاء القادم', 'Next meeting'],
   pjAt: [(day, time) => `${day}، ${time}`, (day, time) => `${day}, ${time}`],
   pjMembers: [(n) => `${n} عضواً`, (n) => `${n} members`],
@@ -471,7 +471,7 @@ const STRINGS = {
   // the fasts (src/home/hijri.js fastOn) and their reminder (src/home/fast-reminders.js)
   fastRamadan: ['صيام رمضان (فرض)', 'Fast of Ramadan (obligatory)'],
   fastArafah: ['صيام يوم عرفة (سنة)', 'Fast of the Day of Arafah (sunnah)'],
-  fastTasua: ['صيام تاسوعاء (سنة)', 'Fast of Tasuʿa (sunnah)'],
+  fastTasua: ['صيام تاسوعاء (سنة)', 'Fast of Tasu’a (sunnah)'],
   fastAshura: ['صيام عاشوراء (سنة)', 'Fast of Ashura (sunnah)'],
   fastWhite: ['صيام الأيام البيض (سنة)', 'Fast of the White Days (sunnah)'],
   fastMonday: ['صيام الاثنين (سنة)', 'Monday fast (sunnah)'],
@@ -485,8 +485,8 @@ const STRINGS = {
   calRemindDenied: ['الإشعارات غير مسموحة: فعّلها من إعدادات الهاتف.', 'Notifications are not allowed: turn them on in the phone’s settings.'],
   fastRemindTitle: ['صيام الغد', 'Tomorrow’s fast'],
   fastTomorrow: [(label) => `غداً: ${label}`, (label) => `Tomorrow: ${label}`],
-  fastRamadanStarts: ['رمضان يبدأ غداً إن شاء الله', 'Ramadan begins tomorrow, in shāʾ Allāh'],
-  comingSoon: ['قريباً إن شاء الله', 'Coming soon, in shāʾ Allāh'],
+  fastRamadanStarts: ['رمضان يبدأ غداً إن شاء الله', 'Ramadan begins tomorrow, in sha Allah'],
+  comingSoon: ['قريباً إن شاء الله', 'Coming soon, in sha Allah'],
   soonBadge: ['قريباً', 'Soon'],
   megabytes: [(n) => `${n} م.ب`, (n) => `${n} MB`],
   pagesSaved: [
@@ -515,7 +515,7 @@ const STRINGS = {
 
   // Choice of mushaf
   mushafCurrent: ['المصحف الحالي', 'Current mushaf'],
-  mushafSoon: ['قريباً إن شاء الله', 'Coming soon, in shāʾ Allāh'],
+  mushafSoon: ['قريباً إن شاء الله', 'Coming soon, in sha Allah'],
   mushafChoose: ['اختيار هذا المصحف', 'Read this mushaf'],
 
   // Feedback

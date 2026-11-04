@@ -26,6 +26,15 @@ export const light = {
   switchOff: '#d8d0bd',
   shadow: 'rgba(68, 55, 43, 0.08)',
   dim: 'rgba(25, 24, 19, 0.12)',
+  // the Quran's panels (the website's --ix-* palette: the index, the tafsir panel)
+  panel: '#fffefa',
+  surface: '#ffffff',
+  pageNum: '#70552b',
+  accent: '#173f32', // the bar on the chosen row's edge
+  chosenLine: '#dcc99d',
+  // the mushaf's paper (the pages' own cream), and how much the night dims the pages
+  paper: '#fffce0',
+  nightDim: 0,
 };
 
 export type Palette = typeof light;
@@ -51,6 +60,13 @@ export const dark: Palette = {
   switchOff: 'rgba(255, 255, 255, 0.18)',
   shadow: 'rgba(0, 0, 0, 0.3)',
   dim: 'rgba(0, 0, 0, 0.2)',
+  panel: '#1f2221',
+  surface: '#262927',
+  pageNum: '#d9bd84',
+  accent: '#c5a15a',
+  chosenLine: 'rgba(197, 161, 90, 0.45)',
+  paper: '#d7d0b3',
+  nightDim: 0.22, // the pages at 78 % of their brightness, as on the website
 };
 
 export const radius = { card: 20, button: 22, chip: 16 };

@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# Skia's drawing engine for the browser preview (copied from node_modules by `npm run skia-web`)
+/public/canvaskit.wasm

@@ -37,6 +37,186 @@ export function SettingsIcon({ size = 22, color, strokeWidth = 1.7 }: IconProps)
   );
 }
 
+// A line icon from the website's icons.svg: its paths (and circles) in a 24 × 24 box
+function Line({ size = 22, color, strokeWidth = 1.7, children }: IconProps & { children: React.ReactNode }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      {children}
+    </Svg>
+  );
+}
+
+export const MenuIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M4 7h16M4 12h16M4 17h16" />
+  </Line>
+);
+export const SearchIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Circle cx={11} cy={11} r={6.5} />
+    <Path d="M20 20l-4.2-4.2" />
+  </Line>
+);
+// the home screen: its tab (filled when it is the one open), the member's round, and the five prayers
+export function HomeIcon({ size = 22, color, filled }: IconProps & { filled?: boolean }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={1.7} strokeLinejoin="round">
+      <Path d="M4 10.5L12 4l8 6.5V19.5a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" />
+    </Svg>
+  );
+}
+export const PersonIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Circle cx={12} cy={8.5} r={3.8} />
+    <Path d="M4.5 20c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4" />
+  </Line>
+);
+export const PlusIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M12 5v14M5 12h14" />
+  </Line>
+);
+// the five prayers, each its time of day: al-Fajr the first light over the horizon under the last star,
+// al-Dhuhr the sun high, al-Asr the sun lower over the ground, al-Maghrib the sun going down into the
+// horizon, al-Isha the crescent among the stars
+export const FajrIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M3 19h18M7 19a5 5 0 0 1 10 0M12 11v1.6M7.4 13.2l1.1 1.1M16.6 13.2l-1.1 1.1" />
+    <Path d="M6 3.5v3M4.5 5h3" />
+  </Line>
+);
+export const DhuhrIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Circle cx={12} cy={12} r={4} />
+    <Path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4" />
+  </Line>
+);
+export const AsrIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Circle cx={14} cy={10} r={3.5} />
+    <Path d="M14 3.6v1.4M19.4 5.3l-1 1M20.6 10h-1.4M8.6 5.3l1 1M3 19.5h18M5 16.5h6" />
+  </Line>
+);
+export const MaghribIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M3 15.5h18M7 15.5a5 5 0 0 1 10 0M6 18.5h12M9 21h6M12 4v4.5M9.8 6.6L12 8.8l2.2-2.2" />
+  </Line>
+);
+export const IshaIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M18 15.5A7.5 7.5 0 0 1 8.5 6a7.5 7.5 0 1 0 9.5 9.5z" />
+    <Path d="M17 3.5v3M15.5 5h3M20.5 8.5v2M19.5 9.5h2" />
+  </Line>
+);
+// the ayah's options (the website's book-columns, comment, pen, trash)
+export const TafsirIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z" />
+  </Line>
+);
+export const CommentIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M5 4.5h14A1.5 1.5 0 0 1 20.5 6v9a1.5 1.5 0 0 1-1.5 1.5h-8L6.5 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V6A1.5 1.5 0 0 1 5 4.5z" />
+    <Path d="M7.5 9h9M7.5 12.5h6" />
+  </Line>
+);
+export const PenIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M4 20h7" />
+    <Path d="M14.5 4.5l5 5L11 18H6v-5z" />
+  </Line>
+);
+export const TrashIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M4 7h16M10 7V4.5h4V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6" />
+  </Line>
+);
+export const CheckIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M5 12.5l4.5 4.5L19 7.5" />
+  </Line>
+);
+export const DownloadIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14" />
+  </Line>
+);
+export const RiwayaIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M12 6C10 4.5 7 4.3 4 5v13c3-.7 6-.5 8 1 2-1.5 5-1.7 8-1V5c-3-.7-6-.5-8 1ZM12 6v13" />
+  </Line>
+);
+// «the whole page» while zoomed in (the website's #pinch-out): a magnifier with a minus
+export const ZoomOutIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Circle cx={11} cy={11} r={7} />
+    <Path d="M16.5 16.5L21 21M8 11h6" />
+  </Line>
+);
+export const NotebookIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M6.5 3.5h11A1.5 1.5 0 0 1 19 5v14a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V5a1.5 1.5 0 0 1 1.5-1.5z" />
+    <Path d="M8.5 3.5v17" />
+    <Path d="M13 3.5v6l1.75-1.4 1.75 1.4v-6" />
+    <Path d="M11 13h5M11 16h4" />
+  </Line>
+);
+export const ExpandIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  </Line>
+);
+export const CloseIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M6 6l12 12M18 6L6 18" />
+  </Line>
+);
+// a place: the map pin
+export const PinIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M12 21s-6.5-6.1-6.5-11a6.5 6.5 0 0 1 13 0c0 4.9-6.5 11-6.5 11z" />
+    <Circle cx={12} cy={10} r={2.3} />
+  </Line>
+);
+export const BookOpenIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5M12 6.5C14 5 17 4.5 20 5v13c-3-.5-6 0-8 1.5M12 6.5v13" />
+    <Path d="M15.5 5.3v5.2l1.5-1.2 1.5 1.2V5.1" />
+  </Line>
+);
+export const MoonIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+  </Line>
+);
+export const SunIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Circle cx={12} cy={12} r={4} />
+    <Path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" />
+  </Line>
+);
+export const CopyIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M8 8h11v12H8z" />
+    <Path d="M5 15V6a2 2 0 0 1 2-2h8" />
+  </Line>
+);
+
+// The index's number badge: an eight-pointed star outlined in gold, filled forest green when chosen
+export function StarBadge({ size = 38, fill, stroke }: { size?: number; fill: string; stroke: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 40 40" style={{ position: 'absolute' }}>
+      <Path
+        d="M20 1.4L25.45 6.85H33.15V14.55L38.6 20L33.15 25.45V33.15H25.45L20 38.6L14.55 33.15H6.85V25.45L1.4 20L6.85 14.55V6.85H14.55Z"
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={1.4}
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 // «back»: a chevron pointing to where the reader came from (right in Arabic, left in English/French)
 export function BackIcon({ size = 24, color, rtl }: IconProps & { rtl: boolean }) {
   return (

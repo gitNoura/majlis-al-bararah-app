@@ -9,7 +9,7 @@ export const HOME = {
   setPlace: () => L('حدّد مكانك', 'Set your place', 'Indiquez votre lieu'),
   wirdLabel: () => L('وردي اليومي', 'My daily wird', 'Mon wird quotidien'),
   wirdBegin: () => L('ابدأ ختمتك من الفاتحة', 'Begin your khatma from al-Fatiha', 'Commencez par al-Fatiha'),
-  wirdGo: () => L('متابعة القراءة', 'Continue reading', 'Continuer la lecture'),
+  wirdGo: () => L('اقرأ وِرد اليوم', 'Read today’s wird', 'Lisez le wird du jour'),
   surah: (name) => L(`سورة ${name}`, `Surah ${name}`, `Sourate ${name}`),
   ayahPage: (a, p) => L(`الآية ${a} · الصفحة ${p}`, `Ayah ${a} · Page ${p}`, `Verset ${a} · Page ${p}`),
   khatma: (pct) => L(`ختمة ${pct}%`, `Khatma ${pct}%`, `Khatma ${pct} %`),
@@ -34,6 +34,7 @@ export const HOME = {
   memorize: () => L('الحفظ', 'Memorization', 'Mémorisation'),
   memorizeSub: () => L('خطط ومراجعة وأوسمة', 'Plans, revision and badges', 'Programmes, révision et badges'),
   test: () => L('اختبار المحفوظ', 'Test your memorization', 'Tester sa mémorisation'),
+  testShort: () => L('اختبار الحفظ', 'Test', 'Test'),
   testSub: () => L('تسميع وتصحيح', 'Recitation and correction', 'Récitation et correction'),
   majalis: () => L('مجالس البررة', 'Majalis al-Bararah', 'Majalis al-Bararah'),
   majalisSub: () => L('حلقات وتسميع جماعي', 'Circles and group recitation', 'Cercles et récitation en groupe'),
@@ -44,5 +45,26 @@ export const HOME = {
   calendar: () => L('التقويم', 'Calendar', 'Calendrier'),
   settings: () => L('الإعدادات', 'Settings', 'Paramètres'),
   back: () => L('رجوع', 'Back', 'Retour'),
-  coming: () => L('هذا القسم في الطريق إن شاء الله.', 'This section is on its way, in shāʾ Allāh.', 'Cette section arrive bientôt, in sha Allah.'),
+  // the wird card's hadith («read and rise»: HOME.hadith) and its short chain, on two lines: who told it,
+  // and where it is recorded
+  heroSource: () =>
+    L(
+      'عن عبد الله بن عمرو رضي الله عنهما\nرواه أبو داود والترمذي',
+      'Narrated by Abdullah ibn Amr\nAbu Dawud and al-Tirmidhi',
+      'Rapporté par Abdallah ibn Amr\nAbou Daoud et at-Tirmidhi',
+    ),
+  wirdStart: () => L('ابدأ وِردك', 'Start your wird', 'Commencez votre wird'),
+  // today's five prayers (the green box)
+  prayersToday: () => L('صلوات اليوم', 'Today’s prayers', 'Les prières du jour'),
+  prayerIn: (name, hms) => L(`${name} بعد ${hms}`, `${name} in ${hms}`, `${name} dans ${hms}`),
+  locating: () => L('جارٍ تحديد مكانك…', 'Finding your location…', 'Localisation…'),
+  // the bar along the bottom
+  tabHome: () => L('الرئيسية', 'Home', 'Accueil'),
+  tabQuran: () => L('القرآن', 'Quran', 'Coran'),
+  tabMemorize: () => L('الحفظ', 'Memorize', 'Mémoriser'),
+  tabMajalis: () => L('المجالس', 'Majalis', 'Majalis'),
+  profile: () => L('حسابي', 'My account', 'Mon compte'),
+  login: () => L('تسجيل الدخول', 'Log in', 'Connexion'),
+  tabSettings: () => L('الإعدادات', 'Settings', 'Paramètres'),
+  coming: () => L('هذا القسم في الطريق إن شاء الله.', 'This section is coming soon, in sha Allah.', 'Cette section arrive bientôt, in sha Allah.'),
 };
