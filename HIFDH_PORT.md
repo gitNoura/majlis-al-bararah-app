@@ -97,7 +97,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 2: web inventory table written
 - [x] Step 3a: tab bar (Listen / My plans / Recite) → `components/hifdh/HifTabs.tsx`, shown under the Plan screen; replaces the «My plans» tile. Recite shows «coming soon» exactly as the web does (no web Test code exists). Listen tab calls `useHif().listen(null)` (stub until 3b).
 - [x] Step 3b: Listen → `components/hifdh/ListenScreen.tsx` (a `'listen'` view in `memorize.tsx`), engine `src/lib/hifdh/listen.js`, `log.js`, `reciters.js`; see notes below
-- [ ] Step 3c: Test / Recite
+- [x] Step 3c: Test / Recite: nothing to port. The web has no Test code (`hifz.js`: `act === 'test'` only toasts «coming soon»; no recite/test file exists in `src/`), so the Recite tab (3a) shows the same toast via `HOME.coming()` and `src/app/test.tsx` stays `Coming`. Revisit when the web builds it.
 - [ ] Step 3d: history screen
 - [ ] Step 3e: importOldMarks (port or note why skipped)
 - [ ] Step 4: final tsc and lint clean
