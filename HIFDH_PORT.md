@@ -1,7 +1,7 @@
 # Hifdh page port: handoff (web → Expo app)
 
 Branch: `hifdh-port-from-web` (this repo). Source: private repo `gitNoura/Majlis-al-Bararah`, branch `hifdh-port`.
-Scope: the Hifdh page only («الحفظ» = the Plan screen, `src/hifz/`). Listen (`listen.js`) and Test are separate pages, out of scope.
+Scope: the whole Hifdh page («الحفظ»): the Plan screen, Listen, Recite/Test and history (see Verification at the bottom; this line used to call Listen and Test out of scope).
 
 ## Files a new chat needs from the private repo (send these)
 Required for the UI stage:
@@ -85,7 +85,7 @@ Already ported (no need to resend): `src/hifz/hifz-core.js`, `src/hifz/hifz-plan
 - Lint: `Burst` in `Confetti.tsx` keeps its `Animated.Value` in `useState` (the `react-hooks/refs` rule rejects `useRef(...).current`). Left alone: the `no-unused-expressions` warning in `src/lib/hifdh/core.js:214` (copied from the web, not a Hifdh UI file).
 - tsc: rows from the plan logic are typed `Row` (= any) in the cards; `TaskRow`'s Pressable ref is `any` (RN 0.88 does not export the instance type); the surah list takes its type from `SURAHS` (`name` may be a number).
 
-## What remains
+## What remains (superseded by Verification below)
 Stage 4: `npx expo lint`, `npx tsc --noEmit`, and fix what they report across 3a-3c (none of it has been type-checked: paste the errors). Optional later piece: the history screen.
 
 ## Verification
@@ -100,7 +100,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 3c: Test / Recite: nothing to port. The web has no Test code (`hifz.js`: `act === 'test'` only toasts «coming soon»; no recite/test file exists in `src/`), so the Recite tab (3a) shows the same toast via `HOME.coming()` and `src/app/test.tsx` stays `Coming`. Revisit when the web builds it.
 - [x] Step 3d: history → `components/hifdh/HistoryScreen.tsx` (`HistoryTile` under the cards, `'history'` view in `memorize.tsx`, status sheet, extra-revision removal, «Older»)
 - [x] Step 3e: `importOldMarks()` skipped on purpose: it migrates the web's old Hifdh map marks (`marksIn()` from `src/hifdh/marks.js`, once, flag `hifz2ImportedMarks`) into the ledger. The app has no old map and never stored those marks (no `hifdhMarks` / `marks.js` equivalent in `src/`; `src/lib/marks.ts` is highlights and notes), so there is nothing to import. If the app ever gets the old map, port it then.
-- [ ] Step 4: final tsc and lint clean
+- [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
 Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti.js}`, `src/hifdh/{index.js, listen.js (784), log.js, marks.js, reciters.js}`, `#hifz` and `#listen` sections of `index.html`. There is no separate Test/Recite file: in `hifz.js` the Recite tab does `if (act === 'test') return toast(t('comingSoon'))`.
@@ -135,3 +135,9 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - `HistoryTile` («History / Past days», the web's `progressHTML`) sits under the Revision card; it opens the `'history'` view (back and Android back return to the plan). `HistoryScreen` is `historyHTML`: a card per day, a button per portion (kind, name, status), extra-revision sessions («Extra revision», tap removes them and shows «Session removed.»), 40 days at a time then «Older».
 - `StatusSheet` is `openStatus`: Done / Stopped at an ayah… / Mark as not done (+ hint) / Clear the mark; weekly rows only get Done and Clear, as on the web. «Stopped at an ayah…» closes the sheet and opens the existing `StopSheet` through `HifProvider.openStop`, which marks it. No new strings were needed (the history keys were already in `hifdh.js`).
 - Logged Listen sessions (`hifdhLog`) are not listed in History: the web does not list them there either (they only count toward the map's «last worked», which the app has no map for).
+
+### Still missing / to check on a device
+- Nothing from the checklist is unfinished. Open items, none blocking:
+  - Recite/Test: the web has no page either; build both when the web does.
+  - Listen: no mushaf behind it (range form instead); no background playback with the screen off; Warsh has no reciter yet (same as web). Needs a development build (`expo-audio` is a native module). The audio and the screens were type-checked and linted but not run on a device or emulator from this sandbox.
+  - The lint warning in `src/lib/hifdh/core.js:214` mentioned in Stage 4 no longer shows.
