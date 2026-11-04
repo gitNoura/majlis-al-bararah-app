@@ -87,3 +87,17 @@ Already ported (no need to resend): `src/hifz/hifz-core.js`, `src/hifz/hifz-plan
 
 ## What remains
 Stage 4: `npx expo lint`, `npx tsc --noEmit`, and fix what they report across 3a-3c (none of it has been type-checked: paste the errors). Optional later piece: the history screen.
+
+## Verification
+Scope correction: everything on the web Hifdh page is in scope (Plan screen, Listen, Test/Recite, history). Earlier notes that call Listen and Test "out of scope" are superseded by this section.
+
+Checklist (tick each step, commit and push after each):
+- [x] Step 0: this section added and pushed
+- [ ] Step 1: npm install, tsc, lint clean
+- [ ] Step 2: web inventory table written
+- [ ] Step 3a: tab bar (Listen / My plans / Recite)
+- [ ] Step 3b: Listen
+- [ ] Step 3c: Test / Recite
+- [ ] Step 3d: history screen
+- [ ] Step 3e: importOldMarks (port or note why skipped)
+- [ ] Step 4: final tsc and lint clean
