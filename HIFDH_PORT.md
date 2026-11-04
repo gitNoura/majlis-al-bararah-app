@@ -17,9 +17,9 @@ Already ported (no need to resend): `src/hifz/hifz-core.js`, `src/hifz/hifz-plan
 - [x] Stage 1: logic modules copied with imports fixed → `src/lib/hifdh/{core,plan,index}.js`
 - [x] Stage 2: strings → `src/i18n/hifdh.js` (same `L(ar, en, fr)` style as `src/i18n/home.js`), `HIF.key()`, 115 keys
 - [ ] Stage 3: UI → `src/app/memorize.tsx` + components in `src/components/hifdh/`
-  - [ ] 3a header and plan summary
+  - [x] 3a header and plan summary → `src/app/memorize.tsx`, `src/components/hifdh/{HifHeader,WeekCard,MemorizedRing,PlanSummary}.tsx`
   - [ ] 3b daily cards
-  - [ ] 3c date stepper and settings
+  - [ ] 3c plan setup/edit flow (finish date, pace, days, pause/delete), plans list, memorized picker
 - [ ] Stage 4: lint + `npx tsc --noEmit`
 
 ## Conventions in this app (from AGENTS.md and existing code)
@@ -34,5 +34,14 @@ Already ported (no need to resend): `src/hifz/hifz-core.js`, `src/hifz/hifz-plan
 - French strings keep plain spaces before `? ! : ;`, as in `home.js` (the web page did the same for `L()` strings).
 - Parametrised keys take plain values: `dayOfN(k, n)`, `forDay(dayText)`, `nothingTodayNext(dayText)`, `stepOf(i, n)`, `amountQuestion(revise, weekly)`, `scopeQuestion(revise)`, `finishLine(revise)`.
 
+## Notes and decisions (Stage 3a)
+- Plan screen only: the web's bottom tabs (Listen / My plans / Recite) are not drawn. Listen and Test are other pages; «My plans» comes back in 3c as a door from the plan screen.
+- `memorize.tsx` loads with `plan.ready()` (loading / failed states from `HIF.loading()` / `HIF.loadFailed()`), then shows `PlanSummary`: week card, memorized ring, «Today's plan» heading with the date.
+- `HifHeader({ title, onBack })` is the shared head: without `onBack` it leaves the page, so 3c can pass its own step-back for the setup questions and sub-screens.
+- `MemorizedRing({ onPress })` shows the chevron only when `onPress` is given; 3c wires it to the memorized picker via `PlanSummary({ onOpenMemorized })`.
+- The language change remounts the whole app (`_layout.tsx` keys on `lang`), so no screen needs its own language listener. After a mark or plan change, 3b/3c should bump a `rev` state in `memorize.tsx` to redraw the summary.
+- Left out: the web's `importOldMarks()` (migrates the old `hifdhMarks` into the ledger on open); the app has no earlier data. `marks.js` is not needed by 3a; it is for the freshness view / picking something known in 3c.
+- `npx tsc --noEmit` could not run in the chat (no `node_modules`), so 3a is unchecked until Stage 4.
+
 ## What remains
-Stage 3a (header + plan summary in `memorize.tsx` and `src/components/hifdh/`), 3b, 3c, then Stage 4 (`npx expo lint`, `npx tsc --noEmit`). Ambiguity: "date stepper and settings" is read as the plan setup/edit flow (finish date, pace, days, pause/delete).
+3b daily cards (`TodayCard`/`RevisionCard`/`AheadCard` from `taskHTML`, `todayHTML`, `revisionHTML`, `aheadHTML`: Complete with long-press «where did you stop?», undo, status lines; confetti on Complete), then 3c, then Stage 4 (`npx expo lint`, `npx tsc --noEmit`). Ambiguity: "date stepper and settings" is read as the plan setup/edit flow (finish date, pace, days, pause/delete).
