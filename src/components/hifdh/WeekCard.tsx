@@ -4,7 +4,6 @@
 import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { useTints } from '@/components/hifdh/Section';
 import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
@@ -23,15 +22,14 @@ function CloseMark({ color }: { color: string }) {
 }
 
 export function WeekCard() {
-  const { c } = useTheme();
-  const t = useTints('violet');
+  const { c, isDark } = useTheme();
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }]}>
+    <View style={[styles.card, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#eff3ee', borderColor: c.line }]}>
       <View style={styles.top}>
-        <Txt serif size={18} weight={700} color={c.ink} lineHeight={30}>
+        <Txt size={18} weight={700} color={c.ink}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
@@ -54,8 +52,8 @@ export function WeekCard() {
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? t.base : c.soft },
-                  state === 'now' && { borderWidth: 1.5, borderColor: t.ink },
+                  { backgroundColor: state === 'on' ? c.on : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(23, 63, 50, 0.07)' },
+                  state === 'now' && { borderWidth: 1.5, borderColor: c.on },
                 ]}
               >
                 {state === 'on' && <CheckIcon color="#ffffff" size={16} strokeWidth={2.4} />}

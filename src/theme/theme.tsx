@@ -82,12 +82,42 @@ export function QuranTheme({ children }: { children: ReactNode }) {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-// The Hifdh page uses the app's own palette and cards (the settings page's look); only the gold used for links and
-// borders turns forest green here, so the page has no yellow accents.
+// The Hifdh page: light, clean and neutral, with forest green as its only colour. A near-white screen, white cards with a
+// hairline border, quiet grey-green second lines (the gold and beige of the rest of the app are not used here).
 export function HifTheme({ children }: { children: ReactNode }) {
   const app = useContext(ThemeContext);
   const value = useMemo(
-    () => ({ ...app, c: { ...app.c, goldStrong: app.isDark ? '#8fd0b2' : '#2f6650' } }),
+    () => ({
+      ...app,
+      c: app.isDark
+        ? {
+            ...app.c,
+            screen: '#1b201e',
+            screenEnd: '#171b19',
+            stars: '#6fb597',
+            card: 'rgba(255, 255, 255, 0.06)',
+            meta: '#9fb2a8',
+            soft: 'rgba(255, 255, 255, 0.08)',
+            line: 'rgba(255, 255, 255, 0.10)',
+            gold: '#6fb597',
+            goldStrong: '#8fd0b2',
+            chosenLine: 'rgba(143, 208, 178, 0.45)',
+          }
+        : {
+            ...app.c,
+            screen: '#fbfcfa',
+            screenEnd: '#f4f6f3',
+            stars: '#9bb8aa',
+            card: '#ffffff',
+            meta: '#6b7a70',
+            soft: 'rgba(23, 63, 50, 0.06)',
+            line: 'rgba(23, 63, 50, 0.10)',
+            divider: 'rgba(23, 63, 50, 0.08)',
+            gold: '#5c8f78',
+            goldStrong: '#2f6650',
+            chosenLine: 'rgba(47, 102, 80, 0.4)',
+          },
+    }),
     [app],
   );
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

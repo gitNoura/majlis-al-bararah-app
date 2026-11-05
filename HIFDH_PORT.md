@@ -241,3 +241,10 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - A card's head holds only its icon and its title («الحفظ» / «المراجعة»); `Section` has no subtitle any more.
 - Finished card (`DoneCard`), organised below the title: the portions done (bold), a hairline rule, the congratulation (bold) with the blessing under it, and «Undo» at the end. A faint hue wash and a solid chip with a white check mark it as done.
 - Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.
+
+### Notes (Step 13: sixth pass, light and neutral with one green)
+- Look: modern, light, one colour. `HifTheme` gives a near-white screen (`#fbfcfa`), white cards with a hairline border, grey-green second lines (`meta` `#6b7a70`) and no gold or beige anywhere on the page (`gold` / `goldStrong` map to greens, so Undo, picker borders and links are green). Dark mode has its own sage-on-charcoal values.
+- One font: every title on the page uses the UI font (no `serif`). The accent system is a single forest green (`useGreen` in `Section.tsx`: chip, border and wash tints); the blue, violet and rose hues are gone, so Hifdh and Murajaa cards are identical (green icon chip; the finished card gets a faint green wash and a solid chip with a white check).
+- The week card keeps the earlier green version: a sage card (`#eff3ee`), kept days in forest green, the other days a grey-green tint.
+- Progress: ring card (green ring) and History card, both neutral.
+- Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.

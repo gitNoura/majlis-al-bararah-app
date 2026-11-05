@@ -25,7 +25,7 @@ export function RevisionCard() {
 
   if (!st.plans.some((p: { type: string }) => p.type === 'revise')) {
     return (
-      <Section title={title} accent="blue" icon={(color) => <RepeatIcon color={color} size={22} />}>
+      <Section title={title} icon={(color) => <RepeatIcon color={color} size={22} />}>
         <Txt size={15} weight={700} color={c.ink}>
           {HIF.noRevPlan()}
         </Txt>
@@ -40,7 +40,7 @@ export function RevisionCard() {
   if (rows.length && rows.every(isDone)) return <DoneCard rows={rows} revise />; // done: the same card turns into the congratulation
 
   return (
-    <Section title={title} accent="blue" icon={(color) => <RepeatIcon color={color} size={22} />}>
+    <Section title={title} icon={(color) => <RepeatIcon color={color} size={22} />}>
       {rows.length ? (
         <View>
           {rows.map((r: Row, i: number) => (

@@ -7,7 +7,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { Heading, Hint, Section, useTints } from '@/components/hifdh/Section';
+import { Heading, Hint, Section, useGreen } from '@/components/hifdh/Section';
 import { ProgressRing } from '@/components/hifdh/ProgressRing';
 import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
@@ -26,10 +26,10 @@ const PAGE = 40; // days shown at a time
 // reference: how far the plans are (a ring and the big value beside it) and the way into the past days.
 export function ProgressSection({ onPress }: { onPress: () => void }) {
   const { c } = useTheme();
-  const t = useTints('rose');
+  const g = useGreen();
   const p = plan.planProgress();
   const pct = p == null ? null : Math.round(p * 100);
-  const arrow = <Txt size={20} color={t.ink} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>›</Txt>;
+  const arrow = <Txt size={20} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>›</Txt>;
   return (
     <View style={{ gap: 12 }}>
       <Heading title={HIF.progress()} link={HIF.history()} onLink={onPress} />
@@ -39,7 +39,7 @@ export function ProgressSection({ onPress }: { onPress: () => void }) {
             {HIF.progressLabel()}
           </Txt>
           <View style={styles.miniRow}>
-            <ProgressRing size={60} inside={false} color={t.base} track={c.soft} />
+            <ProgressRing size={60} inside={false} color={g.base} track={g.chip} />
             <View style={{ flex: 1 }}>
               <Txt size={pct == null ? 20 : 26} weight={800} color={c.ink} lineHeight={pct == null ? 28 : 32}>
                 {pct == null ? HIF.progressNone() : `${num(pct)}%`}

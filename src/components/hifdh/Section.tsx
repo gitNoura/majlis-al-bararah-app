@@ -9,58 +9,31 @@ import { useTheme } from '@/theme/theme';
 
 export type Tone = 'done';
 
-// The page's colours: four muted hues of one softness, one per kind of card (green = memorizing, blue = revising,
-// violet = the week, rose = progress). A card uses only its own hue (wash, border, icon chip, title, and whatever it
-// draws: the ring, the kept days) on the neutral page, so the colour reads as a system and not as decoration.
-// `base` is the hue for washes and fills, `ink` its deep version for titles and icons.
-export type Accent = 'green' | 'blue' | 'violet' | 'rose';
-const ACCENTS = {
-  light: {
-    green: { base: '#3f8a6c', ink: '#1f5a45' },
-    blue: { base: '#4a86a8', ink: '#2a5d7a' },
-    violet: { base: '#7864b0', ink: '#55448c' },
-    rose: { base: '#b5607a', ink: '#8f3f58' },
-  },
-  dark: {
-    green: { base: '#5fb592', ink: '#8fd9bb' },
-    blue: { base: '#6aa6c8', ink: '#92cdee' },
-    violet: { base: '#9a88d4', ink: '#bdb0ee' },
-    rose: { base: '#d4809a', ink: '#eba5bb' },
-  },
-};
-export function useAccent(accent: Accent = 'green') {
-  const { isDark } = useTheme();
-  return ACCENTS[isDark ? 'dark' : 'light'][accent];
-}
+// The page is neutral with one accent, forest green: the icon chips, the ring, the kept days, the buttons. One font
+// (the app's UI font) for every title. `green` is the fill, its tints are for washes, borders and chips.
 export function alpha(hex: string, a: number) {
   const n = parseInt(hex.slice(1), 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
 }
-// the three tints every card is built from, so they all look alike
-export function useTints(accent: Accent = 'green') {
+export function useGreen() {
   const { isDark } = useTheme();
-  const a = useAccent(accent);
-  return {
-    ...a,
-    wash: alpha(a.base, isDark ? 0.14 : 0.1),
-    line: alpha(a.base, isDark ? 0.4 : 0.3),
-    chip: alpha(a.base, isDark ? 0.26 : 0.18),
-  };
+  const base = isDark ? '#6fb597' : '#2f6650';
+  return { base, chip: alpha(base, isDark ? 0.22 : 0.1), line: alpha(base, isDark ? 0.4 : 0.28), wash: alpha(base, isDark ? 0.12 : 0.06) };
 }
 
-// A card, as on the settings page (white, a hairline border, 20 px corners) with the home page's serif title. Colour is
-// only an accent: the icon chip takes the card's hue. `tone="done"` is a finished card: a faint wash of its hue and
-// a solid chip with a white check. Nothing is ever written under the title: the card's content goes below the head.
-export function Section({ title, icon, accent = 'green', tone, children, style }: { title: string; icon?: (color: string) => ReactNode; accent?: Accent; tone?: Tone; children: ReactNode; style?: StyleProp<ViewStyle> }) {
-  const { c, isDark } = useTheme();
-  const t = useTints(accent);
+// A card: white on the light screen, a hairline border, 20 px corners, the title in the UI font. The icon chip is the
+// card's only colour. `tone="done"` is a finished card: a faint green wash and a solid green chip with a white check.
+// Nothing is ever written under the title: the card's content goes below the head. Hifdh and Murajaa are identical.
+export function Section({ title, icon, tone, children, style }: { title: string; icon?: (color: string) => ReactNode; tone?: Tone; children: ReactNode; style?: StyleProp<ViewStyle> }) {
+  const { c } = useTheme();
+  const g = useGreen();
   const done = tone === 'done';
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: done ? t.line : c.line }, style]}>
-      {done && <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: alpha(t.base, isDark ? 0.12 : 0.07) }]} />}
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: done ? g.line : c.line }, style]}>
+      {done && <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: g.wash }]} />}
       <View style={styles.head}>
-        {icon ? <View style={[styles.chip, { backgroundColor: done ? t.base : t.chip }]}>{icon(done ? '#ffffff' : t.ink)}</View> : null}
-        <Txt serif size={18} weight={700} color={c.ink} lineHeight={30} style={{ flex: 1 }}>
+        {icon ? <View style={[styles.chip, { backgroundColor: done ? g.base : g.chip }]}>{icon(done ? '#ffffff' : g.base)}</View> : null}
+        <Txt size={18} weight={700} color={c.ink} style={{ flex: 1 }}>
           {title}
         </Txt>
       </View>

@@ -27,7 +27,6 @@ export function DoneCard({ rows, revise }: { rows: Row[]; revise?: boolean }) {
   return (
     <Section
       title={revise ? HIF.cardMurajaa() : HIF.cardHifdh()}
-      accent={revise ? 'blue' : 'green'}
       tone="done"
       icon={(color) => <CheckIcon color={color} size={22} strokeWidth={2.4} />}
     >
