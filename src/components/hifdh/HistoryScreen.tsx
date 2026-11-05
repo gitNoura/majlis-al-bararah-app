@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
 import { Hint, Section } from '@/components/hifdh/Section';
-import { CloseIcon } from '@/components/icons';
+import { ClockIcon, CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish } from '@/i18n/i18n';
@@ -25,6 +25,9 @@ export function HistoryTile({ onPress }: { onPress: () => void }) {
   const { c } = useTheme();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={[styles.tile, { backgroundColor: c.card, borderColor: c.line }]}>
+      <View style={[styles.tileIcon, { backgroundColor: c.soft }]}>
+        <ClockIcon color={c.ink} size={22} />
+      </View>
       <View style={{ flex: 1 }}>
         <Txt serif size={18} weight={700} color={c.ink}>
           {HIF.history()}
@@ -185,7 +188,8 @@ export function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  tile: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.card, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 10 },
+  tile: { flexDirection: 'row', alignItems: 'center', borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, boxShadow: '0 4px 14px rgba(23, 63, 50, 0.07)' },
+  tileIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   root: { flex: 1, justifyContent: 'flex-end' },
   panel: { maxHeight: '80%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingTop: 18 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },

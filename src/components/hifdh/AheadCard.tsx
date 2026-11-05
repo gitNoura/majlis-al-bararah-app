@@ -5,6 +5,8 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 
+import { PlayIcon } from '@/components/icons';
+
 import { useHif } from '@/components/hifdh/HifProvider';
 import { Hint, SecondaryButton, Section } from '@/components/hifdh/Section';
 import { TaskRow } from '@/components/hifdh/TaskRow';
@@ -27,7 +29,7 @@ export function AheadCard() {
 
   if (!open && !rows.some(isDone)) {
     return (
-      <Section title={HIF.aheadTitle()}>
+      <Section title={HIF.aheadTitle()} tone="green" icon={<PlayIcon color={c.ink} size={20} />}>
         <Txt size={15} weight={700} color={c.ink}>
           {HIF.allDone()}
         </Txt>
@@ -38,7 +40,7 @@ export function AheadCard() {
   }
 
   return (
-    <Section title={HIF.aheadTitle()}>
+    <Section title={HIF.aheadTitle()} tone="green" icon={<PlayIcon color={c.ink} size={20} />}>
       <View>
         {rows.map((r, i) => (
           <TaskRow key={`${r.plan.id}|${r.week ?? r.day}`} row={r} ahead first={i === 0} />

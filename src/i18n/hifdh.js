@@ -257,19 +257,8 @@ export const HIF = {
   lsPageN: (n) => L(`صفحة ${n}`, `Page ${n}`, `Page ${n}`),
   lsGo: () => L('ابدأ الاستماع', 'Play audio', 'Lancer l’écoute'),
   lsClose: () => L('إغلاق', 'Close', 'Fermer'),
-  // first time: what this page is and how it works
-  welcomeTitle: () => L('احفظ القرآن خطوةً كل يوم', 'Memorize the Quran, a little each day', 'Mémorisez le Coran, un peu chaque jour'),
-  welcomeSub: () => L('ضع خطة، وسيخبرك التطبيق كل يوم بما تحفظه وما تراجعه.', 'Set a plan and the app tells you each day what to memorize and what to revise.', 'Créez un plan et l’application vous dit chaque jour quoi mémoriser et quoi réviser.'),
-  howTitle: () => L('كيف تعمل؟', 'How it works', 'Comment ça marche'),
-  how1: () => L('حدّد ما تحفظه', 'Mark what you know', 'Indiquez ce que vous savez'),
-  how1d: () => L('اختر السور أو الأجزاء التي حفظتَها.', 'Pick the surahs or juz you have already memorized.', 'Choisissez les sourates ou les juz déjà mémorisés.'),
-  how2: () => L('اختر وتيرتك', 'Choose your pace', 'Choisissez votre rythme'),
-  how2d: () => L('قدراً ثابتاً كل يوم، أو تاريخاً تريد أن تنتهي فيه.', 'A set amount each day, or a date you want to finish by.', 'Une quantité par jour, ou une date de fin.'),
-  how3: () => L('اتبع خطة يومك', 'Follow your daily plan', 'Suivez votre plan du jour'),
-  how3d: () => L('كل يوم ورد جديد ومراجعة، وتضع علامة حين تُنهيهما.', 'Each day: a new portion and a revision. Tick them off when done.', 'Chaque jour : une nouvelle portion et une révision. Cochez-les une fois faites.'),
-  alsoHere: () => L('وأيضاً هنا', 'Also here', 'Aussi ici'),
-  listenTile: () => L('اختر أي آيات واسمعها مراراً لتحفظها بالسمع.', 'Pick any ayat and hear them again and again to learn by ear.', 'Choisissez des versets et écoutez-les en boucle pour apprendre à l’oreille.'),
-  memorizedTile: () => L('سجّل ما تحفظه لتتابع تقدّمك.', 'Record what you know to follow your progress.', 'Notez ce que vous savez pour suivre vos progrès.'),
+  // the Plan page for someone with no plan yet, and the cards' one-line subtitles
+  planIntro: () => L('ضع خطة، وسترى هنا كل يوم ما تحفظه وما تراجعه.', 'Set a plan and this page shows each day what to memorize and what to revise.', 'Créez un plan et cette page vous montre chaque jour quoi mémoriser et quoi réviser.'),
   todaySub: () => L('ما تحفظه اليوم', 'What to memorize today', 'À mémoriser aujourd’hui'),
   reviseSub: () => L('ما تراجعه ليبقى محفوظاً', 'What to revise so it stays with you', 'À réviser pour que cela reste'),
 };

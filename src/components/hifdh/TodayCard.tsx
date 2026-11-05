@@ -3,6 +3,9 @@
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { View } from 'react-native';
 
+import { BookOpenIcon } from '@/components/icons';
+import { useTheme } from '@/theme/theme';
+
 import { useHif } from '@/components/hifdh/HifProvider';
 import { Hint, PrimaryButton, Section } from '@/components/hifdh/Section';
 import type { Row } from '@/components/hifdh/StopSheet';
@@ -13,12 +16,13 @@ import * as plan from '@/lib/hifdh/plan';
 
 export function TodayCard() {
   const { startPlan } = useHif(); // also redraws this card whenever `rev` changes
+  const { c } = useTheme();
   const st = plan.get();
   const title = kindOf('memorize');
 
   if (!st.plans.some((p: { type: string }) => p.type === 'memorize')) {
     return (
-      <Section title={title} subtitle={HIF.todaySub()}>
+      <Section title={title} subtitle={HIF.todaySub()} tone="green" icon={<BookOpenIcon color={c.ink} size={22} />}>
         <Hint>{HIF.noPlanYet()}</Hint>
         <PrimaryButton label={HIF.setUpPlan()} onPress={() => startPlan('memorize')} />
       </Section>
@@ -29,7 +33,7 @@ export function TodayCard() {
   const next = plan.upcomingRows().find((r: Row) => r.plan.type === 'memorize');
 
   return (
-    <Section title={title} subtitle={HIF.todaySub()}>
+    <Section title={title} subtitle={HIF.todaySub()} tone="green" icon={<BookOpenIcon color={c.ink} size={22} />}>
       {rows.length ? (
         <View>
           {rows.map((r: Row, i: number) => (
@@ -39,6 +43,7 @@ export function TodayCard() {
       ) : (
         <Hint>{next ? HIF.nothingTodayNext(dayText(next.day)) : HIF.nothingToday()}</Hint>
       )}
+      {rows.some((r: Row) => r.status !== 'done' && r.status !== 'partial' && r.week == null) && <Hint>{HIF.holdHint()}</Hint>}
     </Section>
   );
 }

@@ -9,10 +9,9 @@ import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish } from '@/i18n/i18n';
 import * as plan from '@/lib/hifdh/plan';
-import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/theme';
 
-const SIZE = 64;
+const SIZE = 72;
 const R = 40;
 const CIRC = 2 * Math.PI * R;
 
@@ -71,7 +70,7 @@ export function MemorizedRing({ onPress }: { onPress?: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: radius.card, borderWidth: StyleSheet.hairlineWidth, padding: 14 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 16, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, boxShadow: '0 4px 14px rgba(23, 63, 50, 0.07)' },
   ring: { width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
   pct: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   text: { flex: 1, gap: 2 },

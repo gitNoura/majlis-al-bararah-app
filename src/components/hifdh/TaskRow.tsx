@@ -6,7 +6,7 @@ import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
 import type { Row } from '@/components/hifdh/StopSheet';
-import { BookOpenIcon, CheckIcon } from '@/components/icons';
+import { CheckIcon, PlayIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { STATUS, dayText, findRow, isDone, portionName, startsAt, weekLine } from '@/lib/hifdh/labels';
@@ -105,9 +105,9 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
           onPress={() => listen(findRow(key) ?? row)}
           accessibilityRole="button"
           accessibilityLabel={HIF.listenPortion()}
-          style={[styles.icon, { borderColor: c.chosenLine }]}
+          style={[styles.icon, { backgroundColor: c.soft }]}
         >
-          <BookOpenIcon color={c.ink} size={22} />
+          <PlayIcon color={c.ink} size={20} />
         </Pressable>
         {row.status !== 'notdone' && (
           <Pressable
@@ -140,6 +140,6 @@ const styles = StyleSheet.create({
   task: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10, paddingVertical: 12 },
   main: { flexGrow: 1, flexShrink: 1, flexBasis: 150, minWidth: 0, gap: 2 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  icon: { width: 48, height: 48, borderRadius: 24, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  icon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   complete: { minWidth: 96, minHeight: 48, paddingHorizontal: 18, borderRadius: 24, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
 });

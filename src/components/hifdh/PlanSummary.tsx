@@ -15,10 +15,15 @@ export function PlanSummary({ onOpenMemorized }: { onOpenMemorized?: () => void 
   const { c } = useTheme();
   return (
     <View style={styles.wrap}>
+      {(plan.get().plans as unknown[]).length === 0 && (
+        <Txt size={14.5} color={c.meta}>
+          {HIF.planIntro()}
+        </Txt>
+      )}
       <WeekCard />
       <MemorizedRing onPress={onOpenMemorized} />
       <View style={styles.todayHead}>
-        <Txt serif size={22} weight={700} color={c.ink}>
+        <Txt serif size={24} weight={700} color={c.ink}>
           {HIF.todayPlan()}
         </Txt>
         <Txt size={13} color={c.meta}>

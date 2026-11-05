@@ -3,6 +3,9 @@
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { View } from 'react-native';
 
+import { ClockIcon } from '@/components/icons';
+import { useTheme } from '@/theme/theme';
+
 import { useHif } from '@/components/hifdh/HifProvider';
 import { Hint, PrimaryButton, Section } from '@/components/hifdh/Section';
 import type { Row } from '@/components/hifdh/StopSheet';
@@ -13,13 +16,14 @@ import * as plan from '@/lib/hifdh/plan';
 
 export function RevisionCard() {
   const { startPlan } = useHif(); // also redraws this card whenever `rev` changes
+  const { c } = useTheme();
   const st = plan.get();
   const known = plan.memorizedCount() > 0;
   const title = kindOf('revise');
 
   if (!st.plans.some((p: { type: string }) => p.type === 'revise')) {
     return (
-      <Section title={title} subtitle={HIF.reviseSub()}>
+      <Section title={title} subtitle={HIF.reviseSub()} tone="gold" icon={<ClockIcon color={c.ink} size={22} />}>
         <Hint>{known ? HIF.reviseHint() : HIF.reviseLocked()}</Hint>
         <PrimaryButton label={HIF.startRevision()} onPress={() => startPlan('revise')} disabled={!known} />
       </Section>
@@ -29,7 +33,7 @@ export function RevisionCard() {
   const rows = plan.todayRows().filter((r: Row) => r.plan.type === 'revise');
 
   return (
-    <Section title={title} subtitle={HIF.reviseSub()}>
+    <Section title={title} subtitle={HIF.reviseSub()} tone="gold" icon={<ClockIcon color={c.ink} size={22} />}>
       {rows.length ? (
         <View>
           {rows.map((r: Row, i: number) => (

@@ -103,8 +103,8 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 5 (follow-up): Listen looks like the web: the app's mushaf (`PageCurl`) behind it, top bar, ayah taps choose the range, lit ayah, page follows playback, player pill, settings sheet (see notes below)
 - [x] Step 6 (fixes from the phone): (a) screens did not redraw after a mark until leaving the page; (b) Listen's player pill and settings sheet layout
 - [x] Step 7a: Listen settings sheet: the page's top bar (surah name, index button) still showed through it
-- [x] Step 7b: first-time clarity and a more modern look: a Welcome screen when there is no plan yet (what the page does, how it works, one clear start button), short subtitles and icons on the cards
-- [ ] Step 8: undo Step 7b's Welcome screen (not wanted) and redesign the SAME Plan page: clearer and more modern (tinted cards with icons, clearer week card and ring, clearer Complete buttons, a one-line intro when there is no plan)
+- [x] Step 7b: first-time clarity (the Welcome screen it first added was REMOVED in Step 8; only the card subtitles stay)
+- [x] Step 8: undo Step 7b's Welcome screen (not wanted) and redesign the SAME Plan page: clearer and more modern (tinted cards with icons, clearer week card and ring, clearer Complete buttons, a one-line intro when there is no plan)
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
@@ -168,8 +168,14 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 ### Notes (Step 7a: sheet peek-through)
 - The top bar and the surah name of Listen have `zIndex: 5`, which put them over the settings overlay (a later sibling with no zIndex). The overlay now has `zIndex: 30` / `elevation: 30`, so the sheet and its dimmed backdrop cover the whole page.
 
-### Notes (Step 7b: first-time clarity)
+### Notes (Step 7b: first-time clarity) - Welcome screen removed in Step 8, see below
 - New `components/hifdh/Welcome.tsx`, shown on the Plan screen instead of the week card / ring / cards while there is no plan (`plan.get().plans` is empty; it disappears by itself once a plan exists, and comes back if the last plan is deleted). It has: a green hero («Memorize the Quran, a little each day» + one sentence + «Set up my plan»), «How it works» in three numbered steps (mark what you know → choose your pace → follow your daily plan; numbered because it is a real sequence), and «Also here»: Listen and «What I've memorized», which need no plan.
 - «Set up my plan» opens the setup with no type, so the first question is «What would you like to do?» (memorize or revise), as «+ Add plan» does. The web has no such screen; this is an addition, not a port.
 - `Section` takes an optional `subtitle`; the Today card says «What to memorize today» and the Revision card «What to revise so it stays with you». The bottom tabs, History tile and every other card are unchanged. All new strings are in `src/i18n/hifdh.js` in the L(ar, en, fr) style.
 - Not run on a device from this sandbox (tsc and lint are clean).
+
+### Notes (Step 8: the same Plan page, clearer and more modern)
+- Removed `Welcome.tsx` and its strings; `memorize.tsx` shows the Plan page as before (summary, Today, Ahead, Revision, History tile, bottom tabs) for everyone. No new page or screen was added.
+- Look: «Your week» is now the page's one bold element, a forest-green card (gold ticks for days done, a white ring for today, white text); the other cards have larger corners (24) and a soft shadow. `Section` takes `icon` and `tone`: Today and Ahead are tinted green (as the web's green band), Revision gold (the web's yellow band), each with a round icon (book / play / clock) and its one-line subtitle («What to memorize today», «What to revise so it stays with you»). The memorized ring is bigger (72). The History tile has a clock icon.
+- Clearer: the listen button on a portion is a play icon on a soft round (it was a book icon); under the portions of today a quiet line says «Press and hold to choose where you stopped» while something is still to do (the hold gesture was hidden before); with no plan yet a one-line intro sits above the week card (`planIntro`: «Set a plan and this page shows each day what to memorize and what to revise.»).
+- Behaviour and data are unchanged; only styles, icons and two small hints. Not run on a device from this sandbox (tsc and lint are clean).
