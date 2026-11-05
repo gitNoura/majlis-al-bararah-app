@@ -13,7 +13,8 @@
 // modes two fingers zoom in on the page; while zoomed, a round button at the bottom brings back the
 // whole page.
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import * as Haptics from 'expo-haptics';
+import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
@@ -32,6 +33,7 @@ import { QuranIndex } from '@/components/QuranIndex';
 import { ScreenBackground } from '@/components/Stars';
 import { Tree } from '@/components/Tree';
 import { Txt } from '@/components/Txt';
+import { WirdEnd, WirdQuote } from '@/components/Wird';
 import { isEnglish, surahName, t } from '@/i18n/i18n';
 import { READER } from '@/i18n/reader';
 import { markToday } from '@/lib/activity';
@@ -44,6 +46,7 @@ import { pageUrl } from '@/lib/remote';
 import { onReaderGo } from '@/lib/reader-nav';
 import { trackPlace } from '@/lib/riwaya';
 import { readJSON, writeJSON } from '@/lib/storage';
+import { markStop, wirdStop, type Done } from '@/lib/wird';
 import { QuranTheme, useTheme } from '@/theme/theme';
 
 const IDLE_MS = 5000; // full screen: the round buttons fade after this long untouched
@@ -87,6 +90,16 @@ function Quran() {
   const [toast, setToast] = useState('');
   const idle = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // the wird (src/lib/wird.ts): opened from the home screen (?wird=1) or the wird button. While in it,
+  // the pages turned are not kept as the last page read (the wird has its own place), and holding an
+  // ayah marks where the reader stopped
+  const params = useLocalSearchParams<{ wird?: string }>();
+  const [inWird, setInWird] = useState(false);
+  const wirdOn = useRef(false);
+  const normalPage = useRef(page);
+  const [quote, setQuote] = useState(0); // the opening hadith, shown (a new value each time)
+  const [stop, setStop] = useState(wirdStop);
+  const [done, setDone] = useState<Done | null>(null);
 
   useEffect(() => {
     markToday('quran');
@@ -100,8 +113,48 @@ function Quran() {
   const turned = useCallback((p: number) => {
     const target = Math.min(TOTAL_PAGES, Math.max(1, p));
     setPage(target);
-    writeJSON('lastPage', target);
+    if (!wirdOn.current) writeJSON('lastPage', target);
   }, []);
+
+  const lightAyah = (key: string) => {
+    const [s, a] = key.split(':').map(Number);
+    setFlash({ s, a });
+    clearTimeout(flashTimer.current);
+    flashTimer.current = setTimeout(() => setFlash(null), 3000);
+  };
+  // into the wird: where the reader stopped last time (the first time, the first page), its ayah lit
+  const enterWird = useCallback(() => {
+    if (!wirdOn.current) normalPage.current = page;
+    wirdOn.current = true;
+    setInWird(true);
+    setQuote(Date.now());
+    const at = wirdStop();
+    setStop(at);
+    turned(at?.page ?? 1);
+    if (at) setTimeout(() => lightAyah(at.shown), 5200);
+  }, [page, turned]);
+  // out of it: back to the normal reading place
+  const leaveWird = () => {
+    wirdOn.current = false;
+    setInWird(false);
+    turned(normalPage.current);
+  };
+  const opened = useRef(false);
+  useEffect(() => {
+    if (params.wird === '1' && !opened.current) {
+      opened.current = true;
+      enterWird();
+    }
+  }, [params.wird, enterWird]);
+  // an ayah held in the wird: today's stop; the ribbon drops to it, then the closing card
+  const onHold = (s: number, a: number) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    const first = ayatOn(page)[0];
+    markStop(`${s}:${a}`, page, first ? `${first.s}:${first.a}` : null).then((d) => {
+      setStop(wirdStop());
+      if (d) setTimeout(() => setDone(d), 1600);
+    });
+  };
   useEffect(() => {
     const ahead = [page + 1, page + 2, page + 3, page - 1].filter((n) => n >= 1 && n <= TOTAL_PAGES).map(pageUrl);
     Image.prefetch(ahead, 'disk').catch(() => {});
@@ -202,6 +255,8 @@ function Quran() {
   const startSide = isEnglish ? 'left' : 'right';
   const endSide = isEnglish ? 'right' : 'left';
   const box = lanternBox();
+  // the wird's stop on this page: its ribbon and underline
+  const ribbon: Chosen | null = inWird && stop && stop.page === page ? (onPage.find((e) => `${e.s}:${e.a}` === stop.shown) ?? null) : null;
 
   // full screen: the screen is the page's paper by day; at night the dark screen (the normal page) or the
   // dimmed paper (the dimmed page); its buttons are the icons alone (no glass, which looked light at
@@ -222,10 +277,17 @@ function Quran() {
                 <Pressable onPress={() => router.back()} hitSlop={10} style={styles.back} accessibilityLabel={READER.home()}>
                   <BackIcon color={c.ink} rtl={!isEnglish} />
                 </Pressable>
-                <Pressable onPress={soon} accessibilityLabel={READER.wird()}>
-                  <Glass style={styles.round}>
-                    <BookOpenIcon color={c.ink} />
-                  </Glass>
+                {/* the wird: gold while reading it; pressed again, back to normal reading */}
+                <Pressable onPress={inWird ? leaveWird : enterWird} accessibilityLabel={READER.wird()}>
+                  {inWird ? (
+                    <View style={[styles.round, { backgroundColor: c.gold }]}>
+                      <BookOpenIcon color="#173f32" />
+                    </View>
+                  ) : (
+                    <Glass style={styles.round}>
+                      <BookOpenIcon color={c.ink} />
+                    </Glass>
+                  )}
                 </Pressable>
               </View>
             )}
@@ -237,8 +299,8 @@ function Quran() {
                   <Txt size={18} weight={700} center color={c.ink} numberOfLines={1}>
                     {here.surahs}
                   </Txt>
-                  <Txt size={13} center color={c.meta}>
-                    {here.extra}
+                  <Txt size={13} center color={inWird ? c.gold : c.meta} numberOfLines={1}>
+                    {inWird ? READER.wirdHint() : here.extra}
                   </Txt>
                 </Pressable>
               </View>
@@ -332,6 +394,8 @@ function Quran() {
             onPin={(s, a) => setNote({ s, a })}
             onEmptyTap={() => full && wake()}
             onZoomed={setZoomed}
+            onHold={inWird ? onHold : undefined}
+            ribbon={ribbon}
           />
         </View>
       </GlassBackdrop>
@@ -349,6 +413,14 @@ function Quran() {
         </View>
       )}
 
+      <WirdQuote shown={quote} onGone={() => setQuote(0)} />
+      <WirdEnd
+        done={done}
+        onClose={() => {
+          setDone(null);
+          leaveWird();
+        }}
+      />
       <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={turned} />
       <AyahSheet ayah={ayah} onClose={() => setAyah(null)} onMove={moveAyah} />
       <AyahMenu

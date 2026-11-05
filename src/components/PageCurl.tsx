@@ -24,6 +24,7 @@ import {
   GestureDetector,
   useCompetingGestures,
   useExclusiveGestures,
+  useLongPressGesture,
   usePanGesture,
   usePinchGesture,
   useTapGesture,
@@ -34,7 +35,6 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { ayahAt } from '@/lib/boxes';
 import { cropOf } from '@/lib/crop';
 import { TOTAL_PAGES } from '@/lib/quran';
-import { DAY_PAPER, useNightPage } from '@/lib/nightPage';
 import { pageUrl } from '@/lib/remote';
 import { useTheme } from '@/theme/theme';
 
@@ -63,6 +63,10 @@ type Props = {
   onAyah: (s: number, a: number, x: number, y: number) => void; // x, y: where the finger was, in the room
   onEmptyTap: () => void; // a tap on the page outside its ayat and edges
   onZoomed: (zoomed: boolean) => void;
+  // the wird: holding an ayah (longer than a tap) marks where the reader stopped; the stop's ayah on
+  // this page, its ribbon and underline drawn (null: none here)
+  onHold?: (s: number, a: number) => void;
+  ribbon?: Chosen | null;
 };
 
 type Poly = number[][];
@@ -108,12 +112,12 @@ const DONE = 0.28; // past this share of the turn, letting go finishes it
 const MAX_ZOOM = 4;
 const NOTHING: Poly = [];
 
-export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed }: Props) {
+export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed, onHold, ribbon }: Props) {
   const { c, isDark } = useTheme();
-  // night: the page as by day, or dimmed, as chosen in the settings (its colours never changed)
-  const nightPage = useNightPage();
-  const dimmed = isDark && nightPage === 'dim';
-  const paper = isDark && !dimmed ? DAY_PAPER : c.paper;
+  // night: the page always a little dimmer (its colours never changed); the choice in the settings is
+  // only the screen around it in full screen (quran.tsx)
+  const dimmed = isDark;
+  const paper = c.paper;
   const ox = (width - pageW) / 2;
   const oy = (height - pageH) / 2;
 
@@ -473,7 +477,25 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
     },
   });
 
-  const pages = useExclusiveGestures(drag, tap);
+  // the wird: a finger held still on an ayah (a move turns the page instead)
+  const hold = useLongPressGesture({
+    runOnJS: true,
+    minDuration: 650,
+    maxDistance: 12,
+    enabled: !!onHold,
+    onActivate: (e) => {
+      if (!onHold || mode.get() !== 0) return;
+      const k = zs.get();
+      const fx = (e.x - ox - zx.get()) / k / pageW;
+      const fy = (e.y - oy - zy.get()) / k / pageH;
+      if (fx < 0 || fx > 1 || fy < 0 || fy > 1) return;
+      const crop = cropOf(page, full);
+      const hit = ayahAt(page, crop.x + fx * crop.w, crop.y + fy * crop.h);
+      if (hit) onHold(hit.s, hit.a);
+    },
+  });
+
+  const pages = useExclusiveGestures(drag, hold, tap);
   const gesture = useCompetingGestures(pinch, pages);
 
   // the highlighted ayat and the chosen one, where their parts are on the page as shown (only on the
@@ -489,6 +511,23 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
       color,
     }));
   const lit = [...marks.flatMap((e) => place(e, e.color)), ...chosen.flatMap((e) => place(e, 'rgba(196, 154, 69, 0.3)'))];
+  // the wird's ribbon, as a mushaf's own: hanging from the top of the page on the spine's side (the left
+  // of odd pages, the right of even ones), its forked end at the stop's line; the stop's ayah underlined
+  const ribbonDraw = useMemo(() => {
+    if (!ribbon?.boxes.length) return null;
+    const X = (fx: number) => ((fx - shown.x) / shown.w) * pageW;
+    const Y = (fy: number) => ((fy - shown.y) / shown.h) * pageH;
+    const rw = 0.032;
+    const want = page % 2 ? 0.006 : 1 - 0.006 - rw;
+    const fx0 = Math.min(Math.max(want, shown.x + 0.004), shown.x + shown.w - rw - 0.004);
+    const x0 = X(fx0);
+    const x1 = X(fx0 + rw);
+    const end = Y(Math.max(...ribbon.boxes.map((b) => b[3])) + 0.006);
+    const fork = (x1 - x0) * 0.45;
+    const body = Skia.Path.MakeFromSVGString(`M${x0} 0H${x1}V${end}L${(x0 + x1) / 2} ${end - fork}L${x0} ${end}Z`);
+    const lines = ribbon.boxes.map(([bx0, , bx1, by1], i) => ({ key: i, x: X(bx0), y: Y(by1) - 2.5, w: X(bx1) - X(bx0) }));
+    return { body, shine: { x: x0 + (x1 - x0) * 0.18, h: Math.max(0, end - fork) }, lines };
+  }, [ribbon, shown.x, shown.y, shown.w, shown.h, pageW, pageH, page]);
   const onPage = useDerivedValue(() => (mode.get() === -1 ? 0 : 1));
   const unit = pageW / shown.w / 1000; // the badge's thousandths of the page's width
   const bubble = useMemo(() => ({ body: Skia.Path.MakeFromSVGString(BUBBLE)!, lines: Skia.Path.MakeFromSVGString(BUBBLE_LINES)! }), []);
@@ -553,6 +592,11 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
                       <Path path={bubble.lines} color="#fffaf0" style="stroke" strokeWidth={3} strokeCap="round" />
                     </Group>
                   ))}
+                  {ribbonDraw?.lines.map((l) => (
+                    <Rect key={l.key} x={l.x} y={l.y} width={l.w} height={2} color="#c9a24a" />
+                  ))}
+                  {ribbonDraw?.body && <Path path={ribbonDraw.body} color="#c9a24a" />}
+                  {ribbonDraw?.body && <Rect x={ribbonDraw.shine.x} y={0} width={1.4} height={ribbonDraw.shine.h} color="rgba(241, 220, 156, 0.8)" />}
                 </Group>
                 <Rect x={0} y={0} width={pageW} height={pageH}>
                   <LinearGradient start={foldAt} end={flatShadeEnd} colors={['rgba(0,0,0,0.16)', 'rgba(0,0,0,0)']} />

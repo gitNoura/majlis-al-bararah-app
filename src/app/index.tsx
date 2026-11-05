@@ -373,7 +373,7 @@ export default function Home() {
                 {/* on with the wird, and the days read in a row beside it */}
                 <View style={styles.heroFoot}>
                   <Pressable
-                    onPress={go('/quran')}
+                    onPress={go({ pathname: '/quran', params: { wird: '1' } })}
                     style={({ pressed }) => [styles.heroGo, { backgroundColor: hc.button }, pressed && styles.pressed]}
                   >
                     <Txt size={14} weight={700} color={hc.buttonInk}>
