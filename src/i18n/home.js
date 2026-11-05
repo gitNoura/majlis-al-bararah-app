@@ -4,12 +4,8 @@ import { L } from './i18n.js';
 
 export const HOME = {
   // the sections' one-liners, and today's memorization card
-  soon: () => L('قريبًا', 'Soon', 'Bientôt'),
   quranSub: () => L('اقرأ المصحف واستمع', 'Read the mushaf and listen', 'Lisez le mushaf et écoutez'),
-  testSub: () => L('سمّع حفظك وصحّح', 'Recite and be corrected', 'Récitez et soyez corrigé'),
-  majalisSub: () => L('حلقات وتلاوة جماعية', 'Circles and group recitation', 'Cercles et récitation en groupe'),
   // the wird card: what it is, where the reader stopped, the button
-  wirdLabel: () => L('وِردك اليومي', 'Your daily wird', 'Votre wird du jour'),
   wirdContinue: () => L('أكمل من حيث توقفت', 'Continue where you stopped', 'Reprenez où vous vous êtes arrêté'),
   wirdPage: (n) => L(`الصفحة ${n}`, `Page ${n}`, `Page ${n}`),
   wirdRead: () => L('اقرأ الآن', 'Read now', 'Lire maintenant'),
