@@ -237,13 +237,13 @@ export const LanguageIcon = (p: IconProps) => (
   </Line>
 );
 
-// listen: a play triangle; stop: two bars
-export const PlayIcon = (p: IconProps) => (
+// the adhkar's listen button: a play triangle; stop: two bars (filled)
+export const ListenPlayIcon = (p: IconProps) => (
   <Svg width={p.size ?? 22} height={p.size ?? 22} viewBox="0 0 24 24">
     <Path d="M8 5.5v13l11-6.5z" fill={p.color} />
   </Svg>
 );
-export const PauseIcon = (p: IconProps) => (
+export const ListenPauseIcon = (p: IconProps) => (
   <Svg width={p.size ?? 22} height={p.size ?? 22} viewBox="0 0 24 24">
     <Path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z" fill={p.color} />
   </Svg>
@@ -279,3 +279,32 @@ export function BackIcon({ size = 24, color, rtl }: IconProps & { rtl: boolean }
     </Svg>
   );
 }
+
+// The Hifdh tabs: «Listen» (a play triangle) and «Recite» (a microphone)
+export const PlayIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path fill={p.color} d="M8.5 5.8v12.4a.9.9 0 0 0 1.37.77l9.9-6.2a.9.9 0 0 0 0-1.54l-9.9-6.2A.9.9 0 0 0 8.5 5.8z" />
+  </Line>
+);
+export const MicIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M12 3.5a3 3 0 0 0-3 3V11a3 3 0 0 0 6 0V6.5a3 3 0 0 0-3-3z" />
+    <Path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" />
+  </Line>
+);
+// Hifdh «Revision» (two arrows going round) and «History» (a calendar)
+export const RepeatIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M17 2.5l3 3-3 3M4 11V9.5a4 4 0 0 1 4-4h12M7 21.5l-3-3 3-3M20 13v1.5a4 4 0 0 1-4 4H4" />
+  </Line>
+);
+export const CalendarIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M6.5 5h11A2.5 2.5 0 0 1 20 7.5v10a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5v-10A2.5 2.5 0 0 1 6.5 5zM8 3v4M16 3v4M4 10h16" />
+  </Line>
+);
+export const PauseIcon = (p: IconProps) => (
+  <Line {...p} strokeWidth={3}>
+    <Path d="M8 5.5v13M16 5.5v13" />
+  </Line>
+);

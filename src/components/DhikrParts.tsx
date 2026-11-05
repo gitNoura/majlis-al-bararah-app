@@ -10,7 +10,7 @@ import { Art, tone, type Tone } from '@/components/AdhkarArt';
 import { AdhkarScene, MorningEvening } from '@/components/AdhkarScene';
 import { CategoryPainting, isNightPainting } from '@/components/CategoryPaintings';
 import { PaintedScene } from '@/components/PaintedScene';
-import { CheckIcon, CloseIcon, CopyIcon, HeartIcon, PauseIcon, PlayIcon, PlusIcon, ShareIcon } from '@/components/icons';
+import { CheckIcon, CloseIcon, CopyIcon, HeartIcon, ListenPauseIcon, ListenPlayIcon, PlusIcon, ShareIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { ADHKAR } from '@/i18n/adhkar';
 import { isEnglish } from '@/i18n/i18n';
@@ -215,9 +215,9 @@ export function ListenButton({ audio, size = 36, tint }: { audio?: string; size?
         {on && loading ? (
           <ActivityIndicator size="small" color={c.onInk} />
         ) : on ? (
-          <PauseIcon color={c.onInk} size={size * 0.45} />
+          <ListenPauseIcon color={c.onInk} size={size * 0.45} />
         ) : (
-          <PlayIcon color={ink} size={size * 0.5} />
+          <ListenPlayIcon color={ink} size={size * 0.5} />
         )}
       </Pressable>
       {on && (
