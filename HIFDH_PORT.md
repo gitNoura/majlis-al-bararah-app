@@ -110,7 +110,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 10b: finishing today shows a congratulation card instead of tomorrow's task (the «Ahead» card is removed)
 - [x] Step 10c: «What I've memorized»: a second tap unselects (whole Quran, surahs, juz, ahzab...); tracking by ahzab instead of ayat; Arabic search text runs right to left
 - [x] Step 11a: finishing a portion changes the same card (no extra congratulation box, no extra pop-up box)
-- [ ] Step 11b: the Arabic wording of the Hifdh pages rewritten to read as Arabic, not as a translation
+- [x] Step 11b: the Arabic wording of the Hifdh pages rewritten to read as Arabic, not as a translation
 - [ ] Step 11c: the Hifdh pages take the Home page's look (star background, large serif heading, warm tiles and shadows, glass bottom bar)
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
@@ -199,3 +199,7 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 
 ### Notes (Step 11a: the same card on complete)
 - Replaced the separate congratulation card (`CongratsCard`, deleted) and the «MashaAllah…» pop-up message: when every portion of today is done, the page's own «Today's plan» heading turns into «ما شاء الله، أتممتَ وِردك» with its line under it (`PlanSummary`). The confetti stays; the Complete button still turns into «Done ✓» in its own row. Nothing new is added to the page and no message pops up.
+
+### Notes (Step 11b: Arabic wording)
+- Reworded in `src/i18n/hifdh.js` only the Arabic lines that read as translated (English and French untouched, keys unchanged): «تم الحفظ» / «تم حفظ خطتك» became «سُجّل…» / «سُجّلت خطتك» (on this page «حفظ» means memorizing, so «saved» was confusing), «حفظ التعديلات» became «تأكيد التعديلات», «مسح التسجيل» «إزالة العلامة», and the stiff or word-for-word lines (no plan yet, nothing today, hold hint, not done / stopped toasts, delete confirmation, no history, finish date / amount, days, nothing to revise, listen locked) were rewritten as natural Arabic. The rest was already natural and was left as it was.
+- Not changed on purpose: `nothingToReviseSub` («كل ما اخترتَه محفوظ لديك بالفعل…»). Its meaning looks inverted in all three languages (an empty revision means nothing picked is memorized yet); it came from the web and should be checked there before it is changed here.
