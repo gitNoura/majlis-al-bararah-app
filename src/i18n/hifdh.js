@@ -22,9 +22,9 @@ export const HIF = {
   // summary: week, ring, links
   yourWeek: () => L('أسبوعك', 'Your week', 'Votre semaine'),
   ofSevenDays: () => L('من 7 أيام', 'of 7 days', 'sur 7 jours'),
-  memorizedRing: () => L('المحفوظ', 'Memorized', 'Mémorisé'),
   editMemorized: () => L('عدّل ما حفظتُه', 'Edit what I’ve memorized', 'Modifier ce que j’ai mémorisé'),
   historyRing: () => L('السجل', 'History', 'Historique'),
+  pastDaysProgress: () => L('الأيام الماضية وتقدّم خططك', 'Past days and your plans’ progress', 'Jours passés et avancement de vos plans'),
   pastDays: () => L('الأيام الماضية', 'Past days', 'Jours passés'),
 
   // today

@@ -16,7 +16,7 @@ import { isDone, kindOf } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 
 export function RevisionCard() {
-  const { startPlan } = useHif(); // also redraws this card whenever `rev` changes
+  const { startPlan, openMemorized } = useHif(); // also redraws this card whenever `rev` changes
   const { c } = useTheme();
   const st = plan.get();
   const known = plan.memorizedCount() > 0;
@@ -26,7 +26,7 @@ export function RevisionCard() {
     return (
       <Section title={title} subtitle={HIF.reviseSub()} icon={<RepeatIcon color={c.ink} size={22} />}>
         <Hint>{known ? HIF.reviseHint() : HIF.reviseLocked()}</Hint>
-        <PrimaryButton label={HIF.startRevision()} onPress={() => startPlan('revise')} disabled={!known} />
+        <PrimaryButton label={known ? HIF.startRevision() : HIF.memorizedTitle()} onPress={() => (known ? startPlan('revise') : openMemorized())} />
       </Section>
     );
   }

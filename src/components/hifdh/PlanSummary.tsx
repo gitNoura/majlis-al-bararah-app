@@ -1,9 +1,8 @@
-// The top of the Plan screen: the week, the memorized ring, and the heading of today's plan with the
+// The top of the Plan screen: the week and the heading of today's plan with the
 // day's date. The daily cards (3b) go right under it.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { StyleSheet, View } from 'react-native';
 
-import { MemorizedRing } from '@/components/hifdh/MemorizedRing';
 import { WeekCard } from '@/components/hifdh/WeekCard';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
@@ -11,7 +10,7 @@ import { dayText } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { useTheme } from '@/theme/theme';
 
-export function PlanSummary({ onOpenMemorized }: { onOpenMemorized?: () => void }) {
+export function PlanSummary() {
   const { c } = useTheme();
   return (
     <View style={styles.wrap}>
@@ -21,7 +20,6 @@ export function PlanSummary({ onOpenMemorized }: { onOpenMemorized?: () => void 
         </Txt>
       )}
       <WeekCard />
-      <MemorizedRing onPress={onOpenMemorized} />
       <View style={styles.todayHead}>
         <Txt size={24} weight={700} color={c.ink} style={{ flexShrink: 1 }}>
           {HIF.todayPlan()}

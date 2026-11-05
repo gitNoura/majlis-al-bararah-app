@@ -8,7 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
 import { Hint, Section } from '@/components/hifdh/Section';
-import { CalendarIcon, CloseIcon } from '@/components/icons';
+import { ProgressRing } from '@/components/hifdh/ProgressRing';
+import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish } from '@/i18n/i18n';
@@ -25,15 +26,13 @@ export function HistoryTile({ onPress }: { onPress: () => void }) {
   const { c } = useTheme();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={[styles.tile, { backgroundColor: c.card, borderColor: c.line }]}>
-      <View style={[styles.tileIcon, { backgroundColor: c.soft }]}>
-        <CalendarIcon color={c.ink} size={22} />
-      </View>
+      <ProgressRing />
       <View style={{ flex: 1 }}>
         <Txt size={18} weight={700} color={c.ink}>
           {HIF.history()}
         </Txt>
         <Txt size={13} color={c.meta}>
-          {HIF.pastDays()}
+          {HIF.pastDaysProgress()}
         </Txt>
       </View>
       <Txt size={22} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>
@@ -189,7 +188,6 @@ export function HistoryScreen() {
 
 const styles = StyleSheet.create({
   tile: { flexDirection: 'row', alignItems: 'center', borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, boxShadow: '0px 10px 26px rgba(68, 55, 43, 0.10)' },
-  tileIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   root: { flex: 1, justifyContent: 'flex-end' },
   panel: { maxHeight: '80%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingTop: 18 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },

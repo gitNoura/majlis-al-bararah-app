@@ -113,7 +113,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 11b: the Arabic wording of the Hifdh pages rewritten to read as Arabic, not as a translation
 - [x] Step 11c: the Hifdh pages take the Home page's look (star background, large serif heading, warm tiles and shadows, glass bottom bar)
 - [x] Step 12a: no green surfaces (week card, Today card tint) and one font: the sans for all card text, the serif only for the page's big heading
-- [ ] Step 12b: the memorized ring is removed from the top; a ring tracking PLAN progress sits on the History tile; «what I've memorized» stays reachable (My plans, Revision card)
+- [x] Step 12b: the memorized ring is removed from the top; a ring tracking PLAN progress sits on the History tile; «what I've memorized» stays reachable (My plans, Revision card)
 - [x] Step 12c: pressing Complete turns the same card into a done state (gold, check, congratulation, undo; no Complete / play buttons); the heading goes back to «Today's plan»
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
@@ -220,3 +220,9 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 ### Notes (Step 12c: a finished card)
 - Pressing Complete on the last portion of a card turns that same card into `DoneCard` (`components/hifdh/DoneCard.tsx`): tinted gold, its icon a gold check, «ما شاء الله، أتممتَ وِردك» (revision: «…أتممتَ مراجعتك») with the portion's name under it, a line («بارك الله فيك…», or «وقفتَ في منتصفه…» when you stopped partway) and a small «Undo» that puts the portions back. The Complete and Listen buttons are gone while it is done; the confetti stays. The memorization and revision cards each finish on their own. A weekly plan has no Undo there (its week adds up).
 - The page heading is «Today's plan» again (Step 11a's in-place heading change is undone); `CongratsCard` stays deleted.
+
+
+### Step 12b notes
+- The memorized ring is gone from the top. A gold ring with a percentage now sits on the History tile (`ProgressRing`, `plan.planProgress()`): weekly plan = this week's units done / quota; memorizing plan = days done / all its days; revision plan = the current round; averaged over plans running today (shows – with no plan).
+- «What I've memorized» stays reachable: first tile of My plans, and the button of the Revision card while nothing is memorized (`openMemorized` in HifProvider).
+- Not run on a device.

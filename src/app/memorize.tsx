@@ -84,7 +84,7 @@ function Content({
         </ScrollView>
       ) : (
         <ScrollView contentContainerStyle={{ ...pad, paddingBottom: pad.paddingBottom + TABS_HEIGHT }}>
-          <PlanSummary onOpenMemorized={() => (plan.markMemorizedAsked(), go('memorized'))} />
+          <PlanSummary />
           <TodayCard />
           <RevisionCard />
           <HistoryTile onPress={() => go('history')} />
@@ -148,7 +148,7 @@ function MemorizePage() {
         </Txt>
       )}
       {load === 'ready' && (
-        <HifProvider onStartPlan={startPlan} onListen={openListen}>
+        <HifProvider onStartPlan={startPlan} onListen={openListen} onMemorized={() => (plan.markMemorizedAsked(), setView('memorized'))}>
           <Content view={view} setup={setup} go={setView} open={open} exit={exit} listenAt={listenAt} />
         </HifProvider>
       )}

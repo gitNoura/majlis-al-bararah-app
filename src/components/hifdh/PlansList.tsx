@@ -7,6 +7,7 @@ import { useHif } from '@/components/hifdh/HifProvider';
 import { PrimaryButton, SecondaryButton } from '@/components/hifdh/Section';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
+import { isEnglish } from '@/i18n/i18n';
 import * as core from '@/lib/hifdh/core';
 import { kindOf, paceText, rangeLabel } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
@@ -15,7 +16,7 @@ import { useTheme } from '@/theme/theme';
 
 export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onAdd: () => void }) {
   const { c } = useTheme();
-  const { refresh } = useHif(); // also redraws the list whenever `rev` changes
+  const { refresh, openMemorized } = useHif(); // also redraws the list whenever `rev` changes
   const plans = plan.get().plans as { id: string; type: string; range: number[][] | null }[];
 
   const confirmDelete = (id: string) =>
@@ -33,6 +34,19 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
 
   return (
     <View style={{ gap: 12 }}>
+      <Pressable onPress={openMemorized} accessibilityRole="button" style={[styles.card, { backgroundColor: c.card, borderColor: c.line, flexDirection: 'row', alignItems: 'center', gap: 12 }]}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Txt size={17} weight={700} color={c.ink}>
+            {HIF.memorizedTitle()}
+          </Txt>
+          <Txt size={13} color={c.meta}>
+            {HIF.editMemorized()}
+          </Txt>
+        </View>
+        <Txt size={22} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>
+          ›
+        </Txt>
+      </Pressable>
       {plans.length === 0 && (
         <Txt size={14.5} center color={c.meta} style={{ paddingVertical: 12 }}>
           {HIF.noPlans()}

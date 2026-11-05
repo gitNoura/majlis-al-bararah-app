@@ -46,6 +46,44 @@ export const memorizedCount = () => state.ledger.reduce((n, [a, b]) => n + b - a
 // What the ring shows: memorized ayat out of all ayat. The one place that decides how it is counted.
 export const ringPercent = () => Math.round(core.ringFraction(memorizedCount(), U?.N ?? TOTAL_AYAT) * 100);
 
+// How far the reader is through their plans, 0..1 (null with no plan): a weekly plan counts this week's units,
+// a memorizing plan its days done out of all its days, a revision plan the current round. Averaged over the
+// plans running today.
+export function planProgress() {
+  const day = today();
+  const cx = core.ctxOf(state, U);
+  const parts = [];
+  for (const p of state.plans) {
+    if (day < p.start || core.isPaused(p, day)) continue;
+    if (p.period === 'week') {
+      const r = core.weekRow(p, cx, day);
+      if (r && r.quota) parts.push(Math.min(1, r.done / r.quota));
+      continue;
+    }
+    let total = 0;
+    let done = 0;
+    if (p.type === 'revise') {
+      let cycle = null;
+      for (const row of core.walkDaily(p, cx)) {
+        if (row.day <= day && row.cycle !== cycle) {
+          cycle = row.cycle; // a new round began on or before today: count from its first day
+          total = 0;
+          done = 0;
+        } else if (row.cycle !== cycle) break; // the next round starts after today
+        total++;
+        if (row.status === 'done' || row.status === 'partial') done++;
+      }
+    } else {
+      for (const row of core.walkDaily(p, cx)) {
+        total++;
+        if (row.status === 'done' || row.status === 'partial') done++;
+      }
+    }
+    if (total) parts.push(done / total);
+  }
+  return parts.length ? parts.reduce((a, b) => a + b, 0) / parts.length : null;
+}
+
 // For the profile page, without loading the ayah table: the same figure as a fraction.
 export function savedFraction() {
   const s = readJSON(KEY);
