@@ -112,6 +112,9 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 11a: finishing a portion changes the same card (no extra congratulation box, no extra pop-up box)
 - [x] Step 11b: the Arabic wording of the Hifdh pages rewritten to read as Arabic, not as a translation
 - [x] Step 11c: the Hifdh pages take the Home page's look (star background, large serif heading, warm tiles and shadows, glass bottom bar)
+- [ ] Step 12a: no green surfaces (week card, Today card tint) and one font: the sans for all card text, the serif only for the page's big heading
+- [ ] Step 12b: the memorized ring is removed from the top; a ring tracking PLAN progress sits on the History tile; «what I've memorized» stays reachable (My plans, Revision card)
+- [ ] Step 12c: pressing Complete turns the same card into a done state (gold, check, congratulation, undo; no Complete / play buttons); the heading goes back to «Today's plan»
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
