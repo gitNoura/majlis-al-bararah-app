@@ -11,18 +11,14 @@ import { isEnglish } from '@/i18n/i18n';
 import { HOME } from '@/i18n/home';
 import { useTheme } from '@/theme/theme';
 
-export function HifHeader({ title, subtitle, big, onBack, noBack }: { title: string; subtitle?: string; big?: boolean; onBack?: () => void; noBack?: boolean }) {
+export function HifHeader({ title, subtitle, big, onBack }: { title: string; subtitle?: string; big?: boolean; onBack?: () => void }) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.head, { paddingTop: insets.top + 6 }]}>
-      {noBack ? (
-        <View style={{ height: 12 }} /> // the plan questions step back with «Previous» at the bottom instead
-      ) : (
-        <Pressable onPress={onBack ?? (() => router.back())} hitSlop={10} style={styles.back} accessibilityRole="button" accessibilityLabel={HOME.back()}>
-          <BackIcon color={c.ink} rtl={!isEnglish} />
-        </Pressable>
-      )}
+      <Pressable onPress={onBack ?? (() => router.back())} hitSlop={10} style={styles.back} accessibilityRole="button" accessibilityLabel={HOME.back()}>
+        <BackIcon color={c.ink} rtl={!isEnglish} />
+      </Pressable>
       <View style={styles.text}>
         <Txt size={big || subtitle ? 32 : 26} weight={800} color={c.ink} lineHeight={big || subtitle ? 46 : 38} numberOfLines={1}>
           {title}

@@ -87,13 +87,15 @@ export function PrimaryButton({ label, onPress, disabled }: { label: string; onP
   );
 }
 
-export function SecondaryButton({ label, onPress }: { label: string; onPress: () => void }) {
+export function SecondaryButton({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
   const { c } = useTheme();
   return (
     <Pressable
       onPress={onPress}
+      disabled={disabled}
       accessibilityRole="button"
-      style={[styles.btn, { borderWidth: 1.5, borderColor: c.chosenLine, backgroundColor: 'transparent' }]}
+      accessibilityState={{ disabled: !!disabled }}
+      style={[styles.btn, { borderWidth: 1.5, borderColor: c.chosenLine, backgroundColor: 'transparent', opacity: disabled ? 0.4 : 1 }]}
     >
       <Txt size={16} weight={700} color={c.ink}>
         {label}

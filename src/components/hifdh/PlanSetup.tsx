@@ -1,8 +1,8 @@
 // Plan setup and edit (paceHTML / editHTML / savePace of the website's hifz.js). A new plan is a short run of
 // questions (what to do, what you know the first time, scope, how much a week, which days - or the finish date
 // and then the days), then the summary, which is not a question; editing is one page with every choice, pause
-// and delete under Save. Previous / Next at the bottom step through the questions (the phone's back button does
-// too); the plan is kept per day: the week's amount is shared over the days chosen.
+// and delete under Save. Previous / Next at the bottom move between the questions only (the arrow at the top
+// leaves the setup); the plan is kept per day: the week's amount is shared over the days chosen.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { useEffect, useState, type ReactNode } from 'react';
 import { Alert, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
@@ -170,11 +170,11 @@ function DayRow({ on, text, last, onPress }: { on: boolean; text: string; last?:
 }
 
 // The bottom of every question: Previous and Next side by side
-function NavFoot({ onPrev, onNext, nextLabel, nextDisabled }: { onPrev: () => void; onNext: () => void; nextLabel?: string; nextDisabled?: boolean }) {
+function NavFoot({ onPrev, prevDisabled, onNext, nextLabel, nextDisabled }: { onPrev: () => void; prevDisabled?: boolean; onNext: () => void; nextLabel?: string; nextDisabled?: boolean }) {
   return (
     <View style={styles.two}>
       <View style={{ flex: 1 }}>
-        <SecondaryButton label={HIF.previous()} onPress={onPrev} />
+        <SecondaryButton label={HIF.previous()} onPress={onPrev} disabled={prevDisabled} />
       </View>
       <View style={{ flex: 1 }}>
         <PrimaryButton label={nextLabel ?? HIF.next()} onPress={onNext} disabled={nextDisabled} />
@@ -223,9 +223,11 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   const keys = stepKeys(pace);
   const key = keys[pace.step];
 
-  const back = () => (!editing && pace.step > pace.first ? patch({ step: pace.step - 1 }) : onExit());
+  // the arrow (and the phone's back button) leave the setup; «Previous» only moves between the questions
+  const leave = () => onExit();
+  const prev = () => patch({ step: Math.max(pace.first, pace.step - 1) });
   useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => (back(), true));
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => (leave(), true));
     return () => sub.remove();
   });
 
@@ -455,7 +457,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   // ----- the questions -----
 
   const question = () => {
-    const next = (label?: string, disabled = false, onPress: () => void = () => goStep(pace.step + 1)) => <NavFoot onPrev={back} onNext={onPress} nextLabel={label} nextDisabled={disabled} />;
+    const next = (label?: string, disabled = false, onPress: () => void = () => goStep(pace.step + 1)) => <NavFoot onPrev={prev} prevDisabled={pace.step <= pace.first} onNext={onPress} nextLabel={label} nextDisabled={disabled} />;
     if (key === 'type') {
       return {
         body: (
@@ -581,7 +583,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
 
   return (
     <View style={{ flex: 1 }}>
-      <HifHeader title={editing ? HIF.editPlan() : HIF.newPlan()} onBack={back} noBack={!editing} />
+      <HifHeader title={editing ? HIF.editPlan() : HIF.newPlan()} onBack={leave} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView key={editing ? 'edit' : key} contentContainerStyle={{ padding: 16, paddingBottom: 24, gap: 14 }} keyboardShouldPersistTaps="handled">
           {!editing && i >= 0 && (
