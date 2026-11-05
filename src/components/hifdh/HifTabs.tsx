@@ -1,5 +1,6 @@
-// The bottom tabs of the Plan screen (tabsHTML of the website): Listen · My plans · Recite, a floating dock
-// that always reads left to right, as on the web. «Recite» says «coming soon», as it does on the web.
+// The bottom bar of the Plan screen (tabsHTML of the website): Listen · My plans · Recite. It is the Quran reading
+// page's own bar (src/app/quran.tsx): full width along the bottom edge, each button an icon over its name, on the
+// panel colour with a hairline above. «Recite» says «coming soon», as it does on the web.
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,10 +9,9 @@ import { MicIcon, NotebookIcon, PlayIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { HOME } from '@/i18n/home';
-import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/theme';
 
-export const TABS_HEIGHT = 48 + 12; // the dock's height and its gap above the bottom edge (add the inset)
+export const TABS_HEIGHT = 62; // the bar's height above the phone's own bottom edge (add the inset), as the Quran's BAR_H
 
 export function HifTabs({ onPlans, onListen, onRecite }: { onPlans: () => void; onListen: () => void; onRecite: () => void }) {
   const { c } = useTheme();
@@ -22,21 +22,19 @@ export function HifTabs({ onPlans, onListen, onRecite }: { onPlans: () => void; 
     { key: 'test', label: HIF.tabRecite(), Icon: MicIcon, onPress: onRecite },
   ];
   return (
-    <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, styles.wrap, { paddingBottom: insets.bottom + 12 }]}>
-      <View
-        accessibilityRole="tablist"
-        accessibilityLabel={HIF.tabsLabel()}
-        style={[styles.dock, { backgroundColor: c.card, borderColor: c.line }]}
-      >
-        {tabs.map(({ key, label, Icon, onPress }) => (
-          <Pressable key={key} onPress={onPress} accessibilityRole="tab" accessibilityLabel={label} style={styles.tab}>
-            <Icon color={c.ink} size={23} strokeWidth={1.8} />
-            <Txt size={11} weight={700} color={c.ink} numberOfLines={1}>
-              {label}
-            </Txt>
-          </Pressable>
-        ))}
-      </View>
+    <View
+      accessibilityRole="tablist"
+      accessibilityLabel={HIF.tabsLabel()}
+      style={[styles.bar, { height: TABS_HEIGHT + insets.bottom, paddingBottom: insets.bottom, backgroundColor: c.panel, borderTopColor: c.line }]}
+    >
+      {tabs.map(({ key, label, Icon, onPress }) => (
+        <Pressable key={key} onPress={onPress} accessibilityRole="tab" accessibilityLabel={label} style={({ pressed }) => [styles.btn, pressed && { opacity: 0.55 }]}>
+          <Icon color={c.ink} size={22} />
+          <Txt size={12.5} weight={500} color={c.tabInk} numberOfLines={1}>
+            {label}
+          </Txt>
+        </Pressable>
+      ))}
     </View>
   );
 }
@@ -48,16 +46,6 @@ export function useReciteSoon() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { justifyContent: 'flex-end', alignItems: 'center' },
-  dock: {
-    flexDirection: 'row',
-    direction: 'ltr',
-    gap: 2,
-    padding: 4,
-    minWidth: 280,
-    borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
-    boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
-  },
-  tab: { flex: 1, height: 48, borderRadius: radius.button * 2, alignItems: 'center', justifyContent: 'center', gap: 2 },
+  bar: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', paddingHorizontal: 4, borderTopWidth: StyleSheet.hairlineWidth },
+  btn: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4 },
 });

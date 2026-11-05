@@ -105,7 +105,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 7a: Listen settings sheet: the page's top bar (surah name, index button) still showed through it
 - [x] Step 7b: first-time clarity (the Welcome screen it first added was REMOVED in Step 8; only the card subtitles stay)
 - [x] Step 8: undo Step 7b's Welcome screen (not wanted) and redesign the SAME Plan page: clearer and more modern (tinted cards with icons, clearer week card and ring, clearer Complete buttons, a one-line intro when there is no plan)
-- [ ] Step 9: the Plan page's bottom tabs (Listen / My plans / Recite) become a full-width bar like the Quran reading page's; the floating dock is removed
+- [x] Step 9: the Plan page's bottom tabs (Listen / My plans / Recite) become a full-width bar like the Quran reading page's; the floating dock is removed
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
@@ -180,3 +180,7 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - Look: «Your week» is now the page's one bold element, a forest-green card (gold ticks for days done, a white ring for today, white text); the other cards have larger corners (24) and a soft shadow. `Section` takes `icon` and `tone`: Today and Ahead are tinted green (as the web's green band), Revision gold (the web's yellow band), each with a round icon (book / play / clock) and its one-line subtitle («What to memorize today», «What to revise so it stays with you»). The memorized ring is bigger (72). The History tile has a clock icon.
 - Clearer: the listen button on a portion is a play icon on a soft round (it was a book icon); under the portions of today a quiet line says «Press and hold to choose where you stopped» while something is still to do (the hold gesture was hidden before); with no plan yet a one-line intro sits above the week card (`planIntro`: «Set a plan and this page shows each day what to memorize and what to revise.»).
 - Behaviour and data are unchanged; only styles, icons and two small hints. Not run on a device from this sandbox (tsc and lint are clean).
+
+### Notes (Step 9: the bottom bar)
+- `HifTabs` is now the Quran reading page's bar (`BAR_H` 62 + the bottom inset, `c.panel`, a hairline `c.line` above, icon over name in `c.tabInk`, a press dims it) instead of the floating rounded dock; it follows the language's direction like the Quran bar (the web's dock was always left to right). The plan page's scroll leaves room for it (`TABS_HEIGHT` = 62).
+- Left as it was: Listen's own player pill (it is the web's Listen bar, not these tabs).
