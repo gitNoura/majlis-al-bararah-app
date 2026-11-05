@@ -44,10 +44,10 @@ export const dark: Palette = {
   screenEnd: '#1b1e1c',
   stars: '#c5a15a',
   line: 'rgba(255, 255, 255, 0.1)',
-  ink: '#ece3cc',
-  text: '#ddd3bb',
+  ink: '#ffffff', // titles, names, icons: white at night (gold for the quiet words)
+  text: '#f2f2f0',
   meta: '#c2a971',
-  tabInk: '#cdbf9f',
+  tabInk: '#e8e8e6',
   gold: '#c5a15a',
   goldStrong: '#d9bd84',
   brown: '#ddd3bb',

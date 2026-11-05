@@ -11,17 +11,18 @@ import { isEnglish } from '@/i18n/i18n';
 import { READER } from '@/i18n/reader';
 import { useTheme } from '@/theme/theme';
 
-export function ScreenHeader({ title, end }: { title: string; end?: ReactNode }) {
+// `ink`: the colour of its words and «back» (over a painted page)
+export function ScreenHeader({ title, end, ink }: { title: string; end?: ReactNode; ink?: string }) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.head, { paddingTop: insets.top + 6 }]}>
       <Pressable onPress={() => router.back()} hitSlop={10} style={styles.side} accessibilityLabel={READER.back()}>
-        <BackIcon color={c.ink} rtl={!isEnglish} />
+        <BackIcon color={ink ?? c.ink} rtl={!isEnglish} />
       </Pressable>
       {/* the name in the middle of the screen, whatever is at the ends */}
       <View style={[styles.title, { top: insets.top + 6 }]} pointerEvents="none">
-        <Txt size={18} weight={700} center color={c.ink} numberOfLines={1}>
+        <Txt size={18} weight={700} center color={ink ?? c.ink} numberOfLines={1}>
           {title}
         </Txt>
       </View>

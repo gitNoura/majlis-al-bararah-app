@@ -56,7 +56,8 @@ export function useToast() {
 
 // The language the hadiths are read in, apart from the app's own: a globe in the top bar; a tap opens
 // a small plain menu under it - ع (Arabic), EN (English), ع / EN (both).
-export function ReadLangButton() {
+// `ink`: the globe's colour (over a painted page)
+export function ReadLangButton({ ink }: { ink?: string } = {}) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const lang = useReadLang();
@@ -70,7 +71,7 @@ export function ReadLangButton() {
   return (
     <>
       <Pressable onPress={() => setOpen(true)} hitSlop={6} accessibilityLabel={HADITH.readIn()} style={styles.langBtn}>
-        <LanguageIcon color={c.ink} size={22} />
+        <LanguageIcon color={ink ?? c.ink} size={22} />
       </Pressable>
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={StyleSheet.absoluteFill} onPress={() => setOpen(false)} />

@@ -55,7 +55,8 @@
         {
           "locationWhenInUsePermission": "To show the prayer times and the qibla for where you are. يُستعمل موقعك لمواقيت الصلاة واتجاه القبلة."
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,

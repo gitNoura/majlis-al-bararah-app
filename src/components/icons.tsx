@@ -220,12 +220,33 @@ export function BookmarkIcon({ size = 22, color, strokeWidth = 1.7, on }: IconPr
   );
 }
 
+// like: a heart, filled once liked (`on`)
+export function HeartIcon({ size = 22, color, strokeWidth = 1.7, on }: IconProps & { on?: boolean }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={on ? color : 'none'} stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
+    </Svg>
+  );
+}
+
 // language: a globe
 export const LanguageIcon = (p: IconProps) => (
   <Line {...p}>
     <Circle cx={12} cy={12} r={8.5} />
     <Path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.2 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.2-3.6-8.5s1.2-6.1 3.6-8.5z" />
   </Line>
+);
+
+// listen: a play triangle; stop: two bars
+export const PlayIcon = (p: IconProps) => (
+  <Svg width={p.size ?? 22} height={p.size ?? 22} viewBox="0 0 24 24">
+    <Path d="M8 5.5v13l11-6.5z" fill={p.color} />
+  </Svg>
+);
+export const PauseIcon = (p: IconProps) => (
+  <Svg width={p.size ?? 22} height={p.size ?? 22} viewBox="0 0 24 24">
+    <Path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z" fill={p.color} />
+  </Svg>
 );
 
 // back to the top: a line along the top and a chevron pointing up to it
