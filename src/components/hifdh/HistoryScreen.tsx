@@ -7,14 +7,14 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { Hint, Section } from '@/components/hifdh/Section';
+import { Heading, Hint, Section, alpha, useAccent } from '@/components/hifdh/Section';
 import { ProgressRing } from '@/components/hifdh/ProgressRing';
 import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish } from '@/i18n/i18n';
 import * as core from '@/lib/hifdh/core';
-import { dayText, kindOf, portionName, rangeLabel, STATUS } from '@/lib/hifdh/labels';
+import { dayText, kindOf, num, portionName, rangeLabel, STATUS } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/theme';
@@ -22,32 +22,50 @@ import type { Row } from '@/components/hifdh/StopSheet';
 
 const PAGE = 40; // days shown at a time
 
-export function HistoryTile({ onPress }: { onPress: () => void }) {
+// «Progress» (the home of the history): a heading with a link to the history, then two cards side by side, as in the
+// reference: how far the plans are (a ring and the big value beside it) and the way into the past days.
+export function ProgressSection({ onPress }: { onPress: () => void }) {
   const { c } = useTheme();
+  const green = useAccent('green');
+  const clay = useAccent('clay');
   const p = plan.planProgress();
   const pct = p == null ? null : Math.round(p * 100);
+  const arrow = <Txt size={20} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>›</Txt>;
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={HIF.progress()} style={[styles.tile, { backgroundColor: c.card, borderColor: c.line }]}>
-      <View style={{ flex: 1, gap: 10 }}>
-        <Txt size={14} color={c.meta}>
-          {HIF.progress()}
-        </Txt>
-        <View style={styles.tileRow}>
-          <ProgressRing size={64} inside={false} />
-          <View style={{ flex: 1 }}>
-            <Txt size={26} weight={800} color={c.ink} lineHeight={30}>
-              {pct == null ? HIF.progressNone() : `${pct}%`}
-            </Txt>
-            <Txt size={13} color={c.meta}>
-              {pct == null ? HIF.progressForNow() : HIF.progressOfPlans()}
-            </Txt>
+    <View style={{ gap: 12 }}>
+      <Heading title={HIF.progress()} link={HIF.history()} onLink={onPress} />
+      <View style={styles.pair}>
+        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: c.line }]}>
+          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: alpha(green, 0.04) }]} />
+          <Txt size={13.5} color={c.meta}>
+            {HIF.progressLabel()}
+          </Txt>
+          <View style={styles.miniRow}>
+            <ProgressRing size={60} inside={false} />
+            <View style={{ flex: 1 }}>
+              <Txt size={pct == null ? 20 : 26} weight={800} color={c.ink} lineHeight={pct == null ? 28 : 32}>
+                {pct == null ? HIF.progressNone() : `${num(pct)}%`}
+              </Txt>
+              <Txt size={12.5} color={c.meta} lineHeight={18}>
+                {pct == null ? HIF.progressNoneSub() : HIF.progressOfPlans()}
+              </Txt>
+            </View>
           </View>
-        </View>
+        </Pressable>
+        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: c.line }]}>
+          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: alpha(clay, 0.04) }]} />
+          <Txt size={13.5} color={c.meta}>
+            {HIF.history()}
+          </Txt>
+          <View style={{ flex: 1, justifyContent: 'space-between', gap: 6 }}>
+            <Txt size={15} weight={600} color={c.ink} lineHeight={22}>
+              {HIF.historySub()}
+            </Txt>
+            <View style={{ alignSelf: 'flex-end' }}>{arrow}</View>
+          </View>
+        </Pressable>
       </View>
-      <Txt size={22} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>
-        ›
-      </Txt>
-    </Pressable>
+    </View>
   );
 }
 
@@ -196,8 +214,9 @@ export function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  tile: { flexDirection: 'row', alignItems: 'center', borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, boxShadow: '0px 6px 18px rgba(23, 63, 50, 0.06)' },
-  tileRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  pair: { flexDirection: 'row', gap: 12 },
+  mini: { flex: 1, minHeight: 128, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 10, overflow: 'hidden' },
+  miniRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   root: { flex: 1, justifyContent: 'flex-end' },
   panel: { maxHeight: '80%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingTop: 18 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },

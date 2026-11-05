@@ -4,6 +4,7 @@
 import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
+import { alpha, useAccent } from '@/components/hifdh/Section';
 import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
@@ -23,13 +24,15 @@ function CloseMark({ color }: { color: string }) {
 
 export function WeekCard() {
   const { c } = useTheme();
+  const green = useAccent('green');
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
     <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }]}>
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: alpha(green, 0.04) }]} />
       <View style={styles.top}>
-        <Txt size={18} weight={700} color={c.ink}>
+        <Txt serif size={18} weight={700} color={c.ink} lineHeight={30}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
@@ -68,7 +71,7 @@ export function WeekCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 14, boxShadow: '0px 6px 18px rgba(23, 63, 50, 0.06)' },
+  card: { borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 14, overflow: 'hidden' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { alignItems: 'flex-end' },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 6 },

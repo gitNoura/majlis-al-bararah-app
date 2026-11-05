@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HifHeader } from '@/components/hifdh/HifHeader';
 import { ListenScreen } from '@/components/hifdh/ListenScreen';
-import { HistoryScreen, HistoryTile } from '@/components/hifdh/HistoryScreen';
+import { HistoryScreen, ProgressSection } from '@/components/hifdh/HistoryScreen';
 import { HifTabs, TABS_HEIGHT, useReciteSoon } from '@/components/hifdh/HifTabs';
 import { HifProvider, useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { MemorizedScreen } from '@/components/hifdh/MemorizedScreen';
@@ -87,7 +87,7 @@ function Content({
           <PlanSummary />
           <TodayCard />
           <RevisionCard />
-          <HistoryTile onPress={() => go('history')} />
+          <ProgressSection onPress={() => go('history')} />
         </ScrollView>
       )}
       {view === 'home' && <HifTabs onPlans={() => go('plans')} onListen={() => listen(null)} onRecite={reciteSoon} />}

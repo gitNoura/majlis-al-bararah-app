@@ -10,7 +10,7 @@ import type { Row } from '@/components/hifdh/StopSheet';
 import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
-import { findRow, kindOf, portionName } from '@/lib/hifdh/labels';
+import { findRow, portionName } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { useTheme } from '@/theme/theme';
 
@@ -26,10 +26,11 @@ export function DoneCard({ rows, revise }: { rows: Row[]; revise?: boolean }) {
   };
   return (
     <Section
-      title={kindOf(revise ? 'revise' : 'memorize')}
+      title={revise ? HIF.cardMurajaa() : HIF.cardHifdh()}
+      accent={revise ? 'blue' : 'green'}
       subtitle={revise ? HIF.reviseDoneTitle() : HIF.congratsTitle()}
       tone="done"
-      icon={<CheckIcon color="#ffffff" size={22} strokeWidth={2.4} />}
+      icon={(color) => <CheckIcon color={color} size={22} strokeWidth={2.4} />}
     >
       <Txt size={16} weight={700} color={c.ink}>
         {names}

@@ -1,4 +1,4 @@
-// The pieces the daily cards share: a card with a small heading, a hint line, and the two button looks
+// The pieces the daily cards share: a card with a title, a hint line, and the two button looks
 // («hz-primary» and «hz-secondary» of the website).
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { ReactNode } from 'react';
@@ -9,20 +9,37 @@ import { useTheme } from '@/theme/theme';
 
 export type Tone = 'done';
 
-// A card: an optional round icon, the title with its one-line subtitle, then the content. It is the home page's tile;
-// `tone="done"` is what a finished card looks like: tinted soft green, its icon a white check on forest green.
-export function Section({ title, subtitle, icon, tone, children, style }: { title: string; subtitle?: string; icon?: ReactNode; tone?: Tone; children: ReactNode; style?: StyleProp<ViewStyle> }) {
+// The page's few accent colours: muted, one per kind of card (forest green for memorizing, slate blue for revising,
+// clay for the rest). They colour only small things (an icon chip, a faint wash, a ring), never whole cards or titles.
+export type Accent = 'green' | 'blue' | 'clay';
+const ACCENTS = {
+  light: { green: '#2f6650', blue: '#3b6f8c', clay: '#a0654c' },
+  dark: { green: '#7cc3a3', blue: '#8fbfdc', clay: '#dba68e' },
+};
+export function useAccent(accent: Accent = 'green') {
+  const { isDark } = useTheme();
+  return ACCENTS[isDark ? 'dark' : 'light'][accent];
+}
+export function alpha(hex: string, a: number) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+}
+
+// A card, as on the settings page (white, a hairline border, 20 px corners) with the home page's serif title; an
+// optional round-square icon chip in the card's accent (`icon` is given the colour to draw with). `tone="done"` is
+// a finished card: a soft green wash, its icon a white check on solid green.
+export function Section({ title, subtitle, icon, accent = 'green', tone, children, style }: { title: string; subtitle?: string; icon?: (color: string) => ReactNode; accent?: Accent; tone?: Tone; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const { c, isDark } = useTheme();
+  const a = useAccent(accent);
   const done = tone === 'done';
-  const tint = done ? (isDark ? 'rgba(111, 181, 151, 0.14)' : 'rgba(47, 102, 80, 0.09)') : null;
-  const chip = done ? c.on : c.soft;
+  const wash = alpha(a, done ? (isDark ? 0.14 : 0.09) : isDark ? 0.06 : 0.04);
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: done ? c.chosenLine : c.line }, style]}>
-      {tint && <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: tint, borderRadius: 24 }]} />}
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: done ? alpha(a, 0.45) : c.line }, style]}>
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: wash }]} />
       <View style={styles.head}>
-        {icon ? <View style={[styles.chip, { backgroundColor: chip }]}>{icon}</View> : null}
+        {icon ? <View style={[styles.chip, { backgroundColor: done ? a : alpha(a, isDark ? 0.22 : 0.13) }]}>{icon(done ? '#ffffff' : a)}</View> : null}
         <View style={{ flex: 1 }}>
-          <Txt size={18} weight={700} color={c.ink}>
+          <Txt serif size={18} weight={700} color={c.ink} lineHeight={30}>
             {title}
           </Txt>
           {subtitle ? (
@@ -33,6 +50,25 @@ export function Section({ title, subtitle, icon, tone, children, style }: { titl
         </View>
       </View>
       {children}
+    </View>
+  );
+}
+
+// A heading between the cards («Today's plan», «Progress»), with an optional quiet link at its end
+export function Heading({ title, link, onLink }: { title: string; link?: string; onLink?: () => void }) {
+  const { c } = useTheme();
+  return (
+    <View style={styles.heading}>
+      <Txt serif size={22} weight={700} color={c.ink} lineHeight={36} style={{ flexShrink: 1 }}>
+        {title}
+      </Txt>
+      {link ? (
+        <Pressable onPress={onLink} hitSlop={10} accessibilityRole="button">
+          <Txt size={14} color={c.meta}>
+            {link} ›
+          </Txt>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -79,8 +115,9 @@ export function SecondaryButton({ label, onPress }: { label: string; onPress: ()
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, boxShadow: '0px 6px 18px rgba(23, 63, 50, 0.06)' },
+  card: { borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, overflow: 'hidden' },
   head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  chip: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  chip: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
   btn: { minHeight: 48, borderRadius: radius.button, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
 });

@@ -229,9 +229,10 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 
 - [x] Step 13: the Plan page is more colourful (soft tinted cards with their own hue, coloured titles/icon chips, in the spirit of the user's reference but with the app's own palette)
 
-### Notes (Step 13: colour, finished-card title; revised)
-- The first colour pass (a different hue per card) looked childish and was replaced: the Hifdh page now has one natural palette, set in `HifTheme` (`src/theme/theme.tsx`): pale sage-white screen, quiet sage-tinted cards with a hairline border and a soft shadow, forest green as the only accent. `gold` / `goldStrong` are remapped to greens inside the page, so no yellow or beige is left on it (links like Undo, picker borders, ring, week pills).
-- `Section` has no hues any more: neutral card, `c.soft` icon chip with a forest-green icon, titles `c.ink`, second lines `c.meta`.
-- Finished card (`DoneCard`): the title stays «Hifdh» / «Murajaa»; the congratulation is the line under it, then the portions done, the blessing and Undo. It is tinted soft green with a white check on forest green (no gold).
-- «History» tile is now «Progress» (`HIF.progress`), laid out like the reference's ring card: a small label, a ring (grey track, green arc, `–` inside when there is no plan) and the big value beside it (`N%` «of your plans», or «None» «for now»). Its screen title is «Progress» too (the list of past days is unchanged).
+### Notes (Step 13: colour, look of the page; third pass)
+- The page now uses the app's own look, the settings page's: white `c.card`, hairline border, 20 px corners, no shadow, the home page's serif for card titles and headings (`Section`, `Heading` in `Section.tsx`). `HifTheme` only turns `goldStrong` (links, picker borders) forest green; the sage override of the second pass is gone.
+- Colour is small and muted: each card has an accent (`Accent`: green = Hifdh, blue = Murajaa, clay = History) that colours only its icon chip and a 4 % wash (`useAccent`, `alpha`); the ring, kept week days and buttons are forest green. Titles stay ink.
+- Cards: titles are «الحفظ» / «المراجعة» (`HIF.cardHifdh` / `cardMurajaa`, not `kindOf`, which other screens still use); the grey line under each title is gone. With no plan, a card says so («لا توجد خطة حفظ بعد» / «لا توجد خطة مراجعة بعد», with a short line on what to do and the button); revision before anything is memorized says to add what was memorized first.
+- Finished card (`DoneCard`) keeps the card's title with the congratulation under it, soft green with a white check.
+- «Progress» (`ProgressSection`, was `HistoryTile`): a heading with a «History ›» link, then two cards side by side as in the reference: the plans' ring with the big value beside it («None yet» when there is no plan), and a History card that opens the past days. The screen it opens is titled «Progress».
 - Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.

@@ -21,7 +21,7 @@ export function PlanSummary() {
       )}
       <WeekCard />
       <View style={styles.todayHead}>
-        <Txt size={24} weight={700} color={c.ink} style={{ flexShrink: 1 }}>
+        <Txt serif size={22} weight={700} color={c.ink} lineHeight={36} style={{ flexShrink: 1 }}>
           {HIF.todayPlan()}
         </Txt>
         <Txt size={13} color={c.meta}>

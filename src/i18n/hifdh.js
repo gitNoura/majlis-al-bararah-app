@@ -11,9 +11,11 @@ export const HIF = {
   myPlans: () => L('خططي', 'My plans', 'Mes plans'),
   history: () => L('سجلّ الأيام', 'History', 'Historique'),
   progress: () => L('التقدّم', 'Progress', 'Progression'),
-  progressNone: () => L('لا شيء', 'None', 'Aucune'),
-  progressForNow: () => L('حاليًا', 'for now', 'pour l’instant'),
-  progressOfPlans: () => L('من خططك', 'of your plans', 'de vos plans'),
+  progressLabel: () => L('تقدّم خططك', 'Your plans', 'Vos plans'),
+  progressNone: () => L('لا شيء بعد', 'None yet', 'Rien encore'),
+  progressNoneSub: () => L('ابدأ خطة لتظهر هنا', 'Start a plan to see it here', 'Lancez un plan pour le voir ici'),
+  progressOfPlans: () => L('من مجموع خططك', 'across your plans', 'sur l’ensemble de vos plans'),
+  historySub: () => L('تصفّح أيامك الماضية', 'Browse your past days', 'Parcourir vos jours passés'),
   memorizedTitle: () => L('محفوظي', 'What I’ve memorized', 'Ce que j’ai mémorisé'),
   loading: () => L('جارٍ التحميل…', 'Loading…', 'Chargement…'),
   loadFailed: () => L('تعذّر تحميل البيانات.', 'The data could not be loaded.', 'Les données n’ont pas pu être chargées.'),
@@ -265,6 +267,28 @@ export const HIF = {
   lsClose: () => L('إغلاق', 'Close', 'Fermer'),
   // the Plan page for someone with no plan yet, and the cards' one-line subtitles
   planIntro: () => L('ضع خطة، وسترى هنا كل يوم ما تحفظه وما تراجعه.', 'Set a plan and this page shows each day what to memorize and what to revise.', 'Créez un plan et cette page vous montre chaque jour quoi mémoriser et quoi réviser.'),
+  cardHifdh: () => L('الحفظ', 'Memorization', 'Mémorisation'),
+  cardMurajaa: () => L('المراجعة', 'Revision', 'Révision'),
+  noHifdhPlan: () => L('لا توجد خطة حفظ بعد', 'No memorization plan yet', 'Aucun plan de mémorisation pour l’instant'),
+  noHifdhPlanSub: () =>
+    L(
+      'اختر ما تريد حفظه ومقدار وِردك كل يوم، وسيظهر لك هنا.',
+      'Choose what to memorize and how much each day, and it will show up here.',
+      'Choisissez ce que vous voulez mémoriser et le rythme de chaque jour : il apparaîtra ici.',
+    ),
+  noRevPlan: () => L('لا توجد خطة مراجعة بعد', 'No revision plan yet', 'Aucun plan de révision pour l’instant'),
+  noRevPlanSub: () =>
+    L(
+      'اختر ما تراجعه من محفوظك ومقدار مراجعتك كل يوم.',
+      'Choose what to revise from what you know, and how much each day.',
+      'Choisissez ce que vous révisez parmi ce que vous savez, et le rythme de chaque jour.',
+    ),
+  noRevPlanLocked: () =>
+    L(
+      'سجّل ما حفظته أولًا، ثم تبدأ مراجعته.',
+      'Add what you’ve already memorized first, then revision opens.',
+      'Ajoutez d’abord ce que vous avez mémorisé : la révision s’ouvrira ensuite.',
+    ),
   todaySub: () => L('ما تحفظه اليوم', 'What to memorize today', 'À mémoriser aujourd’hui'),
   reviseSub: () => L('ما تراجعه ليبقى محفوظاً', 'What to revise so it stays with you', 'À réviser pour que cela reste'),
   reviseDoneTitle: () => L('ما شاء الله، أتممتَ مراجعتك', 'MashaAllah, revision done', 'Machaallah, révision terminée'),
