@@ -7,7 +7,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { Hint, Section } from '@/components/hifdh/Section';
+import { Hint, Section, useHue } from '@/components/hifdh/Section';
 import { ProgressRing } from '@/components/hifdh/ProgressRing';
 import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
@@ -24,18 +24,20 @@ const PAGE = 40; // days shown at a time
 
 export function HistoryTile({ onPress }: { onPress: () => void }) {
   const { c } = useTheme();
+  const hue = useHue('rose');
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.tile, { backgroundColor: c.card, borderColor: c.line }]}>
+    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.tile, { overflow: 'hidden', backgroundColor: c.card, borderColor: hue?.line ?? c.line }]}>
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: hue?.tint }]} />
       <ProgressRing />
       <View style={{ flex: 1 }}>
-        <Txt size={18} weight={700} color={c.ink}>
+        <Txt size={18} weight={700} color={hue?.ink ?? c.ink}>
           {HIF.history()}
         </Txt>
-        <Txt size={13} color={c.meta}>
+        <Txt size={13} color={c.text} style={{ opacity: 0.72 }}>
           {HIF.pastDaysProgress()}
         </Txt>
       </View>
-      <Txt size={22} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>
+      <Txt size={22} color={hue?.ink ?? c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>
         ›
       </Txt>
     </Pressable>

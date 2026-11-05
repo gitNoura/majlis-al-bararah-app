@@ -82,7 +82,7 @@ export function QuranTheme({ children }: { children: ReactNode }) {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-// The Hifdh page: the app's palette with the home page's own tile colour (#f5efe5, a soft tint at night), its warmer
+// The Hifdh page: the app's palette with a clean warm-white tile (#fffdf9, a soft tint at night) so each card's own hue shows, its warmer
 // second-line brown, and a soft brown tint for round icons and tracks, so the page reads as the home page's sibling.
 export function HifTheme({ children }: { children: ReactNode }) {
   const app = useContext(ThemeContext);
@@ -91,7 +91,7 @@ export function HifTheme({ children }: { children: ReactNode }) {
       ...app,
       c: app.isDark
         ? { ...app.c, card: 'rgba(255, 255, 255, 0.05)', meta: '#b9a87f', soft: 'rgba(255, 255, 255, 0.08)' }
-        : { ...app.c, card: '#f5efe5', meta: '#8f7f5d', soft: 'rgba(68, 55, 43, 0.07)' },
+        : { ...app.c, card: '#fffdf9', meta: '#8f7f5d', soft: 'rgba(68, 55, 43, 0.07)' },
     }),
     [app],
   );

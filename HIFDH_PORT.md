@@ -227,4 +227,10 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - «What I've memorized» stays reachable: first tile of My plans, and the button of the Revision card while nothing is memorized (`openMemorized` in HifProvider).
 - Not run on a device.
 
-- [ ] Step 13: the Plan page is more colourful (soft tinted cards with their own hue, coloured titles/icon chips, in the spirit of the user's reference but with the app's own palette)
+- [x] Step 13: the Plan page is more colourful (soft tinted cards with their own hue, coloured titles/icon chips, in the spirit of the user's reference but with the app's own palette)
+
+### Notes (Step 13: colour, finished-card title)
+- `Section` takes a `hue` ('green' | 'blue' | 'rose' | 'violet'; `useHue` exports the same colours for other tiles): a tint wash, a hued border, the icon chip and the title in that hue (light and night variants). Memorization = green, Revision = blue, week card = violet (kept days are green pills), History tile = rose. A finished card stays gold.
+- The Hifdh tile colour is now a clean warm white (`#fffdf9`) instead of beige `#f5efe5`, and second lines/hints use the body text at 72 % instead of the gold-brown, so the page is less yellow. Ivory screen, forest green and gold accents are unchanged.
+- Finished card (`DoneCard`): the title stays «Hifdh» / «Murajaa» (`kindOf`); the congratulation is the line under it, then the portions done, the blessing and Undo.
+- The reference picture did not reach this session, so the hues come from the checklist's description, not from the picture. Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.
