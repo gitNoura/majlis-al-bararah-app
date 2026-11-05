@@ -1,4 +1,5 @@
-// A book's kitabs (كتاب الإيمان، كتاب الصلاة…) as a table of contents, as on the website: the number, the kitab's name (in English or French its name in that language, the Arabic
+// A book's kitabs (كتاب الإيمان، كتاب الصلاة…) under the book's painting, as a table of contents in the
+// Adhkar pages' soft rows: the number in a round of the book's colour, the kitab's name (in English or French its name in that language, the Arabic
 // under it), how many hadiths and their numbers. A kitab opens its hadiths (/hadith-kitab).
 import { useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -6,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { tone, type Tone } from '@/components/AdhkarArt';
 import { Note, openHadith, useToTop } from '@/components/HadithParts';
 import { BackIcon } from '@/components/icons';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -17,6 +19,8 @@ import { serif } from '@/theme/fonts';
 import { textSide } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 
+const BOOK_TONE: Record<string, Tone> = { bukhari: 'green', muslim: 'rose', nawawi: 'indigo' };
+
 export default function HadithBook() {
   const { c, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -24,6 +28,8 @@ export default function HadithBook() {
   const [book, setBook] = useState<Book | null>(null);
   const [failed, setFailed] = useState(false);
   const list = useRef<FlatList<Kitab>>(null);
+  // the book's colour: its leather's family
+  const { wash, ink } = tone(BOOK_TONE[b] ?? 'green', isDark);
   const [onScroll, toTopButton] = useToTop(() => list.current?.scrollToOffset({ offset: 0, animated: true }));
 
   useEffect(() => {
@@ -50,6 +56,7 @@ export default function HadithBook() {
           keyExtractor={(k) => String(k.n)}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 40 }}
           ListHeaderComponent={
+            // the book's name in the top bar (as before), how many hadiths under it
             <Txt size={13.5} center color={c.meta} style={{ marginBottom: 14 }}>
               {t('ahHadithCount', book.count)}
             </Txt>
@@ -60,18 +67,15 @@ export default function HadithBook() {
             return (
               <Pressable
                 onPress={() => openHadith(b, k.n)}
-                style={({ pressed }) => [
-                  styles.row,
-                  { backgroundColor: c.card, borderColor: c.line },
-                  index === 0 && styles.first,
-                  index === book.kitabs.length - 1 && styles.last,
-                  index > 0 && { borderTopWidth: 0 },
-                  pressed && { backgroundColor: c.soft },
-                ]}
+                // no box: on the page, a thin line between two chapters
+                style={({ pressed }) => [styles.row, index > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider }, pressed && { opacity: 0.6 }]}
               >
-                <Txt size={14} weight={700} center color={c.gold} style={styles.num}>
-                  {k.n || '—'}
-                </Txt>
+                {/* its number in a soft round of the book's colour */}
+                <View style={[styles.num, { backgroundColor: wash }]}>
+                  <Txt size={13} weight={700} center color={ink}>
+                    {k.n || '—'}
+                  </Txt>
+                </View>
                 <View style={{ flex: 1, gap: 2 }}>
                   <Txt size={other ? 15.5 : 17} weight={700} color={c.ink} style={!other && { fontFamily: serif(700) }} lineHeight={other ? 22 : 30}>
                     {name}
@@ -98,8 +102,6 @@ export default function HadithBook() {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 14, borderWidth: 1 },
-  first: { borderTopLeftRadius: 18, borderTopRightRadius: 18 },
-  last: { borderBottomLeftRadius: 18, borderBottomRightRadius: 18 },
-  num: { minWidth: 28 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, paddingHorizontal: 4 },
+  num: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
 });

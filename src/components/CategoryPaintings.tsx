@@ -74,6 +74,51 @@ const Stars = ({ points }: { points: number[][] }) => (
 
 // ---------- the paintings ----------
 
+
+// a book of hadith: closed, standing a little turned on a low wooden stand, its leather in its colour with
+// a gold frame and a round gold medallion; an arched window behind, a lantern's warm light
+const bookPainting = (id: string, leather: string, dark: string) => (
+  <>
+    <Sky id={`p-book-${id}`} top="#efe2c8" mid="#f6eedd" low="#ecdcc0" />
+    <Window x={34} y={50} w={34} h={52} frame="#d8c7a4" light="#fbf3e0" />
+    <Lantern x={176} y={52} s={1.05} />
+    <Circle cx={134} cy={100} r={46} fill="#fff3d6" opacity={0.65} />
+    <Rect x={-10} y={140} width={220} height={60} fill="#cdb894" />
+    {/* the stand */}
+    <Path d="M96 142H172L166 150H102Z" fill="#8a6440" />
+    <Rect x={104} y={150} width={4} height={8} fill="#7a5638" />
+    <Rect x={160} y={150} width={4} height={8} fill="#7a5638" />
+    {/* the book: its spine, its pages' edge, its cover */}
+    <Path d="M108 140L116 64L122 66L114 142Z" fill={dark} />
+    <Path d="M156 140L162 70L166 72L160 142Z" fill="#f4ecd8" />
+    <Path d="M114 142L122 66L164 70L158 142Z" fill={leather} />
+    <Path d="M120 134L126 76L156 79L151 134Z" fill="none" stroke="#e5c27a" strokeWidth={1.4} />
+    <Path d="M123.5 130L128.5 81L152.5 83.5L148 130Z" fill="none" stroke="#e5c27a" strokeWidth={0.7} opacity={0.8} />
+    <Circle cx={138.6} cy={106} r={8} fill="none" stroke="#e5c27a" strokeWidth={1.4} />
+    <Circle cx={138.6} cy={106} r={3.4} fill="#e5c27a" />
+    {/* the ribbon */}
+    <Path d="M146 141l1 12l-3-3l-3 3l1-12z" fill="#c9a24c" />
+  </>
+);
+
+// the misbaha's 33 beads, evenly along a drop hanging from the peg (100, 26) down to the long bead
+// (100, 132): the drop's line sampled, then a bead at every 33rd of its length (the bottom left open)
+const MISBAHA_BEADS: number[][] = (() => {
+  const pts: number[][] = [];
+  for (let i = 0; i <= 400; i++) {
+    const tt = Math.PI + (i / 400) * Math.PI * 2;
+    pts.push([100 + 50 * Math.sin(tt) * Math.abs(Math.sin(tt / 2)), 26 + 53 * (1 - Math.cos(tt))]);
+  }
+  const len = [0];
+  for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const total = len[len.length - 1];
+  return Array.from({ length: 33 }, (_, b) => {
+    const want = (total * (b + 0.5)) / 33;
+    const j = len.findIndex((l) => l >= want);
+    return pts[Math.max(0, j)];
+  });
+})();
+
 const PAINTINGS: Record<string, () => ReactNode> = {
   // a cosy house with a lit door and windows, a path, a round tree
   home: () => (
@@ -750,30 +795,76 @@ const PAINTINGS: Record<string, () => ReactNode> = {
     </>
   ),
 
-  // the misbaha itself: its loop of wooden beads resting on a soft cloth, the long bead and the gold
-  // tassel, in a warm light
+  // the misbaha hanging from a wooden peg in an arched niche: its 33 amber beads falling in a drop, two
+  // gold beads parting them in threes of eleven, the long bead and the gold tassel; a lantern's warm light
   misbaha: () => (
     <>
-      <Sky id="p-misbaha" top="#f3e4c8" mid="#f8eedc" low="#efdfc2" />
-      <Circle cx={100} cy={92} r={60} fill="#fff6dc" opacity={0.7} />
-      <Ellipse cx={100} cy={148} rx={96} ry={26} fill="#2e6a4e" />
-      <Ellipse cx={100} cy={146} rx={90} ry={22} fill="#3c7c5e" />
-      <Path d="M20 146Q100 130 180 146" stroke="#e5b65c" strokeWidth={1.2} fill="none" opacity={0.7} />
-      {Array.from({ length: 24 }, (_, i) => {
-        const a = (i / 24) * Math.PI * 2 + Math.PI / 2 + 0.26;
+      <Sky id="p-misbaha" top="#efe2c8" mid="#f7eedc" low="#ecdcc0" />
+      {/* the niche, its gold edge */}
+      <Path d="M40 180V64A60 60 0 0 1 160 64V180Z" fill="#d9e2cf" />
+      <Path d="M40 180V64A60 60 0 0 1 160 64V180" fill="none" stroke="#c9a24c" strokeWidth={1.4} opacity={0.75} />
+      <Circle cx={100} cy={84} r={52} fill="#fff6dc" opacity={0.55} />
+      <Lantern x={182} y={46} s={1} />
+      {/* the peg */}
+      <Rect x={94} y={16} width={12} height={6} rx={2} fill="#7a5638" />
+      <Circle cx={100} cy={22} r={3.2} fill="#8a6440" />
+      {/* the beads */}
+      {MISBAHA_BEADS.map(([x, y], i) => {
+        const gold = i === 10 || i === 22;
         return (
           <G key={i}>
-            <Circle cx={100 + Math.cos(a) * 46} cy={96 + Math.sin(a) * 40} r={7} fill="#7a3f22" />
-            <Circle cx={98 + Math.cos(a) * 46} cy={93.5 + Math.sin(a) * 40} r={2.2} fill="#ffffff" opacity={0.35} />
+            <Circle cx={x} cy={y} r={gold ? 4.8 : 4.2} fill={gold ? '#c9a24c' : '#9a4f26'} />
+            <Circle cx={x - 1.2} cy={y - 1.3} r={1.3} fill="#ffffff" opacity={0.4} />
           </G>
         );
       })}
-      <Ellipse cx={100} cy={138} rx={7} ry={11} fill="#5e2c16" />
-      <Path d="M100 149v9" stroke="#c9a24c" strokeWidth={2} />
-      <Path d="M94 158h12l3 14h-18z" fill="#c9a24c" />
-      <Path d="M97 160v11M100 160v12M103 160v11" stroke="#b8913a" strokeWidth={0.8} />
+      {/* the long bead, the tassel */}
+      <Ellipse cx={100} cy={142} rx={4.6} ry={8} fill="#6e3518" />
+      <Ellipse cx={98.8} cy={138.5} rx={1.2} ry={2.8} fill="#ffffff" opacity={0.3} />
+      <Circle cx={100} cy={152.5} r={3} fill="#c9a24c" />
+      <Path d="M95.5 155H104.5L107.5 174H92.5Z" fill="#c9a24c" />
+      <Path d="M97.5 157V173M100 157V174M102.5 157V173" stroke="#a88a3a" strokeWidth={0.8} />
     </>
   ),
+
+  // the books of hadith: a quiet library - a tall bookcase of leather spines (green, red, blue, gold), an
+  // arched window, a lantern, and an open book on its stand before them
+  library: () => (
+    <>
+      <Sky id="p-library" top="#efe1c6" mid="#f6ecda" low="#ead9bb" />
+      <Window x={62} y={44} w={32} h={54} frame="#d8c7a4" light="#fbf3e0" />
+      <Lantern x={36} y={54} s={1} />
+      {/* the bookcase */}
+      <Rect x={106} y={30} width={88} height={114} rx={2} fill="#8a6440" />
+      <Rect x={110} y={34} width={80} height={106} fill="#6f4f32" />
+      {[0, 1, 2].map((row) => (
+        <G key={row}>
+          <Rect x={110} y={66 + row * 36} width={80} height={3} fill="#8a6440" />
+          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((k) => {
+            const cols = ['#2e6a4e', '#8a2f43', '#34569a', '#c9a24c', '#5e3a24', '#2e6a4e', '#8a2f43', '#d8c49a', '#34569a'];
+            const h = 24 + ((k * 7 + row * 5) % 7);
+            const x = 113 + k * 8.6;
+            return (
+              <G key={k}>
+                <Rect x={x} y={66 + row * 36 - h} width={7.4} height={h} rx={0.8} fill={cols[(k + row * 3) % cols.length]} />
+                <Rect x={x + 1.4} y={66 + row * 36 - h + 4} width={4.6} height={1.2} fill="#e5c27a" opacity={0.85} />
+              </G>
+            );
+          })}
+        </G>
+      ))}
+      <Rect x={-10} y={144} width={220} height={60} fill="#cdb894" />
+      {/* the open book on its stand */}
+      <Path d="M54 150L80 128M106 150L80 128" stroke="#8a6440" strokeWidth={3.4} strokeLinecap="round" />
+      <Path d="M52 130Q66 122 80 127Q94 122 108 130L105 138Q92 132 80 136Q68 132 55 138Z" fill="#f6efe0" />
+      <Path d="M80 127V136" stroke="#d8c7a0" strokeWidth={0.8} />
+      <Path d="M58 130Q68 126 76 129M84 129Q92 126 102 130" stroke="#c9b48f" strokeWidth={0.6} fill="none" />
+    </>
+  ),
+
+  book_bukhari: () => bookPainting('bukhari', '#1d5c47', '#0f3d2f'),
+  book_muslim: () => bookPainting('muslim', '#8a2f43', '#561726'),
+  book_nawawi: () => bookPainting('nawawi', '#34569a', '#1c3366'),
 
   // an open book on its stand (a rahl), a soft light over it
   other: () => (

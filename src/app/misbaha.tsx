@@ -96,18 +96,28 @@ export default function Misbaha() {
                 onPress={() => chooseWord(w.id)}
                 style={({ pressed }) => [styles.word, { backgroundColor: on ? c.on : 'rgba(255,255,255,0.75)', borderColor: on ? c.on : c.line }, pressed && { opacity: 0.7 }]}
               >
-                <Txt size={14} weight={on ? 700 : 500} center color={on ? c.onInk : ink} lineHeight={24} textBreakStrategy="simple" style={{ fontFamily: serif(on ? 700 : 400) }}>
-                  {w.ar}
-                </Txt>
+                {/* each word its own piece, wrapping between words: as one text, Android measures the
+                    phrase too short and cuts its last word (الله in «أستغفر الله») */}
+                <View style={[styles.wordLine, rtlRow()]}>
+                  {w.ar.split(' ').map((part, j) => (
+                    <Txt key={j} size={14} center color={on ? c.onInk : ink} lineHeight={24} style={{ fontFamily: serif(on ? 700 : 400), paddingHorizontal: 1.5 }}>
+                      {part}
+                    </Txt>
+                  ))}
+                </View>
               </Pressable>
             );
           })}
         </View>
 
         {/* the words being said */}
-        <Txt size={28} weight={700} center color={ink} lineHeight={48} textBreakStrategy="simple" style={{ fontFamily: serif(700), marginTop: 14, paddingHorizontal: 20, alignSelf: 'stretch' }}>
-          {word.ar}
-        </Txt>
+        <View style={[styles.wordLine, rtlRow(), { marginTop: 14, paddingHorizontal: 20, columnGap: 8 }]}>
+          {word.ar.split(' ').map((part, j) => (
+            <Txt key={j} size={28} center color={ink} lineHeight={48} style={{ fontFamily: serif(700), paddingHorizontal: 2 }}>
+              {part}
+            </Txt>
+          ))}
+        </View>
         {isEnglish && (
           <Txt size={14} center color="rgba(74,52,20,0.7)">
             {wordName(word)}
@@ -178,6 +188,7 @@ const styles = StyleSheet.create({
   // too short for Arabic with its harakat on Android (the last word fell off: «Allahu akbar»,
   // «Astaghfiru Allah») - and as tall as its words need
   word: { width: '31.5%', paddingHorizontal: 6, paddingVertical: 7, minHeight: 44, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  wordLine: { flexWrap: 'wrap', justifyContent: 'center', columnGap: 3, alignSelf: 'stretch' },
   cord: { position: 'absolute', borderWidth: 1.4, borderColor: 'rgba(122,63,34,0.45)' },
   bead: { position: 'absolute', left: 0, top: 0, width: BEAD, height: BEAD, borderRadius: BEAD / 2, boxShadow: '0px 2px 3px rgba(60,30,10,0.35)' },
   beadShine: { position: 'absolute', top: 2.5, left: 3.5, width: 4.5, height: 3.5, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.45)' },
