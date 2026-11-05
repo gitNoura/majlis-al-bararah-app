@@ -102,6 +102,8 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 3e: `importOldMarks()` skipped on purpose: it migrates the web's old Hifdh map marks (`marksIn()` from `src/hifdh/marks.js`, once, flag `hifz2ImportedMarks`) into the ledger. The app has no old map and never stored those marks (no `hifdhMarks` / `marks.js` equivalent in `src/`; `src/lib/marks.ts` is highlights and notes), so there is nothing to import. If the app ever gets the old map, port it then.
 - [x] Step 5 (follow-up): Listen looks like the web: the app's mushaf (`PageCurl`) behind it, top bar, ayah taps choose the range, lit ayah, page follows playback, player pill, settings sheet (see notes below)
 - [x] Step 6 (fixes from the phone): (a) screens did not redraw after a mark until leaving the page; (b) Listen's player pill and settings sheet layout
+- [ ] Step 7a: Listen settings sheet: the page's top bar (surah name, index button) still showed through it
+- [ ] Step 7b: first-time clarity and a more modern look: a Welcome screen when there is no plan yet (what the page does, how it works, one clear start button), short subtitles and icons on the cards
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
