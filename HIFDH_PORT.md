@@ -226,3 +226,5 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - The memorized ring is gone from the top. A gold ring with a percentage now sits on the History tile (`ProgressRing`, `plan.planProgress()`): weekly plan = this week's units done / quota; memorizing plan = days done / all its days; revision plan = the current round; averaged over plans running today (shows – with no plan).
 - «What I've memorized» stays reachable: first tile of My plans, and the button of the Revision card while nothing is memorized (`openMemorized` in HifProvider).
 - Not run on a device.
+
+- [ ] Step 13: the Plan page is more colourful (soft tinted cards with their own hue, coloured titles/icon chips, in the spirit of the user's reference but with the app's own palette)
