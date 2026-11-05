@@ -79,7 +79,7 @@ export function SecondaryButton({ label, onPress }: { label: string; onPress: ()
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, boxShadow: '0 4px 14px rgba(23, 63, 50, 0.07)' },
+  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, boxShadow: '0px 10px 26px rgba(68, 55, 43, 0.10)' },
   head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   chip: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   btn: { minHeight: 48, borderRadius: radius.button, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },

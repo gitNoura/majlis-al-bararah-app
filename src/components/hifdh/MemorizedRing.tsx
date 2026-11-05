@@ -32,7 +32,7 @@ export function MemorizedRing({ onPress }: { onPress?: () => void }) {
     >
       <View style={styles.ring} accessible accessibilityRole="image" accessibilityLabel={`${pct}%`}>
         <Svg width={SIZE} height={SIZE} viewBox="0 0 96 96">
-          <Circle cx={48} cy={48} r={R} stroke={c.soft} strokeWidth={9} fill="none" />
+          <Circle cx={48} cy={48} r={R} stroke={c.line} strokeWidth={9} fill="none" />
           <Circle
             cx={48}
             cy={48}
@@ -70,7 +70,7 @@ export function MemorizedRing({ onPress }: { onPress?: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 16, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, boxShadow: '0 4px 14px rgba(23, 63, 50, 0.07)' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 16, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, boxShadow: '0px 10px 26px rgba(68, 55, 43, 0.10)' },
   ring: { width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
   pct: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   text: { flex: 1, gap: 2 },

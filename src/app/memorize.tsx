@@ -26,8 +26,9 @@ import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { startKey } from '@/lib/hifdh/listen';
+import { dayText } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
-import { useTheme } from '@/theme/theme';
+import { HifTheme, useTheme } from '@/theme/theme';
 
 type Load = 'loading' | 'ready' | 'failed';
 // The screens inside the page: the plan (home), what I've memorized, My plans, and the plan setup / edit.
@@ -68,7 +69,7 @@ function Content({
   const pad = { padding: 16, paddingBottom: insets.bottom + 32, gap: 14 };
   return (
     <View style={{ flex: 1 }}>
-      <HifHeader title={view === 'memorized' ? HIF.memorizedTitle() : view === 'plans' ? HIF.myPlans() : view === 'history' ? HIF.history() : HIF.title()} onBack={view === 'home' ? undefined : () => go('home')} />
+      <HifHeader subtitle={view === 'home' ? dayText(plan.today()) : undefined} title={view === 'memorized' ? HIF.memorizedTitle() : view === 'plans' ? HIF.myPlans() : view === 'history' ? HIF.history() : HIF.title()} onBack={view === 'home' ? undefined : () => go('home')} />
       {view === 'memorized' ? (
         <ScrollView contentContainerStyle={pad} keyboardShouldPersistTaps="handled">
           <MemorizedScreen />
@@ -95,6 +96,14 @@ function Content({
 }
 
 export default function Memorize() {
+  return (
+    <HifTheme>
+      <MemorizePage />
+    </HifTheme>
+  );
+}
+
+function MemorizePage() {
   const { c } = useTheme();
   const [load, setLoad] = useState<Load>('loading');
   const [view, setView] = useState<Screen>('home');

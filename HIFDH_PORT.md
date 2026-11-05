@@ -111,7 +111,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 10c: «What I've memorized»: a second tap unselects (whole Quran, surahs, juz, ahzab...); tracking by ahzab instead of ayat; Arabic search text runs right to left
 - [x] Step 11a: finishing a portion changes the same card (no extra congratulation box, no extra pop-up box)
 - [x] Step 11b: the Arabic wording of the Hifdh pages rewritten to read as Arabic, not as a translation
-- [ ] Step 11c: the Hifdh pages take the Home page's look (star background, large serif heading, warm tiles and shadows, glass bottom bar)
+- [x] Step 11c: the Hifdh pages take the Home page's look (star background, large serif heading, warm tiles and shadows, glass bottom bar)
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
@@ -203,3 +203,9 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 ### Notes (Step 11b: Arabic wording)
 - Reworded in `src/i18n/hifdh.js` only the Arabic lines that read as translated (English and French untouched, keys unchanged): «تم الحفظ» / «تم حفظ خطتك» became «سُجّل…» / «سُجّلت خطتك» (on this page «حفظ» means memorizing, so «saved» was confusing), «حفظ التعديلات» became «تأكيد التعديلات», «مسح التسجيل» «إزالة العلامة», and the stiff or word-for-word lines (no plan yet, nothing today, hold hint, not done / stopped toasts, delete confirmation, no history, finish date / amount, days, nothing to revise, listen locked) were rewritten as natural Arabic. The rest was already natural and was left as it was.
 - Not changed on purpose: `nothingToReviseSub` («كل ما اخترتَه محفوظ لديك بالفعل…»). Its meaning looks inverted in all three languages (an empty revision means nothing picked is memorized yet); it came from the web and should be checked there before it is changed here.
+
+### Notes (Step 11c: the Home look)
+- The palette was already the home page's; what differed was the surfaces. New `HifTheme` (in `src/theme/theme.tsx`, next to `QuranTheme`) wraps the whole Hifdh page and swaps three colours for the home page's: `card` (#f5efe5 tile, a soft white tint at night, instead of white), `meta` (#8f7f5d, the warmer brown) and `soft` (a green tint for round icons and tracks). Every Hifdh card, row and button picks them up without edits; Listen keeps the Quran palette (`QuranTheme` inside it).
+- `HifHeader` is the home page's manner: back, then the name in large serif type at the start of the line (34 on the plan page, with the date under it as Home does under its greeting; 28 on the inner screens), instead of a small centred title.
+- Shadows are the home page's warm brown (`0px 10px 26px rgba(68, 55, 43, 0.10)`); «Your week» is a green gradient hero (like Home's big sky card). The star background was already behind the page.
+- The bottom bar stays the Quran reading page's (as asked in Step 9); the home page's own bar is a glass panel with rounded top corners, which can replace it if wanted.

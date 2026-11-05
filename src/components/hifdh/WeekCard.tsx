@@ -1,6 +1,7 @@
 // «Your week»: how many of the seven days (Monday first) had something done, and a pill for each day:
 // kept (check), today, missed since the first plan began (cross), or still to come.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
+import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -22,14 +23,14 @@ function CloseMark({ color }: { color: string }) {
 }
 
 export function WeekCard() {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
   const soft = 'rgba(255, 255, 255, 0.14)';
   const muted = 'rgba(255, 255, 255, 0.72)';
 
   return (
-    <View style={[styles.card, { backgroundColor: c.on }]}>
+    <LinearGradient colors={isDark ? ['#3a7a60', '#244f3e'] : ['#2b6b53', '#173f32']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
       <View style={styles.top}>
         <Txt serif size={21} weight={700} color={c.onInk}>
           {HIF.yourWeek()}
@@ -65,12 +66,12 @@ export function WeekCard() {
           );
         })}
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 26, padding: 18, gap: 16, boxShadow: '0 6px 18px rgba(23, 63, 50, 0.18)' },
+  card: { borderRadius: 26, padding: 18, gap: 16, boxShadow: '0px 12px 30px rgba(68, 55, 43, 0.16)' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { alignItems: 'flex-end' },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 6 },

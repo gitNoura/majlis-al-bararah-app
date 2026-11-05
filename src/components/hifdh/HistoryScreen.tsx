@@ -188,7 +188,7 @@ export function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  tile: { flexDirection: 'row', alignItems: 'center', borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, boxShadow: '0 4px 14px rgba(23, 63, 50, 0.07)' },
+  tile: { flexDirection: 'row', alignItems: 'center', borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, boxShadow: '0px 10px 26px rgba(68, 55, 43, 0.10)' },
   tileIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   root: { flex: 1, justifyContent: 'flex-end' },
   panel: { maxHeight: '80%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingTop: 18 },
