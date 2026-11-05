@@ -1,27 +1,21 @@
-// The home screen: the greeting («السلام عليكم» and the member's name, the Hijri date under it) and the
-// member's round (to log in) in the corner; the next prayer with the time left and today's five (the next
-// one lit) and the place they are for (a tap, or the «+», asks: the phone's location or a city), in the
-// colours of the sky of the moment - stars twinkling at night, clouds drifting by day and the sun where it
-// is (src/components/PrayerSky.tsx); the big card with an evening picture (src/components/HomeScene.tsx;
-// at night a lantern hangs in the sun's place) and the hadith «read and rise» with its short chain, its button going on with the
-// wird; under it the Quran's sections in tiles - the Quran, memorization, testing it, the majalis; and
-// the bar along the bottom (rounded at the top, of acrylic glass) - the qibla, the ahadith, the adhkar,
-// the calendar, and settings at the right end, in the same order in every language (as the Quran
-// page's). The words read in their language's direction: in Arabic the greeting, the card's words, the
-// tiles and the prayers (al-Fajr first) start on the right, the round and the card's picture go to the
-// left. By day the screen is nearly white (white at 90 % over the cream), at night the dark grey;
-// plain, without the other pages' stars.
+// The home screen, in the Hifdh page's look (src/theme/theme.tsx HifTheme): a near-white screen (dark grey at night),
+// white cards with a hairline, forest green as the one colour, one font. From the top: the greeting («السلام عليكم»
+// and the member's name, the Hijri date under it) with the member's round in the corner; the prayers card - the next
+// prayer with the time left, today's five (the next one lit in green) and the place they are for (a tap, or the «+»,
+// asks: the phone's location or a city); the wird card - the hadith «read and rise» with its source, its button
+// going on with the wird and the days read in a row; the Quran's sections in tiles - the Quran, memorization,
+// testing it, the majalis; and the bar along the bottom (src/components/BottomPanel.tsx) - the qibla, the ahadith,
+// the adhkar, the calendar, and settings. The words read in their language's direction: in Arabic everything
+// starts on the right, the prayers (al-Fajr first) too.
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect, type Href } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HomeScene } from '@/components/HomeScene';
+import { useGreen } from '@/components/hifdh/Section';
 import { PlaceSheet } from '@/components/PlaceSheet';
-import { PrayerSky, type Phase } from '@/components/PrayerSky';
-import { Lantern, lanternBox } from '@/components/Lantern';
+import type { Phase } from '@/components/PrayerSky';
 import { MajalisTileIcon, MemorizeTileIcon, QuranTileIcon, TestTileIcon } from '@/components/HomeTileIcons';
 import { AsrIcon, DhuhrIcon, FajrIcon, FlameIcon, IshaIcon, MaghribIcon, PinIcon, PlusIcon, SettingsIcon } from '@/components/icons';
 import { BottomPanel, PANEL_H, PanelTab } from '@/components/BottomPanel';
@@ -37,7 +31,7 @@ import * as hijri from '@/lib/hijri';
 import { clockTime, locate, nextPrayer, place, placeName, skyNow, skyTimes, times } from '@/lib/prayer';
 import { stayInQuran } from '@/lib/riwaya';
 import { readJSON, writeJSON } from '@/lib/storage';
-import { useTheme } from '@/theme/theme';
+import { HifTheme, useTheme } from '@/theme/theme';
 
 const IMG = {
   adhkar: require('@/assets/images/home/icon-adhkar.svg'),
@@ -49,8 +43,6 @@ const IMG = {
   test: require('@/assets/images/home/icon-test.svg'),
   majalis: require('@/assets/images/home/icon-majalis.svg'),
 };
-
-const LAMP_W = 40; // the wird card's lantern at night
 
 // the home screen's own colours, by day and by night
 type HomeColours = {
@@ -70,28 +62,28 @@ const HC: { light: HomeColours; dark: HomeColours } = {
   light: {
     ink: '#173f32',
     text: '#26372f',
-    meta: '#8f7f5d',
-    tile: '#f5efe5',
-    tileEdge: 'rgba(68, 55, 43, 0.08)',
+    meta: '#6b7a70',
+    tile: '#ffffff',
+    tileEdge: 'rgba(23, 63, 50, 0.10)',
     heroInk: '#173f32',
-    heroSoft: 'rgba(23, 63, 50, 0.62)',
-    button: '#173f32',
-    buttonInk: '#fffdf5',
-    streak: 'rgba(255, 253, 245, 0.78)',
-    shadow: '0px 12px 30px rgba(68, 55, 43, 0.12)',
+    heroSoft: '#6b7a70',
+    button: '#2f6650',
+    buttonInk: '#ffffff',
+    streak: 'rgba(47, 102, 80, 0.10)',
+    shadow: '0px 0px 0px rgba(0, 0, 0, 0)',
   },
   dark: {
-    ink: '#ffffff',
-    text: '#f2f2f0',
-    meta: '#b9a87f',
-    tile: 'rgba(255, 255, 255, 0.05)',
-    tileEdge: 'rgba(255, 255, 255, 0.07)',
-    heroInk: '#ffffff',
-    heroSoft: 'rgba(243, 234, 210, 0.62)',
-    button: '#ead9a6',
-    buttonInk: '#173f32',
-    streak: 'rgba(20, 30, 26, 0.55)',
-    shadow: '0px 12px 30px rgba(0, 0, 0, 0.35)',
+    ink: '#ece3cc',
+    text: '#ddd3bb',
+    meta: '#9fb2a8',
+    tile: 'rgba(255, 255, 255, 0.06)',
+    tileEdge: 'rgba(255, 255, 255, 0.10)',
+    heroInk: '#ece3cc',
+    heroSoft: '#9fb2a8',
+    button: '#2f6650',
+    buttonInk: '#ffffff',
+    streak: 'rgba(111, 181, 151, 0.16)',
+    shadow: '0px 0px 0px rgba(0, 0, 0, 0)',
   },
 };
 
@@ -189,12 +181,22 @@ const wirdStarted = () => !!readJSON('wird')?.stop?.page || !!readJSON('lastPage
 
 // ---------- the screen ----------
 
+// The home screen wears the Hifdh page's look: a near-white screen, white cards with a hairline, forest green as the
+// one colour, one font.
 export default function Home() {
+  return (
+    <HifTheme>
+      <HomeScreen />
+    </HifTheme>
+  );
+}
+
+function HomeScreen() {
   const { c, isDark } = useTheme();
+  const g = useGreen();
   const panel = <Panel hc={isDark ? HC.dark : HC.light} go={(href: Href) => () => router.push(href)} />;
   const hc = isDark ? HC.dark : HC.light;
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
   // the member signed in (their name and picture; kept on the phone, so shown at once)
   const account = useAccount();
   const member = account.profile ?? account.cached;
@@ -202,8 +204,6 @@ export default function Home() {
   const [day, setDay] = useState<Day>(prayersNow);
   const [days, setDays] = useState(() => streak());
   const [started, setStarted] = useState(wirdStarted);
-  // the wird card as tall as its words and button need; its picture fills that height
-  const [heroH, setHeroH] = useState(0);
   const [locating, setLocating] = useState(false);
 
   // after a change of narration the app opens again: straight back on the mushaf, at the same place
@@ -255,9 +255,8 @@ export default function Home() {
   const here = place();
   const hereName = here ? (placeName(here) ?? t('calMyLocation')) : null;
 
-  const heroW = Math.min(width, 560) - 32;
-  const lamp = lanternBox(LAMP_W);
-  const sky = day?.sky ?? SKIES[skyByClock()];
+  // the prayers card's colours: plain, with the green chips of the Hifdh cards (the next prayer lit in the green)
+  const sky = { ink: hc.ink, soft: hc.meta, circle: g.chip, next: g.base, nextIcon: '#ffffff' };
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
@@ -278,7 +277,7 @@ export default function Home() {
                   {HOME.salam()}
                   {LANG === 'ar' ? '،' : ','}
                 </Txt>
-                <Txt size={34} weight={700} serif color={hc.ink} lineHeight={52} numberOfLines={1}>
+                <Txt size={32} weight={800} color={hc.ink} lineHeight={46} numberOfLines={1}>
                   {member?.display_name ?? HOME.guest()}
                 </Txt>
                 <Txt size={13.5} weight={500} color={hc.meta}>
@@ -297,11 +296,10 @@ export default function Home() {
 
             {/* the next prayer and the time left to it, then today's five, the next one lit; in the sky of
                 the hour */}
-            <Pressable onPress={go('/calendar')} style={({ pressed }) => [styles.prayersBox, { boxShadow: hc.shadow }, pressed && styles.pressed]}>
-              <LinearGradient colors={sky.sky} style={styles.prayers}>
-                <PrayerSky phase={day?.phase ?? skyByClock()} sun={day?.sun ?? 0.5} />
+            <Pressable onPress={go('/calendar')} style={({ pressed }) => [styles.prayersBox, pressed && styles.pressed]}>
+              <View style={[styles.prayers, { backgroundColor: c.card, borderColor: c.line }]}>
                 <View style={styles.prayersHead}>
-                  <Txt size={17} weight={700} serif color={sky.ink} style={{ flex: 1 }} numberOfLines={1}>
+                  <Txt size={18} weight={700} color={sky.ink} style={{ flex: 1 }} numberOfLines={1}>
                     {day ? `${HOME.nextPrayer()}: ${day.next}` : locating ? HOME.locating() : HOME.setPlace()}
                   </Txt>
                   {day ? (
@@ -347,57 +345,46 @@ export default function Home() {
                     );
                   })}
                 </View>
-              </LinearGradient>
+              </View>
             </Pressable>
 
-            {/* the big card: the evening picture, the hadith, and on with the wird */}
-            <View style={[styles.hero, { width: heroW, boxShadow: hc.shadow }]} onLayout={(e) => setHeroH(e.nativeEvent.layout.height)}>
-              <View style={[StyleSheet.absoluteFill, !isEnglish && styles.mirror]}>
-                {heroH > 0 && <HomeScene night={isDark} width={heroW} height={heroH} />}
+            {/* the wird card: the hadith, and on with the wird */}
+            <View style={[styles.hero, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#eff3ee', borderColor: c.line }]}>
+              <View style={styles.heroText}>
+                <Txt size={isEnglish ? 17 : 19} weight={700} color={hc.heroInk} lineHeight={isEnglish ? 26 : 34}>
+                  {HOME.hadith()}
+                </Txt>
+                <Txt size={12} weight={500} color={hc.heroSoft} style={{ marginTop: 2 }}>
+                  {HOME.heroSource()}
+                </Txt>
               </View>
-              {/* at night a lantern hangs from the card's top in the sun's place (the far side from the words) */}
-              {isDark && (
-                <View style={{ position: 'absolute', top: -lamp.y, [isEnglish ? 'right' : 'left']: heroW * 0.16 - LAMP_W / 2 - lamp.x }}>
-                  <Lantern width={LAMP_W} moths />
-                </View>
-              )}
-              <View style={styles.heroOver}>
-                <View style={styles.heroText}>
-                  <Txt size={isEnglish ? 16.5 : 20} weight={700} serif color={hc.heroInk} lineHeight={isEnglish ? 24 : 36}>
-                    {HOME.hadith()}
+              {/* on with the wird, and the days read in a row beside it */}
+              <View style={styles.heroFoot}>
+                <Pressable
+                  onPress={go({ pathname: '/quran', params: { wird: '1' } })}
+                  style={({ pressed }) => [styles.heroGo, { backgroundColor: hc.button }, pressed && styles.pressed]}
+                >
+                  <Txt size={14} weight={700} color={hc.buttonInk}>
+                    {started ? HOME.wirdGo() : HOME.wirdStart()}
                   </Txt>
-                  <Txt size={11.5} weight={500} color={hc.heroSoft} style={{ marginTop: 2 }}>
-                    {HOME.heroSource()}
-                  </Txt>
-                </View>
-                {/* on with the wird, and the days read in a row beside it */}
-                <View style={styles.heroFoot}>
-                  <Pressable
-                    onPress={go({ pathname: '/quran', params: { wird: '1' } })}
-                    style={({ pressed }) => [styles.heroGo, { backgroundColor: hc.button }, pressed && styles.pressed]}
-                  >
-                    <Txt size={14} weight={700} color={hc.buttonInk}>
-                      {started ? HOME.wirdGo() : HOME.wirdStart()}
+                </Pressable>
+                {days > 0 && (
+                  <View style={[styles.streak, { backgroundColor: hc.streak }]}>
+                    <FlameIcon color="#e8903a" size={14} />
+                    <Txt size={12.5} weight={700} color={hc.heroInk}>
+                      {HOME.days(days)}
                     </Txt>
-                  </Pressable>
-                  {days > 0 && (
-                    <View style={[styles.streak, { backgroundColor: hc.streak }]}>
-                      <FlameIcon color="#e8903a" size={14} />
-                      <Txt size={12.5} weight={700} color={hc.heroInk}>
-                        {HOME.days(days)}
-                      </Txt>
-                    </View>
-                  )}
-                </View>
+                  </View>
+                )}
               </View>
             </View>
 
             {/* the Quran's sections */}
             <View style={styles.tiles}>
-              <Tile hc={hc} icon={<QuranTileIcon ink={hc.ink} />} label={HOME.tabQuran()} onPress={go('/quran')} />
-              <Tile hc={hc} icon={<MemorizeTileIcon ink={hc.ink} />} label={HOME.memorize()} onPress={go('/memorize')} />
-              <Tile hc={hc} icon={<TestTileIcon ink={hc.ink} />} label={HOME.testShort()} onPress={go('/test')} />
-              <Tile hc={hc} icon={<MajalisTileIcon ink={hc.ink} />} label={HOME.tabMajalis()} onPress={go('/majalis')} />
+              <Tile hc={hc} icon={<QuranTileIcon ink={g.base} />} label={HOME.tabQuran()} onPress={go('/quran')} />
+              <Tile hc={hc} icon={<MemorizeTileIcon ink={g.base} />} label={HOME.memorize()} onPress={go('/memorize')} />
+              <Tile hc={hc} icon={<TestTileIcon ink={g.base} />} label={HOME.testShort()} onPress={go('/test')} />
+              <Tile hc={hc} icon={<MajalisTileIcon ink={g.base} />} label={HOME.tabMajalis()} onPress={go('/majalis')} />
             </View>
           </View>
         </ScrollView>
@@ -461,16 +448,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 999,
   },
-  hero: { alignSelf: 'center', borderRadius: 28, overflow: 'hidden' },
-  // over the picture: the words, then the button just under them, both at the start of the line
-  heroOver: {
-    paddingTop: 22,
-    paddingBottom: 20,
-    paddingHorizontal: 22,
-    gap: 18,
-    alignItems: 'flex-start',
-  },
-  heroText: { maxWidth: '70%' },
+  hero: { marginHorizontal: 16, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, padding: 18, gap: 16 },
+  heroText: {},
   // the button at the line's start, the days in a row at its far end
   heroFoot: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   heroGo: {
@@ -490,13 +469,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: StyleSheet.hairlineWidth,
   },
-  // the box's shadow outside, its sky (clouds, stars) cut to its round corners inside
-  prayersBox: { marginHorizontal: 16, borderRadius: 26 },
+  prayersBox: { marginHorizontal: 16 },
   prayers: {
-    borderRadius: 26,
+    borderRadius: 20,
+    borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
     paddingTop: 16,
     paddingBottom: 14,
@@ -516,7 +495,6 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 253, 245, 0.92)',
   },
   five: { flexDirection: 'row', justifyContent: 'space-between' },
   prayer: { flex: 1, alignItems: 'center', gap: 4 },
@@ -527,7 +505,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mirror: { transform: [{ scaleX: -1 }] },
   // along the bottom edge, its top corners rounded
   tabImg: { width: 22, height: 22 },
 });
