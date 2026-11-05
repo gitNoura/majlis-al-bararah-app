@@ -109,7 +109,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 10a: new icons for Revision (repeat) and History (calendar)
 - [x] Step 10b: finishing today shows a congratulation card instead of tomorrow's task (the «Ahead» card is removed)
 - [x] Step 10c: «What I've memorized»: a second tap unselects (whole Quran, surahs, juz, ahzab...); tracking by ahzab instead of ayat; Arabic search text runs right to left
-- [ ] Step 11a: finishing a portion changes the same card (no extra congratulation box, no extra pop-up box)
+- [x] Step 11a: finishing a portion changes the same card (no extra congratulation box, no extra pop-up box)
 - [ ] Step 11b: the Arabic wording of the Hifdh pages rewritten to read as Arabic, not as a translation
 - [ ] Step 11c: the Hifdh pages take the Home page's look (star background, large serif heading, warm tiles and shadows, glass bottom bar)
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
@@ -196,3 +196,6 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - 10b: `AheadCard.tsx` is removed and `CongratsCard.tsx` takes its place under the Today card. It shows only when today has portions and every one is done (`isDone`); it says «MashaAllah, today is done» with the existing `allDone` line and a short blessing, and never lists tomorrow's portions. New strings `congratsTitle` / `congratsBody` (ar/en/fr); `aheadTitle`, `aheadHint`, `startTomorrow` were removed. Left as they were (now unused, harmless): `aheadRows()` in `labels.js`, the `ahead` prop and the `aheadDone` toast in `TaskRow`.
 - 10c: in `MemorizedPicker`, the «Whole Quran» button is now a toggle (a second tap while everything is in takes everything out); surahs, juz, hizb and thumun already toggled. Progress is told in ahzab: the summary reads «N/60 hizb» (a part-known hizb counts by its share, one decimal) and each juz row reads «n/2» ahzab instead of «n/16» thumun; surah rows stay in ayat since a surah is cut by ayat. The surah search field runs right to left for typed Arabic, and when it is empty in the Arabic interface.
 - Not run: `npx tsc --noEmit` and `npx expo lint` (no `node_modules` in this sandbox and package installs are off). Only a syntax-level check of the changed files was done. Run both before the next step.
+
+### Notes (Step 11a: the same card on complete)
+- Replaced the separate congratulation card (`CongratsCard`, deleted) and the «MashaAllah…» pop-up message: when every portion of today is done, the page's own «Today's plan» heading turns into «ما شاء الله، أتممتَ وِردك» with its line under it (`PlanSummary`). The confetti stays; the Complete button still turns into «Done ✓» in its own row. Nothing new is added to the page and no message pops up.

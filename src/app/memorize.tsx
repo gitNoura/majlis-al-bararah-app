@@ -11,7 +11,6 @@ import { ActivityIndicator, BackHandler, ScrollView, View } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CongratsCard } from '@/components/hifdh/CongratsCard';
 import { HifHeader } from '@/components/hifdh/HifHeader';
 import { ListenScreen } from '@/components/hifdh/ListenScreen';
 import { HistoryScreen, HistoryTile } from '@/components/hifdh/HistoryScreen';
@@ -86,7 +85,6 @@ function Content({
         <ScrollView contentContainerStyle={{ ...pad, paddingBottom: pad.paddingBottom + TABS_HEIGHT }}>
           <PlanSummary onOpenMemorized={() => (plan.markMemorizedAsked(), go('memorized'))} />
           <TodayCard />
-          <CongratsCard />
           <RevisionCard />
           <HistoryTile onPress={() => go('history')} />
         </ScrollView>

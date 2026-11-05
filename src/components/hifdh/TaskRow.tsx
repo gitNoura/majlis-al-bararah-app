@@ -59,8 +59,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
     const rows = plan.todayRows();
     if (!early && rows.length && rows.every(isDone)) {
       const { width, height } = Dimensions.get('window');
-      burst(width / 2, height * 0.4, { count: 170, spread: 1.4 }); // the whole day is done
-      toast(HIF.allDone());
+      burst(width / 2, height * 0.4, { count: 170, spread: 1.4 }); // the whole day is done: confetti only; the page's heading turns into the congratulation (PlanSummary)
     } else {
       btn.current?.measureInWindow((x: number, y: number, w: number, h: number) => burst(x + w / 2, y + h / 2));
       if (early) toast(HIF.aheadDone());
