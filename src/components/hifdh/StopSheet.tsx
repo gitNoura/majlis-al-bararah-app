@@ -43,7 +43,7 @@ export function StopSheet({ row, onPick, onClose }: { row: Row | null; onPick: (
         <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: c.dim }]} onPress={onClose} accessibilityLabel={HIF.close()} />
         <View style={[styles.panel, { backgroundColor: c.panel, paddingBottom: insets.bottom + 16 }]}>
           <View style={styles.head}>
-            <Txt serif size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
+            <Txt size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
               {HIF.stopTitle()}
             </Txt>
             <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel={HIF.close()}>
@@ -56,7 +56,7 @@ export function StopSheet({ row, onPick, onClose }: { row: Row | null; onPick: (
           <ScrollView contentContainerStyle={{ paddingBottom: 8 }}>
             {groups.map((grp, i) => (
               <View key={`${grp.surah}-${i}`} style={{ marginBottom: 10 }}>
-                <Txt serif size={17} weight={700} color={c.ink} style={{ marginBottom: 6 }}>
+                <Txt size={17} weight={700} color={c.ink} style={{ marginBottom: 6 }}>
                   {grp.surah}
                 </Txt>
                 <View style={styles.chips}>

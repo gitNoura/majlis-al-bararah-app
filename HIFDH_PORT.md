@@ -109,6 +109,12 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 10a: new icons for Revision (repeat) and History (calendar)
 - [x] Step 10b: finishing today shows a congratulation card instead of tomorrow's task (the «Ahead» card is removed)
 - [x] Step 10c: «What I've memorized»: a second tap unselects (whole Quran, surahs, juz, ahzab...); tracking by ahzab instead of ayat; Arabic search text runs right to left
+- [x] Step 11a: finishing a portion changes the same card (no extra congratulation box, no extra pop-up box)
+- [x] Step 11b: the Arabic wording of the Hifdh pages rewritten to read as Arabic, not as a translation
+- [x] Step 11c: the Hifdh pages take the Home page's look (star background, large serif heading, warm tiles and shadows, glass bottom bar)
+- [x] Step 12a: no green surfaces (week card, Today card tint) and one font: the sans for all card text, the serif only for the page's big heading
+- [x] Step 12b: the memorized ring is removed from the top; a ring tracking PLAN progress sits on the History tile; «what I've memorized» stays reachable (My plans, Revision card)
+- [x] Step 12c: pressing Complete turns the same card into a done state (gold, check, congratulation, undo; no Complete / play buttons); the heading goes back to «Today's plan»
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
@@ -193,3 +199,57 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - 10b: `AheadCard.tsx` is removed and `CongratsCard.tsx` takes its place under the Today card. It shows only when today has portions and every one is done (`isDone`); it says «MashaAllah, today is done» with the existing `allDone` line and a short blessing, and never lists tomorrow's portions. New strings `congratsTitle` / `congratsBody` (ar/en/fr); `aheadTitle`, `aheadHint`, `startTomorrow` were removed. Left as they were (now unused, harmless): `aheadRows()` in `labels.js`, the `ahead` prop and the `aheadDone` toast in `TaskRow`.
 - 10c: in `MemorizedPicker`, the «Whole Quran» button is now a toggle (a second tap while everything is in takes everything out); surahs, juz, hizb and thumun already toggled. Progress is told in ahzab: the summary reads «N/60 hizb» (a part-known hizb counts by its share, one decimal) and each juz row reads «n/2» ahzab instead of «n/16» thumun; surah rows stay in ayat since a surah is cut by ayat. The surah search field runs right to left for typed Arabic, and when it is empty in the Arabic interface.
 - Not run: `npx tsc --noEmit` and `npx expo lint` (no `node_modules` in this sandbox and package installs are off). Only a syntax-level check of the changed files was done. Run both before the next step.
+
+### Notes (Step 11a: the same card on complete)
+- Replaced the separate congratulation card (`CongratsCard`, deleted) and the «MashaAllah…» pop-up message: when every portion of today is done, the page's own «Today's plan» heading turns into «ما شاء الله، أتممتَ وِردك» with its line under it (`PlanSummary`). The confetti stays; the Complete button still turns into «Done ✓» in its own row. Nothing new is added to the page and no message pops up.
+
+### Notes (Step 11b: Arabic wording)
+- Reworded in `src/i18n/hifdh.js` only the Arabic lines that read as translated (English and French untouched, keys unchanged): «تم الحفظ» / «تم حفظ خطتك» became «سُجّل…» / «سُجّلت خطتك» (on this page «حفظ» means memorizing, so «saved» was confusing), «حفظ التعديلات» became «تأكيد التعديلات», «مسح التسجيل» «إزالة العلامة», and the stiff or word-for-word lines (no plan yet, nothing today, hold hint, not done / stopped toasts, delete confirmation, no history, finish date / amount, days, nothing to revise, listen locked) were rewritten as natural Arabic. The rest was already natural and was left as it was.
+- Not changed on purpose: `nothingToReviseSub` («كل ما اخترتَه محفوظ لديك بالفعل…»). Its meaning looks inverted in all three languages (an empty revision means nothing picked is memorized yet); it came from the web and should be checked there before it is changed here.
+
+### Notes (Step 11c: the Home look)
+- The palette was already the home page's; what differed was the surfaces. New `HifTheme` (in `src/theme/theme.tsx`, next to `QuranTheme`) wraps the whole Hifdh page and swaps three colours for the home page's: `card` (#f5efe5 tile, a soft white tint at night, instead of white), `meta` (#8f7f5d, the warmer brown) and `soft` (a green tint for round icons and tracks). Every Hifdh card, row and button picks them up without edits; Listen keeps the Quran palette (`QuranTheme` inside it).
+- `HifHeader` is the home page's manner: back, then the name in large serif type at the start of the line (34 on the plan page, with the date under it as Home does under its greeting; 28 on the inner screens), instead of a small centred title.
+- Shadows are the home page's warm brown (`0px 10px 26px rgba(68, 55, 43, 0.10)`); «Your week» is a green gradient hero (like Home's big sky card). The star background was already behind the page.
+- The bottom bar stays the Quran reading page's (as asked in Step 9); the home page's own bar is a glass panel with rounded top corners, which can replace it if wanted.
+
+### Notes (Step 12a: no green, one font)
+- Surfaces are the home page's beige tile everywhere; the green gradient on «Your week» and the green tint of the Today card are gone («Your week» is a plain tile, the days kept are gold). Round icon chips are a soft gold; `HifTheme.soft` is a brown tint (was green). The only tinted card is a finished one (`Section tone="done"`, gold, step 12c). The dark green stays only where Home uses it: text and the main buttons.
+- One font: every `serif` on the Hifdh pages was removed (cards, headings, sheets, setup, Listen's sheet); the page heading is the sans at weight 800.
+
+### Notes (Step 12c: a finished card)
+- Pressing Complete on the last portion of a card turns that same card into `DoneCard` (`components/hifdh/DoneCard.tsx`): tinted gold, its icon a gold check, «ما شاء الله، أتممتَ وِردك» (revision: «…أتممتَ مراجعتك») with the portion's name under it, a line («بارك الله فيك…», or «وقفتَ في منتصفه…» when you stopped partway) and a small «Undo» that puts the portions back. The Complete and Listen buttons are gone while it is done; the confetti stays. The memorization and revision cards each finish on their own. A weekly plan has no Undo there (its week adds up).
+- The page heading is «Today's plan» again (Step 11a's in-place heading change is undone); `CongratsCard` stays deleted.
+
+
+### Step 12b notes
+- The memorized ring is gone from the top. A gold ring with a percentage now sits on the History tile (`ProgressRing`, `plan.planProgress()`): weekly plan = this week's units done / quota; memorizing plan = days done / all its days; revision plan = the current round; averaged over plans running today (shows – with no plan).
+- «What I've memorized» stays reachable: first tile of My plans, and the button of the Revision card while nothing is memorized (`openMemorized` in HifProvider).
+- Not run on a device.
+
+- [x] Step 13: the Plan page is more colourful (soft tinted cards with their own hue, coloured titles/icon chips, in the spirit of the user's reference but with the app's own palette)
+
+### Notes (Step 13: colour, look of the page; fourth pass)
+- The page uses the settings page's card (hairline border, 20 px corners, serif title) and the app's palette; `HifTheme` only turns `goldStrong` forest green. Colour is a small system in `Section.tsx`: four muted hues of one softness (`Accent`: green = Hifdh, blue = Murajaa, violet = the week, rose = Progress), each with a `base` (wash, fills) and a deep `ink` (titles, icons); `useTints(accent)` gives a card its wash (10 %), border (30 %) and icon-chip (18 %) so every card is built alike, and a card uses only its own hue (the ring and the History card are rose, the week's kept days violet). The page behind them stays neutral; buttons stay forest green.
+- Removed: the date after the page title (`HifHeader` has `big` for the plan page's large title), the intro sentence for a new user (`planIntro` string left unused), and the visible «hold to say where you stopped» hint under the Hifdh card (`holdHint` is still the Complete button's accessibility hint; the long press itself is unchanged).
+- «Today's plan» and its date are the same size, bold, in the quiet `c.meta` colour; the «Progress» heading and its link use the same look.
+- Cards: titles «الحفظ» / «المراجعة», no line under them, clear no-plan states; finished card keeps the title with the congratulation under it. «Progress» = ring card + History card side by side.
+- Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.
+
+### Notes (Step 13: fifth pass, final look)
+- Cards are the settings page's: white `c.card`, hairline border, 20 px corners, serif title, no wash and no hued borders or titles. Colour is only a small accent in the card's hue (`Accent` / `useTints` in `Section.tsx`): the icon chip (green = Hifdh, blue = Murajaa), the Progress ring (rose) and the kept days of the week (violet).
+- A card's head holds only its icon and its title («الحفظ» / «المراجعة»); `Section` has no subtitle any more.
+- Finished card (`DoneCard`), organised below the title: the portions done (bold), a hairline rule, the congratulation (bold) with the blessing under it, and «Undo» at the end. A faint hue wash and a solid chip with a white check mark it as done.
+- Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.
+
+### Notes (Step 13: sixth pass, light and neutral with one green)
+- Look: modern, light, one colour. `HifTheme` gives a near-white screen (`#fbfcfa`), white cards with a hairline border, grey-green second lines (`meta` `#6b7a70`) and no gold or beige anywhere on the page (`gold` / `goldStrong` map to greens, so Undo, picker borders and links are green). Dark mode has its own sage-on-charcoal values.
+- One font: every title on the page uses the UI font (no `serif`). The accent system is a single forest green (`useGreen` in `Section.tsx`: chip, border and wash tints); the blue, violet and rose hues are gone, so Hifdh and Murajaa cards are identical (green icon chip; the finished card gets a faint green wash and a solid chip with a white check).
+- The week card keeps the earlier green version: a sage card (`#eff3ee`), kept days in forest green, the other days a grey-green tint.
+- Progress: ring card (green ring) and History card, both neutral.
+- Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.
+
+### Notes (Step 13: seventh pass, finished card and icons)
+- Finished card (`DoneCard`): the head keeps the card's own icon and title (the icon no longer turns into a check); the middle rule is gone. Below: the congratulation (bold) with the blessing under it, then a row with a «Memorized» / «Revised» check pill (with the portions) at the start and «Undo» at the end. A done card is washed soft green (10 %) with a green border.
+- Icons: the Hifdh card keeps the original `BookOpenIcon` (the bookmark book `HifdhIcon` was tried and dropped); `PlansIcon` (a checklist) for «My plans» in the bottom bar, in `icons.tsx`.
+- Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.

@@ -300,6 +300,18 @@ export const MicIcon = (p: IconProps) => (
   </Line>
 );
 // Hifdh «Revision» (two arrows going round) and «History» (a calendar)
+// Hifdh (a book with a bookmark) and My plans (a checklist)
+export const HifdhIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M10 2v8l3-3 3 3V2" />
+    <Path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
+  </Line>
+);
+export const PlansIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M3 17l2 2 4-4M3 7l2 2 4-4M13 6h8M13 12h8M13 18h8" />
+  </Line>
+);
 export const RepeatIcon = (p: IconProps) => (
   <Line {...p}>
     <Path d="M17 2.5l3 3-3 3M4 11V9.5a4 4 0 0 1 4-4h12M7 21.5l-3-3 3-3M20 13v1.5a4 4 0 0 1-4 4H4" />

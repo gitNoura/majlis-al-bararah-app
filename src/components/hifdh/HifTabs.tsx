@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { MicIcon, NotebookIcon, PlayIcon } from '@/components/icons';
+import { MicIcon, PlansIcon, PlayIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { HOME } from '@/i18n/home';
@@ -18,7 +18,7 @@ export function HifTabs({ onPlans, onListen, onRecite }: { onPlans: () => void; 
   const insets = useSafeAreaInsets();
   const tabs = [
     { key: 'listen', label: HIF.tabListen(), Icon: PlayIcon, onPress: onListen },
-    { key: 'plans', label: HIF.myPlans(), Icon: NotebookIcon, onPress: onPlans },
+    { key: 'plans', label: HIF.myPlans(), Icon: PlansIcon, onPress: onPlans },
     { key: 'test', label: HIF.tabRecite(), Icon: MicIcon, onPress: onRecite },
   ];
   return (

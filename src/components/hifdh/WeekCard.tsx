@@ -22,23 +22,21 @@ function CloseMark({ color }: { color: string }) {
 }
 
 export function WeekCard() {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
-  const soft = 'rgba(255, 255, 255, 0.14)';
-  const muted = 'rgba(255, 255, 255, 0.72)';
 
   return (
-    <View style={[styles.card, { backgroundColor: c.on }]}>
+    <View style={[styles.card, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#eff3ee', borderColor: c.line }]}>
       <View style={styles.top}>
-        <Txt serif size={21} weight={700} color={c.onInk}>
+        <Txt size={18} weight={700} color={c.ink}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
-          <Txt size={30} weight={800} color={c.onInk} lineHeight={34}>
+          <Txt size={26} weight={800} color={c.ink} lineHeight={30}>
             {num(n)}
           </Txt>
-          <Txt size={12} color={muted}>
+          <Txt size={12} color={c.meta}>
             {HIF.ofSevenDays()}
           </Txt>
         </View>
@@ -48,18 +46,18 @@ export function WeekCard() {
           const state: DayState = kept.has(d) ? 'on' : d === today ? 'now' : started && d >= started && d < today ? 'miss' : 'idle';
           return (
             <View key={d} style={styles.day}>
-              <Txt size={11} weight={600} center color={state === 'now' ? c.onInk : muted}>
+              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={state === 'now' ? c.ink : c.text}>
                 {weekdayName(core.weekdayOf(d))}
               </Txt>
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? c.gold : soft },
-                  state === 'now' && { borderWidth: 1.5, borderColor: c.onInk },
+                  { backgroundColor: state === 'on' ? c.on : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(23, 63, 50, 0.07)' },
+                  state === 'now' && { borderWidth: 1.5, borderColor: c.on },
                 ]}
               >
-                {state === 'on' && <CheckIcon color="#173f32" size={16} strokeWidth={2.4} />}
-                {state === 'miss' && <CloseMark color={muted} />}
+                {state === 'on' && <CheckIcon color="#ffffff" size={16} strokeWidth={2.4} />}
+                {state === 'miss' && <CloseMark color={c.meta} />}
               </View>
             </View>
           );
@@ -70,7 +68,7 @@ export function WeekCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 26, padding: 18, gap: 16, boxShadow: '0 6px 18px rgba(23, 63, 50, 0.18)' },
+  card: { borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 14, overflow: 'hidden' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { alignItems: 'flex-end' },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 6 },

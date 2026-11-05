@@ -21,6 +21,7 @@ type Hif = {
   burst: (x?: number, y?: number, o?: BurstOptions) => void;
   openStop: (row: Row | null) => void;
   startPlan: (type: PlanType) => void;
+  openMemorized: () => void; // «What I've memorized»
   listen: (row: Row | null) => void;
 };
 
@@ -36,9 +37,11 @@ export function HifProvider({
   children,
   onStartPlan,
   onListen,
+  onMemorized,
 }: {
   children: ReactNode;
   onStartPlan?: (type: PlanType) => void; // 3c: opens the plan setup
+  onMemorized?: () => void; // opens the memorized picker
   onListen?: (row: Row | null) => void; // 3b: opens Listen at a portion (null: today's first one)
 }) {
   const [rev, setRev] = useState(0);
@@ -69,9 +72,10 @@ export function HifProvider({
       burst,
       openStop: setStopRow,
       startPlan: onStartPlan ?? comingSoon,
+      openMemorized: onMemorized ?? comingSoon,
       listen: (row) => (!onListen ? comingSoon() : available().length ? onListen(row) : toast(HIF.lsWarshSoon())), // Warsh has no reciter yet
     }),
-    [rev, refresh, toast, burst, onStartPlan, onListen, comingSoon],
+    [rev, refresh, toast, burst, onStartPlan, onListen, onMemorized, comingSoon],
   );
 
   return (

@@ -11,10 +11,9 @@ import { ActivityIndicator, BackHandler, ScrollView, View } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CongratsCard } from '@/components/hifdh/CongratsCard';
 import { HifHeader } from '@/components/hifdh/HifHeader';
 import { ListenScreen } from '@/components/hifdh/ListenScreen';
-import { HistoryScreen, HistoryTile } from '@/components/hifdh/HistoryScreen';
+import { HistoryScreen, ProgressSection } from '@/components/hifdh/HistoryScreen';
 import { HifTabs, TABS_HEIGHT, useReciteSoon } from '@/components/hifdh/HifTabs';
 import { HifProvider, useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { MemorizedScreen } from '@/components/hifdh/MemorizedScreen';
@@ -29,7 +28,7 @@ import { HIF } from '@/i18n/hifdh';
 import { markToday } from '@/lib/activity';
 import { startKey } from '@/lib/hifdh/listen';
 import * as plan from '@/lib/hifdh/plan';
-import { useTheme } from '@/theme/theme';
+import { HifTheme, useTheme } from '@/theme/theme';
 
 type Load = 'loading' | 'ready' | 'failed';
 // The screens inside the page: the plan (home), what I've memorized, My plans, and the plan setup / edit.
@@ -70,7 +69,7 @@ function Content({
   const pad = { padding: 16, paddingBottom: insets.bottom + 32, gap: 14 };
   return (
     <View style={{ flex: 1 }}>
-      <HifHeader title={view === 'memorized' ? HIF.memorizedTitle() : view === 'plans' ? HIF.myPlans() : view === 'history' ? HIF.history() : HIF.title()} onBack={view === 'home' ? undefined : () => go('home')} />
+      <HifHeader big={view === 'home'} title={view === 'memorized' ? HIF.memorizedTitle() : view === 'plans' ? HIF.myPlans() : view === 'history' ? HIF.progress() : HIF.title()} onBack={view === 'home' ? undefined : () => go('home')} />
       {view === 'memorized' ? (
         <ScrollView contentContainerStyle={pad} keyboardShouldPersistTaps="handled">
           <MemorizedScreen />
@@ -85,11 +84,10 @@ function Content({
         </ScrollView>
       ) : (
         <ScrollView contentContainerStyle={{ ...pad, paddingBottom: pad.paddingBottom + TABS_HEIGHT }}>
-          <PlanSummary onOpenMemorized={() => (plan.markMemorizedAsked(), go('memorized'))} />
+          <PlanSummary />
           <TodayCard />
-          <CongratsCard />
           <RevisionCard />
-          <HistoryTile onPress={() => go('history')} />
+          <ProgressSection onPress={() => go('history')} />
         </ScrollView>
       )}
       {view === 'home' && <HifTabs onPlans={() => go('plans')} onListen={() => listen(null)} onRecite={reciteSoon} />}
@@ -98,6 +96,14 @@ function Content({
 }
 
 export default function Memorize() {
+  return (
+    <HifTheme>
+      <MemorizePage />
+    </HifTheme>
+  );
+}
+
+function MemorizePage() {
   const { c } = useTheme();
   const [load, setLoad] = useState<Load>('loading');
   const [view, setView] = useState<Screen>('home');
@@ -145,7 +151,7 @@ export default function Memorize() {
         </Txt>
       )}
       {load === 'ready' && (
-        <HifProvider onStartPlan={startPlan} onListen={openListen}>
+        <HifProvider onStartPlan={startPlan} onListen={openListen} onMemorized={() => (plan.markMemorizedAsked(), setView('memorized'))}>
           <Content view={view} setup={setup} go={setView} open={open} exit={exit} listenAt={listenAt} />
         </HifProvider>
       )}

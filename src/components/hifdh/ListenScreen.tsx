@@ -102,7 +102,7 @@ function SurahPicker({ open, onPick, onClose }: { open: boolean; onPick: (n: num
       <View style={[styles.modalBack, { backgroundColor: c.dim }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={HIF.close()} />
         <View style={[styles.modal, { backgroundColor: c.screen, paddingBottom: insets.bottom + 8 }]}>
-          <Txt serif size={18} weight={700} color={c.ink} center style={{ paddingVertical: 12 }}>
+          <Txt size={18} weight={700} color={c.ink} center style={{ paddingVertical: 12 }}>
             {HIF.lsSurah()}
           </Txt>
           <FlatList
@@ -442,7 +442,7 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetWrap} pointerEvents="box-none">
             <View style={[styles.sheet, { backgroundColor: c.panel, paddingBottom: insets.bottom + 12, maxHeight: height - insets.top - 24 }]}>
               <View style={styles.sheetHead}>
-                <Txt serif size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
+                <Txt size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
                   {HIF.lsSettings()}
                 </Txt>
                 <Pressable onPress={() => setSetOpen(false)} hitSlop={10} accessibilityRole="button" accessibilityLabel={HIF.lsClose()}>
@@ -464,7 +464,7 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
 
                 <Section title={HIF.lsEachH()}>
                   <Nums value={prefs.repeat} onChange={(n) => ls.setPref('repeat', n)} />
-                  <Txt serif size={18} weight={700} color={c.ink}>
+                  <Txt size={18} weight={700} color={c.ink}>
                     {HIF.lsRoundsH()}
                   </Txt>
                   <Nums value={prefs.rounds} onChange={(n) => ls.setPref('rounds', n)} />
@@ -476,7 +476,7 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
                       <Chip key={v} label={`${v}×`} on={prefs.speed === v} onPress={() => ls.setPref('speed', v)} />
                     ))}
                   </View>
-                  <Txt serif size={18} weight={700} color={c.ink}>
+                  <Txt size={18} weight={700} color={c.ink}>
                     {HIF.lsReciter()}
                   </Txt>
                   <View style={styles.wrapRow}>

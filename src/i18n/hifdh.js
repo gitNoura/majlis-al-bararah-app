@@ -10,6 +10,12 @@ export const HIF = {
   newPlan: () => L('خطة جديدة', 'New plan', 'Nouveau plan'),
   myPlans: () => L('خططي', 'My plans', 'Mes plans'),
   history: () => L('سجلّ الأيام', 'History', 'Historique'),
+  progress: () => L('التقدّم', 'Progress', 'Progression'),
+  progressLabel: () => L('تقدّم خططك', 'Your plans', 'Vos plans'),
+  progressNone: () => L('لا شيء بعد', 'None yet', 'Rien encore'),
+  progressNoneSub: () => L('ابدأ خطة لتظهر هنا', 'Start a plan to see it here', 'Lancez un plan pour le voir ici'),
+  progressOfPlans: () => L('من مجموع خططك', 'across your plans', 'sur l’ensemble de vos plans'),
+  historySub: () => L('تصفّح أيامك الماضية', 'Browse your past days', 'Parcourir vos jours passés'),
   memorizedTitle: () => L('محفوظي', 'What I’ve memorized', 'Ce que j’ai mémorisé'),
   loading: () => L('جارٍ التحميل…', 'Loading…', 'Chargement…'),
   loadFailed: () => L('تعذّر تحميل البيانات.', 'The data could not be loaded.', 'Les données n’ont pas pu être chargées.'),
@@ -22,22 +28,22 @@ export const HIF = {
   // summary: week, ring, links
   yourWeek: () => L('أسبوعك', 'Your week', 'Votre semaine'),
   ofSevenDays: () => L('من 7 أيام', 'of 7 days', 'sur 7 jours'),
-  memorizedRing: () => L('المحفوظ', 'Memorized', 'Mémorisé'),
   editMemorized: () => L('عدّل ما حفظتُه', 'Edit what I’ve memorized', 'Modifier ce que j’ai mémorisé'),
   historyRing: () => L('السجل', 'History', 'Historique'),
+  pastDaysProgress: () => L('الأيام الماضية وتقدّم خططك', 'Past days and your plans’ progress', 'Jours passés et avancement de vos plans'),
   pastDays: () => L('الأيام الماضية', 'Past days', 'Jours passés'),
 
   // today
   todayPlan: () => L('خطة اليوم', 'Today’s plan', 'Plan du jour'),
   noPlanYet: () =>
     L(
-      'لا توجد خطة حفظ بعد. اختر ما يناسب وقتك وسنرتّب لك الباقي.',
+      'لا خطة للحفظ بعد. اختر وتيرة تناسب يومك ونرتّب لك الباقي.',
       'No memorization plan yet. Pick a pace that fits your day and we’ll plan the rest.',
       'Pas encore de plan de mémorisation. Choisissez un rythme adapté à votre journée, on s’occupe du reste.',
     ),
   setUpPlan: () => L('ابدأ خطتي', 'Set up my plan', 'Définir mon plan'),
-  nothingToday: () => L('لا ورد لهذا اليوم.', 'Nothing is planned for today.', 'Rien de prévu aujourd’hui.'),
-  nothingTodayNext: (day) => L(`لا ورد اليوم. التالي: ${day}.`, `Nothing today. Next: ${day}.`, `Rien aujourd’hui. Prochain : ${day}.`),
+  nothingToday: () => L('لا وِرد لك اليوم.', 'Nothing is planned for today.', 'Rien de prévu aujourd’hui.'),
+  nothingTodayNext: (day) => L(`لا وِرد اليوم. موعد وِردك التالي: ${day}.`, `Nothing today. Next: ${day}.`, `Rien aujourd’hui. Prochain : ${day}.`),
   allDone: () => L('ما شاء الله، أتممتَ ورد اليوم.', 'MashaAllah, you’ve finished today’s plan.', 'MashaAllah, vous avez terminé le plan du jour.'),
   congratsTitle: () => L('ما شاء الله، أتممتَ وِردك', 'MashaAllah, today is done', 'MashaAllah, c’est fait pour aujourd’hui'),
   congratsBody: () =>
@@ -53,12 +59,12 @@ export const HIF = {
     L('ثبّت ما حفظتَه بخطة مراجعة منتظمة.', 'Keep what you know fresh with a steady revision plan.', 'Consolidez ce que vous savez avec un plan de révision régulier.'),
   reviseLocked: () =>
     L(
-      'تُفعَّل المراجعة بعد أن تضيف محفوظك.',
+      'أضف محفوظك أولاً لتبدأ المراجعة.',
       'Revision opens once you’ve memorized something.',
       'La révision s’ouvre dès que vous avez mémorisé quelque chose.',
     ),
   startRevision: () => L('ابدأ خطة مراجعة', 'Start a revision plan', 'Commencer un plan de révision'),
-  noRevision: () => L('لا مراجعة اليوم.', 'No revision planned for today.', 'Pas de révision prévue aujourd’hui.'),
+  noRevision: () => L('لا مراجعة عليك اليوم.', 'No revision planned for today.', 'Pas de révision prévue aujourd’hui.'),
 
   // a daily card
   dayOfN: (k, n) => L(`اليوم ${k} من ${n}`, `Day ${k} of ${n}`, `Jour ${k} sur ${n}`),
@@ -66,33 +72,35 @@ export const HIF = {
   weekComplete: () => L('أتممتَ ورد هذا الأسبوع', 'This week is complete', 'La semaine est complète'),
   complete: () => L('أتممتُ', 'Complete', 'Terminer'),
   holdHint: () =>
-    L('اضغط مطولاً لتحديد موضع وقوفك', 'Press and hold to choose where you stopped', 'Appui long pour choisir où vous vous êtes arrêté'),
+    L('اضغط مطوّلاً لتحدّد الآية التي وقفتَ عندها', 'Press and hold to choose where you stopped', 'Appui long pour choisir où vous vous êtes arrêté'),
   listenPortion: () => L('استمع إلى هذا الورد', 'Listen to this portion', 'Écouter cette portion'),
   undo: () => L('تراجع', 'Undo', 'Annuler'),
   notDoneToast: () =>
-    L('لم تُتمّها؛ نقلناها إلى الغد.', 'Marked not done; moved to the next day.', 'Marqué « non fait » ; reporté au jour suivant.'),
+    L('لم تُتمّه؛ أجّلناه إلى الغد.', 'Marked not done; moved to the next day.', 'Marqué « non fait » ; reporté au jour suivant.'),
   partialToast: () =>
-    L('وقفتَ في أثنائها، ونكمل الباقي غداً.', 'Stopped partway; the rest carries on to the next day.', 'Arrêté en cours de route ; la suite est reportée.'),
+    L('وقفتَ في منتصفه، ونُكمل الباقي غدًا.', 'Stopped partway; the rest carries on to the next day.', 'Arrêté en cours de route ; la suite est reportée.'),
 
   // the «where did you stop» sheet
-  stopTitle: () => L('عند أي آية توقفتَ؟', 'Where did you stop?', 'Où vous êtes-vous arrêté ?'),
+  stopTitle: () => L('عند أي آية وقفتَ؟', 'Where did you stop?', 'Où vous êtes-vous arrêté ?'),
   stopHint: () =>
     L(
       'نحسب ما حفظتَه حتى هذه الآية، ويبقى الباقي لغدٍ.',
       'Ayat up to this one are counted; the rest carries forward.',
       'Les versets jusqu’à celui-ci sont comptés ; la suite est reportée.',
     ),
-  stopSaved: () => L('تم الحفظ، ونكمل الباقي غداً.', 'Saved; the rest carries forward.', 'Enregistré ; la suite est reportée.'),
+  stopSaved: () => L('سُجّل، ونُكمل الباقي غدًا.', 'Saved; the rest carries forward.', 'Enregistré ; la suite est reportée.'),
   close: () => L('إغلاق', 'Close', 'Fermer'),
   stoppedAt: () => L('وقفتُ عند آية…', 'Stopped at an ayah…', 'Arrêté à un verset…'),
   markNotDone: () => L('لم أتمّها', 'Mark as not done', 'Marquer comme non fait'),
   markNotDoneHint: () =>
     L('ننقل هذا الورد وما بعده إلى الأيام التالية.', 'This portion and the later ones shift to the following days.', 'Cette portion et les suivantes sont décalées.'),
-  clearMark: () => L('مسح التسجيل', 'Clear the mark', 'Effacer la marque'),
+  clearMark: () => L('إزالة العلامة', 'Clear the mark', 'Effacer la marque'),
 
   // setting up or editing a plan (the questions)
-  stepOf: (i, n) => L(`السؤال ${i} من ${n}`, `Step ${i} of ${n}`, `Étape ${i} sur ${n}`),
+  stepOf: (i, n) => L(`السؤال ${i} من ${n}`, `Question ${i} of ${n}`, `Question ${i} sur ${n}`),
   continue: () => L('متابعة', 'Continue', 'Continuer'),
+  previous: () => L('السابق', 'Previous', 'Précédent'),
+  next: () => L('التالي', 'Next', 'Suivant'),
   startPlan: () => L('ابدأ خطتي', 'Start my plan', 'Commencer mon plan'),
   planReady: () => L('خطتك جاهزة', 'Your plan is ready', 'Votre plan est prêt'),
   whatToDo: () => L('بماذا تريد أن تبدأ؟', 'What would you like to do?', 'Que souhaitez-vous faire ?'),
@@ -111,12 +119,12 @@ export const HIF = {
   scopeQuestion: (revise) =>
     revise
       ? L('ماذا تريد أن تراجع؟', 'What will you revise?', 'Que voulez-vous réviser ?')
-      : L('ماذا ستحفظ الآن؟', 'What are you memorizing now?', 'Que mémorisez-vous maintenant ?'),
+      : L('ماذا تريد أن تحفظ الآن؟', 'What are you memorizing now?', 'Que mémorisez-vous maintenant ?'),
   scopeSub: () =>
     L('القرآن كله، أو أثمان تختارها.', 'The whole Quran, or only the thumun you choose.', 'Tout le Coran, ou seulement les thumun choisis.'),
   scopeSpecific: () => L('سور محددة', 'Specific surahs', 'Des sourates précises'),
   scopeSpecificSub: () => L('اختر السور أو الأجزاء', 'Choose surahs or juz', 'Choisissez sourates ou juz'),
-  nothingToRevise: () => L('لا شيء لمراجعته في هذا الاختيار.', 'Nothing to revise in this selection.', 'Rien à réviser dans cette sélection.'),
+  nothingToRevise: () => L('ليس في هذا الاختيار ما تراجعه.', 'Nothing to revise in this selection.', 'Rien à réviser dans cette sélection.'),
   nothingToReviseSub: () =>
     L(
       'كل ما اخترتَه محفوظ لديك بالفعل. ارجع واختر سوراً أخرى.',
@@ -139,19 +147,19 @@ export const HIF = {
       'Every ayah memorized is one ayah closer to your goal. Any pace, done consistently, will get you there.',
       'Chaque verset est un pas vers votre but. Tout rythme, tenu avec constance, y mène.',
     ),
-  pickDate: () => L('أريد تحديد تاريخ للانتهاء', 'I’d rather pick a finish date', 'Je préfère choisir une date de fin'),
-  pickAmount: () => L('أريد تحديد مقدار محدد', 'I’d rather set an amount', 'Je préfère fixer une quantité'),
+  pickDate: () => L('أريد تحديد تاريخ أنتهي فيه', 'I’d rather pick a finish date', 'Je préfère choisir une date de fin'),
+  pickAmount: () => L('أريد تحديد المقدار بنفسي', 'I’d rather set an amount', 'Je préfère fixer une quantité'),
   whenQuestion: () => L('متى تريد أن تنتهي؟', 'When do you want to finish?', 'Quand voulez-vous finir ?'),
   finishDate: () => L('تاريخ الانتهاء', 'Finish date', 'Date de fin'),
-  thatsAbout: () => L('أي حوالي', 'That’s about', 'Soit environ'),
+  thatsAbout: () => L('أي ما يقارب', 'That’s about', 'Soit environ'),
   daysQuestion: (revise) =>
     revise
       ? L('في أي أيام تريد أن تراجع؟', 'Which days do you want to revise?', 'Quels jours voulez-vous réviser ?')
       : L('في أي أيام تريد أن تحفظ؟', 'Which days do you want to memorize?', 'Quels jours voulez-vous mémoriser ?'),
-  daysSub: () => L('اختر الأيام التي ستظهر فيها خطتك.', 'Your plan will appear on the days you pick.', 'Votre plan apparaîtra les jours choisis.'),
+  daysSub: () => L('اختر الأيام التي تريد أن يظهر فيها وِردك.', 'Your plan will appear on the days you pick.', 'Votre plan apparaîtra les jours choisis.'),
   everyDay: () => L('كل يوم', 'Every day', 'Tous les jours'),
   pickADay: () => L('اختر يوماً واحداً على الأقل.', 'Choose at least one day.', 'Choisissez au moins un jour.'),
-  planSaved: () => L('تم حفظ خطتك.', 'Plan saved.', 'Plan enregistré.'),
+  planSaved: () => L('سُجّلت خطتك.', 'Plan saved.', 'Plan enregistré.'),
 
   // editing a plan (one page)
   covers: () => L('ما تشمله الخطة', 'What it covers', 'Ce que ça couvre'),
@@ -166,10 +174,10 @@ export const HIF = {
   resumePlan: () => L('استئناف الخطة', 'Resume plan', 'Reprendre le plan'),
   pausePlan: () => L('إيقاف الخطة مؤقتاً', 'Pause plan', 'Mettre en pause'),
   deletePlan: () => L('حذف الخطة', 'Delete plan', 'Supprimer le plan'),
-  saveChanges: () => L('حفظ التعديلات', 'Save changes', 'Enregistrer'),
+  saveChanges: () => L('تأكيد التعديلات', 'Save changes', 'Enregistrer'),
   confirmDelete: () =>
     L(
-      'حذف هذه الخطة وسجلّ جلساتها؟ (ما حفظتَه يبقى).',
+      'هل تريد حذف هذه الخطة وسجلّها؟ ما حفظتَه لن يُحذف.',
       'Delete this plan and its session history? (What you memorized stays.)',
       'Supprimer ce plan et son historique ? (Ce que vous avez mémorisé reste.)',
     ),
@@ -186,12 +194,12 @@ export const HIF = {
   // history
   noHistory: () =>
     L(
-      'لا شيء بعد. ستظهر الأيام هنا حين تضع خطة.',
+      'لا أيام هنا بعد. تظهر أيامك حين تبدأ خطة.',
       'Nothing yet. Days will appear here once you set a plan.',
       'Rien pour l’instant. Les jours apparaîtront ici dès que vous aurez un plan.',
     ),
   extraRevision: () => L('مراجعة إضافية', 'Extra revision', 'Révision en plus'),
-  older: () => L('أيام أقدم', 'Older', 'Plus ancien'),
+  older: () => L('أيام سابقة', 'Older', 'Plus ancien'),
   sessionRemoved: () => L('حُذفت الجلسة.', 'Session removed.', 'Séance supprimée.'),
 
   // what I’ve memorized
@@ -202,7 +210,7 @@ export const HIF = {
   juzPlural: () => L('الأجزاء', 'Juz', 'Juz'),
   autoSaved: () =>
     L(
-      'يُحفظ تلقائياً، وما تُتمّه من وردك يُضاف هنا.',
+      'يُسجَّل ما تختاره تلقائيًا، وما تُتمّه من وِردك يُضاف هنا.',
       'Saved as you go. Whatever you complete in your plan is added here.',
       'Enregistré automatiquement. Ce que vous terminez dans votre plan s’ajoute ici.',
     ),
@@ -253,7 +261,7 @@ export const HIF = {
   lsRoundsH: () => L('كم مرة تسمع المقطع كله؟', 'Play the whole selection', 'Écouter toute la sélection'),
   lsOptional: () => L('(اختياري)', '(optional)', '(facultatif)'),
   lsSettings: () => L('إعدادات الاستماع', 'Playback settings', 'Réglages d’écoute'),
-  lsLocked: () => L('الآيات محددة. لتغييرها اضغط ✕ أو افتح الإعدادات.', 'The ayat are set. To change them, press ✕ or open settings.', 'Les versets sont choisis. Pour les changer, appuyez sur ✕ ou ouvrez les réglages.'),
+  lsLocked: () => L('اخترتَ الآيات. لتغييرها اضغط ✕ أو افتح الإعدادات.', 'The ayat are set. To change them, press ✕ or open settings.', 'Les versets sont choisis. Pour les changer, appuyez sur ✕ ou ouvrez les réglages.'),
   lsPickMore: () => L('اضغط على آية أخرى لتشمل ما بينهما', 'tap another ayah to include everything between', 'touchez un autre verset pour inclure tout ce qui est entre'),
   lsPickShort: () => L('اضغط على آية في الصفحة', 'Tap an ayah on the page', 'Touchez un verset sur la page'),
   lsPageN: (n) => L(`صفحة ${n}`, `Page ${n}`, `Page ${n}`),
@@ -261,6 +269,32 @@ export const HIF = {
   lsClose: () => L('إغلاق', 'Close', 'Fermer'),
   // the Plan page for someone with no plan yet, and the cards' one-line subtitles
   planIntro: () => L('ضع خطة، وسترى هنا كل يوم ما تحفظه وما تراجعه.', 'Set a plan and this page shows each day what to memorize and what to revise.', 'Créez un plan et cette page vous montre chaque jour quoi mémoriser et quoi réviser.'),
+  doneMemorized: () => L('تمّ الحفظ', 'Memorized', 'Mémorisé'),
+  doneRevised: () => L('تمّت المراجعة', 'Revised', 'Révisé'),
+  cardHifdh: () => L('الحفظ', 'Memorization', 'Mémorisation'),
+  cardMurajaa: () => L('المراجعة', 'Revision', 'Révision'),
+  noHifdhPlan: () => L('لا توجد خطة حفظ بعد', 'No memorization plan yet', 'Aucun plan de mémorisation pour l’instant'),
+  noHifdhPlanSub: () =>
+    L(
+      'اختر ما تريد حفظه ومقدار وِردك كل يوم، وسيظهر لك هنا.',
+      'Choose what to memorize and how much each day, and it will show up here.',
+      'Choisissez ce que vous voulez mémoriser et le rythme de chaque jour : il apparaîtra ici.',
+    ),
+  noRevPlan: () => L('لا توجد خطة مراجعة بعد', 'No revision plan yet', 'Aucun plan de révision pour l’instant'),
+  noRevPlanSub: () =>
+    L(
+      'اختر ما تراجعه من محفوظك ومقدار مراجعتك كل يوم.',
+      'Choose what to revise from what you know, and how much each day.',
+      'Choisissez ce que vous révisez parmi ce que vous savez, et le rythme de chaque jour.',
+    ),
+  noRevPlanLocked: () =>
+    L(
+      'سجّل ما حفظته أولًا، ثم تبدأ مراجعته.',
+      'Add what you’ve already memorized first, then revision opens.',
+      'Ajoutez d’abord ce que vous avez mémorisé : la révision s’ouvrira ensuite.',
+    ),
   todaySub: () => L('ما تحفظه اليوم', 'What to memorize today', 'À mémoriser aujourd’hui'),
   reviseSub: () => L('ما تراجعه ليبقى محفوظاً', 'What to revise so it stays with you', 'À réviser pour que cela reste'),
+  reviseDoneTitle: () => L('ما شاء الله، أتممتَ مراجعتك', 'MashaAllah, revision done', 'Machaallah, révision terminée'),
+  reviseDoneBody: () => L('ما حفظتَه ازداد رسوخًا، بارك الله فيك.', 'What you know is a little firmer. Barakallahu feek.', 'Ce que vous savez est un peu plus solide. Qu’Allah vous bénisse.'),
 };

@@ -23,7 +23,7 @@ export function MemorizedScreen() {
   return (
     <View style={{ gap: 12 }}>
       <View style={{ gap: 4 }}>
-        <Txt serif size={22} weight={700} color={c.ink}>
+        <Txt size={22} weight={700} color={c.ink}>
           {HIF.memorizedQuestion()}
         </Txt>
         <Txt size={14} color={c.meta}>
