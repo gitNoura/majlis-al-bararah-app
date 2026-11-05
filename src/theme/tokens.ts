@@ -3,9 +3,9 @@
 // Tajawal for the interface (src/theme/fonts.ts).
 
 export const light = {
-  // the screen: ivory fading a little towards the bottom, faint stars over it
-  screen: '#f7f2e7',
-  screenEnd: '#f1e7d4',
+  // the screen: white (since 2026-11-05; it was ivory)
+  screen: '#ffffff',
+  screenEnd: '#ffffff',
   stars: '#c5a15a', // the stars' lines (drawn very faint)
   line: '#e8ddc7', // hairlines
   // words and controls: forest green; gold only as an accent
