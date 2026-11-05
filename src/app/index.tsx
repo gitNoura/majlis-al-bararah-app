@@ -1,21 +1,23 @@
-// The home screen, in the Hifdh page's look (src/theme/theme.tsx HifTheme): a near-white screen (dark grey at night),
-// white cards with a hairline, forest green as the one colour, one font. From the top: the greeting («السلام عليكم»
-// and the member's name, the Hijri date under it) with the member's round in the corner; the prayers card - the next
-// prayer with the time left, today's five (the next one lit in green) and the place they are for (a tap, or the «+»,
-// asks: the phone's location or a city); the wird card - the hadith «read and rise» with its source, its button
-// going on with the wird and the days read in a row; the Quran's sections in tiles - the Quran, memorization,
-// testing it, the majalis; and the bar along the bottom (src/components/BottomPanel.tsx) - the qibla, the ahadith,
-// the adhkar, the calendar, and settings. The words read in their language's direction: in Arabic everything
-// starts on the right, the prayers (al-Fajr first) too.
+// The home screen: the day's companion, in the Hifdh page's clean look (near-white screen, white cards, forest green)
+// with colour where it is fun. From the top: the greeting and the member's round; the prayers card, in the sky of the
+// moment (stars at night, clouds by day), with the next prayer, the time left and today's five; the wird card, a
+// hadith over the evening picture with the button that goes on with the wird and the days read in a row; today's
+// memorization, from the plan (what is left, how many are done, or how to begin); then the app's four sections in
+// soft-coloured tiles - the Quran, memorization, testing it, the majalis (the last two marked «soon») - and the bar
+// along the bottom (src/components/BottomPanel.tsx) with the tools: the qibla, the ahadith, the adhkar, the
+// calendar, settings.
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect, type Href } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useGreen } from '@/components/hifdh/Section';
+import { HomeScene } from '@/components/HomeScene';
+import { alpha, useGreen } from '@/components/hifdh/Section';
 import { PlaceSheet } from '@/components/PlaceSheet';
-import type { Phase } from '@/components/PrayerSky';
+import { PrayerSky, type Phase } from '@/components/PrayerSky';
+import { Lantern, lanternBox } from '@/components/Lantern';
 import { MajalisTileIcon, MemorizeTileIcon, QuranTileIcon, TestTileIcon } from '@/components/HomeTileIcons';
 import { AsrIcon, DhuhrIcon, FajrIcon, FlameIcon, IshaIcon, MaghribIcon, PinIcon, PlusIcon, SettingsIcon } from '@/components/icons';
 import { BottomPanel, PANEL_H, PanelTab } from '@/components/BottomPanel';
@@ -30,8 +32,12 @@ import { streak } from '@/lib/activity';
 import * as hijri from '@/lib/hijri';
 import { clockTime, locate, nextPrayer, place, placeName, skyNow, skyTimes, times } from '@/lib/prayer';
 import { stayInQuran } from '@/lib/riwaya';
+import { isDone, portionName } from '@/lib/hifdh/labels';
+import * as plan from '@/lib/hifdh/plan';
 import { readJSON, writeJSON } from '@/lib/storage';
 import { HifTheme, useTheme } from '@/theme/theme';
+
+const LAMP_W = 40; // the wird card's lantern at night
 
 const IMG = {
   adhkar: require('@/assets/images/home/icon-adhkar.svg'),
@@ -66,11 +72,11 @@ const HC: { light: HomeColours; dark: HomeColours } = {
     tile: '#ffffff',
     tileEdge: 'rgba(23, 63, 50, 0.10)',
     heroInk: '#173f32',
-    heroSoft: '#6b7a70',
-    button: '#2f6650',
-    buttonInk: '#ffffff',
-    streak: 'rgba(47, 102, 80, 0.10)',
-    shadow: '0px 0px 0px rgba(0, 0, 0, 0)',
+    heroSoft: 'rgba(23, 63, 50, 0.62)',
+    button: '#173f32',
+    buttonInk: '#fffdf5',
+    streak: 'rgba(255, 253, 245, 0.78)',
+    shadow: '0px 12px 30px rgba(68, 55, 43, 0.12)',
   },
   dark: {
     ink: '#ece3cc',
@@ -78,12 +84,12 @@ const HC: { light: HomeColours; dark: HomeColours } = {
     meta: '#9fb2a8',
     tile: 'rgba(255, 255, 255, 0.06)',
     tileEdge: 'rgba(255, 255, 255, 0.10)',
-    heroInk: '#ece3cc',
-    heroSoft: '#9fb2a8',
-    button: '#2f6650',
-    buttonInk: '#ffffff',
-    streak: 'rgba(111, 181, 151, 0.16)',
-    shadow: '0px 0px 0px rgba(0, 0, 0, 0)',
+    heroInk: '#f3ead2',
+    heroSoft: 'rgba(243, 234, 210, 0.62)',
+    button: '#ead9a6',
+    buttonInk: '#173f32',
+    streak: 'rgba(20, 30, 26, 0.55)',
+    shadow: '0px 12px 30px rgba(0, 0, 0, 0.35)',
   },
 };
 
@@ -204,6 +210,9 @@ function HomeScreen() {
   const [day, setDay] = useState<Day>(prayersNow);
   const [days, setDays] = useState(() => streak());
   const [started, setStarted] = useState(wirdStarted);
+  // the wird card as tall as its words and button need; its picture fills that height
+  const [heroH, setHeroH] = useState(0);
+  const { width } = useWindowDimensions();
   const [locating, setLocating] = useState(false);
 
   // after a change of narration the app opens again: straight back on the mushaf, at the same place
@@ -255,8 +264,9 @@ function HomeScreen() {
   const here = place();
   const hereName = here ? (placeName(here) ?? t('calMyLocation')) : null;
 
-  // the prayers card's colours: plain, with the green chips of the Hifdh cards (the next prayer lit in the green)
-  const sky = { ink: hc.ink, soft: hc.meta, circle: g.chip, next: g.base, nextIcon: '#ffffff' };
+  const heroW = Math.min(width, 560) - 32;
+  const lamp = lanternBox(LAMP_W);
+  const sky = day?.sky ?? SKIES[skyByClock()]; // the prayers card takes the sky of the moment
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
@@ -296,10 +306,11 @@ function HomeScreen() {
 
             {/* the next prayer and the time left to it, then today's five, the next one lit; in the sky of
                 the hour */}
-            <Pressable onPress={go('/calendar')} style={({ pressed }) => [styles.prayersBox, pressed && styles.pressed]}>
-              <View style={[styles.prayers, { backgroundColor: c.card, borderColor: c.line }]}>
+            <Pressable onPress={go('/calendar')} style={({ pressed }) => [styles.prayersBox, { boxShadow: hc.shadow }, pressed && styles.pressed]}>
+              <LinearGradient colors={sky.sky} style={styles.prayers}>
+                <PrayerSky phase={day?.phase ?? skyByClock()} sun={day?.sun ?? 0.5} />
                 <View style={styles.prayersHead}>
-                  <Txt size={18} weight={700} color={sky.ink} style={{ flex: 1 }} numberOfLines={1}>
+                  <Txt size={17} weight={700} serif color={sky.ink} style={{ flex: 1 }} numberOfLines={1}>
                     {day ? `${HOME.nextPrayer()}: ${day.next}` : locating ? HOME.locating() : HOME.setPlace()}
                   </Txt>
                   {day ? (
@@ -345,46 +356,60 @@ function HomeScreen() {
                     );
                   })}
                 </View>
-              </View>
+              </LinearGradient>
             </Pressable>
 
-            {/* the wird card: the hadith, and on with the wird */}
-            <View style={[styles.hero, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#eff3ee', borderColor: c.line }]}>
-              <View style={styles.heroText}>
-                <Txt size={isEnglish ? 17 : 19} weight={700} color={hc.heroInk} lineHeight={isEnglish ? 26 : 34}>
-                  {HOME.hadith()}
-                </Txt>
-                <Txt size={12} weight={500} color={hc.heroSoft} style={{ marginTop: 2 }}>
-                  {HOME.heroSource()}
-                </Txt>
+            {/* the big card: the evening picture, the hadith, and on with the wird */}
+            <View style={[styles.hero, { width: heroW, boxShadow: hc.shadow }]} onLayout={(e) => setHeroH(e.nativeEvent.layout.height)}>
+              <View style={[StyleSheet.absoluteFill, !isEnglish && styles.mirror]}>
+                {heroH > 0 && <HomeScene night={isDark} width={heroW} height={heroH} />}
               </View>
-              {/* on with the wird, and the days read in a row beside it */}
-              <View style={styles.heroFoot}>
-                <Pressable
-                  onPress={go({ pathname: '/quran', params: { wird: '1' } })}
-                  style={({ pressed }) => [styles.heroGo, { backgroundColor: hc.button }, pressed && styles.pressed]}
-                >
-                  <Txt size={14} weight={700} color={hc.buttonInk}>
-                    {started ? HOME.wirdGo() : HOME.wirdStart()}
+              {/* at night a lantern hangs from the card's top in the sun's place (the far side from the words) */}
+              {isDark && (
+                <View style={{ position: 'absolute', top: -lamp.y, [isEnglish ? 'right' : 'left']: heroW * 0.16 - LAMP_W / 2 - lamp.x }}>
+                  <Lantern width={LAMP_W} moths />
+                </View>
+              )}
+              <View style={styles.heroOver}>
+                <View style={styles.heroText}>
+                  <Txt size={isEnglish ? 16.5 : 20} weight={700} serif color={hc.heroInk} lineHeight={isEnglish ? 24 : 36}>
+                    {HOME.hadith()}
                   </Txt>
-                </Pressable>
-                {days > 0 && (
-                  <View style={[styles.streak, { backgroundColor: hc.streak }]}>
-                    <FlameIcon color="#e8903a" size={14} />
-                    <Txt size={12.5} weight={700} color={hc.heroInk}>
-                      {HOME.days(days)}
+                  <Txt size={11.5} weight={500} color={hc.heroSoft} style={{ marginTop: 2 }}>
+                    {HOME.heroSource()}
+                  </Txt>
+                </View>
+                {/* on with the wird, and the days read in a row beside it */}
+                <View style={styles.heroFoot}>
+                  <Pressable
+                    onPress={go({ pathname: '/quran', params: { wird: '1' } })}
+                    style={({ pressed }) => [styles.heroGo, { backgroundColor: hc.button }, pressed && styles.pressed]}
+                  >
+                    <Txt size={14} weight={700} color={hc.buttonInk}>
+                      {started ? HOME.wirdGo() : HOME.wirdStart()}
                     </Txt>
-                  </View>
-                )}
+                  </Pressable>
+                  {days > 0 && (
+                    <View style={[styles.streak, { backgroundColor: hc.streak }]}>
+                      <FlameIcon color="#e8903a" size={14} />
+                      <Txt size={12.5} weight={700} color={hc.heroInk}>
+                        {HOME.days(days)}
+                      </Txt>
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
 
-            {/* the Quran's sections */}
+            {/* today's memorization, from the plan: what is left, or how to begin */}
+            <HifdhToday g={g} onPress={go('/memorize')} />
+
+            {/* the app's four sections */}
             <View style={styles.tiles}>
-              <Tile hc={hc} icon={<QuranTileIcon ink={g.base} />} label={HOME.tabQuran()} onPress={go('/quran')} />
-              <Tile hc={hc} icon={<MemorizeTileIcon ink={g.base} />} label={HOME.memorize()} onPress={go('/memorize')} />
-              <Tile hc={hc} icon={<TestTileIcon ink={g.base} />} label={HOME.testShort()} onPress={go('/test')} />
-              <Tile hc={hc} icon={<MajalisTileIcon ink={g.base} />} label={HOME.tabMajalis()} onPress={go('/majalis')} />
+              <Tile hc={hc} g={g} tint={g.chip} ink={g.base} icon={QuranTileIcon} label={HOME.tabQuran()} sub={HOME.quranSub()} onPress={go('/quran')} />
+              <Tile hc={hc} g={g} tint={alpha('#c5a15a', 0.2)} ink="#a8832f" icon={MemorizeTileIcon} label={HOME.memorize()} sub={HOME.memorizeSub()} onPress={go('/memorize')} />
+              <Tile hc={hc} g={g} tint={alpha('#4a7f9a', 0.16)} ink="#3d6f8a" icon={TestTileIcon} label={HOME.testShort()} sub={HOME.testSub()} soon onPress={go('/test')} />
+              <Tile hc={hc} g={g} tint={alpha('#b86b6b', 0.15)} ink="#a35656" icon={MajalisTileIcon} label={HOME.tabMajalis()} sub={HOME.majalisSub()} soon onPress={go('/majalis')} />
             </View>
           </View>
         </ScrollView>
@@ -416,16 +441,85 @@ function Panel({ hc, go }: { hc: HomeColours; go: (href: Href) => () => void }) 
   );
 }
 
-function Tile({ hc, icon, label, onPress }: { hc: HomeColours; icon: React.ReactNode; label: string; onPress: () => void }) {
+// One of the app's sections: a soft-coloured icon, its name and one line about it («soon» where it is still to come)
+function Tile({ hc, g, tint, ink, icon: Icon, label, sub, soon, onPress }: { hc: HomeColours; g: ReturnType<typeof useGreen>; tint: string; ink: string; icon: (p: { ink: string; size?: number }) => React.ReactNode; label: string; sub: string; soon?: boolean; onPress: () => void }) {
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [styles.tile, { backgroundColor: hc.tile, borderColor: hc.tileEdge }, pressed && styles.pressed]}
     >
-      {icon}
-      <Txt size={12} weight={600} center color={hc.meta} numberOfLines={1}>
+      <View style={styles.tileTop}>
+        <View style={[styles.tileChip, { backgroundColor: tint }]}>
+          <Icon ink={ink} size={26} />
+        </View>
+        {soon && (
+          <View style={[styles.soon, { backgroundColor: g.chip }]}>
+            <Txt size={11} weight={700} color={g.base}>
+              {HOME.soon()}
+            </Txt>
+          </View>
+        )}
+      </View>
+      <Txt size={16} weight={800} color={hc.ink} numberOfLines={1}>
         {label}
       </Txt>
+      <Txt size={12.5} color={hc.meta} numberOfLines={2}>
+        {sub}
+      </Txt>
+    </Pressable>
+  );
+}
+
+// Today's memorization on the home screen: how many portions of today's plan are done and the next one waiting,
+// or the way to begin when there is no plan yet. The plan lives on the device (src/lib/hifdh/plan.js).
+type Today = { plans: number; total: number; done: number; next: string };
+function HifdhToday({ g, onPress }: { g: ReturnType<typeof useGreen>; onPress: () => void }) {
+  const { c } = useTheme();
+  const [info, setInfo] = useState<Today | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      plan
+        .ready()
+        .then(() => {
+          const rows = (plan.todayRows() as { segs?: number[][]; version: { unit: string }; status?: string; week?: number | null; complete?: boolean }[]).filter((r) => r.segs?.length);
+          const open = rows.find((r) => !isDone(r));
+          setInfo({
+            plans: (plan.get().plans as unknown[]).length,
+            total: rows.length,
+            done: rows.filter(isDone).length,
+            next: open ? portionName(open.segs, open.version.unit) : '',
+          });
+        })
+        .catch(() => setInfo(null));
+    }, []),
+  );
+  const none = !info || info.plans === 0;
+  const idle = !none && info.total === 0;
+  const finished = !none && info.total > 0 && info.done === info.total;
+  const line = none ? HOME.hifdhNoPlan() : idle ? HOME.hifdhNothing() : finished ? HOME.hifdhAllDone() : info.next;
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.today, { backgroundColor: c.card, borderColor: c.line }, pressed && styles.pressed]}>
+      <View style={[styles.todayChip, { backgroundColor: g.chip }]}>
+        <MemorizeTileIcon ink={g.base} size={26} />
+      </View>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Txt size={13} weight={600} color={c.meta}>
+          {HOME.hifdhToday()}
+        </Txt>
+        <Txt size={17} weight={800} color={c.ink} numberOfLines={1}>
+          {line}
+        </Txt>
+        {!none && info.total > 0 && (
+          <View style={{ gap: 6, marginTop: 4 }}>
+            <View style={[styles.track, { backgroundColor: g.chip }]}>
+              <View style={[styles.fill, { backgroundColor: g.base, width: `${(info.done / info.total) * 100}%` }]} />
+            </View>
+            <Txt size={12} color={c.meta}>
+              {HOME.hifdhProgress(info.done, info.total)}
+            </Txt>
+          </View>
+        )}
+      </View>
     </Pressable>
   );
 }
@@ -448,8 +542,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 999,
   },
-  hero: { marginHorizontal: 16, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, padding: 18, gap: 16 },
-  heroText: {},
+  hero: { alignSelf: 'center', borderRadius: 28, overflow: 'hidden' },
+  // over the picture: the words, then the button just under them, both at the start of the line
+  heroOver: {
+    paddingTop: 22,
+    paddingBottom: 20,
+    paddingHorizontal: 22,
+    gap: 18,
+    alignItems: 'flex-start',
+  },
+  heroText: { maxWidth: '70%' },
   // the button at the line's start, the days in a row at its far end
   heroFoot: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   heroGo: {
@@ -461,21 +563,19 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   pressed: { opacity: 0.88, transform: [{ scale: 0.99 }] },
-  tiles: { flexDirection: 'row', gap: 10, marginHorizontal: 16 },
-  tile: {
-    flex: 1,
-    aspectRatio: 1,
-    maxHeight: 96,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderRadius: 20,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  prayersBox: { marginHorizontal: 16 },
+  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginHorizontal: 16 },
+  tile: { flexBasis: '47%', flexGrow: 1, gap: 4, padding: 14, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth },
+  tileTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  tileChip: { width: 46, height: 46, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  soon: { paddingHorizontal: 9, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  today: { marginHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth },
+  todayChip: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  track: { height: 6, borderRadius: 3, overflow: 'hidden' },
+  fill: { height: 6, borderRadius: 3 },
+  // the box's shadow outside, its sky (clouds, stars) cut to its round corners inside
+  prayersBox: { marginHorizontal: 16, borderRadius: 26 },
   prayers: {
-    borderRadius: 20,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 26,
     overflow: 'hidden',
     paddingTop: 16,
     paddingBottom: 14,
@@ -495,6 +595,7 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255, 253, 245, 0.92)',
   },
   five: { flexDirection: 'row', justifyContent: 'space-between' },
   prayer: { flex: 1, alignItems: 'center', gap: 4 },
@@ -505,6 +606,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  mirror: { transform: [{ scaleX: -1 }] },
   // along the bottom edge, its top corners rounded
   tabImg: { width: 22, height: 22 },
 });

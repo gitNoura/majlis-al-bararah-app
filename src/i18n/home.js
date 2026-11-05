@@ -3,6 +3,16 @@
 import { L } from './i18n.js';
 
 export const HOME = {
+  // the sections' one-liners, and today's memorization card
+  soon: () => L('قريبًا', 'Soon', 'Bientôt'),
+  quranSub: () => L('اقرأ المصحف واستمع', 'Read the mushaf and listen', 'Lisez le mushaf et écoutez'),
+  testSub: () => L('سمّع حفظك وصحّح', 'Recite and be corrected', 'Récitez et soyez corrigé'),
+  majalisSub: () => L('حلقات وتلاوة جماعية', 'Circles and group recitation', 'Cercles et récitation en groupe'),
+  hifdhToday: () => L('حفظ اليوم', 'Today’s memorization', 'Mémorisation du jour'),
+  hifdhNoPlan: () => L('ضع خطتك وابدأ الحفظ', 'Set a plan and start memorizing', 'Créez un plan et commencez'),
+  hifdhNothing: () => L('لا شيء مقرَّر اليوم', 'Nothing planned today', 'Rien de prévu aujourd’hui'),
+  hifdhAllDone: () => L('أتممتَ ورد اليوم، ما شاء الله', 'Today is done, MashaAllah', 'C’est fait pour aujourd’hui, MashaAllah'),
+  hifdhProgress: (d, n) => L(`أنجزتَ ${d} من ${n}`, `${d} of ${n} done`, `${d} sur ${n} faits`),
   salam: () => L('السلام عليكم', 'Assalamu Alaikum', 'Assalamu Alaikum'),
   guest: () => L('مسلم(ة)', 'Muslim(ah)', 'Musulman(e)'),
   nextPrayer: () => L('الصلاة القادمة', 'Next prayer', 'Prochaine prière'),
