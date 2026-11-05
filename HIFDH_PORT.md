@@ -106,6 +106,9 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 7b: first-time clarity (the Welcome screen it first added was REMOVED in Step 8; only the card subtitles stay)
 - [x] Step 8: undo Step 7b's Welcome screen (not wanted) and redesign the SAME Plan page: clearer and more modern (tinted cards with icons, clearer week card and ring, clearer Complete buttons, a one-line intro when there is no plan)
 - [x] Step 9: the Plan page's bottom tabs (Listen / My plans / Recite) become a full-width bar like the Quran reading page's; the floating dock is removed
+- [ ] Step 10a: new icons for Revision (repeat) and History (calendar)
+- [ ] Step 10b: finishing today shows a congratulation card instead of tomorrow's task (the «Ahead» card is removed)
+- [ ] Step 10c: «What I've memorized»: a second tap unselects (whole Quran, surahs, juz, ahzab...); tracking by ahzab instead of ayat; Arabic search text runs right to left
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
