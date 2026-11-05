@@ -7,7 +7,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { Hint, Section, useHue } from '@/components/hifdh/Section';
+import { Hint, Section } from '@/components/hifdh/Section';
 import { ProgressRing } from '@/components/hifdh/ProgressRing';
 import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
@@ -24,20 +24,27 @@ const PAGE = 40; // days shown at a time
 
 export function HistoryTile({ onPress }: { onPress: () => void }) {
   const { c } = useTheme();
-  const hue = useHue('rose');
+  const p = plan.planProgress();
+  const pct = p == null ? null : Math.round(p * 100);
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.tile, { overflow: 'hidden', backgroundColor: c.card, borderColor: hue?.line ?? c.line }]}>
-      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: hue?.tint }]} />
-      <ProgressRing />
-      <View style={{ flex: 1 }}>
-        <Txt size={18} weight={700} color={hue?.ink ?? c.ink}>
-          {HIF.history()}
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={HIF.progress()} style={[styles.tile, { backgroundColor: c.card, borderColor: c.line }]}>
+      <View style={{ flex: 1, gap: 10 }}>
+        <Txt size={14} color={c.meta}>
+          {HIF.progress()}
         </Txt>
-        <Txt size={13} color={c.text} style={{ opacity: 0.72 }}>
-          {HIF.pastDaysProgress()}
-        </Txt>
+        <View style={styles.tileRow}>
+          <ProgressRing size={64} inside={false} />
+          <View style={{ flex: 1 }}>
+            <Txt size={26} weight={800} color={c.ink} lineHeight={30}>
+              {pct == null ? HIF.progressNone() : `${pct}%`}
+            </Txt>
+            <Txt size={13} color={c.meta}>
+              {pct == null ? HIF.progressForNow() : HIF.progressOfPlans()}
+            </Txt>
+          </View>
+        </View>
       </View>
-      <Txt size={22} color={hue?.ink ?? c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>
+      <Txt size={22} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>
         ›
       </Txt>
     </Pressable>
@@ -189,7 +196,8 @@ export function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  tile: { flexDirection: 'row', alignItems: 'center', borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, boxShadow: '0px 10px 26px rgba(68, 55, 43, 0.10)' },
+  tile: { flexDirection: 'row', alignItems: 'center', borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, boxShadow: '0px 6px 18px rgba(23, 63, 50, 0.06)' },
+  tileRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   root: { flex: 1, justifyContent: 'flex-end' },
   panel: { maxHeight: '80%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingTop: 18 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },

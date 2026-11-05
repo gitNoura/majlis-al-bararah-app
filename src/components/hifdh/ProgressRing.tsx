@@ -10,21 +10,21 @@ import { useTheme } from '@/theme/theme';
 const R = 40;
 const CIRC = 2 * Math.PI * R;
 
-export function ProgressRing({ size = 52 }: { size?: number }) {
+export function ProgressRing({ size = 52, inside = true }: { size?: number; inside?: boolean }) {
   const { c } = useTheme();
   const p = plan.planProgress();
   const pct = p == null ? 0 : Math.round(p * 100);
   return (
     <View style={{ width: size, height: size }} accessible accessibilityRole="image" accessibilityLabel={`${pct}%`}>
       <Svg width={size} height={size} viewBox="0 0 96 96">
-        <Circle cx={48} cy={48} r={R} stroke={c.line} strokeWidth={9} fill="none" />
+        <Circle cx={48} cy={48} r={R} stroke={c.line} strokeWidth={10} fill="none" />
         {pct > 0 && (
           <Circle
             cx={48}
             cy={48}
             r={R}
-            stroke={c.gold}
-            strokeWidth={9}
+            stroke={c.on}
+            strokeWidth={10}
             fill="none"
             strokeLinecap="round"
             strokeDasharray={CIRC}
@@ -34,9 +34,11 @@ export function ProgressRing({ size = 52 }: { size?: number }) {
         )}
       </Svg>
       <View style={styles.pct} pointerEvents="none">
-        <Txt size={size * 0.27} weight={800} color={c.ink}>
-          {p == null ? '–' : `${pct}%`}
-        </Txt>
+        {(inside || p == null) && (
+          <Txt size={size * (inside ? 0.27 : 0.34)} weight={800} color={inside ? c.ink : c.meta}>
+            {p == null ? '–' : `${pct}%`}
+          </Txt>
+        )}
       </View>
     </View>
   );

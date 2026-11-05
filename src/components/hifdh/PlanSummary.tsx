@@ -24,7 +24,7 @@ export function PlanSummary() {
         <Txt size={24} weight={700} color={c.ink} style={{ flexShrink: 1 }}>
           {HIF.todayPlan()}
         </Txt>
-        <Txt size={13} color={c.text} style={{ opacity: 0.72 }}>
+        <Txt size={13} color={c.meta}>
           {dayText(plan.today())}
         </Txt>
       </View>

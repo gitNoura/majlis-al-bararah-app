@@ -8,7 +8,7 @@ import { useTheme } from '@/theme/theme';
 
 import { useHif } from '@/components/hifdh/HifProvider';
 import { DoneCard } from '@/components/hifdh/DoneCard';
-import { Hint, PrimaryButton, Section, useHue } from '@/components/hifdh/Section';
+import { Hint, PrimaryButton, Section } from '@/components/hifdh/Section';
 import type { Row } from '@/components/hifdh/StopSheet';
 import { TaskRow } from '@/components/hifdh/TaskRow';
 import { HIF } from '@/i18n/hifdh';
@@ -18,14 +18,13 @@ import * as plan from '@/lib/hifdh/plan';
 export function RevisionCard() {
   const { startPlan, openMemorized } = useHif(); // also redraws this card whenever `rev` changes
   const { c } = useTheme();
-  const ink = useHue('blue')?.ink ?? c.ink;
   const st = plan.get();
   const known = plan.memorizedCount() > 0;
   const title = kindOf('revise');
 
   if (!st.plans.some((p: { type: string }) => p.type === 'revise')) {
     return (
-      <Section title={title} subtitle={HIF.reviseSub()} hue="blue" icon={<RepeatIcon color={ink} size={22} />}>
+      <Section title={title} subtitle={HIF.reviseSub()} icon={<RepeatIcon color={c.on} size={22} />}>
         <Hint>{known ? HIF.reviseHint() : HIF.reviseLocked()}</Hint>
         <PrimaryButton label={known ? HIF.startRevision() : HIF.memorizedTitle()} onPress={() => (known ? startPlan('revise') : openMemorized())} />
       </Section>
@@ -37,7 +36,7 @@ export function RevisionCard() {
   if (rows.length && rows.every(isDone)) return <DoneCard rows={rows} revise />; // done: the same card turns into the congratulation
 
   return (
-    <Section title={title} subtitle={HIF.reviseSub()} hue="blue" icon={<RepeatIcon color={ink} size={22} />}>
+    <Section title={title} subtitle={HIF.reviseSub()} icon={<RepeatIcon color={c.on} size={22} />}>
       {rows.length ? (
         <View>
           {rows.map((r: Row, i: number) => (

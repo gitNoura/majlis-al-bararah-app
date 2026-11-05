@@ -1,4 +1,4 @@
-// What a card becomes once everything in it is done (the usual way in apps): the same card, tinted gold, its icon a
+// What a card becomes once everything in it is done (the usual way in apps): the same card, tinted soft green, its icon a
 // check, the card's own title kept with the congratulation under it, the portions done, and a small «Undo». The Complete and Listen buttons are gone.
 // Used by the memorization card and the revision card; the confetti is TaskRow's.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
@@ -29,7 +29,7 @@ export function DoneCard({ rows, revise }: { rows: Row[]; revise?: boolean }) {
       title={kindOf(revise ? 'revise' : 'memorize')}
       subtitle={revise ? HIF.reviseDoneTitle() : HIF.congratsTitle()}
       tone="done"
-      icon={<CheckIcon color="#173f32" size={22} strokeWidth={2.4} />}
+      icon={<CheckIcon color="#ffffff" size={22} strokeWidth={2.4} />}
     >
       <Txt size={16} weight={700} color={c.ink}>
         {names}

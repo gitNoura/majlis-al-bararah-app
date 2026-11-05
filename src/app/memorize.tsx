@@ -69,7 +69,7 @@ function Content({
   const pad = { padding: 16, paddingBottom: insets.bottom + 32, gap: 14 };
   return (
     <View style={{ flex: 1 }}>
-      <HifHeader subtitle={view === 'home' ? dayText(plan.today()) : undefined} title={view === 'memorized' ? HIF.memorizedTitle() : view === 'plans' ? HIF.myPlans() : view === 'history' ? HIF.history() : HIF.title()} onBack={view === 'home' ? undefined : () => go('home')} />
+      <HifHeader subtitle={view === 'home' ? dayText(plan.today()) : undefined} title={view === 'memorized' ? HIF.memorizedTitle() : view === 'plans' ? HIF.myPlans() : view === 'history' ? HIF.progress() : HIF.title()} onBack={view === 'home' ? undefined : () => go('home')} />
       {view === 'memorized' ? (
         <ScrollView contentContainerStyle={pad} keyboardShouldPersistTaps="handled">
           <MemorizedScreen />

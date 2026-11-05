@@ -229,8 +229,9 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 
 - [x] Step 13: the Plan page is more colourful (soft tinted cards with their own hue, coloured titles/icon chips, in the spirit of the user's reference but with the app's own palette)
 
-### Notes (Step 13: colour, finished-card title)
-- `Section` takes a `hue` ('green' | 'blue' | 'rose' | 'violet'; `useHue` exports the same colours for other tiles): a tint wash, a hued border, the icon chip and the title in that hue (light and night variants). Memorization = green, Revision = blue, week card = violet (kept days are green pills), History tile = rose. A finished card stays gold.
-- The Hifdh tile colour is now a clean warm white (`#fffdf9`) instead of beige `#f5efe5`, and second lines/hints use the body text at 72 % instead of the gold-brown, so the page is less yellow. Ivory screen, forest green and gold accents are unchanged.
-- Finished card (`DoneCard`): the title stays «Hifdh» / «Murajaa» (`kindOf`); the congratulation is the line under it, then the portions done, the blessing and Undo.
-- The reference picture did not reach this session, so the hues come from the checklist's description, not from the picture. Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.
+### Notes (Step 13: colour, finished-card title; revised)
+- The first colour pass (a different hue per card) looked childish and was replaced: the Hifdh page now has one natural palette, set in `HifTheme` (`src/theme/theme.tsx`): pale sage-white screen, quiet sage-tinted cards with a hairline border and a soft shadow, forest green as the only accent. `gold` / `goldStrong` are remapped to greens inside the page, so no yellow or beige is left on it (links like Undo, picker borders, ring, week pills).
+- `Section` has no hues any more: neutral card, `c.soft` icon chip with a forest-green icon, titles `c.ink`, second lines `c.meta`.
+- Finished card (`DoneCard`): the title stays «Hifdh» / «Murajaa»; the congratulation is the line under it, then the portions done, the blessing and Undo. It is tinted soft green with a white check on forest green (no gold).
+- «History» tile is now «Progress» (`HIF.progress`), laid out like the reference's ring card: a small label, a ring (grey track, green arc, `–` inside when there is no plan) and the big value beside it (`N%` «of your plans», or «None» «for now»). Its screen title is «Progress» too (the list of past days is unchanged).
+- Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.

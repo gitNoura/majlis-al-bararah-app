@@ -4,7 +4,6 @@
 import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { useHue } from '@/components/hifdh/Section';
 import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
@@ -23,24 +22,21 @@ function CloseMark({ color }: { color: string }) {
 }
 
 export function WeekCard() {
-  const { c, isDark } = useTheme();
-  const hue = useHue('violet');
-  const ok = useHue('green');
+  const { c } = useTheme();
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: hue?.line ?? c.line }]}>
-      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: hue?.tint, borderRadius: 24 }]} />
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }]}>
       <View style={styles.top}>
-        <Txt size={18} weight={700} color={hue?.ink ?? c.ink}>
+        <Txt size={18} weight={700} color={c.ink}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
-          <Txt size={26} weight={800} color={hue?.ink ?? c.ink} lineHeight={30}>
+          <Txt size={26} weight={800} color={c.ink} lineHeight={30}>
             {num(n)}
           </Txt>
-          <Txt size={12} color={c.text} style={{ opacity: 0.72 }}>
+          <Txt size={12} color={c.meta}>
             {HIF.ofSevenDays()}
           </Txt>
         </View>
@@ -50,14 +46,14 @@ export function WeekCard() {
           const state: DayState = kept.has(d) ? 'on' : d === today ? 'now' : started && d >= started && d < today ? 'miss' : 'idle';
           return (
             <View key={d} style={styles.day}>
-              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={state === 'now' ? (hue?.ink ?? c.ink) : c.text}>
+              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={state === 'now' ? (c.ink) : c.text}>
                 {weekdayName(core.weekdayOf(d))}
               </Txt>
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? (isDark ? '#3f9b7a' : '#4fae8a') : (hue?.chip ?? c.soft) },
-                  state === 'now' && { borderWidth: 1.5, borderColor: hue?.ink ?? c.goldStrong },
+                  { backgroundColor: state === 'on' ? c.on : c.soft },
+                  state === 'now' && { borderWidth: 1.5, borderColor: c.on },
                 ]}
               >
                 {state === 'on' && <CheckIcon color="#ffffff" size={16} strokeWidth={2.4} />}
@@ -72,7 +68,7 @@ export function WeekCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { overflow: 'hidden', borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 14, boxShadow: '0px 10px 26px rgba(68, 55, 43, 0.10)' },
+  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 14, boxShadow: '0px 6px 18px rgba(23, 63, 50, 0.06)' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { alignItems: 'flex-end' },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 6 },

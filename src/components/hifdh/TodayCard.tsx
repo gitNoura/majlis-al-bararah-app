@@ -8,7 +8,7 @@ import { useTheme } from '@/theme/theme';
 
 import { useHif } from '@/components/hifdh/HifProvider';
 import { DoneCard } from '@/components/hifdh/DoneCard';
-import { Hint, PrimaryButton, Section, useHue } from '@/components/hifdh/Section';
+import { Hint, PrimaryButton, Section } from '@/components/hifdh/Section';
 import type { Row } from '@/components/hifdh/StopSheet';
 import { TaskRow } from '@/components/hifdh/TaskRow';
 import { HIF } from '@/i18n/hifdh';
@@ -18,13 +18,12 @@ import * as plan from '@/lib/hifdh/plan';
 export function TodayCard() {
   const { startPlan } = useHif(); // also redraws this card whenever `rev` changes
   const { c } = useTheme();
-  const ink = useHue('green')?.ink ?? c.ink;
   const st = plan.get();
   const title = kindOf('memorize');
 
   if (!st.plans.some((p: { type: string }) => p.type === 'memorize')) {
     return (
-      <Section title={title} subtitle={HIF.todaySub()} hue="green" icon={<BookOpenIcon color={ink} size={22} />}>
+      <Section title={title} subtitle={HIF.todaySub()} icon={<BookOpenIcon color={c.on} size={22} />}>
         <Hint>{HIF.noPlanYet()}</Hint>
         <PrimaryButton label={HIF.setUpPlan()} onPress={() => startPlan('memorize')} />
       </Section>
@@ -37,7 +36,7 @@ export function TodayCard() {
   if (rows.length && rows.every(isDone)) return <DoneCard rows={rows} />; // done: the same card turns into the congratulation
 
   return (
-    <Section title={title} subtitle={HIF.todaySub()} hue="green" icon={<BookOpenIcon color={ink} size={22} />}>
+    <Section title={title} subtitle={HIF.todaySub()} icon={<BookOpenIcon color={c.on} size={22} />}>
       {rows.length ? (
         <View>
           {rows.map((r: Row, i: number) => (
