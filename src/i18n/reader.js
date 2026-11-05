@@ -19,6 +19,7 @@ export const READER = {
   soon: () => L('قريباً إن شاء الله', 'Coming soon, in sha Allah', 'Bientôt, in sha Allah'),
   // full screen's round buttons (the website's), and the button back to the whole page while zoomed
   exitFull: () => L('الخروج من ملء الشاشة', 'Exit full screen', 'Quitter le plein écran'),
+  pageLight: () => L('خلفية داكنة / صفحة خافتة', 'Dark screen / dimmed page', 'Écran sombre / page atténuée'),
   theme: () => L('الوضع الليلي / النهاري', 'Night / day', 'Nuit / jour'),
   wholePage: () => L('الصفحة كاملة', 'Whole page', 'Page entière'),
   back: () => L('رجوع', 'Back', 'Retour'),
@@ -32,6 +33,12 @@ export const READER = {
       'Only for the Quran pages. Changing the app’s appearance resets it.',
       'Seulement pour les pages du Coran. Changer l’apparence de l’application le réinitialise.',
     ),
+  // the page at night: as by day, or dimmed (its colours never changed)
+  nightPage: () => L('الصفحة في الوضع الليلي', 'The page at night', 'La page en mode nuit'),
+  normalPage: () => L('صفحة عادية', 'Normal page', 'Page normale'),
+  normalPageSub: () => L('الصفحة كما في النهار، على خلفية داكنة', 'The page as by day, on a dark screen', 'La page comme le jour, sur un écran sombre'),
+  dimPage: () => L('صفحة خافتة', 'Dimmed page', 'Page atténuée'),
+  dimPageSub: () => L('الصفحة بإضاءة أخف', 'The page a little dimmer', 'La page un peu moins lumineuse'),
   riwaya: () => L('الرواية', 'Narration', 'Lecture (riwaya)'),
   warsh: () => L('ورش عن نافع', 'Warsh from Nafi', 'Warsh d’après Nâfi'),
   hafs: () => L('حفص عن عاصم', 'Hafs from Asim', 'Hafs d’après Âsim'),

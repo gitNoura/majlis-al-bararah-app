@@ -14,6 +14,7 @@ import { Row, Section, Tag } from '@/components/SettingsList';
 import { Toggle } from '@/components/Toggle';
 import { isEnglish, isFrench } from '@/i18n/i18n';
 import { READER } from '@/i18n/reader';
+import { setNightPage, useNightPage } from '@/lib/nightPage';
 import { HAFS, setRiwaya } from '@/lib/riwaya';
 import { setSource, SOURCES, tafsirSources } from '@/lib/sources';
 import { QuranTheme, useTheme } from '@/theme/theme';
@@ -36,6 +37,7 @@ function QuranSettings() {
   const { c, isDark, setQuranMode } = useTheme();
   const insets = useSafeAreaInsets();
   const [chosen, setChosen] = useState(chosenIds);
+  const nightPage = useNightPage();
   const sources = SOURCES as Source[];
   const toggle = (id: string, on: boolean) => {
     setSource(id, on);
@@ -51,8 +53,22 @@ function QuranSettings() {
       <ScreenHeader title={READER.settingsTitle()} />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 28 }}>
         <Section title={READER.appearance()}>
-          <Row icon={<MoonIcon color={c.ink} size={20} />} title={READER.night()} sub={READER.nightSub()} end={onOff(isDark, (on) => setQuranMode(on ? 'dark' : 'light'))} />
+          <Row
+            icon={<MoonIcon color={c.ink} size={20} />}
+            title={READER.night()}
+            sub={READER.nightSub()}
+            end={onOff(isDark, (on) => setQuranMode(on ? 'dark' : 'light'))}
+            last
+          />
         </Section>
+
+        {/* at night: the page as by day, or dimmed */}
+        {isDark && (
+          <Section title={READER.nightPage()}>
+            <Row title={READER.normalPage()} sub={READER.normalPageSub()} end={nightPage === 'normal' && <CheckIcon color={c.on} />} onPress={() => setNightPage('normal')} />
+            <Row title={READER.dimPage()} sub={READER.dimPageSub()} end={nightPage === 'dim' && <CheckIcon color={c.on} />} onPress={() => setNightPage('dim')} last />
+          </Section>
+        )}
 
         <Section title={READER.riwaya()} note={READER.riwayaSub()}>
           <Row

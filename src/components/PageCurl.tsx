@@ -34,6 +34,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { ayahAt } from '@/lib/boxes';
 import { cropOf } from '@/lib/crop';
 import { TOTAL_PAGES } from '@/lib/quran';
+import { DAY_PAPER, useNightPage } from '@/lib/nightPage';
 import { pageUrl } from '@/lib/remote';
 import { useTheme } from '@/theme/theme';
 
@@ -108,7 +109,11 @@ const MAX_ZOOM = 4;
 const NOTHING: Poly = [];
 
 export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed }: Props) {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
+  // night: the page as by day, or dimmed, as chosen in the settings (its colours never changed)
+  const nightPage = useNightPage();
+  const dimmed = isDark && nightPage === 'dim';
+  const paper = isDark && !dimmed ? DAY_PAPER : c.paper;
   const ox = (width - pageW) / 2;
   const oy = (height - pageH) / 2;
 
@@ -499,7 +504,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
             top: oy,
             width: pageW,
             height: pageH,
-            backgroundColor: c.paper,
+            backgroundColor: paper,
             ...(!full && {
               borderWidth: 0.5,
               borderColor: c.line,
@@ -516,7 +521,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
             <Group transform={zoomMove}>
               {/* the page under */}
               <Group clip={whole}>
-                <Rect x={0} y={0} width={pageW} height={pageH} color={c.paper} />
+                <Rect x={0} y={0} width={pageW} height={pageH} color={paper} />
                 <SkiaImage image={under} rect={underAt} fit="fill" />
               </Group>
               <Group clip={uncovered}>
@@ -527,7 +532,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
 
               {/* the page turning, as much as still lies flat (the chosen ayah lit on it) */}
               <Group clip={flat}>
-                <Rect x={0} y={0} width={pageW} height={pageH} color={c.paper} />
+                <Rect x={0} y={0} width={pageW} height={pageH} color={paper} />
                 <SkiaImage image={over} rect={overAt} fit="fill" />
                 <Group opacity={onPage}>
                   {lit.map((r) => (
@@ -558,7 +563,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
               <Group clip={flap}>
                 <Group matrix={backSide}>
                   <Group clip={whole}>
-                    <Rect x={0} y={0} width={pageW} height={pageH} color={c.paper} />
+                    <Rect x={0} y={0} width={pageW} height={pageH} color={paper} />
                     <SkiaImage image={over} rect={overAt} fit="fill" />
                   </Group>
                 </Group>
@@ -572,8 +577,8 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
                 </Rect>
               </Group>
 
-              {/* night: the pages a little dimmer, as on the website */}
-              {c.nightDim > 0 && <Rect x={0} y={0} width={pageW} height={pageH} color={`rgba(0,0,0,${c.nightDim})`} />}
+              {/* night, the dimmed page: a little dimmer, as on the website */}
+              {dimmed && c.nightDim > 0 && <Rect x={0} y={0} width={pageW} height={pageH} color={`rgba(0,0,0,${c.nightDim})`} />}
             </Group>
           </Group>
         </Canvas>

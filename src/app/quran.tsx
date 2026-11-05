@@ -23,19 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AyahSheet, type Ayah } from '@/components/AyahSheet';
 import { BottomPanel, PANEL_H, PanelTab } from '@/components/BottomPanel';
 import { Glass, GlassBackdrop } from '@/components/Glass';
-import {
-  BackIcon,
-  BookOpenIcon,
-  CloseIcon,
-  ExpandIcon,
-  MenuIcon,
-  MoonIcon,
-  NotebookIcon,
-  SearchIcon,
-  SettingsIcon,
-  SunIcon,
-  ZoomOutIcon,
-} from '@/components/icons';
+import { BackIcon, BookOpenIcon, CloseIcon, ContrastIcon, ExpandIcon, MenuIcon, MoonIcon, NotebookIcon, SearchIcon, SettingsIcon, SunIcon, ZoomOutIcon } from '@/components/icons';
 import { Lantern, lanternBox } from '@/components/Lantern';
 import { AyahMenu, type MenuAt } from '@/components/AyahMenu';
 import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
@@ -49,6 +37,7 @@ import { READER } from '@/i18n/reader';
 import { markToday } from '@/lib/activity';
 import { ayatOn, pageOf, stepAyah, surahsOn } from '@/lib/boxes';
 import { hlColor, noteColor, useMarks } from '@/lib/marks';
+import { DIM_PAPER, setNightPage, useNightPage } from '@/lib/nightPage';
 import { FULL_SHAPE, PAGE_SHAPE } from '@/lib/crop';
 import { hizbForPage, juzForPage, SURAHS, TOTAL_PAGES } from '@/lib/quran';
 import { pageUrl } from '@/lib/remote';
@@ -214,8 +203,12 @@ function Quran() {
   const endSide = isEnglish ? 'right' : 'left';
   const box = lanternBox();
 
-  // full screen by day: the screen is the page's paper
-  const screen = full && !isDark ? c.paper : c.screen;
+  // full screen: the screen is the page's paper by day; at night the dark screen (the normal page) or the
+  // dimmed paper (the dimmed page); its buttons are the icons alone (no glass, which looked light at
+  // night), in an ink that reads there
+  const nightPage = useNightPage();
+  const screen = !full ? c.screen : !isDark ? c.paper : nightPage === 'dim' ? DIM_PAPER : c.screen;
+  const fullInk = isDark && nightPage === 'dim' ? '#2a2a22' : c.ink;
 
   return (
     <View style={{ flex: 1, backgroundColor: screen, overflow: 'hidden' }} onTouchStart={full ? wake : undefined}>
@@ -255,23 +248,34 @@ function Quran() {
                 Arabic), leave and night / day at its end */}
             {full && (
               <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents={awake ? 'box-none' : 'none'}>
-                <RoundButton at={{ top: insets.top + 14, [startSide]: 14 }} label={READER.surahs()} onPress={() => setIndexOpen(true)} bare={!isDark}>
-                  <MenuIcon color={c.ink} />
+                <RoundButton at={{ top: insets.top + 14, [startSide]: 14 }} label={READER.surahs()} onPress={() => setIndexOpen(true)} bare>
+                  <MenuIcon color={fullInk} />
                 </RoundButton>
-                <RoundButton at={{ top: insets.top + 14, [startSide]: 66 }} label={READER.search()} onPress={openSearch} bare={!isDark}>
-                  <SearchIcon color={c.ink} />
+                <RoundButton at={{ top: insets.top + 14, [startSide]: 66 }} label={READER.search()} onPress={openSearch} bare>
+                  <SearchIcon color={fullInk} />
                 </RoundButton>
-                <RoundButton at={{ top: insets.top + 14, [endSide]: 14 }} label={READER.exitFull()} onPress={leaveFull} bare={!isDark}>
-                  <CloseIcon color={c.ink} />
+                <RoundButton at={{ top: insets.top + 14, [endSide]: 14 }} label={READER.exitFull()} onPress={leaveFull} bare>
+                  <CloseIcon color={fullInk} />
                 </RoundButton>
                 <RoundButton
                   at={{ top: insets.top + 14, [endSide]: 66 }}
                   label={READER.theme()}
                   onPress={() => setQuranMode(isDark ? 'light' : 'dark')}
-                  bare={!isDark}
+                  bare
                 >
-                  {isDark ? <SunIcon color={c.ink} /> : <MoonIcon color={c.ink} />}
+                  {isDark ? <SunIcon color={fullInk} /> : <MoonIcon color={fullInk} />}
                 </RoundButton>
+                {/* at night: the dark screen around the page, or the page dimmed (as in the settings) */}
+                {isDark && (
+                  <RoundButton
+                    at={{ top: insets.top + 14, [endSide]: 118 }}
+                    label={READER.pageLight()}
+                    onPress={() => setNightPage(nightPage === 'dim' ? 'normal' : 'dim')}
+                    bare
+                  >
+                    <ContrastIcon color={fullInk} />
+                  </RoundButton>
+                )}
               </Animated.View>
             )}
 

@@ -22,6 +22,7 @@ import { HomeScene } from '@/components/HomeScene';
 import { PlaceSheet } from '@/components/PlaceSheet';
 import { PrayerSky, type Phase } from '@/components/PrayerSky';
 import { Lantern, lanternBox } from '@/components/Lantern';
+import { MajalisTileIcon, MemorizeTileIcon, QuranTileIcon, TestTileIcon } from '@/components/HomeTileIcons';
 import { AsrIcon, DhuhrIcon, FajrIcon, FlameIcon, IshaIcon, MaghribIcon, PinIcon, PlusIcon, SettingsIcon } from '@/components/icons';
 import { BottomPanel, PANEL_H, PanelTab } from '@/components/BottomPanel';
 import { GlassBackdrop } from '@/components/Glass';
@@ -393,10 +394,10 @@ export default function Home() {
 
             {/* the Quran's sections */}
             <View style={styles.tiles}>
-              <Tile hc={hc} icon={IMG.read} label={HOME.tabQuran()} onPress={go('/quran')} />
-              <Tile hc={hc} icon={IMG.memorize} label={HOME.memorize()} onPress={go('/memorize')} />
-              <Tile hc={hc} icon={IMG.test} label={HOME.testShort()} onPress={go('/test')} />
-              <Tile hc={hc} icon={IMG.majalis} label={HOME.tabMajalis()} onPress={go('/majalis')} />
+              <Tile hc={hc} icon={<QuranTileIcon ink={hc.ink} />} label={HOME.tabQuran()} onPress={go('/quran')} />
+              <Tile hc={hc} icon={<MemorizeTileIcon ink={hc.ink} />} label={HOME.memorize()} onPress={go('/memorize')} />
+              <Tile hc={hc} icon={<TestTileIcon ink={hc.ink} />} label={HOME.testShort()} onPress={go('/test')} />
+              <Tile hc={hc} icon={<MajalisTileIcon ink={hc.ink} />} label={HOME.tabMajalis()} onPress={go('/majalis')} />
             </View>
           </View>
         </ScrollView>
@@ -428,13 +429,13 @@ function Panel({ hc, go }: { hc: HomeColours; go: (href: Href) => () => void }) 
   );
 }
 
-function Tile({ hc, icon, label, onPress }: { hc: HomeColours; icon: number; label: string; onPress: () => void }) {
+function Tile({ hc, icon, label, onPress }: { hc: HomeColours; icon: React.ReactNode; label: string; onPress: () => void }) {
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [styles.tile, { backgroundColor: hc.tile, borderColor: hc.tileEdge }, pressed && styles.pressed]}
     >
-      <Image source={icon} style={{ width: 26, height: 26 }} tintColor={hc.ink} />
+      {icon}
       <Txt size={12} weight={600} center color={hc.meta} numberOfLines={1}>
         {label}
       </Txt>
