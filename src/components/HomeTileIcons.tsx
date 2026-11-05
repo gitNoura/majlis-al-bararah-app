@@ -1,5 +1,5 @@
 // The home screen's four tiles' icons: plain line icons in the tile's ink, as the app's other icons -
-// the Quran (an open book), memorization (a book with a bookmark), testing (a clipboard with a tick),
+// the Quran (an open book), memorization (a heart: what is kept in the heart), testing (a microphone: recitation),
 // the majalis (two people).
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
@@ -20,17 +20,15 @@ export const QuranTileIcon = ({ ink, size }: P) => (
 
 export const MemorizeTileIcon = ({ ink, size }: P) => (
   <Frame ink={ink} size={size}>
-    <Path d="M5 19.5V5.5A2.5 2.5 0 0 1 7.5 3H19V21H7.5A2.5 2.5 0 0 1 5 18.5" />
-    <Path d="M5 18.5A2.5 2.5 0 0 1 7.5 16H19" />
-    <Path d="M11 3V10L13 8.5L15 10V3" />
+    <Path d="M12 20.5C12 20.5 3.5 15.4 3.5 9.2A4.7 4.7 0 0 1 12 6.6A4.7 4.7 0 0 1 20.5 9.2C20.5 15.4 12 20.5 12 20.5Z" />
   </Frame>
 );
 
 export const TestTileIcon = ({ ink, size }: P) => (
   <Frame ink={ink} size={size}>
-    <Rect x={5} y={4.5} width={14} height={16.5} rx={2} />
-    <Path d="M9 3H15V6H9Z" />
-    <Path d="M9 13.5L11 15.5L15 11.5" />
+    <Rect x={9} y={3} width={6} height={11} rx={3} />
+    <Path d="M5.5 11.5C5.5 15.4 8.4 18 12 18C15.6 18 18.5 15.4 18.5 11.5" />
+    <Path d="M12 18V21M9 21H15" />
   </Frame>
 );
 

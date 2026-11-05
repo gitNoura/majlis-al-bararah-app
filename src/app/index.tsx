@@ -2,7 +2,7 @@
 // with colour where it is fun. From the top: the greeting and the member's round; the prayers card, in the sky of the
 // moment (stars at night, clouds by day), with the next prayer, the time left and today's five; the wird card, a
 // hadith over the evening picture with the button that goes on with the wird and the days read in a row; today's
-// memorization, from the plan (what is left, how many are done, or how to begin); then the app's four sections in
+// then the app's four sections in
 // soft-coloured tiles - the Quran, memorization, testing it, the majalis (the last two marked «soon») - and the bar
 // along the bottom (src/components/BottomPanel.tsx) with the tools: the qibla, the ahadith, the adhkar, the
 // calendar, settings.
@@ -32,8 +32,6 @@ import { streak } from '@/lib/activity';
 import * as hijri from '@/lib/hijri';
 import { clockTime, locate, nextPrayer, place, placeName, skyNow, skyTimes, times } from '@/lib/prayer';
 import { stayInQuran } from '@/lib/riwaya';
-import { isDone, portionName } from '@/lib/hifdh/labels';
-import * as plan from '@/lib/hifdh/plan';
 import { readJSON, writeJSON } from '@/lib/storage';
 import { HifTheme, useTheme } from '@/theme/theme';
 
@@ -183,7 +181,8 @@ function prayersNow(): Day {
   };
 }
 
-const wirdStarted = () => !!readJSON('wird')?.stop?.page || !!readJSON('lastPage');
+const wirdPage = (): number | null => Number(readJSON('wird')?.stop?.page ?? readJSON('lastPage')) || null;
+const wirdStarted = () => wirdPage() != null;
 
 // ---------- the screen ----------
 
@@ -210,6 +209,7 @@ function HomeScreen() {
   const [day, setDay] = useState<Day>(prayersNow);
   const [days, setDays] = useState(() => streak());
   const [started, setStarted] = useState(wirdStarted);
+  const [wirdAt, setWirdAt] = useState(wirdPage);
   // the wird card as tall as its words and button need; its picture fills that height
   const [heroH, setHeroH] = useState(0);
   const { width } = useWindowDimensions();
@@ -230,6 +230,7 @@ function HomeScreen() {
       setDate(hijriDate());
       setDays(streak());
       setStarted(wirdStarted());
+      setWirdAt(wirdPage());
       setDay(prayersNow());
     }, []),
   );
@@ -359,8 +360,14 @@ function HomeScreen() {
               </LinearGradient>
             </Pressable>
 
-            {/* the big card: the evening picture, the hadith, and on with the wird */}
-            <View style={[styles.hero, { width: heroW, boxShadow: hc.shadow }]} onLayout={(e) => setHeroH(e.nativeEvent.layout.height)}>
+            {/* the wird card: it says what it is (your daily wird), where you stopped, and one clear button to read */}
+            <Pressable
+              onPress={go({ pathname: '/quran', params: { wird: '1' } })}
+              accessibilityRole="button"
+              accessibilityLabel={`${HOME.wirdLabel()}: ${started ? HOME.wirdContinue() : HOME.wirdStart()}`}
+              style={({ pressed }) => [styles.hero, { width: heroW, boxShadow: hc.shadow }, pressed && styles.pressed]}
+              onLayout={(e) => setHeroH(e.nativeEvent.layout.height)}
+            >
               <View style={[StyleSheet.absoluteFill, !isEnglish && styles.mirror]}>
                 {heroH > 0 && <HomeScene night={isDark} width={heroW} height={heroH} />}
               </View>
@@ -372,23 +379,31 @@ function HomeScreen() {
               )}
               <View style={styles.heroOver}>
                 <View style={styles.heroText}>
-                  <Txt size={isEnglish ? 16.5 : 20} weight={700} serif color={hc.heroInk} lineHeight={isEnglish ? 24 : 36}>
-                    {HOME.hadith()}
-                  </Txt>
-                  <Txt size={11.5} weight={500} color={hc.heroSoft} style={{ marginTop: 2 }}>
-                    {HOME.heroSource()}
-                  </Txt>
-                </View>
-                {/* on with the wird, and the days read in a row beside it */}
-                <View style={styles.heroFoot}>
-                  <Pressable
-                    onPress={go({ pathname: '/quran', params: { wird: '1' } })}
-                    style={({ pressed }) => [styles.heroGo, { backgroundColor: hc.button }, pressed && styles.pressed]}
-                  >
-                    <Txt size={14} weight={700} color={hc.buttonInk}>
-                      {started ? HOME.wirdGo() : HOME.wirdStart()}
+                  <View style={styles.wirdLabel}>
+                    <View style={[styles.wirdChip, { backgroundColor: hc.streak }]}>
+                      <QuranTileIcon ink={hc.heroInk} size={16} />
+                    </View>
+                    <Txt size={13} weight={800} color={hc.heroInk}>
+                      {HOME.wirdLabel()}
                     </Txt>
-                  </Pressable>
+                  </View>
+                  <Txt size={isEnglish ? 23 : 25} weight={700} serif color={hc.heroInk} lineHeight={isEnglish ? 31 : 42} style={{ marginTop: 6 }}>
+                    {started ? HOME.wirdContinue() : HOME.wirdStart()}
+                  </Txt>
+                  {started && wirdAt ? (
+                    <Txt size={13} weight={600} color={hc.heroSoft}>
+                      {HOME.wirdPage(wirdAt)}
+                    </Txt>
+                  ) : null}
+                </View>
+                {/* the button, and the days read in a row beside it */}
+                <View style={styles.heroFoot}>
+                  <View style={[styles.heroGo, { backgroundColor: hc.button }]}>
+                    <QuranTileIcon ink={hc.buttonInk} size={18} />
+                    <Txt size={15} weight={700} color={hc.buttonInk}>
+                      {HOME.wirdRead()}
+                    </Txt>
+                  </View>
                   {days > 0 && (
                     <View style={[styles.streak, { backgroundColor: hc.streak }]}>
                       <FlameIcon color="#e8903a" size={14} />
@@ -399,10 +414,7 @@ function HomeScreen() {
                   )}
                 </View>
               </View>
-            </View>
-
-            {/* today's memorization, from the plan: what is left, or how to begin */}
-            <HifdhToday g={g} onPress={go('/memorize')} />
+            </Pressable>
 
             {/* the app's four sections */}
             <View style={styles.tiles}>
@@ -470,60 +482,6 @@ function Tile({ hc, g, tint, ink, icon: Icon, label, sub, soon, onPress }: { hc:
   );
 }
 
-// Today's memorization on the home screen: how many portions of today's plan are done and the next one waiting,
-// or the way to begin when there is no plan yet. The plan lives on the device (src/lib/hifdh/plan.js).
-type Today = { plans: number; total: number; done: number; next: string };
-function HifdhToday({ g, onPress }: { g: ReturnType<typeof useGreen>; onPress: () => void }) {
-  const { c } = useTheme();
-  const [info, setInfo] = useState<Today | null>(null);
-  useFocusEffect(
-    useCallback(() => {
-      plan
-        .ready()
-        .then(() => {
-          const rows = (plan.todayRows() as { segs?: number[][]; version: { unit: string }; status?: string; week?: number | null; complete?: boolean }[]).filter((r) => r.segs?.length);
-          const open = rows.find((r) => !isDone(r));
-          setInfo({
-            plans: (plan.get().plans as unknown[]).length,
-            total: rows.length,
-            done: rows.filter(isDone).length,
-            next: open ? portionName(open.segs, open.version.unit) : '',
-          });
-        })
-        .catch(() => setInfo(null));
-    }, []),
-  );
-  const none = !info || info.plans === 0;
-  const idle = !none && info.total === 0;
-  const finished = !none && info.total > 0 && info.done === info.total;
-  const line = none ? HOME.hifdhNoPlan() : idle ? HOME.hifdhNothing() : finished ? HOME.hifdhAllDone() : info.next;
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.today, { backgroundColor: c.card, borderColor: c.line }, pressed && styles.pressed]}>
-      <View style={[styles.todayChip, { backgroundColor: g.chip }]}>
-        <MemorizeTileIcon ink={g.base} size={26} />
-      </View>
-      <View style={{ flex: 1, gap: 2 }}>
-        <Txt size={13} weight={600} color={c.meta}>
-          {HOME.hifdhToday()}
-        </Txt>
-        <Txt size={17} weight={800} color={c.ink} numberOfLines={1}>
-          {line}
-        </Txt>
-        {!none && info.total > 0 && (
-          <View style={{ gap: 6, marginTop: 4 }}>
-            <View style={[styles.track, { backgroundColor: g.chip }]}>
-              <View style={[styles.fill, { backgroundColor: g.base, width: `${(info.done / info.total) * 100}%` }]} />
-            </View>
-            <Txt size={12} color={c.meta}>
-              {HOME.hifdhProgress(info.done, info.total)}
-            </Txt>
-          </View>
-        )}
-      </View>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   inner: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: 16 },
   head: {
@@ -551,15 +509,17 @@ const styles = StyleSheet.create({
     gap: 18,
     alignItems: 'flex-start',
   },
-  heroText: { maxWidth: '70%' },
+  heroText: { maxWidth: '78%' },
+  wirdLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  wirdChip: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   // the button at the line's start, the days in a row at its far end
   heroFoot: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   heroGo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    height: 42,
-    paddingHorizontal: 18,
+    height: 46,
+    paddingHorizontal: 20,
     borderRadius: 999,
   },
   pressed: { opacity: 0.88, transform: [{ scale: 0.99 }] },
@@ -568,10 +528,6 @@ const styles = StyleSheet.create({
   tileTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   tileChip: { width: 46, height: 46, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   soon: { paddingHorizontal: 9, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  today: { marginHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth },
-  todayChip: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  track: { height: 6, borderRadius: 3, overflow: 'hidden' },
-  fill: { height: 6, borderRadius: 3 },
   // the box's shadow outside, its sky (clouds, stars) cut to its round corners inside
   prayersBox: { marginHorizontal: 16, borderRadius: 26 },
   prayers: {
