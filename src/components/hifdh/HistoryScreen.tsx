@@ -34,15 +34,14 @@ export function ProgressSection({ onPress }: { onPress: () => void }) {
     <View style={{ gap: 12 }}>
       <Heading title={HIF.progress()} link={HIF.history()} onLink={onPress} />
       <View style={styles.pair}>
-        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: t.line }]}>
-          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: t.wash }]} />
+        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: c.line }]}>
           <Txt size={13.5} color={c.meta}>
             {HIF.progressLabel()}
           </Txt>
           <View style={styles.miniRow}>
-            <ProgressRing size={60} inside={false} color={t.base} track={t.chip} />
+            <ProgressRing size={60} inside={false} color={t.base} track={c.soft} />
             <View style={{ flex: 1 }}>
-              <Txt size={pct == null ? 20 : 26} weight={800} color={t.ink} lineHeight={pct == null ? 28 : 32}>
+              <Txt size={pct == null ? 20 : 26} weight={800} color={c.ink} lineHeight={pct == null ? 28 : 32}>
                 {pct == null ? HIF.progressNone() : `${num(pct)}%`}
               </Txt>
               <Txt size={12.5} color={c.meta} lineHeight={18}>
@@ -51,13 +50,12 @@ export function ProgressSection({ onPress }: { onPress: () => void }) {
             </View>
           </View>
         </Pressable>
-        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: t.line }]}>
-          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: t.wash }]} />
+        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: c.line }]}>
           <Txt size={13.5} color={c.meta}>
             {HIF.history()}
           </Txt>
           <View style={{ flex: 1, justifyContent: 'space-between', gap: 6 }}>
-            <Txt size={15} weight={600} color={t.ink} lineHeight={22}>
+            <Txt size={15} weight={600} color={c.ink} lineHeight={22}>
               {HIF.historySub()}
             </Txt>
             <View style={{ alignSelf: 'flex-end' }}>{arrow}</View>

@@ -235,3 +235,9 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - «Today's plan» and its date are the same size, bold, in the quiet `c.meta` colour; the «Progress» heading and its link use the same look.
 - Cards: titles «الحفظ» / «المراجعة», no line under them, clear no-plan states; finished card keeps the title with the congratulation under it. «Progress» = ring card + History card side by side.
 - Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.
+
+### Notes (Step 13: fifth pass, final look)
+- Cards are the settings page's: white `c.card`, hairline border, 20 px corners, serif title, no wash and no hued borders or titles. Colour is only a small accent in the card's hue (`Accent` / `useTints` in `Section.tsx`): the icon chip (green = Hifdh, blue = Murajaa), the Progress ring (rose) and the kept days of the week (violet).
+- A card's head holds only its icon and its title («الحفظ» / «المراجعة»); `Section` has no subtitle any more.
+- Finished card (`DoneCard`), organised below the title: the portions done (bold), a hairline rule, the congratulation (bold) with the blessing under it, and «Undo» at the end. A faint hue wash and a solid chip with a white check mark it as done.
+- Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.

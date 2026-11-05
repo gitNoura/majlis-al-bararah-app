@@ -29,14 +29,13 @@ export function WeekCard() {
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: t.line }]}>
-      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: t.wash }]} />
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }]}>
       <View style={styles.top}>
-        <Txt serif size={18} weight={700} color={t.ink} lineHeight={30}>
+        <Txt serif size={18} weight={700} color={c.ink} lineHeight={30}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
-          <Txt size={26} weight={800} color={t.ink} lineHeight={30}>
+          <Txt size={26} weight={800} color={c.ink} lineHeight={30}>
             {num(n)}
           </Txt>
           <Txt size={12} color={c.meta}>
@@ -49,18 +48,18 @@ export function WeekCard() {
           const state: DayState = kept.has(d) ? 'on' : d === today ? 'now' : started && d >= started && d < today ? 'miss' : 'idle';
           return (
             <View key={d} style={styles.day}>
-              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={state === 'now' ? t.ink : c.text}>
+              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={state === 'now' ? c.ink : c.text}>
                 {weekdayName(core.weekdayOf(d))}
               </Txt>
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? t.base : t.chip },
+                  { backgroundColor: state === 'on' ? t.base : c.soft },
                   state === 'now' && { borderWidth: 1.5, borderColor: t.ink },
                 ]}
               >
                 {state === 'on' && <CheckIcon color="#ffffff" size={16} strokeWidth={2.4} />}
-                {state === 'miss' && <CloseMark color={t.ink} />}
+                {state === 'miss' && <CloseMark color={c.meta} />}
               </View>
             </View>
           );

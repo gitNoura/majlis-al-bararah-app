@@ -48,28 +48,21 @@ export function useTints(accent: Accent = 'green') {
   };
 }
 
-// A card, as on the settings page (a hairline border, 20 px corners) with the home page's serif title, washed in its
-// own hue; an optional round-square icon chip (`icon` is given the colour to draw with). `tone="done"` is a finished
-// card: a stronger wash, its icon a white check on the solid hue.
-export function Section({ title, subtitle, icon, accent = 'green', tone, children, style }: { title: string; subtitle?: string; icon?: (color: string) => ReactNode; accent?: Accent; tone?: Tone; children: ReactNode; style?: StyleProp<ViewStyle> }) {
+// A card, as on the settings page (white, a hairline border, 20 px corners) with the home page's serif title. Colour is
+// only an accent: the icon chip takes the card's hue. `tone="done"` is a finished card: a faint wash of its hue and
+// a solid chip with a white check. Nothing is ever written under the title: the card's content goes below the head.
+export function Section({ title, icon, accent = 'green', tone, children, style }: { title: string; icon?: (color: string) => ReactNode; accent?: Accent; tone?: Tone; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const { c, isDark } = useTheme();
   const t = useTints(accent);
   const done = tone === 'done';
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: done ? alpha(t.base, 0.55) : t.line }, style]}>
-      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: done ? alpha(t.base, isDark ? 0.2 : 0.16) : t.wash }]} />
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: done ? t.line : c.line }, style]}>
+      {done && <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: alpha(t.base, isDark ? 0.12 : 0.07) }]} />}
       <View style={styles.head}>
         {icon ? <View style={[styles.chip, { backgroundColor: done ? t.base : t.chip }]}>{icon(done ? '#ffffff' : t.ink)}</View> : null}
-        <View style={{ flex: 1 }}>
-          <Txt serif size={18} weight={700} color={t.ink} lineHeight={30}>
-            {title}
-          </Txt>
-          {subtitle ? (
-            <Txt size={13} color={c.meta}>
-              {subtitle}
-            </Txt>
-          ) : null}
-        </View>
+        <Txt serif size={18} weight={700} color={c.ink} lineHeight={30} style={{ flex: 1 }}>
+          {title}
+        </Txt>
       </View>
       {children}
     </View>
