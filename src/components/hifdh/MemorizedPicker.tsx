@@ -3,6 +3,7 @@
 // its 16 thumun, grouped in two hizb). It does not own the data: `bits` is one 0/1 per ayah and `onSet`
 // is called to put a span [from, to) in or out. The memorized page feeds it the ledger; the plan setup
 // (3c-2) feeds it the plan's range. `quick` adds the summary and the two shortcuts of the memorized page.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 

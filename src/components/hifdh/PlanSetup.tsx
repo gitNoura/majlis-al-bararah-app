@@ -2,6 +2,7 @@
 // questions (what to do, what you know the first time, scope, amount or finish date, days, summary); editing
 // is one page with every choice, pause and delete under Save. It draws its own head and bottom button, so the
 // phone's back button and the head's back step through the questions before leaving.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { useEffect, useState, type ReactNode } from 'react';
 import { Alert, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

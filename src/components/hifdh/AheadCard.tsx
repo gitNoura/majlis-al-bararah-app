@@ -1,6 +1,7 @@
 // «Ahead of schedule»: for whoever has finished today's plan and wants to go on (aheadHTML of the website).
 // First an offer to start tomorrow's plan; once opened (or once something ahead is done) the next portions
 // are listed. Nothing is drawn while today's plan is unfinished or there is nothing ahead.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { useState } from 'react';
 import { View } from 'react-native';
 

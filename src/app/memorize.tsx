@@ -6,6 +6,7 @@
 // Listen (`ListenScreen`, the 'listen' view) opens from the Listen tab or a row's listen button and steps back here.
 // «History» (`HistoryScreen`, the tile under the cards) lists the past days. Recite has no page on the website yet (it says «coming soon»), so it does the same here.
 // `rev` (in HifProvider) goes up after every mark, so the summary and the cards redraw.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { ActivityIndicator, BackHandler, ScrollView, View } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

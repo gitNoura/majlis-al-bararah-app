@@ -1,5 +1,6 @@
 // «My plans» (plansHTML of the website): a card per plan with Modify / Pause (or Resume) / Delete, and «Add plan».
 // The «My plans» tab (HifTabs) is the door to it from the plan screen.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';

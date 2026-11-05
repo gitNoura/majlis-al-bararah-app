@@ -1,5 +1,6 @@
 // «Your week»: how many of the seven days (Monday first) had something done, and a pill for each day:
 // kept (check), today, missed since the first plan began (cross), or still to come.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 

@@ -1,5 +1,6 @@
 // «What I've memorized»: the page behind the ring (memorizedHTML of the website). Marks go straight into the
 // ledger as you tap, so there is no Save button; `refresh()` redraws the ring and the cards behind it.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { useMemo } from 'react';
 import { View } from 'react-native';
 

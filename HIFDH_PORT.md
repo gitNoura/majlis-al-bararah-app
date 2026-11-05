@@ -101,6 +101,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 3d: history → `components/hifdh/HistoryScreen.tsx` (`HistoryTile` under the cards, `'history'` view in `memorize.tsx`, status sheet, extra-revision removal, «Older»)
 - [x] Step 3e: `importOldMarks()` skipped on purpose: it migrates the web's old Hifdh map marks (`marksIn()` from `src/hifdh/marks.js`, once, flag `hifz2ImportedMarks`) into the ledger. The app has no old map and never stored those marks (no `hifdhMarks` / `marks.js` equivalent in `src/`; `src/lib/marks.ts` is highlights and notes), so there is nothing to import. If the app ever gets the old map, port it then.
 - [x] Step 5 (follow-up): Listen looks like the web: the app's mushaf (`PageCurl`) behind it, top bar, ayah taps choose the range, lit ayah, page follows playback, player pill, settings sheet (see notes below)
+- [ ] Step 6 (fixes from the phone): (a) screens did not redraw after a mark until leaving the page; (b) Listen's player pill and settings sheet layout
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
@@ -151,3 +152,6 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - Reading place: Listen starts on the page of the portion's first ayah (or the saved page) and does not write `lastPage`, so leaving leaves the reader where it was.
 - Closest-to-web choices: no ayah context menu or notes here (the web hides them too); the web's `ls-jump` panel is the app's existing `QuranIndex`; two-page spreads do not exist in the app, so «whole page» is the one page shown.
 - tsc and lint are clean; not run on a device from this sandbox.
+
+### Notes (Step 6a: screens not redrawing)
+- Cause: the app has `reactCompiler: true` (app.json). The cards read the plan from a module (`plan.todayRows()`, `plan.get()`...) with no props or state, so the compiler cached their output and `rev` (bumped by `refresh()`) never made them redraw; leaving and re-entering mounted them fresh. Fix: `'use no memo'` at the top of every Hifdh component that reads that state (the cards, `TaskRow`, `WeekCard`, `MemorizedRing`, `PlanSummary`, `PlansList`, `PlanSetup`, `MemorizedScreen`, `MemorizedPicker`, `HistoryScreen`, `ListenScreen`) and of `src/app/memorize.tsx`. Rule for new Hifdh components: if it reads `plan.*` or the Listen engine, add the directive.

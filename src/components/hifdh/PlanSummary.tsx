@@ -1,5 +1,6 @@
 // The top of the Plan screen: the week, the memorized ring, and the heading of today's plan with the
 // day's date. The daily cards (3b) go right under it.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { StyleSheet, View } from 'react-native';
 
 import { MemorizedRing } from '@/components/hifdh/MemorizedRing';

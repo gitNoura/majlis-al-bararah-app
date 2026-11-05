@@ -6,6 +6,7 @@
 // gently, the one heard now gold, and the page turns by itself to follow it. Leaving keeps the reading place:
 // nothing here writes 'lastPage'. The engine (steps, two players taking turns, the log) is `Listener` in
 // src/lib/hifdh/listen.js.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useMemo, useState } from 'react';

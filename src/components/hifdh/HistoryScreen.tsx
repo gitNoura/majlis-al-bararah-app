@@ -1,6 +1,7 @@
 // «History» (historyHTML, openStatus and the «History» tile of the website): the past days, newest first, with
 // each planned portion and how it went; a tap opens the status sheet (done / stopped at an ayah / not done /
 // clear the mark); an extra-revision session is removed with a tap. 40 days at a time, then «Older».
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

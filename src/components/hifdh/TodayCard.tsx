@@ -1,5 +1,6 @@
 // «New memorization»: today's memorization portions (todayHTML of the website). With no memorization plan
 // yet it offers «Set up my plan»; with a plan but nothing today it says what comes next.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';

@@ -1,5 +1,6 @@
 // «Revision»: today's revision portions (revisionHTML of the website). Revision opens once something is
 // memorized: before that the plan button is disabled and any revision rows are locked.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';

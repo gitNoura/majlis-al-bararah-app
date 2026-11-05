@@ -1,6 +1,7 @@
 // The memorized ring: the share of the Quran the reader knows, as a small ring with its percentage,
 // beside «Memorized / Edit what I’ve memorized». Pressing it opens the memorized picker (3c) when
 // `onPress` is given.
+'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
