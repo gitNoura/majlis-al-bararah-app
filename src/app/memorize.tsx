@@ -1,6 +1,6 @@
 // «Memorization» (الحفظ): the Plan screen of the Hifdh page, and the screens inside it. 3a: the head and the
 // plan's summary (the week, the memorized ring, today's heading). 3b: the daily cards (today's memorization,
-// ahead of schedule, revision). 3c-1: «what I've memorized» (the ring opens it). 3c-2: the plan setup and edit
+// the congratulation card once today is done, revision). 3c-1: «what I've memorized» (the ring opens it). 3c-2: the plan setup and edit
 // (`PlanSetup`, opened by «Set up my plan» / «Start a revision plan»). 3c-3: «My plans» (`PlansList`, with modify / pause /
 // delete / add plan), opened from the tile under the cards; editing a plan returns there.
 // Listen (`ListenScreen`, the 'listen' view) opens from the Listen tab or a row's listen button and steps back here.
@@ -11,7 +11,7 @@ import { ActivityIndicator, BackHandler, ScrollView, View } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AheadCard } from '@/components/hifdh/AheadCard';
+import { CongratsCard } from '@/components/hifdh/CongratsCard';
 import { HifHeader } from '@/components/hifdh/HifHeader';
 import { ListenScreen } from '@/components/hifdh/ListenScreen';
 import { HistoryScreen, HistoryTile } from '@/components/hifdh/HistoryScreen';
@@ -86,7 +86,7 @@ function Content({
         <ScrollView contentContainerStyle={{ ...pad, paddingBottom: pad.paddingBottom + TABS_HEIGHT }}>
           <PlanSummary onOpenMemorized={() => (plan.markMemorizedAsked(), go('memorized'))} />
           <TodayCard />
-          <AheadCard />
+          <CongratsCard />
           <RevisionCard />
           <HistoryTile onPress={() => go('history')} />
         </ScrollView>

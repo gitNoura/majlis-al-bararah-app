@@ -11,7 +11,7 @@ import { CheckIcon } from '@/components/icons';
 import { PrimaryButton, SecondaryButton } from '@/components/hifdh/Section';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
-import { surahName } from '@/i18n/i18n';
+import { isEnglish, surahName } from '@/i18n/i18n';
 import { UNIT_PLURAL, num } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { SURAHS } from '@/lib/quran';
@@ -27,6 +27,14 @@ const count = (bits: Bits, a: number, b: number) => {
   return n;
 };
 const stateOf = (have: number, size: number): St => (have === size ? 2 : have ? 1 : 0);
+// Progress is told in ahzab (a hizb is 8 thumun, 60 in the Quran), not ayat: a part-known hizb counts by its share.
+const hizbShare = (bits: Bits): number => {
+  const hz = plan.units().unit.hizb;
+  let sum = 0;
+  for (let u = 0; u < hz.count; u++) sum += count(bits, hz.start[u], hz.start[u] + hz.size[u]) / hz.size[u];
+  return Math.round(sum * 10) / 10;
+};
+const ARABIC = /[\u0600-\u06FF]/;
 
 function Check({ st, label, onPress }: { st: St; label: string; onPress: () => void }) {
   const { c } = useTheme();
@@ -77,6 +85,8 @@ function SurahList({ bits, onSet }: Omit<Props, 'quick'>) {
   const [from, setFrom] = useState('1');
   const [to, setTo] = useState('');
   const query = q.trim().toLowerCase();
+  // Arabic runs right to left: typed Arabic (or an empty field in the Arabic interface) sits on the right
+  const rtl = ARABIC.test(q) || (!q && !isEnglish);
 
   const toggle = (i: number, n: number) => {
     setOpen(open === i ? -1 : i);
@@ -94,7 +104,7 @@ function SurahList({ bits, onSet }: Omit<Props, 'quick'>) {
         autoCorrect={false}
         autoCapitalize="none"
         clearButtonMode="while-editing"
-        style={[styles.search, { borderColor: c.chosenLine, backgroundColor: c.surface, color: c.ink }]}
+        style={[styles.search, { borderColor: c.chosenLine, backgroundColor: c.surface, color: c.ink }, rtl && styles.searchRtl]}
       />
       {SURAHS.map((sr, i) => {
         if (query && !(String(i + 1) === query || String(sr.name).includes(query) || (sr.latin || '').toLowerCase().includes(query))) return null;
@@ -190,7 +200,7 @@ function JuzList({ bits, onSet }: Omit<Props, 'quick'>) {
                   ))}
                 </View>
                 <Txt size={13} color={c.meta}>
-                  {n}/16
+                  {num(n / 8)}/2
                 </Txt>
               </Pressable>
             </View>
@@ -244,12 +254,12 @@ export function MemorizedPicker({ bits, onSet, quick = false }: Props) {
               {num(plan.ringPercent())}%
             </Txt>
             <Txt size={14} color={c.meta}>
-              {HIF.ofQuran()} · {num(plan.memorizedCount())} {UNIT_PLURAL.ayah()}
+              {HIF.ofQuran()} · {num(hizbShare(bits))}/60 {UNIT_PLURAL.hizb()}
             </Txt>
           </View>
           <View style={styles.quick}>
             <View style={{ flex: 1 }}>
-              {total === N ? <PrimaryButton label={HIF.wholeQuran()} onPress={() => onSet(0, N, true)} /> : <SecondaryButton label={HIF.wholeQuran()} onPress={() => onSet(0, N, true)} />}
+              {total === N ? <PrimaryButton label={HIF.wholeQuran()} onPress={() => onSet(0, N, false)} /> : <SecondaryButton label={HIF.wholeQuran()} onPress={() => onSet(0, N, true)} />}
             </View>
             <View style={{ flex: 1 }}>
               {total === 0 ? <PrimaryButton label={HIF.nothingYet()} onPress={() => onSet(0, N, false)} /> : <SecondaryButton label={HIF.nothingYet()} onPress={() => onSet(0, N, false)} />}
@@ -269,6 +279,7 @@ const styles = StyleSheet.create({
   tabs: { flexDirection: 'row', borderRadius: 16, padding: 4, gap: 4 },
   tab: { flex: 1, minHeight: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   search: { minHeight: 46, borderWidth: 1, borderRadius: 16, paddingHorizontal: 14, fontSize: 15 },
+  searchRtl: { textAlign: 'right', writingDirection: 'rtl' },
   row: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12, paddingVertical: 10, gap: 10 },
   rowHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   rowMain: { flex: 1, minHeight: 36, justifyContent: 'center' },

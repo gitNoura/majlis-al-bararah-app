@@ -1,5 +1,5 @@
 // One planned portion (taskHTML of the website): its name and where it starts, a listen button and
-// «Complete». A long press on «Complete» opens «where did you stop?». Used by the Today, Revision and Ahead cards.
+// «Complete». A long press on «Complete» opens «where did you stop?». Used by the Today and Revision cards.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { useRef } from 'react';
 import { Dimensions, Pressable, StyleSheet, View } from 'react-native';

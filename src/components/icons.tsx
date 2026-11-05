@@ -238,6 +238,17 @@ export const MicIcon = (p: IconProps) => (
     <Path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" />
   </Line>
 );
+// Hifdh «Revision» (two arrows going round) and «History» (a calendar)
+export const RepeatIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M17 2.5l3 3-3 3M4 11V9.5a4 4 0 0 1 4-4h12M7 21.5l-3-3 3-3M20 13v1.5a4 4 0 0 1-4 4H4" />
+  </Line>
+);
+export const CalendarIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Path d="M6.5 5h11A2.5 2.5 0 0 1 20 7.5v10a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5v-10A2.5 2.5 0 0 1 6.5 5zM8 3v4M16 3v4M4 10h16" />
+  </Line>
+);
 export const PauseIcon = (p: IconProps) => (
   <Line {...p} strokeWidth={3}>
     <Path d="M8 5.5v13M16 5.5v13" />

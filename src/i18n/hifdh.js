@@ -39,14 +39,13 @@ export const HIF = {
   nothingToday: () => L('لا ورد لهذا اليوم.', 'Nothing is planned for today.', 'Rien de prévu aujourd’hui.'),
   nothingTodayNext: (day) => L(`لا ورد اليوم. التالي: ${day}.`, `Nothing today. Next: ${day}.`, `Rien aujourd’hui. Prochain : ${day}.`),
   allDone: () => L('ما شاء الله، أتممتَ ورد اليوم.', 'MashaAllah, you’ve finished today’s plan.', 'MashaAllah, vous avez terminé le plan du jour.'),
-  aheadHint: () =>
+  congratsTitle: () => L('ما شاء الله، أتممتَ وِردك', 'MashaAllah, today is done', 'MashaAllah, c’est fait pour aujourd’hui'),
+  congratsBody: () =>
     L(
-      'إن بقي لك نشاط، فيمكنك أن تسبق وِرد الغد.',
-      'Still have energy? You can get ahead on tomorrow’s plan.',
-      'Il vous reste de l’énergie ? Vous pouvez avancer sur le plan de demain.',
+      'بارك الله فيك وفي جهدك. نلقاك غدًا على وِرد جديد.',
+      'May Allah bless your effort. Come back tomorrow for the next portion.',
+      'Qu’Allah bénisse votre effort. Revenez demain pour la suite.',
     ),
-  startTomorrow: () => L('ابدأ ورد الغد الآن', 'Start tomorrow’s plan now', 'Commencer le plan de demain'),
-  aheadTitle: () => L('سَبْقٌ للغد', 'Ahead of schedule', 'En avance'),
   aheadDone: () => L('بارك الله فيك، سبقتَ ورد الغد.', 'Well done, you’re ahead of schedule.', 'Bravo, vous êtes en avance.'),
 
   // revision

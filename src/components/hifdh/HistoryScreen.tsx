@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
 import { Hint, Section } from '@/components/hifdh/Section';
-import { ClockIcon, CloseIcon } from '@/components/icons';
+import { CalendarIcon, CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish } from '@/i18n/i18n';
@@ -26,7 +26,7 @@ export function HistoryTile({ onPress }: { onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={[styles.tile, { backgroundColor: c.card, borderColor: c.line }]}>
       <View style={[styles.tileIcon, { backgroundColor: c.soft }]}>
-        <ClockIcon color={c.ink} size={22} />
+        <CalendarIcon color={c.ink} size={22} />
       </View>
       <View style={{ flex: 1 }}>
         <Txt serif size={18} weight={700} color={c.ink}>

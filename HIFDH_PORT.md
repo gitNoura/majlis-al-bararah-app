@@ -106,9 +106,9 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 7b: first-time clarity (the Welcome screen it first added was REMOVED in Step 8; only the card subtitles stay)
 - [x] Step 8: undo Step 7b's Welcome screen (not wanted) and redesign the SAME Plan page: clearer and more modern (tinted cards with icons, clearer week card and ring, clearer Complete buttons, a one-line intro when there is no plan)
 - [x] Step 9: the Plan page's bottom tabs (Listen / My plans / Recite) become a full-width bar like the Quran reading page's; the floating dock is removed
-- [ ] Step 10a: new icons for Revision (repeat) and History (calendar)
-- [ ] Step 10b: finishing today shows a congratulation card instead of tomorrow's task (the «Ahead» card is removed)
-- [ ] Step 10c: «What I've memorized»: a second tap unselects (whole Quran, surahs, juz, ahzab...); tracking by ahzab instead of ayat; Arabic search text runs right to left
+- [x] Step 10a: new icons for Revision (repeat) and History (calendar)
+- [x] Step 10b: finishing today shows a congratulation card instead of tomorrow's task (the «Ahead» card is removed)
+- [x] Step 10c: «What I've memorized»: a second tap unselects (whole Quran, surahs, juz, ahzab...); tracking by ahzab instead of ayat; Arabic search text runs right to left
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
@@ -187,3 +187,9 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 ### Notes (Step 9: the bottom bar)
 - `HifTabs` is now the Quran reading page's bar (`BAR_H` 62 + the bottom inset, `c.panel`, a hairline `c.line` above, icon over name in `c.tabInk`, a press dims it) instead of the floating rounded dock; it follows the language's direction like the Quran bar (the web's dock was always left to right). The plan page's scroll leaves room for it (`TABS_HEIGHT` = 62).
 - Left as it was: Listen's own player pill (it is the web's Listen bar, not these tabs).
+
+### Notes (Step 10: icons, congratulation, memorized picker)
+- 10a: `RepeatIcon` and `CalendarIcon` added to `src/components/icons.tsx` (same `Line` style as the others). The Revision card uses the repeat icon, the History tile the calendar; `ClockIcon` stays for settings.
+- 10b: `AheadCard.tsx` is removed and `CongratsCard.tsx` takes its place under the Today card. It shows only when today has portions and every one is done (`isDone`); it says «MashaAllah, today is done» with the existing `allDone` line and a short blessing, and never lists tomorrow's portions. New strings `congratsTitle` / `congratsBody` (ar/en/fr); `aheadTitle`, `aheadHint`, `startTomorrow` were removed. Left as they were (now unused, harmless): `aheadRows()` in `labels.js`, the `ahead` prop and the `aheadDone` toast in `TaskRow`.
+- 10c: in `MemorizedPicker`, the «Whole Quran» button is now a toggle (a second tap while everything is in takes everything out); surahs, juz, hizb and thumun already toggled. Progress is told in ahzab: the summary reads «N/60 hizb» (a part-known hizb counts by its share, one decimal) and each juz row reads «n/2» ahzab instead of «n/16» thumun; surah rows stay in ayat since a surah is cut by ayat. The surah search field runs right to left for typed Arabic, and when it is empty in the Arabic interface.
+- Not run: `npx tsc --noEmit` and `npx expo lint` (no `node_modules` in this sandbox and package installs are off). Only a syntax-level check of the changed files was done. Run both before the next step.
