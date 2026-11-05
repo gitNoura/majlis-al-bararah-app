@@ -267,6 +267,8 @@ export const HIF = {
   lsClose: () => L('إغلاق', 'Close', 'Fermer'),
   // the Plan page for someone with no plan yet, and the cards' one-line subtitles
   planIntro: () => L('ضع خطة، وسترى هنا كل يوم ما تحفظه وما تراجعه.', 'Set a plan and this page shows each day what to memorize and what to revise.', 'Créez un plan et cette page vous montre chaque jour quoi mémoriser et quoi réviser.'),
+  doneMemorized: () => L('تمّ الحفظ', 'Memorized', 'Mémorisé'),
+  doneRevised: () => L('تمّت المراجعة', 'Revised', 'Révisé'),
   cardHifdh: () => L('الحفظ', 'Memorization', 'Mémorisation'),
   cardMurajaa: () => L('المراجعة', 'Revision', 'Révision'),
   noHifdhPlan: () => L('لا توجد خطة حفظ بعد', 'No memorization plan yet', 'Aucun plan de mémorisation pour l’instant'),

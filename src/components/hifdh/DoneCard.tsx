@@ -1,13 +1,13 @@
-// What a card becomes once everything in it is done (the usual way in apps): the same card, tinted soft green, its icon a
-// check, the card's own title alone in the head, then below it the portions done, a rule, the congratulation, and a small «Undo». The Complete and Listen buttons are gone.
-// Used by the memorization card and the revision card; the confetti is TaskRow's.
+// What a card becomes once everything in it is done: the same card with its own icon and title, tinted soft green. Below
+// the head: the congratulation, then a row with a «Memorized» / «Revised» check pill (with the portions) and «Undo» at the
+// other end. The Complete and Listen buttons are gone. Used by the memorization and revision cards; the confetti is TaskRow's.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { Hint, Section } from '@/components/hifdh/Section';
+import { Hint, Section, useGreen } from '@/components/hifdh/Section';
 import type { Row } from '@/components/hifdh/StopSheet';
-import { CheckIcon } from '@/components/icons';
+import { CheckIcon, HifdhIcon, RepeatIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { findRow, portionName } from '@/lib/hifdh/labels';
@@ -16,6 +16,7 @@ import { useTheme } from '@/theme/theme';
 
 export function DoneCard({ rows, revise }: { rows: Row[]; revise?: boolean }) {
   const { c } = useTheme();
+  const g = useGreen();
   const { refresh } = useHif();
   const names = rows.map((r) => (r.week != null ? HIF.weekComplete() : portionName(r.segs, r.version.unit))).join(' · ');
   const partial = rows.some((r) => r.status === 'partial');
@@ -24,31 +25,35 @@ export function DoneCard({ rows, revise }: { rows: Row[]; revise?: boolean }) {
     for (const r of rows) plan.mark(findRow(`${r.plan.id}|${r.week ?? r.day}`) ?? r, 'untouched');
     refresh();
   };
+  const Icon = revise ? RepeatIcon : HifdhIcon;
   return (
-    <Section
-      title={revise ? HIF.cardMurajaa() : HIF.cardHifdh()}
-      tone="done"
-      icon={(color) => <CheckIcon color={color} size={22} strokeWidth={2.4} />}
-    >
-      <Txt size={17} weight={700} color={c.ink}>
-        {names}
-      </Txt>
-      <View style={[styles.rule, { backgroundColor: c.divider }]} />
+    <Section title={revise ? HIF.cardMurajaa() : HIF.cardHifdh()} tone="done" icon={(color) => <Icon color={color} size={22} />}>
       <View style={{ gap: 2 }}>
-        <Txt size={15} weight={700} color={c.ink}>
+        <Txt size={16} weight={700} color={c.ink}>
           {revise ? HIF.reviseDoneTitle() : HIF.congratsTitle()}
         </Txt>
         <Hint>{partial ? HIF.partialToast() : revise ? HIF.reviseDoneBody() : HIF.congratsBody()}</Hint>
       </View>
-      {canUndo && (
-        <Pressable onPress={undo} hitSlop={10} accessibilityRole="button" style={{ alignSelf: 'flex-end' }}>
-          <Txt size={14} weight={700} color={c.goldStrong}>
-            {HIF.undo()}
+      <View style={styles.foot}>
+        <View style={[styles.pill, { backgroundColor: g.chip }]}>
+          <CheckIcon color={g.base} size={16} strokeWidth={2.4} />
+          <Txt size={13.5} weight={700} color={g.base} numberOfLines={1} style={{ flexShrink: 1 }}>
+            {revise ? HIF.doneRevised() : HIF.doneMemorized()} · {names}
           </Txt>
-        </Pressable>
-      )}
+        </View>
+        {canUndo && (
+          <Pressable onPress={undo} hitSlop={10} accessibilityRole="button">
+            <Txt size={14} weight={700} color={c.meta}>
+              {HIF.undo()}
+            </Txt>
+          </Pressable>
+        )}
+      </View>
     </Section>
   );
 }
 
-const styles = StyleSheet.create({ rule: { height: StyleSheet.hairlineWidth } });
+const styles = StyleSheet.create({
+  foot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  pill: { flexShrink: 1, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999 },
+});

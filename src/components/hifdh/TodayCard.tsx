@@ -3,7 +3,7 @@
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { View } from 'react-native';
 
-import { BookOpenIcon } from '@/components/icons';
+import { HifdhIcon } from '@/components/icons';
 import { useTheme } from '@/theme/theme';
 
 import { useHif } from '@/components/hifdh/HifProvider';
@@ -24,7 +24,7 @@ export function TodayCard() {
 
   if (!st.plans.some((p: { type: string }) => p.type === 'memorize')) {
     return (
-      <Section title={title} icon={(color) => <BookOpenIcon color={color} size={22} />}>
+      <Section title={title} icon={(color) => <HifdhIcon color={color} size={22} />}>
         <Txt size={15} weight={700} color={c.ink}>
           {HIF.noHifdhPlan()}
         </Txt>
@@ -40,7 +40,7 @@ export function TodayCard() {
   if (rows.length && rows.every(isDone)) return <DoneCard rows={rows} />; // done: the same card turns into the congratulation
 
   return (
-    <Section title={title} icon={(color) => <BookOpenIcon color={color} size={22} />}>
+    <Section title={title} icon={(color) => <HifdhIcon color={color} size={22} />}>
       {rows.length ? (
         <View>
           {rows.map((r: Row, i: number) => (

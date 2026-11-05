@@ -18,11 +18,11 @@ export function alpha(hex: string, a: number) {
 export function useGreen() {
   const { isDark } = useTheme();
   const base = isDark ? '#6fb597' : '#2f6650';
-  return { base, chip: alpha(base, isDark ? 0.22 : 0.1), line: alpha(base, isDark ? 0.4 : 0.28), wash: alpha(base, isDark ? 0.12 : 0.06) };
+  return { base, chip: alpha(base, isDark ? 0.22 : 0.1), line: alpha(base, isDark ? 0.4 : 0.28), wash: alpha(base, isDark ? 0.16 : 0.1) };
 }
 
 // A card: white on the light screen, a hairline border, 20 px corners, the title in the UI font. The icon chip is the
-// card's only colour. `tone="done"` is a finished card: a faint green wash and a solid green chip with a white check.
+// card's only colour. `tone="done"` is a finished card: a soft green wash and border (the icon stays as it was).
 // Nothing is ever written under the title: the card's content goes below the head. Hifdh and Murajaa are identical.
 export function Section({ title, icon, tone, children, style }: { title: string; icon?: (color: string) => ReactNode; tone?: Tone; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const { c } = useTheme();
@@ -32,7 +32,7 @@ export function Section({ title, icon, tone, children, style }: { title: string;
     <View style={[styles.card, { backgroundColor: c.card, borderColor: done ? g.line : c.line }, style]}>
       {done && <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: g.wash }]} />}
       <View style={styles.head}>
-        {icon ? <View style={[styles.chip, { backgroundColor: done ? g.base : g.chip }]}>{icon(done ? '#ffffff' : g.base)}</View> : null}
+        {icon ? <View style={[styles.chip, { backgroundColor: g.chip }]}>{icon(g.base)}</View> : null}
         <Txt size={18} weight={700} color={c.ink} style={{ flex: 1 }}>
           {title}
         </Txt>

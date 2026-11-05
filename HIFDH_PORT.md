@@ -248,3 +248,8 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - The week card keeps the earlier green version: a sage card (`#eff3ee`), kept days in forest green, the other days a grey-green tint.
 - Progress: ring card (green ring) and History card, both neutral.
 - Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.
+
+### Notes (Step 13: seventh pass, finished card and icons)
+- Finished card (`DoneCard`): the head keeps the card's own icon and title (the icon no longer turns into a check); the middle rule is gone. Below: the congratulation (bold) with the blessing under it, then a row with a «Memorized» / «Revised» check pill (with the portions) at the start and «Undo» at the end. A done card is washed soft green (10 %) with a green border.
+- Icons: `HifdhIcon` (a book with a bookmark) for the Hifdh card and `PlansIcon` (a checklist) for «My plans» in the bottom bar, in `icons.tsx`.
+- Not run: `npx tsc --noEmit` / `npx expo lint` (no `node_modules`, installs off); syntax-only check done.
