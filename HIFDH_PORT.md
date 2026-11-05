@@ -109,6 +109,9 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 10a: new icons for Revision (repeat) and History (calendar)
 - [x] Step 10b: finishing today shows a congratulation card instead of tomorrow's task (the «Ahead» card is removed)
 - [x] Step 10c: «What I've memorized»: a second tap unselects (whole Quran, surahs, juz, ahzab...); tracking by ahzab instead of ayat; Arabic search text runs right to left
+- [ ] Step 11a: finishing a portion changes the same card (no extra congratulation box, no extra pop-up box)
+- [ ] Step 11b: the Arabic wording of the Hifdh pages rewritten to read as Arabic, not as a translation
+- [ ] Step 11c: the Hifdh pages take the Home page's look (star background, large serif heading, warm tiles and shadows, glass bottom bar)
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
