@@ -437,7 +437,7 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
       <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={(p) => setPage(Math.min(TOTAL_PAGES, Math.max(1, p)))} />
 
       {setOpen && (
-        <View style={StyleSheet.absoluteFill}>
+        <View style={[StyleSheet.absoluteFill, { zIndex: 30, elevation: 30 }]}>{/* above the top bar (zIndex 5), which would show through */}
           <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]} onPress={() => setSetOpen(false)} accessibilityLabel={HIF.lsClose()} />
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetWrap} pointerEvents="box-none">
             <View style={[styles.sheet, { backgroundColor: c.panel, paddingBottom: insets.bottom + 12, maxHeight: height - insets.top - 24 }]}>

@@ -102,7 +102,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 3e: `importOldMarks()` skipped on purpose: it migrates the web's old Hifdh map marks (`marksIn()` from `src/hifdh/marks.js`, once, flag `hifz2ImportedMarks`) into the ledger. The app has no old map and never stored those marks (no `hifdhMarks` / `marks.js` equivalent in `src/`; `src/lib/marks.ts` is highlights and notes), so there is nothing to import. If the app ever gets the old map, port it then.
 - [x] Step 5 (follow-up): Listen looks like the web: the app's mushaf (`PageCurl`) behind it, top bar, ayah taps choose the range, lit ayah, page follows playback, player pill, settings sheet (see notes below)
 - [x] Step 6 (fixes from the phone): (a) screens did not redraw after a mark until leaving the page; (b) Listen's player pill and settings sheet layout
-- [ ] Step 7a: Listen settings sheet: the page's top bar (surah name, index button) still showed through it
+- [x] Step 7a: Listen settings sheet: the page's top bar (surah name, index button) still showed through it
 - [ ] Step 7b: first-time clarity and a more modern look: a Welcome screen when there is no plan yet (what the page does, how it works, one clear start button), short subtitles and icons on the cards
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
@@ -163,3 +163,6 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - The settings sheet is at most as tall as the room under the status bar and the page behind it is dimmed (40 %), so the surah name no longer shows through its top edge.
 - «Play audio» now works from the From / To the sheet shows even if no ayah was tapped first (it was disabled, which looked broken), and the number boxes use the app's font.
 - The blue round gear at the top-left of the screenshots is Expo Go's own developer-tools button, not part of the app.
+
+### Notes (Step 7a: sheet peek-through)
+- The top bar and the surah name of Listen have `zIndex: 5`, which put them over the settings overlay (a later sibling with no zIndex). The overlay now has `zIndex: 30` / `elevation: 30`, so the sheet and its dimmed backdrop cover the whole page.
