@@ -251,4 +251,10 @@ export const HIF = {
   lsRoundsH: () => L('كم مرة تسمع المقطع كله؟', 'Play the whole selection', 'Écouter toute la sélection'),
   lsOptional: () => L('(اختياري)', '(optional)', '(facultatif)'),
   lsSettings: () => L('إعدادات الاستماع', 'Playback settings', 'Réglages d’écoute'),
+  lsLocked: () => L('الآيات محددة. لتغييرها اضغط ✕ أو افتح الإعدادات.', 'The ayat are set. To change them, press ✕ or open settings.', 'Les versets sont choisis. Pour les changer, appuyez sur ✕ ou ouvrez les réglages.'),
+  lsPickMore: () => L('اضغط على آية أخرى لتشمل ما بينهما', 'tap another ayah to include everything between', 'touchez un autre verset pour inclure tout ce qui est entre'),
+  lsPickShort: () => L('اضغط على آية في الصفحة', 'Tap an ayah on the page', 'Touchez un verset sur la page'),
+  lsPageN: (n) => L(`صفحة ${n}`, `Page ${n}`, `Page ${n}`),
+  lsGo: () => L('ابدأ الاستماع', 'Play audio', 'Lancer l’écoute'),
+  lsClose: () => L('إغلاق', 'Close', 'Fermer'),
 };

@@ -1,27 +1,41 @@
-// «Listen» (listen.js of the website): choose the ayat (from / to, the whole page or surah), how many times
-// each is heard, the speed, the reciter and the way of listening, then play. The player bar at the bottom shows
-// what is heard now and has previous / play / next, repeat-all and ✕. Unlike the website there is no mushaf
-// behind it: the ayat are picked with the two «surah + ayah» boxes (the website's settings sheet).
-// The engine (steps, two players taking turns, the log) is `Listener` in src/lib/hifdh/listen.js.
+// «Listen» (listen.js of the website), on the mushaf: the same page book as the Quran screen (PageCurl) under
+// its own top bar (back, the index, the surah and page in the middle) and its own player pill. A tap on an
+// ayah chooses it, a second tap takes everything between; the settings sheet (the pill's summary or gear) has
+// the other ways: From / To, whole page or surah, how many times each ayah is heard, speed, reciter and the
+// way of listening, ending with «Play audio». The ayat chosen are tinted green, the ones of the step heard
+// gently, the one heard now gold, and the page turns by itself to follow it. Leaving keeps the reading place:
+// nothing here writes 'lastPage'. The engine (steps, two players taking turns, the log) is `Listener` in
+// src/lib/hifdh/listen.js.
+import { Image } from 'expo-image';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BackHandler, FlatList, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { BackHandler, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HifHeader } from '@/components/hifdh/HifHeader';
+import { Glass, GlassBackdrop } from '@/components/Glass';
 import { Section } from '@/components/hifdh/Section';
-import { BackIcon, CloseIcon, PauseIcon, PlayIcon } from '@/components/icons';
+import { BackIcon, CloseIcon, MenuIcon, PauseIcon, PlayIcon, SettingsIcon } from '@/components/icons';
+import { PageCurl, type Marked } from '@/components/PageCurl';
+import { QuranIndex } from '@/components/QuranIndex';
+import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish, surahName } from '@/i18n/i18n';
 import { ayatOn, pageOf } from '@/lib/boxes';
+import { PAGE_SHAPE } from '@/lib/crop';
 import { counts, keysFromTo, Listener, MAX_TYPED, METHODS, ordered, parse, pos, QUICK, reciterOf, available, SPEEDS, times } from '@/lib/hifdh/listen';
-import { SURAHS } from '@/lib/quran';
+import { SURAHS, TOTAL_PAGES } from '@/lib/quran';
+import { pageUrl } from '@/lib/remote';
+import { readJSON } from '@/lib/storage';
 import { radius } from '@/theme/tokens';
-import { useTheme } from '@/theme/theme';
+import { QuranTheme, useTheme } from '@/theme/theme';
 
 type Sel = { from: string; to: string };
 
-const PLAYER_H = 150; // the player bar's height (the scroll leaves room for it)
+const PLAYER_H = 64; // the player pill's height, as on the website
+const PAGE_GREEN = 'rgba(27, 107, 83, 0.2)'; // chosen
+const STEP_GREEN = 'rgba(27, 107, 83, 0.14)'; // the other ayat of the step being heard
+const NOW_GOLD = 'rgba(217, 185, 106, 0.42)'; // the ayah heard now
 
 // «al-Baqarah 7», «al-Baqarah 7–9», «al-Baqarah 286 ← Āl ʿImrān 3»
 function labelOf(from: string, to: string) {
@@ -156,196 +170,369 @@ function Point({ label, value, onChange }: { label: string; value: string; onCha
   );
 }
 
+const savedPage = () => {
+  const n = Number(readJSON('lastPage', 1));
+  return Number.isFinite(n) && n >= 1 && n <= TOTAL_PAGES ? n : 1;
+};
+
+// The Listen screen (the Quran's own day / night, as the reading page)
 export function ListenScreen({ start, onBack }: { start: string | null; onBack: () => void }) {
-  const { c } = useTheme();
+  return (
+    <QuranTheme>
+      <Listen start={start} onBack={onBack} />
+    </QuranTheme>
+  );
+}
+
+function Listen({ start, onBack }: { start: string | null; onBack: () => void }) {
+  const { c, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const [, bump] = useState(0);
   const [ls] = useState(() => new Listener());
-  const [sel, setSel] = useState<Sel | null>(start ? { from: start, to: start } : null);
+  const [page, setPage] = useState(() => (start ? (pageOf(...(parse(start) as [number, number])) ?? savedPage()) : savedPage()));
+  const [sel, setSel] = useState<Sel | null>(null);
+  const [anchor, setAnchor] = useState(false); // exactly one ayah is chosen: a second tap takes everything between
+  const [hint, setHint] = useState('');
+  const [setOpen, setSetOpen] = useState(false);
+  const [indexOpen, setIndexOpen] = useState(false);
+  const [seenNow, setSeenNow] = useState<string | null>(null);
 
   useEffect(() => {
     ls.start(() => bump((n) => n + 1));
     return () => ls.release();
   }, [ls]);
   useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => (onBack(), true));
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => (setOpen ? setSetOpen(false) : onBack(), true));
     return () => sub.remove();
-  }, [onBack]);
+  }, [onBack, setOpen]);
+  useEffect(() => {
+    const ahead = [page + 1, page + 2, page + 3, page - 1].filter((n) => n >= 1 && n <= TOTAL_PAGES).map(pageUrl);
+    Image.prefetch(ahead, 'disk').catch(() => {});
+  }, [page]);
+  useEffect(() => {
+    if (!hint) return;
+    const timer = setTimeout(() => setHint(''), 2800);
+    return () => clearTimeout(timer);
+  }, [hint]);
 
-  const keys = useMemo(() => (sel ? keysFromTo(sel.from, sel.to) : []), [sel]);
   const prefs = ls.prefs;
+  const keys = useMemo(() => (sel ? keysFromTo(sel.from, sel.to) : []), [sel]);
   const selId = sel ? `${sel.from}-${sel.to}|${prefs.method}` : '';
   const s = ls.s && ls.s.selId === selId ? ls.s : null;
   const playing = ls.playing && !!s;
+  const step = s ? s.steps[s.si] : null;
+  const now = s && !s.finished ? s.steps[s.si][s.ki] : null;
 
-  const setFrom = (from: string) => setSel((p) => ({ from, to: p && pos(p.to) >= pos(from) ? p.to : from }));
-  const setTo = (to: string) => setSel((p) => ({ from: p?.from ?? to, to: p && pos(to) < pos(p.from) ? p.from : to })); // an end before the start is taken as the start
-  const base = sel?.from ?? '1:1';
+  // the page follows the ayah that is heard
+  if (now !== seenNow) {
+    setSeenNow(now);
+    const p = now ? pageOf(...(parse(now) as [number, number])) : null;
+    if (p && p !== page) setPage(p);
+  }
+
+  // the page room, as the Quran screen's
+  const top = insets.top + 96;
+  const bottom = insets.bottom + PLAYER_H + 18;
+  const roomH = height - top - bottom;
+  const pageW = Math.min(width - 10, (roomH - 12) * PAGE_SHAPE);
+  const pageH = pageW / PAGE_SHAPE;
+  const nameTop = Math.min(insets.top + 10 + 32, top + (roomH - pageH) / 2 - 44 - 6);
+
+  // the tint of the ayat on this page: chosen, the step heard, the one heard now (drawn last)
+  const onPage = ayatOn(page) as { s: number; a: number; boxes: number[][] }[];
+  const chosenSet = new Set(keys);
+  const stepSet = new Set(step ?? []);
+  const marks: Marked[] = [
+    ...onPage.filter((e) => chosenSet.has(`${e.s}:${e.a}`)).map((e) => ({ ...e, color: PAGE_GREEN })),
+    ...onPage.filter((e) => stepSet.has(`${e.s}:${e.a}`) && `${e.s}:${e.a}` !== now).map((e) => ({ ...e, color: STEP_GREEN })),
+    ...onPage.filter((e) => `${e.s}:${e.a}` === now).map((e) => ({ ...e, color: NOW_GOLD })),
+  ];
+  const first = onPage[0];
+  const where = first ? surahName(SURAHS[first.s - 1]) : '';
+
+  const say = (text: string) => setHint(text);
+  // A tap on the page chooses an ayah, and a second tap completes the range. Once the range is complete, or
+  // something is playing, taps do nothing (a stray touch must not change it).
+  const tapAyah = (su: number, a: number) => {
+    const key = `${su}:${a}`;
+    if (ls.s || (sel && !anchor)) return say(HIF.lsLocked());
+    if (!sel || !anchor) {
+      setSel({ from: key, to: key });
+      setAnchor(true);
+    } else {
+      const [from, to] = ordered(sel.from, key);
+      setSel({ from, to });
+      setAnchor(false);
+    }
+  };
+  const setRange = (next: Sel) => {
+    setSel(next);
+    setAnchor(false);
+  };
+  const setFrom = (from: string) => setRange({ from, to: sel && pos(sel.to) >= pos(from) ? sel.to : from });
+  const setTo = (to: string) => setRange({ from: sel?.from ?? to, to: sel && pos(to) < pos(sel.from) ? sel.from : to }); // an end before the start is taken as the start
+  const base = sel?.from ?? (first ? `${first.s}:${first.a}` : '1:1');
   const wholeSurah = () => {
     const su = parse(base)[0];
-    setSel({ from: `${su}:1`, to: `${su}:${counts()[su - 1]}` });
+    setRange({ from: `${su}:1`, to: `${su}:${counts()[su - 1]}` });
   };
   const wholePage = () => {
-    const [su, a] = parse(base);
-    const page = pageOf(su, a);
-    const list = page ? (ayatOn(page) as { s: number; a: number }[]) : [];
-    if (!list.length) return;
-    const [from, to] = ordered(`${list[0].s}:${list[0].a}`, `${list[list.length - 1].s}:${list[list.length - 1].a}`);
-    setSel({ from, to });
+    if (!onPage.length) return;
+    const last = onPage[onPage.length - 1];
+    setRange({ from: `${onPage[0].s}:${onPage[0].a}`, to: `${last.s}:${last.a}` });
   };
   const clear = useCallback(() => {
     ls.halt();
     setSel(null);
+    setAnchor(false);
   }, [ls]);
 
-
   let title = sel ? labelOf(sel.from, sel.to) : HIF.lsNothingChosen();
-  let sub = sel ? HIF.lsAyatCount(keys.length) : '';
-  if (s) {
-    const step = s.steps[s.si];
+  let sub = sel ? (anchor ? `${HIF.lsAyatCount(keys.length)} · ${HIF.lsPickMore()}` : HIF.lsAyatCount(keys.length)) : HIF.lsPickShort();
+  if (s && step) {
     const bits = [HIF.lsStep(s.si + 1, s.steps.length), HIF.lsTime(s.pass + 1, prefs.repeat)];
     if (prefs.loop || prefs.rounds !== 1) bits.push(HIF.lsRound(s.round + 1, prefs.loop ? 0 : prefs.rounds));
     const [x, y] = step.length > 1 ? ordered(step[0], step[step.length - 1]) : [step[0], step[0]];
     title = labelOf(x, y);
     sub = s.error ? HIF.lsError() : s.finished ? HIF.lsDone() : bits.join(' · ');
   }
+  if (hint) sub = hint;
+
   const names = (r: { name: string[] }) => r.name[isEnglish ? 1 : 0];
   const methodText: Record<string, [string, string]> = {
     each: [HIF.lsMethodEach(), HIF.lsMethodEachD()],
     prev: [HIF.lsMethodPrev(), HIF.lsMethodPrevD()],
     all: [HIF.lsMethodAll(), HIF.lsMethodAllD()],
   };
+  const play = () => ls.togglePlay(keys, selId);
+  const startFromSheet = () => {
+    setSetOpen(false);
+    ls.begin(keys, selId);
+  };
 
   return (
-    <View style={{ flex: 1 }}>
-      <HifHeader title={HIF.tabListen()} onBack={onBack} />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: insets.bottom + PLAYER_H + 24 }} keyboardShouldPersistTaps="handled">
-        <Section title={HIF.lsRangeH()}>
-          <Point label={HIF.lsFrom()} value={sel?.from ?? base} onChange={setFrom} />
-          <Point label={HIF.lsTo()} value={sel?.to ?? base} onChange={setTo} />
-          <Txt size={13} weight={700} color={c.meta}>
-            {HIF.lsQuickH()}
-          </Txt>
-          <View style={styles.wrapRow}>
-            <Chip label={HIF.lsQuickPage()} onPress={wholePage} />
-            <Chip label={HIF.lsQuickSurah()} onPress={wholeSurah} />
-          </View>
-        </Section>
-
-        <Section title={HIF.lsEachH()}>
-          <Nums value={prefs.repeat} onChange={(n) => ls.setPref('repeat', n)} />
-          <Txt serif size={18} weight={700} color={c.ink}>
-            {HIF.lsRoundsH()}
-          </Txt>
-          <Nums value={prefs.rounds} onChange={(n) => ls.setPref('rounds', n)} />
-        </Section>
-
-        <Section title={HIF.lsSpeed()}>
-          <View style={styles.wrapRow}>
-            {SPEEDS.map((v) => (
-              <Chip key={v} label={`${v}×`} on={prefs.speed === v} onPress={() => ls.setPref('speed', v)} />
-            ))}
-          </View>
-          <Txt serif size={18} weight={700} color={c.ink}>
-            {HIF.lsReciter()}
-          </Txt>
-          <View style={styles.wrapRow}>
-            {available().map((r) => (
-              <Chip key={r.id} label={names(r)} on={reciterOf(prefs).id === r.id} onPress={() => ls.setPref('reciter', r.id)} />
-            ))}
-          </View>
-        </Section>
-
-        <Section title={`${HIF.lsMethod()} ${HIF.lsOptional()}`}>
-          {METHODS.map((m) => {
-            const on = prefs.method === m;
-            return (
-              <Pressable
-                key={m}
-                onPress={() => ls.setPref('method', m)}
-                accessibilityRole="button"
-                accessibilityState={{ selected: on }}
-                style={[styles.method, { backgroundColor: on ? c.soft : c.card, borderColor: on ? c.chosenLine : c.line }]}
-              >
-                <Txt size={15} weight={700} color={c.ink}>
-                  {methodText[m][0]}
-                </Txt>
-                <Txt size={13} color={c.meta}>
-                  {methodText[m][1]}
-                </Txt>
-              </Pressable>
-            );
-          })}
-        </Section>
-      </ScrollView>
-
-      <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end', paddingBottom: insets.bottom + 12, paddingHorizontal: 12 }]}>
-        <View style={[styles.player, { backgroundColor: c.card, borderColor: c.line }]}>
-          <View style={styles.playerTop}>
-            <View style={{ flex: 1 }}>
-              <Txt serif size={17} weight={700} color={c.ink} numberOfLines={1}>
-                {title}
-              </Txt>
-              <Txt size={13} color={s?.error ? '#b3261e' : c.meta} numberOfLines={1}>
-                {sub}
-              </Txt>
-            </View>
-            {sel && (
-              <Pressable onPress={clear} hitSlop={10} accessibilityRole="button" accessibilityLabel={HIF.lsQuickClear()}>
-                <CloseIcon color={c.ink} size={22} />
-              </Pressable>
-            )}
-          </View>
-          <View style={styles.controls}>
-            <Pressable
-              onPress={() => ls.setPref('loop', !prefs.loop)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: prefs.loop }}
-              accessibilityLabel={HIF.lsLoop()}
-              style={[styles.round, { backgroundColor: prefs.loop ? c.on : c.soft }]}
-            >
-              <Txt size={18} weight={700} color={prefs.loop ? c.onInk : c.ink}>
-                ⟲
-              </Txt>
-            </Pressable>
-            <Pressable
-              onPress={() => ls.jump(-1)}
-              disabled={!s || s.si === 0}
-              accessibilityRole="button"
-              accessibilityLabel={HIF.lsPrevStep()}
-              style={[styles.round, { opacity: !s || s.si === 0 ? 0.35 : 1 }]}
-            >
-              <BackIcon color={c.ink} rtl={!isEnglish} />
-            </Pressable>
-            <Pressable
-              onPress={() => ls.togglePlay(keys, selId)}
-              disabled={!sel}
-              accessibilityRole="button"
-              accessibilityLabel={playing ? HIF.lsPause() : HIF.lsPlay()}
-              style={[styles.play, { backgroundColor: c.on, opacity: sel ? 1 : 0.45 }]}
-            >
-              {playing ? <PauseIcon color={c.onInk} size={26} /> : <PlayIcon color={c.onInk} size={26} />}
-            </Pressable>
-            <Pressable
-              onPress={() => ls.jump(1)}
-              disabled={!s || s.si >= s.steps.length - 1}
-              accessibilityRole="button"
-              accessibilityLabel={HIF.lsNextStep()}
-              style={[styles.round, { opacity: !s || s.si >= s.steps.length - 1 ? 0.35 : 1 }]}
-            >
-              <View style={{ transform: [{ scaleX: -1 }] }}>
+    <View style={{ flex: 1, backgroundColor: c.screen, overflow: 'hidden' }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <GlassBackdrop
+        glass={
+          <>
+            {/* the top: back and the index at the line's start, the surah and page in the middle */}
+            <View style={[styles.top, { paddingTop: insets.top + 10 }]} pointerEvents="box-none">
+              <Pressable onPress={onBack} hitSlop={10} style={styles.back} accessibilityRole="button" accessibilityLabel={HIF.close()}>
                 <BackIcon color={c.ink} rtl={!isEnglish} />
-              </View>
-            </Pressable>
-            <View style={styles.round} />
-          </View>
+              </Pressable>
+              <Pressable onPress={() => setIndexOpen(true)} hitSlop={10} style={styles.back} accessibilityRole="button" accessibilityLabel={HIF.lsSurah()}>
+                <MenuIcon color={c.ink} />
+              </Pressable>
+            </View>
+            <View style={[styles.name, { top: nameTop, height: 44 }]} pointerEvents="box-none">
+              <Pressable onPress={() => setIndexOpen(true)} style={styles.where}>
+                <Txt size={18} weight={700} center color={c.ink} numberOfLines={1}>
+                  {where}
+                </Txt>
+                <Txt size={13} center color={c.meta}>
+                  {HIF.lsPageN(page)}
+                </Txt>
+              </Pressable>
+            </View>
+
+            {/* the bar under the page: what is chosen (and heard), clear, repeat, settings, previous, play, next */}
+            <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end', alignItems: 'center', paddingBottom: insets.bottom + 12 }]}>
+              <Glass acrylic style={[styles.player, { width: Math.min(width - 24, 520) }]}>
+                <Pressable onPress={() => setSetOpen(true)} accessibilityRole="button" accessibilityLabel={HIF.lsSettings()} style={styles.summary}>
+                  <Txt size={16} weight={700} color={c.ink} numberOfLines={1}>
+                    {title}
+                  </Txt>
+                  <Txt size={12.5} color={s?.error ? '#b3402e' : c.meta} numberOfLines={1}>
+                    {sub}
+                  </Txt>
+                </Pressable>
+                {sel && (
+                  <Pressable onPress={clear} accessibilityRole="button" accessibilityLabel={HIF.lsQuickClear()} style={[styles.ico, { backgroundColor: c.soft }]}>
+                    <CloseIcon color={c.ink} size={20} />
+                  </Pressable>
+                )}
+                <Pressable
+                  onPress={() => ls.setPref('loop', !prefs.loop)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: prefs.loop }}
+                  accessibilityLabel={HIF.lsLoop()}
+                  style={[styles.ico, { backgroundColor: prefs.loop ? c.on : c.soft }]}
+                >
+                  <Txt size={18} weight={700} color={prefs.loop ? c.onInk : c.ink}>
+                    ⟲
+                  </Txt>
+                </Pressable>
+                <Pressable onPress={() => setSetOpen(true)} accessibilityRole="button" accessibilityLabel={HIF.lsSettings()} style={[styles.ico, { backgroundColor: c.soft }]}>
+                  <SettingsIcon color={c.ink} size={20} />
+                </Pressable>
+                {s && (
+                  <Pressable
+                    onPress={() => ls.jump(-1)}
+                    disabled={s.si === 0}
+                    accessibilityRole="button"
+                    accessibilityLabel={HIF.lsPrevStep()}
+                    style={[styles.ico, { backgroundColor: c.soft, opacity: s.si === 0 ? 0.35 : 1 }]}
+                  >
+                    <BackIcon color={c.ink} size={20} rtl={!isEnglish} />
+                  </Pressable>
+                )}
+                <Pressable
+                  onPress={play}
+                  disabled={!sel}
+                  accessibilityRole="button"
+                  accessibilityLabel={playing ? HIF.lsPause() : HIF.lsPlay()}
+                  style={[styles.play, { backgroundColor: c.on, opacity: sel ? 1 : 0.35 }]}
+                >
+                  {playing ? <PauseIcon color={c.onInk} size={22} /> : <PlayIcon color={c.onInk} size={22} />}
+                </Pressable>
+                {s && (
+                  <Pressable
+                    onPress={() => ls.jump(1)}
+                    disabled={s.si >= s.steps.length - 1}
+                    accessibilityRole="button"
+                    accessibilityLabel={HIF.lsNextStep()}
+                    style={[styles.ico, { backgroundColor: c.soft, opacity: s.si >= s.steps.length - 1 ? 0.35 : 1 }]}
+                  >
+                    <View style={{ transform: [{ scaleX: -1 }] }}>
+                      <BackIcon color={c.ink} size={20} rtl={!isEnglish} />
+                    </View>
+                  </Pressable>
+                )}
+              </Glass>
+            </View>
+          </>
+        }
+      >
+        <ScreenBackground />
+        <View style={{ position: 'absolute', top, left: 0, right: 0, height: roomH }}>
+          <PageCurl
+            page={page}
+            width={width}
+            height={roomH}
+            pageW={pageW}
+            pageH={pageH}
+            full={false}
+            chosen={[]}
+            unzoom={0}
+            onTurned={(p) => setPage(Math.min(TOTAL_PAGES, Math.max(1, p)))}
+            marks={marks}
+            pins={[]}
+            onAyah={tapAyah}
+            onPin={() => {}}
+            onEmptyTap={() => {}}
+            onZoomed={() => {}}
+          />
         </View>
-      </View>
+      </GlassBackdrop>
+
+      <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={(p) => setPage(Math.min(TOTAL_PAGES, Math.max(1, p)))} />
+
+      {setOpen && (
+        <View style={StyleSheet.absoluteFill}>
+          <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: c.dim }]} onPress={() => setSetOpen(false)} accessibilityLabel={HIF.lsClose()} />
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetWrap} pointerEvents="box-none">
+            <View style={[styles.sheet, { backgroundColor: c.panel, paddingBottom: insets.bottom + 12 }]}>
+              <View style={styles.sheetHead}>
+                <Txt serif size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
+                  {HIF.lsSettings()}
+                </Txt>
+                <Pressable onPress={() => setSetOpen(false)} hitSlop={10} accessibilityRole="button" accessibilityLabel={HIF.lsClose()}>
+                  <CloseIcon color={c.ink} size={22} />
+                </Pressable>
+              </View>
+              <ScrollView contentContainerStyle={{ gap: 12, paddingBottom: 12 }} keyboardShouldPersistTaps="handled">
+                <Section title={HIF.lsRangeH()}>
+                  <Point label={HIF.lsFrom()} value={sel?.from ?? base} onChange={setFrom} />
+                  <Point label={HIF.lsTo()} value={sel?.to ?? base} onChange={setTo} />
+                  <Txt size={13} weight={700} color={c.meta}>
+                    {HIF.lsQuickH()}
+                  </Txt>
+                  <View style={styles.wrapRow}>
+                    <Chip label={HIF.lsQuickPage()} onPress={wholePage} />
+                    <Chip label={HIF.lsQuickSurah()} onPress={wholeSurah} />
+                  </View>
+                </Section>
+
+                <Section title={HIF.lsEachH()}>
+                  <Nums value={prefs.repeat} onChange={(n) => ls.setPref('repeat', n)} />
+                  <Txt serif size={18} weight={700} color={c.ink}>
+                    {HIF.lsRoundsH()}
+                  </Txt>
+                  <Nums value={prefs.rounds} onChange={(n) => ls.setPref('rounds', n)} />
+                </Section>
+
+                <Section title={HIF.lsSpeed()}>
+                  <View style={styles.wrapRow}>
+                    {SPEEDS.map((v) => (
+                      <Chip key={v} label={`${v}×`} on={prefs.speed === v} onPress={() => ls.setPref('speed', v)} />
+                    ))}
+                  </View>
+                  <Txt serif size={18} weight={700} color={c.ink}>
+                    {HIF.lsReciter()}
+                  </Txt>
+                  <View style={styles.wrapRow}>
+                    {available().map((r) => (
+                      <Chip key={r.id} label={names(r)} on={reciterOf(prefs).id === r.id} onPress={() => ls.setPref('reciter', r.id)} />
+                    ))}
+                  </View>
+                </Section>
+
+                <Section title={`${HIF.lsMethod()} ${HIF.lsOptional()}`}>
+                  {METHODS.map((m) => {
+                    const on = prefs.method === m;
+                    return (
+                      <Pressable
+                        key={m}
+                        onPress={() => ls.setPref('method', m)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: on }}
+                        style={[styles.method, { backgroundColor: on ? c.soft : c.card, borderColor: on ? c.chosenLine : c.line }]}
+                      >
+                        <Txt size={15} weight={700} color={c.ink}>
+                          {methodText[m][0]}
+                        </Txt>
+                        <Txt size={13} color={c.meta}>
+                          {methodText[m][1]}
+                        </Txt>
+                      </Pressable>
+                    );
+                  })}
+                </Section>
+              </ScrollView>
+              <Pressable
+                onPress={startFromSheet}
+                disabled={!sel}
+                accessibilityRole="button"
+                style={[styles.go, { backgroundColor: c.on, opacity: sel ? 1 : 0.45 }]}
+              >
+                <PlayIcon color={c.onInk} size={22} />
+                <Txt size={16} weight={700} color={c.onInk}>
+                  {HIF.lsGo()}
+                </Txt>
+              </Pressable>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  top: { position: 'absolute', top: 0, left: 0, right: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, gap: 4, zIndex: 5 },
+  back: { width: 40, height: 44, alignItems: 'center', justifyContent: 'center' },
+  name: { position: 'absolute', left: 100, right: 100, alignItems: 'center', justifyContent: 'center', zIndex: 5 },
+  where: { alignItems: 'center', paddingVertical: 4, paddingHorizontal: 10 },
+  player: { height: PLAYER_H, borderRadius: PLAYER_H / 2, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8 },
+  summary: { flex: 1, minWidth: 0, paddingVertical: 6, paddingHorizontal: 10, gap: 1 },
+  ico: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  play: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  sheetWrap: { flex: 1, justifyContent: 'flex-end' },
+  sheet: { maxHeight: '88%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 16, paddingTop: 16, gap: 10 },
+  sheetHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  go: { minHeight: 52, borderRadius: radius.button, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center' },
   chip: { minHeight: 40, paddingHorizontal: 14, borderRadius: radius.chip, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
   other: { minWidth: 96, height: 40, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, textAlign: 'center', fontSize: 14 },
@@ -356,9 +543,4 @@ const styles = StyleSheet.create({
   modal: { maxHeight: '80%', borderTopLeftRadius: radius.card, borderTopRightRadius: radius.card, paddingHorizontal: 16 },
   surahRow: { flexDirection: 'row', alignItems: 'center', minHeight: 46, borderBottomWidth: StyleSheet.hairlineWidth },
   method: { borderRadius: radius.chip, borderWidth: 1, padding: 12, gap: 2 },
-  player: { borderRadius: radius.card, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 10, boxShadow: '0 6px 18px rgba(0,0,0,0.14)' },
-  playerTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  controls: { flexDirection: 'row', direction: 'ltr', alignItems: 'center', justifyContent: 'space-between' },
-  round: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
-  play: { width: 58, height: 58, borderRadius: 29, alignItems: 'center', justifyContent: 'center' },
 });
