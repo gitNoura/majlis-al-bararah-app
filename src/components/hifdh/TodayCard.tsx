@@ -7,11 +7,12 @@ import { BookOpenIcon } from '@/components/icons';
 import { useTheme } from '@/theme/theme';
 
 import { useHif } from '@/components/hifdh/HifProvider';
+import { DoneCard } from '@/components/hifdh/DoneCard';
 import { Hint, PrimaryButton, Section } from '@/components/hifdh/Section';
 import type { Row } from '@/components/hifdh/StopSheet';
 import { TaskRow } from '@/components/hifdh/TaskRow';
 import { HIF } from '@/i18n/hifdh';
-import { dayText, kindOf } from '@/lib/hifdh/labels';
+import { dayText, isDone, kindOf } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 
 export function TodayCard() {
@@ -31,6 +32,8 @@ export function TodayCard() {
 
   const rows = plan.todayRows().filter((r: Row) => r.plan.type === 'memorize');
   const next = plan.upcomingRows().find((r: Row) => r.plan.type === 'memorize');
+
+  if (rows.length && rows.every(isDone)) return <DoneCard rows={rows} />; // done: the same card turns into the congratulation
 
   return (
     <Section title={title} subtitle={HIF.todaySub()} icon={<BookOpenIcon color={c.ink} size={22} />}>

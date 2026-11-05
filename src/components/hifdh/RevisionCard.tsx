@@ -7,11 +7,12 @@ import { RepeatIcon } from '@/components/icons';
 import { useTheme } from '@/theme/theme';
 
 import { useHif } from '@/components/hifdh/HifProvider';
+import { DoneCard } from '@/components/hifdh/DoneCard';
 import { Hint, PrimaryButton, Section } from '@/components/hifdh/Section';
 import type { Row } from '@/components/hifdh/StopSheet';
 import { TaskRow } from '@/components/hifdh/TaskRow';
 import { HIF } from '@/i18n/hifdh';
-import { kindOf } from '@/lib/hifdh/labels';
+import { isDone, kindOf } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 
 export function RevisionCard() {
@@ -31,6 +32,8 @@ export function RevisionCard() {
   }
 
   const rows = plan.todayRows().filter((r: Row) => r.plan.type === 'revise');
+
+  if (rows.length && rows.every(isDone)) return <DoneCard rows={rows} revise />; // done: the same card turns into the congratulation
 
   return (
     <Section title={title} subtitle={HIF.reviseSub()} icon={<RepeatIcon color={c.ink} size={22} />}>

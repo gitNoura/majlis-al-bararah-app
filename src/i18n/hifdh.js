@@ -263,4 +263,6 @@ export const HIF = {
   planIntro: () => L('ضع خطة، وسترى هنا كل يوم ما تحفظه وما تراجعه.', 'Set a plan and this page shows each day what to memorize and what to revise.', 'Créez un plan et cette page vous montre chaque jour quoi mémoriser et quoi réviser.'),
   todaySub: () => L('ما تحفظه اليوم', 'What to memorize today', 'À mémoriser aujourd’hui'),
   reviseSub: () => L('ما تراجعه ليبقى محفوظاً', 'What to revise so it stays with you', 'À réviser pour que cela reste'),
+  reviseDoneTitle: () => L('ما شاء الله، أتممتَ مراجعتك', 'MashaAllah, revision done', 'Machaallah, révision terminée'),
+  reviseDoneBody: () => L('ما حفظتَه ازداد رسوخًا، بارك الله فيك.', 'What you know is a little firmer. Barakallahu feek.', 'Ce que vous savez est un peu plus solide. Qu’Allah vous bénisse.'),
 };
