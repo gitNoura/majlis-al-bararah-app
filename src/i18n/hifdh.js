@@ -283,9 +283,9 @@ export const HIF = {
   noRevPlan: () => L('لا توجد خطة مراجعة بعد', 'No revision plan yet', 'Aucun plan de révision pour l’instant'),
   noRevPlanSub: () =>
     L(
-      'اختر ما تراجعه من محفوظك ومقدار مراجعتك كل يوم.',
-      'Choose what to revise from what you know, and how much each day.',
-      'Choisissez ce que vous révisez parmi ce que vous savez, et le rythme de chaque jour.',
+      'اختر ما تريد مراجعته وكم تراجع في الأسبوع.',
+      'Choose what you want to revise and how much each week.',
+      'Choisissez ce que vous voulez réviser et le rythme de chaque semaine.',
     ),
   noRevPlanLocked: () =>
     L(

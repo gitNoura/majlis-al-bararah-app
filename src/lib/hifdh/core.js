@@ -165,7 +165,8 @@ export const ctxOf = (state, U) => ({ U, ledger: rangesToBits(state.ledger, U.N)
 // The ayat a plan draws its portions from, in order.
 //   memorize: its range, less what is memorized already - except what this plan's own sessions
 //             memorized, which stays in so the plan's days keep their place
-//   revise:   its range (all by default) of what is memorized
+//   revise:   its range as it is - what the reader chose to revise needs no entry in the ledger - or, with no
+//             range, everything memorized
 function pool(plan, ctx) {
   const { U, ledger } = ctx;
   const inRange = plan.range ? rangesToBits(plan.range, U.N) : null;
@@ -176,7 +177,7 @@ function pool(plan, ctx) {
   const R = [];
   for (let g = 0; g < U.N; g++) {
     if (inRange && !inRange[g]) continue;
-    if (plan.type === 'memorize' ? !ledger[g] || own[g] : ledger[g]) R.push(g);
+    if (plan.type === 'memorize' ? !ledger[g] || own[g] : inRange || ledger[g]) R.push(g);
   }
   return R;
 }

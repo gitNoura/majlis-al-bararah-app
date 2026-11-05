@@ -68,7 +68,7 @@ function initPace(type: PlanType | null, id: string | null): Pace {
       first: 0,
     };
   }
-  const t: PlanType = type === 'revise' && known ? 'revise' : 'memorize';
+  const t: PlanType = type === 'revise' ? 'revise' : 'memorize';
   return {
     id: null,
     type: t,
@@ -108,7 +108,8 @@ function calc(p: Pace): { unit: string; amount: number } {
 }
 
 // how much a week, then which days; for «finish by a date» the days come first (the date needs them)
-const stepKeys = (p: Pace) => ['type', ...(p.askMem ? ['memorized'] : []), 'scope', ...(p.mode === 'date' ? ['days', 'date'] : ['amount', 'days']), 'summary'];
+const stepKeys = (p: Pace) => ['type', ...(p.askMem && p.type === 'memorize' ? ['memorized'] : []), // revising asks what to revise, not what is memorized
+   'scope', ...(p.mode === 'date' ? ['days', 'date'] : ['amount', 'days']), 'summary'];
 
 function Opt({ on, text, sub, disabled, onPress }: { on: boolean; text: string; sub?: string; disabled?: boolean; onPress: () => void }) {
   const { c } = useTheme();
@@ -269,7 +270,11 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
 
   const scopeBlock = () => (
     <View style={{ gap: 10 }}>
-      <Opt on={pace.scopeSel === 'all'} text={rangeLabel(null, pace.type)} onPress={() => patch({ scopeSel: 'all', range: null })} />
+      <Opt
+        on={pace.scopeSel === 'all'}
+        text={rangeLabel(null, revise && known ? 'revise' : 'memorize')}
+        onPress={() => patch({ scopeSel: 'all', range: revise && !known ? [[0, plan.units().N]] : null })} // with nothing memorized, «all» is the whole Quran itself
+      />
       <Opt
         on={pace.scopeSel === 'part'}
         text={HIF.scopeSpecific()}
@@ -466,9 +471,8 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
             <Opt on={!revise} text={HIF.memorizeOpt()} sub={HIF.memorizeOptSub()} onPress={() => patch({ type: 'memorize', range: null, scopeSel: null, bits: emptyBits() })} />
             <Opt
               on={revise}
-              disabled={!known}
               text={HIF.reviseOpt()}
-              sub={known ? HIF.reviseOptSub() : HIF.reviseOptLocked()}
+              sub={HIF.reviseOptSub()}
               onPress={() => patch({ type: 'revise', range: null, scopeSel: null, bits: emptyBits() })}
             />
           </View>

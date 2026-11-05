@@ -1,5 +1,5 @@
-// «Revision»: today's revision portions (revisionHTML of the website). Revision opens once something is
-// memorized: before that the plan button is disabled and any revision rows are locked.
+// «Revision»: today's revision portions (revisionHTML of the website). The reader says what to revise: nothing
+// has to be entered as memorized first.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { View } from 'react-native';
 
@@ -17,10 +17,9 @@ import { isDone } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 
 export function RevisionCard() {
-  const { startPlan, openMemorized } = useHif(); // also redraws this card whenever `rev` changes
+  const { startPlan } = useHif(); // also redraws this card whenever `rev` changes
   const { c } = useTheme();
   const st = plan.get();
-  const known = plan.memorizedCount() > 0;
   const title = HIF.cardMurajaa();
 
   if (!st.plans.some((p: { type: string }) => p.type === 'revise')) {
@@ -29,8 +28,8 @@ export function RevisionCard() {
         <Txt size={15} weight={700} color={c.ink}>
           {HIF.noRevPlan()}
         </Txt>
-        <Hint>{known ? HIF.noRevPlanSub() : HIF.noRevPlanLocked()}</Hint>
-        <PrimaryButton label={known ? HIF.startRevision() : HIF.memorizedTitle()} onPress={() => (known ? startPlan('revise') : openMemorized())} />
+        <Hint>{HIF.noRevPlanSub()}</Hint>
+        <PrimaryButton label={HIF.startRevision()} onPress={() => startPlan('revise')} />
       </Section>
     );
   }
@@ -44,13 +43,12 @@ export function RevisionCard() {
       {rows.length ? (
         <View>
           {rows.map((r: Row, i: number) => (
-            <TaskRow key={`${r.plan.id}|${r.week ?? r.day}`} row={r} locked={!known} first={i === 0} />
+            <TaskRow key={`${r.plan.id}|${r.week ?? r.day}`} row={r} first={i === 0} />
           ))}
         </View>
       ) : (
         <Hint>{HIF.noRevision()}</Hint>
       )}
-      {!known && <Hint>{HIF.reviseLocked()}</Hint>}
     </Section>
   );
 }
