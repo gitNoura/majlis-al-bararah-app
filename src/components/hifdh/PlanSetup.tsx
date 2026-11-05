@@ -1,7 +1,8 @@
 // Plan setup and edit (paceHTML / editHTML / savePace of the website's hifz.js). A new plan is a short run of
-// questions (what to do, what you know the first time, scope, amount or finish date, days, summary); editing
-// is one page with every choice, pause and delete under Save. It draws its own head and bottom button, so the
-// phone's back button and the head's back step through the questions before leaving.
+// questions (what to do, what you know the first time, scope, how much a week, which days - or the finish date
+// and then the days), then the summary, which is not a question; editing is one page with every choice, pause
+// and delete under Save. Previous / Next at the bottom step through the questions (the phone's back button does
+// too); the plan is kept per day: the week's amount is shared over the days chosen.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { useEffect, useState, type ReactNode } from 'react';
 import { Alert, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
@@ -13,6 +14,7 @@ import { useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { MemorizedPicker } from '@/components/hifdh/MemorizedPicker';
 import { MemorizedScreen } from '@/components/hifdh/MemorizedScreen';
 import { Hint, PrimaryButton, SecondaryButton } from '@/components/hifdh/Section';
+import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import * as core from '@/lib/hifdh/core';
@@ -47,7 +49,7 @@ function initPace(type: PlanType | null, id: string | null): Pace {
   if (existing) {
     const v = core.versionAt(existing, today);
     const weekly = existing.period === 'week';
-    const perDay = weekly ? (v.unit === 'ayah' ? Math.max(1, Math.ceil(v.amount / 7)) : Math.max(0.5, Math.ceil((v.amount / 7) * 2) / 2)) : v.amount;
+    const perWeek = weekly ? v.amount : Math.round(v.amount * v.days.length * 100) / 100; // the question is «how much a week»
     return {
       id: existing.id,
       type: existing.type,
@@ -56,7 +58,7 @@ function initPace(type: PlanType | null, id: string | null): Pace {
       scopeSel: existing.range ? 'part' : 'all',
       bits: Array.from(core.rangesToBits(existing.range || [], plan.units().N)) as number[],
       unit: v.unit,
-      amtText: String(perDay),
+      amtText: String(perWeek),
       days: weekly ? [...ALL_DAYS] : [...v.days],
       mode: existing.target?.kind === 'date' ? 'date' : 'amount',
       date: existing.target?.kind === 'date' ? existing.target.date : core.addDays(today, 90),
@@ -95,8 +97,9 @@ const amountOf = (p: Pace) => {
 // for the reader: the biggest one that gives at least 1 per day.
 function calc(p: Pace): { unit: string; amount: number } {
   if (p.mode !== 'date') {
-    const a = amountOf(p);
-    return p.unit === 'juz' ? { unit: 'hizb', amount: a * 2 } : { unit: p.unit, amount: a };
+    const a = amountOf(p) / Math.max(1, p.days.length); // a week's amount over the days chosen
+    const r = (x: number) => Math.round(x * 10000) / 10000;
+    return p.unit === 'juz' ? { unit: 'hizb', amount: r(a * 2) } : { unit: p.unit, amount: r(a) };
   }
   const base = { ...p, period: 'day', target: { kind: 'date', date: p.date } };
   const derive = (unit: string): number => core.deriveAmount({ ...base, unit }, plan.ctx(), plan.today());
@@ -104,7 +107,8 @@ function calc(p: Pace): { unit: string; amount: number } {
   return { unit: 'ayah', amount: derive('ayah') };
 }
 
-const stepKeys = (p: Pace) => ['type', ...(p.askMem ? ['memorized'] : []), 'scope', 'days', p.mode === 'date' ? 'date' : 'amount', 'summary'];
+// how much a week, then which days; for «finish by a date» the days come first (the date needs them)
+const stepKeys = (p: Pace) => ['type', ...(p.askMem ? ['memorized'] : []), 'scope', ...(p.mode === 'date' ? ['days', 'date'] : ['amount', 'days']), 'summary'];
 
 function Opt({ on, text, sub, disabled, onPress }: { on: boolean; text: string; sub?: string; disabled?: boolean; onPress: () => void }) {
   const { c } = useTheme();
@@ -144,6 +148,38 @@ function Chip({ on, text, onPress }: { on: boolean; text: string; onPress: () =>
         {text}
       </Txt>
     </Pressable>
+  );
+}
+
+// One weekday (or «every day») as a row with a tick box, the rows sharing one card
+function DayRow({ on, text, last, onPress }: { on: boolean; text: string; last?: boolean; onPress: () => void }) {
+  const { c } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: on }}
+      style={[styles.dayRow, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.divider }]}
+    >
+      <View style={[styles.box, { borderColor: on ? c.on : c.chosenLine, backgroundColor: on ? c.on : 'transparent' }]}>{on && <CheckIcon color={c.onInk} size={16} strokeWidth={2.6} />}</View>
+      <Txt size={16} weight={on ? 700 : 500} color={c.ink} style={{ flex: 1 }}>
+        {text}
+      </Txt>
+    </Pressable>
+  );
+}
+
+// The bottom of every question: Previous and Next side by side
+function NavFoot({ onPrev, onNext, nextLabel, nextDisabled }: { onPrev: () => void; onNext: () => void; nextLabel?: string; nextDisabled?: boolean }) {
+  return (
+    <View style={styles.two}>
+      <View style={{ flex: 1 }}>
+        <SecondaryButton label={HIF.previous()} onPress={onPrev} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <PrimaryButton label={nextLabel ?? HIF.next()} onPress={onNext} disabled={nextDisabled} />
+      </View>
+    </View>
   );
 }
 
@@ -252,7 +288,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     </View>
   );
 
-  const amountTitle = HIF.amountQuestion(revise, false);
+  const amountTitle = HIF.amountQuestion(revise, true);
   const amountBlock = () => (
     <View style={{ gap: 12 }}>
       <View style={styles.chips}>
@@ -276,7 +312,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
           style={[styles.amt, { borderColor: c.chosenLine, backgroundColor: c.surface, color: c.ink }]}
         />
         <Txt size={15} color={c.meta} style={{ flex: 1 }}>
-          {UNIT_PLURAL[pace.unit as keyof typeof UNIT_PLURAL]()} {perWord(pace.period)}
+          {UNIT_PLURAL[pace.unit as keyof typeof UNIT_PLURAL]()} {perWord('week')}
         </Txt>
       </View>
     </View>
@@ -296,24 +332,31 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
 
   const daysBlock = () => (
     <View style={{ gap: 10 }}>
-      <View style={styles.chips}>
-        {WEEK_ORDER.map((d: number) => (
-          <Chip
+      <View style={[styles.daysCard, { backgroundColor: c.card, borderColor: c.line }]}>
+        <DayRow on={pace.days.length === 7} text={HIF.everyDay()} onPress={() => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] })} />
+        {WEEK_ORDER.map((d: number, k: number) => (
+          <DayRow
             key={d}
             on={pace.days.includes(d)}
-            text={weekdayName(d)}
+            text={weekdayName(d, 'long')}
+            last={k === WEEK_ORDER.length - 1}
             onPress={() => patch({ days: pace.days.includes(d) ? pace.days.filter((x) => x !== d) : [...pace.days, d].sort() })}
           />
         ))}
       </View>
-      <View style={styles.chips}>
-        <Chip on={pace.days.length === 7} text={HIF.everyDay()} onPress={() => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] })} />
-      </View>
+      {pace.mode === 'amount' && amount > 0 && days.length > 0 && (
+        <Txt size={14.5} color={c.text}>
+          {HIF.thatsAbout()}{' '}
+          <Txt size={14.5} weight={700} color={c.ink}>
+            {unitCount(unit, amount)} {perWord('day')}
+          </Txt>
+        </Txt>
+      )}
     </View>
   );
 
   const toDate = () => <Link text={HIF.pickDate()} onPress={() => patch({ mode: 'date', period: 'day' })} />;
-  const toAmount = () => <Link text={HIF.pickAmount()} onPress={() => patch({ mode: 'amount', period: 'day' })} />;
+  const toAmount = () => <Link text={HIF.pickAmount()} onPress={() => patch(editing ? { mode: 'amount', period: 'day' } : { mode: 'amount', period: 'day', step: pace.step - 1 })} />; // from the date question back to the amount question
   const finishLine = () =>
     finish ? (
       <Txt size={15} color={c.text}>
@@ -412,7 +455,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   // ----- the questions -----
 
   const question = () => {
-    const next = (label = HIF.continue(), disabled = false, onPress: () => void = () => goStep(pace.step + 1)) => <PrimaryButton label={label} onPress={onPress} disabled={disabled} />;
+    const next = (label?: string, disabled = false, onPress: () => void = () => goStep(pace.step + 1)) => <NavFoot onPrev={back} onNext={onPress} nextLabel={label} nextDisabled={disabled} />;
     if (key === 'type') {
       return {
         body: (
@@ -486,9 +529,8 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     }
     // summary: «Your plan is ready»
     const everyDay = days.length === 7;
-    const paceLine = `${unitCount(unit, amount)} ${perWord(pace.period)}${
-      pace.period === 'week' ? '' : ` · ${everyDay ? HIF.everyDay() : WEEK_ORDER.filter((d: number) => days.includes(d)).map((d: number) => weekdayName(d)).join(' ')}`
-    }`;
+    const weekly = Math.round(amount * days.length * 100) / 100;
+    const paceLine = `${unitCount(unit, weekly)} ${perWord('week')} · ${everyDay ? HIF.everyDay() : WEEK_ORDER.filter((d: number) => days.includes(d)).map((d: number) => weekdayName(d)).join(' ')}`;
     const row = (k: string, v: string) => (
       <View key={k} style={[styles.sumRow, { borderTopColor: c.divider }]}>
         <Txt size={13} color={c.meta}>
@@ -527,20 +569,22 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
           </View>
         </View>
       ),
-      foot: <PrimaryButton label={HIF.startPlan()} onPress={save} disabled={!finish} />,
+      foot: next(HIF.startPlan(), !finish, save),
     };
   };
 
   const { body, foot } = editing ? edit() : question();
-  const n = keys.length - pace.first;
-  const i = pace.step - pace.first;
+  // the questions are counted; the memorized page and the summary are not questions
+  const asked = keys.filter((k) => k !== 'memorized' && k !== 'summary').slice(pace.first);
+  const n = asked.length;
+  const i = asked.indexOf(key);
 
   return (
     <View style={{ flex: 1 }}>
-      <HifHeader title={editing ? HIF.editPlan() : HIF.newPlan()} onBack={back} />
+      <HifHeader title={editing ? HIF.editPlan() : HIF.newPlan()} onBack={back} noBack={!editing} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView key={editing ? 'edit' : key} contentContainerStyle={{ padding: 16, paddingBottom: 24, gap: 14 }} keyboardShouldPersistTaps="handled">
-          {!editing && key !== 'memorized' && (
+          {!editing && i >= 0 && (
             <View style={{ gap: 8 }}>
               <Txt size={13} weight={600} color={c.meta}>
                 {HIF.stepOf(i + 1, n)}
@@ -569,6 +613,9 @@ const styles = StyleSheet.create({
   track: { height: 6, borderRadius: 3, overflow: 'hidden' },
   fill: { height: 6, borderRadius: 3 },
   two: { flexDirection: 'row', gap: 10 },
+  daysCard: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 20, overflow: 'hidden' },
+  dayRow: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 54, paddingHorizontal: 16 },
+  box: { width: 24, height: 24, borderRadius: 7, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   danger: { minHeight: 48, borderRadius: 22, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 },
   sumRow: { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 12, gap: 2 },
   foot: { paddingHorizontal: 16, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth },

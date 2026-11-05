@@ -97,8 +97,10 @@ export const HIF = {
   clearMark: () => L('إزالة العلامة', 'Clear the mark', 'Effacer la marque'),
 
   // setting up or editing a plan (the questions)
-  stepOf: (i, n) => L(`السؤال ${i} من ${n}`, `Step ${i} of ${n}`, `Étape ${i} sur ${n}`),
+  stepOf: (i, n) => L(`السؤال ${i} من ${n}`, `Question ${i} of ${n}`, `Question ${i} sur ${n}`),
   continue: () => L('متابعة', 'Continue', 'Continuer'),
+  previous: () => L('السابق', 'Previous', 'Précédent'),
+  next: () => L('التالي', 'Next', 'Suivant'),
   startPlan: () => L('ابدأ خطتي', 'Start my plan', 'Commencer mon plan'),
   planReady: () => L('خطتك جاهزة', 'Your plan is ready', 'Votre plan est prêt'),
   whatToDo: () => L('بماذا تريد أن تبدأ؟', 'What would you like to do?', 'Que souhaitez-vous faire ?'),

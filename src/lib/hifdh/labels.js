@@ -88,7 +88,9 @@ export const perWord = (period) => (period === 'week' ? s('في الأسبوع',
 export const paceText = (p) => {
   const v = core.versionAt(p, plan.today());
   const days = p.period === 'week' || v.days.length === 7 ? '' : ` · ${WEEK_ORDER.filter((d) => v.days.includes(d)).map((d) => weekdayName(d)).join(' ')}`;
-  return `${unitCount(v.unit, v.amount)} ${perWord(p.period)}${days}`;
+  // shown as a week's amount, as it was asked (a daily plan's portion times its days)
+  const weekly = p.period === 'week' ? v.amount : Math.round(v.amount * v.days.length * 100) / 100;
+  return `${unitCount(v.unit, weekly)} ${perWord('week')}${days}`;
 };
 
 export const kindOf = (type) => (type === 'revise' ? s('مراجعة', 'Revision', 'Révision') : s('حفظ جديد', 'New memorization', 'Nouvelle mémorisation'));
