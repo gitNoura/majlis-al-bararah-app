@@ -28,6 +28,7 @@ import { counts, keysFromTo, Listener, MAX_TYPED, METHODS, ordered, parse, pos, 
 import { SURAHS, TOTAL_PAGES } from '@/lib/quran';
 import { pageUrl } from '@/lib/remote';
 import { readJSON } from '@/lib/storage';
+import { ui } from '@/theme/fonts';
 import { radius } from '@/theme/tokens';
 import { QuranTheme, useTheme } from '@/theme/theme';
 
@@ -308,8 +309,11 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
   };
   const play = () => ls.togglePlay(keys, selId);
   const startFromSheet = () => {
+    const range = sel ?? { from: base, to: base }; // the sheet shows From / To even when nothing was tapped yet
+    setSel(range);
+    setAnchor(false);
     setSetOpen(false);
-    ls.begin(keys, selId);
+    ls.begin(keysFromTo(range.from, range.to), `${range.from}-${range.to}|${prefs.method}`);
   };
 
   return (
@@ -341,6 +345,7 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
             {/* the bar under the page: what is chosen (and heard), clear, repeat, settings, previous, play, next */}
             <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end', alignItems: 'center', paddingBottom: insets.bottom + 12 }]}>
               <Glass acrylic style={[styles.player, { width: Math.min(width - 24, 520) }]}>
+                <View style={styles.pillRow}>
                 <Pressable onPress={() => setSetOpen(true)} accessibilityRole="button" accessibilityLabel={HIF.lsSettings()} style={styles.summary}>
                   <Txt size={16} weight={700} color={c.ink} numberOfLines={1}>
                     {title}
@@ -401,6 +406,7 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
                     </View>
                   </Pressable>
                 )}
+                </View>
               </Glass>
             </View>
           </>
@@ -432,9 +438,9 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
 
       {setOpen && (
         <View style={StyleSheet.absoluteFill}>
-          <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: c.dim }]} onPress={() => setSetOpen(false)} accessibilityLabel={HIF.lsClose()} />
+          <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]} onPress={() => setSetOpen(false)} accessibilityLabel={HIF.lsClose()} />
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetWrap} pointerEvents="box-none">
-            <View style={[styles.sheet, { backgroundColor: c.panel, paddingBottom: insets.bottom + 12 }]}>
+            <View style={[styles.sheet, { backgroundColor: c.panel, paddingBottom: insets.bottom + 12, maxHeight: height - insets.top - 24 }]}>
               <View style={styles.sheetHead}>
                 <Txt serif size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
                   {HIF.lsSettings()}
@@ -504,9 +510,8 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
               </ScrollView>
               <Pressable
                 onPress={startFromSheet}
-                disabled={!sel}
                 accessibilityRole="button"
-                style={[styles.go, { backgroundColor: c.on, opacity: sel ? 1 : 0.45 }]}
+                style={[styles.go, { backgroundColor: c.on }]}
               >
                 <PlayIcon color={c.onInk} size={22} />
                 <Txt size={16} weight={700} color={c.onInk}>
@@ -526,7 +531,8 @@ const styles = StyleSheet.create({
   back: { width: 40, height: 44, alignItems: 'center', justifyContent: 'center' },
   name: { position: 'absolute', left: 100, right: 100, alignItems: 'center', justifyContent: 'center', zIndex: 5 },
   where: { alignItems: 'center', paddingVertical: 4, paddingHorizontal: 10 },
-  player: { height: PLAYER_H, borderRadius: PLAYER_H / 2, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8 },
+  player: { height: PLAYER_H, borderRadius: PLAYER_H / 2 },
+  pillRow: { alignSelf: 'stretch', height: PLAYER_H, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8 },
   summary: { flex: 1, minWidth: 0, paddingVertical: 6, paddingHorizontal: 10, gap: 1 },
   ico: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   play: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
@@ -536,10 +542,10 @@ const styles = StyleSheet.create({
   go: { minHeight: 52, borderRadius: radius.button, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center' },
   chip: { minHeight: 40, paddingHorizontal: 14, borderRadius: radius.chip, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
-  other: { minWidth: 96, height: 40, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, textAlign: 'center', fontSize: 14 },
+  other: { minWidth: 96, height: 40, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, textAlign: 'center', fontSize: 14, fontFamily: ui(600) },
   pointRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   surahBtn: { flex: 1, minHeight: 44, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, justifyContent: 'center' },
-  ayahBox: { width: 64, height: 44, borderRadius: radius.chip, borderWidth: 1, textAlign: 'center', fontSize: 16 },
+  ayahBox: { width: 64, height: 44, borderRadius: radius.chip, borderWidth: 1, textAlign: 'center', fontSize: 16, fontFamily: ui(600) },
   modalBack: { flex: 1, justifyContent: 'flex-end' },
   modal: { maxHeight: '80%', borderTopLeftRadius: radius.card, borderTopRightRadius: radius.card, paddingHorizontal: 16 },
   surahRow: { flexDirection: 'row', alignItems: 'center', minHeight: 46, borderBottomWidth: StyleSheet.hairlineWidth },
