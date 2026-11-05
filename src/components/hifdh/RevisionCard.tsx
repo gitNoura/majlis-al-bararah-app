@@ -19,7 +19,7 @@ export function RevisionCard() {
 
   if (!st.plans.some((p: { type: string }) => p.type === 'revise')) {
     return (
-      <Section title={title}>
+      <Section title={title} subtitle={HIF.reviseSub()}>
         <Hint>{known ? HIF.reviseHint() : HIF.reviseLocked()}</Hint>
         <PrimaryButton label={HIF.startRevision()} onPress={() => startPlan('revise')} disabled={!known} />
       </Section>
@@ -29,7 +29,7 @@ export function RevisionCard() {
   const rows = plan.todayRows().filter((r: Row) => r.plan.type === 'revise');
 
   return (
-    <Section title={title}>
+    <Section title={title} subtitle={HIF.reviseSub()}>
       {rows.length ? (
         <View>
           {rows.map((r: Row, i: number) => (

@@ -23,6 +23,7 @@ import { PlanSetup } from '@/components/hifdh/PlanSetup';
 import { PlanSummary } from '@/components/hifdh/PlanSummary';
 import { RevisionCard } from '@/components/hifdh/RevisionCard';
 import { TodayCard } from '@/components/hifdh/TodayCard';
+import { Welcome } from '@/components/hifdh/Welcome';
 import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
@@ -84,11 +85,22 @@ function Content({
         </ScrollView>
       ) : (
         <ScrollView contentContainerStyle={{ ...pad, paddingBottom: pad.paddingBottom + TABS_HEIGHT }}>
-          <PlanSummary onOpenMemorized={() => (plan.markMemorizedAsked(), go('memorized'))} />
-          <TodayCard />
-          <AheadCard />
-          <RevisionCard />
-          <HistoryTile onPress={() => go('history')} />
+          {(plan.get().plans as unknown[]).length === 0 ? (
+            // the first time: what the page is for, before any plan exists
+            <Welcome
+              onSetup={() => open({ type: null, id: null })}
+              onListen={() => listen(null)}
+              onMemorized={() => (plan.markMemorizedAsked(), go('memorized'))}
+            />
+          ) : (
+            <>
+              <PlanSummary onOpenMemorized={() => (plan.markMemorizedAsked(), go('memorized'))} />
+              <TodayCard />
+              <AheadCard />
+              <RevisionCard />
+              <HistoryTile onPress={() => go('history')} />
+            </>
+          )}
         </ScrollView>
       )}
       {view === 'home' && <HifTabs onPlans={() => go('plans')} onListen={() => listen(null)} onRecite={reciteSoon} />}

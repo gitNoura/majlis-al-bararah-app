@@ -7,13 +7,20 @@ import { Txt } from '@/components/Txt';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/theme';
 
-export function Section({ title, children, style }: { title: string; children: ReactNode; style?: StyleProp<ViewStyle> }) {
+export function Section({ title, subtitle, children, style }: { title: string; subtitle?: string; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const { c } = useTheme();
   return (
     <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }, style]}>
-      <Txt serif size={18} weight={700} color={c.ink}>
-        {title}
-      </Txt>
+      <View>
+        <Txt serif size={18} weight={700} color={c.ink}>
+          {title}
+        </Txt>
+        {subtitle ? (
+          <Txt size={13} color={c.meta}>
+            {subtitle}
+          </Txt>
+        ) : null}
+      </View>
       {children}
     </View>
   );
