@@ -104,6 +104,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 6 (fixes from the phone): (a) screens did not redraw after a mark until leaving the page; (b) Listen's player pill and settings sheet layout
 - [x] Step 7a: Listen settings sheet: the page's top bar (surah name, index button) still showed through it
 - [x] Step 7b: first-time clarity and a more modern look: a Welcome screen when there is no plan yet (what the page does, how it works, one clear start button), short subtitles and icons on the cards
+- [ ] Step 8: undo Step 7b's Welcome screen (not wanted) and redesign the SAME Plan page: clearer and more modern (tinted cards with icons, clearer week card and ring, clearer Complete buttons, a one-line intro when there is no plan)
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
 
 ### Web inventory (source `Majlis-al-Bararah`, branch `hifdh-port`)
