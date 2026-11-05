@@ -46,16 +46,18 @@ function initPace(type: PlanType | null, id: string | null): Pace {
   const existing = id ? plan.planById(id) : null;
   if (existing) {
     const v = core.versionAt(existing, today);
+    const weekly = existing.period === 'week';
+    const perDay = weekly ? (v.unit === 'ayah' ? Math.max(1, Math.ceil(v.amount / 7)) : Math.max(0.5, Math.ceil((v.amount / 7) * 2) / 2)) : v.amount;
     return {
       id: existing.id,
       type: existing.type,
-      period: existing.period,
+      period: 'day', // plans are daily: today's plan follows the days you chose, not the week
       range: existing.range,
       scopeSel: existing.range ? 'part' : 'all',
       bits: Array.from(core.rangesToBits(existing.range || [], plan.units().N)) as number[],
       unit: v.unit,
-      amtText: String(v.amount),
-      days: [...v.days],
+      amtText: String(perDay),
+      days: weekly ? [...ALL_DAYS] : [...v.days],
       mode: existing.target?.kind === 'date' ? 'date' : 'amount',
       date: existing.target?.kind === 'date' ? existing.target.date : core.addDays(today, 90),
       from: today,
@@ -68,13 +70,13 @@ function initPace(type: PlanType | null, id: string | null): Pace {
   return {
     id: null,
     type: t,
-    period: 'week',
+    period: 'day',
     range: null,
     scopeSel: null,
     bits: emptyBits(),
     unit: 'thumun',
     amtText: '',
-    days: [...ALL_DAYS],
+    days: [],
     mode: 'amount',
     date: core.addDays(today, 90),
     from: today,
@@ -102,7 +104,7 @@ function calc(p: Pace): { unit: string; amount: number } {
   return { unit: 'ayah', amount: derive('ayah') };
 }
 
-const stepKeys = (p: Pace) => ['type', ...(p.askMem ? ['memorized'] : []), 'scope', p.mode === 'date' ? 'date' : 'amount', ...(p.period === 'week' ? [] : ['days']), 'summary'];
+const stepKeys = (p: Pace) => ['type', ...(p.askMem ? ['memorized'] : []), 'scope', 'days', p.mode === 'date' ? 'date' : 'amount', 'summary'];
 
 function Opt({ on, text, sub, disabled, onPress }: { on: boolean; text: string; sub?: string; disabled?: boolean; onPress: () => void }) {
   const { c } = useTheme();
@@ -193,7 +195,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
 
   const goStep = (n: number) => patch({ step: Math.max(pace.first, Math.min(n, keys.length - 1)) });
   const { unit, amount } = calc(pace);
-  const days = pace.period === 'week' ? ALL_DAYS : pace.days;
+  const days = pace.days;
   const draft = () => core.draftPlan({ ...pace, unit, amount, days }, plan.today());
   const finish: string | null = (key === 'summary' || editing) && amount > 0 ? plan.forecast(draft()) : null;
   const scopeReady = pace.scopeSel === 'all' || (pace.scopeSel === 'part' && pace.bits.some((b) => b === 1));
@@ -207,8 +209,9 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     } else {
       const p = JSON.parse(JSON.stringify(plan.planById(pace.id)));
       const cur = core.versionAt(p, pace.from);
-      const changed = cur.unit !== unit || cur.amount !== amount || cur.days.join() !== days.join();
+      const changed = cur.unit !== unit || cur.amount !== amount || cur.days.join() !== days.join() || plan.planById(pace.id).period === 'week';
       p.range = pace.range;
+      p.period = 'day';
       p.target = target;
       if (changed) {
         const from = pace.from < p.start ? p.start : pace.from;
@@ -249,7 +252,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     </View>
   );
 
-  const amountTitle = HIF.amountQuestion(revise, pace.period === 'week');
+  const amountTitle = HIF.amountQuestion(revise, false);
   const amountBlock = () => (
     <View style={{ gap: 12 }}>
       <View style={styles.chips}>
@@ -304,13 +307,13 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
         ))}
       </View>
       <View style={styles.chips}>
-        <Chip on={pace.days.length === 7} text={HIF.everyDay()} onPress={() => patch({ days: [...ALL_DAYS] })} />
+        <Chip on={pace.days.length === 7} text={HIF.everyDay()} onPress={() => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] })} />
       </View>
     </View>
   );
 
   const toDate = () => <Link text={HIF.pickDate()} onPress={() => patch({ mode: 'date', period: 'day' })} />;
-  const toAmount = () => <Link text={HIF.pickAmount()} onPress={() => patch({ mode: 'amount', period: pace.id ? pace.period : 'week' })} />;
+  const toAmount = () => <Link text={HIF.pickAmount()} onPress={() => patch({ mode: 'amount', period: 'day' })} />;
   const finishLine = () =>
     finish ? (
       <Txt size={15} color={c.text}>
@@ -355,7 +358,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
               </>
             ),
           )}
-          {pace.period === 'day' && sec(HIF.days(), daysBlock())}
+          {sec(HIF.days(), daysBlock())}
           {sec(
             HIF.newPaceFrom(),
             <>
@@ -474,7 +477,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
       return {
         body: (
           <View style={{ gap: 14 }}>
-            <Question title={HIF.daysQuestion()} sub={HIF.daysSub()} />
+            <Question title={HIF.daysQuestion(revise)} sub={HIF.daysSub()} />
             {daysBlock()}
           </View>
         ),

@@ -244,6 +244,7 @@ export function MemorizedPicker({ bits, onSet, quick = false }: Props) {
   const [tab, setTab] = useState<'surah' | 'juz'>('surah');
   const N: number = plan.units().N;
   const total = count(bits, 0, N);
+  const none = total === 0 && plan.nothingMemorized(); // chosen on purpose; pressing it again lets go of it
 
   return (
     <View style={{ gap: 12 }}>
@@ -259,10 +260,14 @@ export function MemorizedPicker({ bits, onSet, quick = false }: Props) {
           </View>
           <View style={styles.quick}>
             <View style={{ flex: 1 }}>
-              {total === N ? <PrimaryButton label={HIF.wholeQuran()} onPress={() => onSet(0, N, false)} /> : <SecondaryButton label={HIF.wholeQuran()} onPress={() => onSet(0, N, true)} />}
+              {total === N ? <PrimaryButton label={HIF.wholeQuran()} onPress={() => onSet(0, N, false)} /> : <SecondaryButton label={HIF.wholeQuran()} onPress={() => (plan.setNothingMemorized(false), onSet(0, N, true))} />}
             </View>
             <View style={{ flex: 1 }}>
-              {total === 0 ? <PrimaryButton label={HIF.nothingYet()} onPress={() => onSet(0, N, false)} /> : <SecondaryButton label={HIF.nothingYet()} onPress={() => onSet(0, N, false)} />}
+              {none ? (
+                <PrimaryButton label={HIF.nothingYet()} onPress={() => (plan.setNothingMemorized(false), onSet(0, 0, false))} />
+              ) : (
+                <SecondaryButton label={HIF.nothingYet()} onPress={() => (plan.setNothingMemorized(true), onSet(0, N, false))} />
+              )}
             </View>
           </View>
         </>

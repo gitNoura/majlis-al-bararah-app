@@ -34,6 +34,7 @@ export function MemorizedScreen() {
         quick
         bits={bits}
         onSet={(from, to, on) => {
+          if (on) plan.setNothingMemorized(false);
           plan.setLedger([[from, to]], on);
           refresh();
         }}

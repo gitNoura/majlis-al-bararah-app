@@ -94,6 +94,13 @@ export function markMemorizedAsked() {
   save();
 }
 
+// «Nothing yet» is a choice of its own (a toggle), not just an empty ledger: it is kept in the settings
+export const nothingMemorized = () => Boolean(state.settings?.memNone) && memorizedCount() === 0;
+export function setNothingMemorized(on) {
+  state.settings = { ...state.settings, memNone: Boolean(on) };
+  save();
+}
+
 // ---------- Sessions ----------
 
 export const todayRows = () => core.todayRows(state, U, today());

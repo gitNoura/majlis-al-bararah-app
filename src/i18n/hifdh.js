@@ -144,8 +144,11 @@ export const HIF = {
   whenQuestion: () => L('متى تريد أن تنتهي؟', 'When do you want to finish?', 'Quand voulez-vous finir ?'),
   finishDate: () => L('تاريخ الانتهاء', 'Finish date', 'Date de fin'),
   thatsAbout: () => L('أي حوالي', 'That’s about', 'Soit environ'),
-  daysQuestion: () => L('في أي أيام تتفرغ؟', 'Which days work for you?', 'Quels jours vous conviennent ?'),
-  daysSub: () => L('اختر أيام الحفظ في الأسبوع.', 'Pick the days you’ll keep each week.', 'Choisissez les jours que vous tiendrez chaque semaine.'),
+  daysQuestion: (revise) =>
+    revise
+      ? L('في أي أيام تريد أن تراجع؟', 'Which days do you want to revise?', 'Quels jours voulez-vous réviser ?')
+      : L('في أي أيام تريد أن تحفظ؟', 'Which days do you want to memorize?', 'Quels jours voulez-vous mémoriser ?'),
+  daysSub: () => L('اختر الأيام التي ستظهر فيها خطتك.', 'Your plan will appear on the days you pick.', 'Votre plan apparaîtra les jours choisis.'),
   everyDay: () => L('كل يوم', 'Every day', 'Tous les jours'),
   pickADay: () => L('اختر يوماً واحداً على الأقل.', 'Choose at least one day.', 'Choisissez au moins un jour.'),
   planSaved: () => L('تم حفظ خطتك.', 'Plan saved.', 'Plan enregistré.'),
