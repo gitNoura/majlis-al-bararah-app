@@ -1,7 +1,6 @@
 // «Your week»: how many of the seven days (Monday first) had something done, and a pill for each day:
 // kept (check), today, missed since the first plan began (cross), or still to come.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
-import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -23,23 +22,21 @@ function CloseMark({ color }: { color: string }) {
 }
 
 export function WeekCard() {
-  const { c, isDark } = useTheme();
+  const { c } = useTheme();
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
-  const soft = 'rgba(255, 255, 255, 0.14)';
-  const muted = 'rgba(255, 255, 255, 0.72)';
 
   return (
-    <LinearGradient colors={isDark ? ['#3a7a60', '#244f3e'] : ['#2b6b53', '#173f32']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }]}>
       <View style={styles.top}>
-        <Txt serif size={21} weight={700} color={c.onInk}>
+        <Txt size={18} weight={700} color={c.ink}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
-          <Txt size={30} weight={800} color={c.onInk} lineHeight={34}>
+          <Txt size={26} weight={800} color={c.ink} lineHeight={30}>
             {num(n)}
           </Txt>
-          <Txt size={12} color={muted}>
+          <Txt size={12} color={c.meta}>
             {HIF.ofSevenDays()}
           </Txt>
         </View>
@@ -49,29 +46,29 @@ export function WeekCard() {
           const state: DayState = kept.has(d) ? 'on' : d === today ? 'now' : started && d >= started && d < today ? 'miss' : 'idle';
           return (
             <View key={d} style={styles.day}>
-              <Txt size={11} weight={600} center color={state === 'now' ? c.onInk : muted}>
+              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={state === 'now' ? c.ink : c.meta}>
                 {weekdayName(core.weekdayOf(d))}
               </Txt>
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? c.gold : soft },
-                  state === 'now' && { borderWidth: 1.5, borderColor: c.onInk },
+                  { backgroundColor: state === 'on' ? c.gold : c.soft },
+                  state === 'now' && { borderWidth: 1.5, borderColor: c.goldStrong },
                 ]}
               >
                 {state === 'on' && <CheckIcon color="#173f32" size={16} strokeWidth={2.4} />}
-                {state === 'miss' && <CloseMark color={muted} />}
+                {state === 'miss' && <CloseMark color={c.meta} />}
               </View>
             </View>
           );
         })}
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 26, padding: 18, gap: 16, boxShadow: '0px 12px 30px rgba(68, 55, 43, 0.16)' },
+  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 14, boxShadow: '0px 10px 26px rgba(68, 55, 43, 0.10)' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { alignItems: 'flex-end' },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 6 },

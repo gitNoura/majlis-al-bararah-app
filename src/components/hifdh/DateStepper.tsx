@@ -31,7 +31,7 @@ export function DateStepper({ value, min, onChange, label }: { value: string; mi
   );
   return (
     <View style={styles.wrap} accessible accessibilityRole="adjustable" accessibilityLabel={`${label}: ${fmtDate(value)}`}>
-      <Txt serif size={22} weight={700} center color={c.ink}>
+      <Txt size={22} weight={700} center color={c.ink}>
         {fmtDate(value)}
       </Txt>
       <View style={styles.row}>{STEPS.map((n) => btn(-n)).reverse()}</View>

@@ -22,7 +22,7 @@ export function TodayCard() {
 
   if (!st.plans.some((p: { type: string }) => p.type === 'memorize')) {
     return (
-      <Section title={title} subtitle={HIF.todaySub()} tone="green" icon={<BookOpenIcon color={c.ink} size={22} />}>
+      <Section title={title} subtitle={HIF.todaySub()} icon={<BookOpenIcon color={c.ink} size={22} />}>
         <Hint>{HIF.noPlanYet()}</Hint>
         <PrimaryButton label={HIF.setUpPlan()} onPress={() => startPlan('memorize')} />
       </Section>
@@ -33,7 +33,7 @@ export function TodayCard() {
   const next = plan.upcomingRows().find((r: Row) => r.plan.type === 'memorize');
 
   return (
-    <Section title={title} subtitle={HIF.todaySub()} tone="green" icon={<BookOpenIcon color={c.ink} size={22} />}>
+    <Section title={title} subtitle={HIF.todaySub()} icon={<BookOpenIcon color={c.ink} size={22} />}>
       {rows.length ? (
         <View>
           {rows.map((r: Row, i: number) => (

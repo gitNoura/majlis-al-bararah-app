@@ -1,5 +1,5 @@
 // The head of the Hifdh page and of the screens inside it, in the home page's manner: «back», then the screen's name
-// in large serif type at the start of the line (the plan page adds the date under it, as the home page does under
+// in large type at the start of the line (the plan page adds the date under it, as the home page does under
 // its greeting). `onBack` is the page's own step back (a sheet, the plan questions); without it, back leaves the page.
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -20,7 +20,7 @@ export function HifHeader({ title, subtitle, onBack }: { title: string; subtitle
         <BackIcon color={c.ink} rtl={!isEnglish} />
       </Pressable>
       <View style={styles.text}>
-        <Txt serif size={subtitle ? 34 : 28} weight={700} color={c.ink} lineHeight={subtitle ? 52 : 44} numberOfLines={1}>
+        <Txt size={subtitle ? 32 : 26} weight={800} color={c.ink} lineHeight={subtitle ? 46 : 38} numberOfLines={1}>
           {title}
         </Txt>
         {subtitle ? (

@@ -112,7 +112,7 @@ Checklist (tick each step, commit and push after each):
 - [x] Step 11a: finishing a portion changes the same card (no extra congratulation box, no extra pop-up box)
 - [x] Step 11b: the Arabic wording of the Hifdh pages rewritten to read as Arabic, not as a translation
 - [x] Step 11c: the Hifdh pages take the Home page's look (star background, large serif heading, warm tiles and shadows, glass bottom bar)
-- [ ] Step 12a: no green surfaces (week card, Today card tint) and one font: the sans for all card text, the serif only for the page's big heading
+- [x] Step 12a: no green surfaces (week card, Today card tint) and one font: the sans for all card text, the serif only for the page's big heading
 - [ ] Step 12b: the memorized ring is removed from the top; a ring tracking PLAN progress sits on the History tile; «what I've memorized» stays reachable (My plans, Revision card)
 - [ ] Step 12c: pressing Complete turns the same card into a done state (gold, check, congratulation, undo; no Complete / play buttons); the heading goes back to «Today's plan»
 - [x] Step 4: final `npx tsc --noEmit` and `npx expo lint`: no errors, no warnings
@@ -212,3 +212,7 @@ Web files: `src/hifz/{hifz.js (1072 lines), hifz-core.js, hifz-plan.js, confetti
 - `HifHeader` is the home page's manner: back, then the name in large serif type at the start of the line (34 on the plan page, with the date under it as Home does under its greeting; 28 on the inner screens), instead of a small centred title.
 - Shadows are the home page's warm brown (`0px 10px 26px rgba(68, 55, 43, 0.10)`); «Your week» is a green gradient hero (like Home's big sky card). The star background was already behind the page.
 - The bottom bar stays the Quran reading page's (as asked in Step 9); the home page's own bar is a glass panel with rounded top corners, which can replace it if wanted.
+
+### Notes (Step 12a: no green, one font)
+- Surfaces are the home page's beige tile everywhere; the green gradient on «Your week» and the green tint of the Today card are gone («Your week» is a plain tile, the days kept are gold). Round icon chips are a soft gold; `HifTheme.soft` is a brown tint (was green). The only tinted card is a finished one (`Section tone="done"`, gold, step 12c). The dark green stays only where Home uses it: text and the main buttons.
+- One font: every `serif` on the Hifdh pages was removed (cards, headings, sheets, setup, Listen's sheet); the page heading is the sans at weight 800.

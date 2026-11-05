@@ -29,7 +29,7 @@ export function HistoryTile({ onPress }: { onPress: () => void }) {
         <CalendarIcon color={c.ink} size={22} />
       </View>
       <View style={{ flex: 1 }}>
-        <Txt serif size={18} weight={700} color={c.ink}>
+        <Txt size={18} weight={700} color={c.ink}>
           {HIF.history()}
         </Txt>
         <Txt size={13} color={c.meta}>
@@ -78,7 +78,7 @@ function StatusSheet({ row, onClose }: { row: Row | null; onClose: () => void })
         <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: c.dim }]} onPress={onClose} accessibilityLabel={HIF.close()} />
         <View style={[styles.panel, { backgroundColor: c.panel, paddingBottom: insets.bottom + 16 }]}>
           <View style={styles.head}>
-            <Txt serif size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
+            <Txt size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
               {dayText(row.day)}
             </Txt>
             <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel={HIF.close()}>

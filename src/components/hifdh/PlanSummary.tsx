@@ -27,7 +27,7 @@ export function PlanSummary({ onOpenMemorized }: { onOpenMemorized?: () => void 
       <WeekCard />
       <MemorizedRing onPress={onOpenMemorized} />
       <View style={styles.todayHead}>
-        <Txt serif size={24} weight={700} color={c.ink} style={{ flexShrink: 1 }}>
+        <Txt size={24} weight={700} color={c.ink} style={{ flexShrink: 1 }}>
           {done ? HIF.congratsTitle() : HIF.todayPlan()}
         </Txt>
         <Txt size={13} color={c.meta}>

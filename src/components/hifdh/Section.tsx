@@ -7,22 +7,22 @@ import { Txt } from '@/components/Txt';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/theme';
 
-export type Tone = 'green' | 'gold';
+export type Tone = 'done';
 
-// A card: an optional round icon, the title with its one-line subtitle, then the content. `tone` tints it softly
-// (green for what is memorized today, gold for revision), as the website's green and yellow bands did.
+// A card: an optional round icon, the title with its one-line subtitle, then the content. It is the home page's tile;
+// `tone="done"` is what a finished card looks like: tinted gold, its icon a gold check.
 export function Section({ title, subtitle, icon, tone, children, style }: { title: string; subtitle?: string; icon?: ReactNode; tone?: Tone; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const { c, isDark } = useTheme();
-  const tint =
-    tone === 'green' ? (isDark ? 'rgba(47, 102, 80, 0.22)' : 'rgba(23, 63, 50, 0.06)') : tone === 'gold' ? (isDark ? 'rgba(197, 161, 90, 0.14)' : 'rgba(197, 161, 90, 0.16)') : null;
-  const chip = tone === 'gold' ? 'rgba(197, 161, 90, 0.3)' : isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(23, 63, 50, 0.1)';
+  const done = tone === 'done';
+  const tint = done ? (isDark ? 'rgba(197, 161, 90, 0.16)' : 'rgba(197, 161, 90, 0.22)') : null;
+  const chip = done ? c.gold : 'rgba(197, 161, 90, 0.2)';
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }, style]}>
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: done ? 'rgba(184, 145, 58, 0.5)' : c.line }, style]}>
       {tint && <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: tint, borderRadius: 24 }]} />}
       <View style={styles.head}>
         {icon ? <View style={[styles.chip, { backgroundColor: chip }]}>{icon}</View> : null}
         <View style={{ flex: 1 }}>
-          <Txt serif size={19} weight={700} color={c.ink}>
+          <Txt size={18} weight={700} color={c.ink}>
             {title}
           </Txt>
           {subtitle ? (

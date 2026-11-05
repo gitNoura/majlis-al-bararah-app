@@ -162,7 +162,7 @@ function Question({ title, sub }: { title: string; sub?: string }) {
   const { c } = useTheme();
   return (
     <View style={{ gap: 4 }}>
-      <Txt serif size={24} weight={700} color={c.ink}>
+      <Txt size={24} weight={700} color={c.ink}>
         {title}
       </Txt>
       {!!sub && (
@@ -502,7 +502,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     return {
       body: (
         <View style={{ gap: 14 }}>
-          <Txt serif size={26} weight={700} center color={c.ink}>
+          <Txt size={26} weight={700} center color={c.ink}>
             {HIF.planReady()}
           </Txt>
           {finish ? (
@@ -510,7 +510,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
               <Txt size={14} color={c.meta}>
                 {HIF.finishLine(revise)}
               </Txt>
-              <Txt serif size={26} weight={700} color={c.ink}>
+              <Txt size={26} weight={700} color={c.ink}>
                 {fmtDate(finish)}
               </Txt>
             </View>
