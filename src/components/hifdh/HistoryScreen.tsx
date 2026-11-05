@@ -7,7 +7,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { Heading, Hint, Section, alpha, useAccent } from '@/components/hifdh/Section';
+import { Heading, Hint, Section, useTints } from '@/components/hifdh/Section';
 import { ProgressRing } from '@/components/hifdh/ProgressRing';
 import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
@@ -26,24 +26,23 @@ const PAGE = 40; // days shown at a time
 // reference: how far the plans are (a ring and the big value beside it) and the way into the past days.
 export function ProgressSection({ onPress }: { onPress: () => void }) {
   const { c } = useTheme();
-  const green = useAccent('green');
-  const clay = useAccent('clay');
+  const t = useTints('rose');
   const p = plan.planProgress();
   const pct = p == null ? null : Math.round(p * 100);
-  const arrow = <Txt size={20} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>›</Txt>;
+  const arrow = <Txt size={20} color={t.ink} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>›</Txt>;
   return (
     <View style={{ gap: 12 }}>
       <Heading title={HIF.progress()} link={HIF.history()} onLink={onPress} />
       <View style={styles.pair}>
-        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: c.line }]}>
-          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: alpha(green, 0.04) }]} />
+        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: t.line }]}>
+          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: t.wash }]} />
           <Txt size={13.5} color={c.meta}>
             {HIF.progressLabel()}
           </Txt>
           <View style={styles.miniRow}>
-            <ProgressRing size={60} inside={false} />
+            <ProgressRing size={60} inside={false} color={t.base} track={t.chip} />
             <View style={{ flex: 1 }}>
-              <Txt size={pct == null ? 20 : 26} weight={800} color={c.ink} lineHeight={pct == null ? 28 : 32}>
+              <Txt size={pct == null ? 20 : 26} weight={800} color={t.ink} lineHeight={pct == null ? 28 : 32}>
                 {pct == null ? HIF.progressNone() : `${num(pct)}%`}
               </Txt>
               <Txt size={12.5} color={c.meta} lineHeight={18}>
@@ -52,13 +51,13 @@ export function ProgressSection({ onPress }: { onPress: () => void }) {
             </View>
           </View>
         </Pressable>
-        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: c.line }]}>
-          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: alpha(clay, 0.04) }]} />
+        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: t.line }]}>
+          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: t.wash }]} />
           <Txt size={13.5} color={c.meta}>
             {HIF.history()}
           </Txt>
           <View style={{ flex: 1, justifyContent: 'space-between', gap: 6 }}>
-            <Txt size={15} weight={600} color={c.ink} lineHeight={22}>
+            <Txt size={15} weight={600} color={t.ink} lineHeight={22}>
               {HIF.historySub()}
             </Txt>
             <View style={{ alignSelf: 'flex-end' }}>{arrow}</View>

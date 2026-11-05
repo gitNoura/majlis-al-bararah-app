@@ -4,7 +4,7 @@
 import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { alpha, useAccent } from '@/components/hifdh/Section';
+import { useTints } from '@/components/hifdh/Section';
 import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
@@ -24,19 +24,19 @@ function CloseMark({ color }: { color: string }) {
 
 export function WeekCard() {
   const { c } = useTheme();
-  const green = useAccent('green');
+  const t = useTints('violet');
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }]}>
-      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: alpha(green, 0.04) }]} />
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: t.line }]}>
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: t.wash }]} />
       <View style={styles.top}>
-        <Txt serif size={18} weight={700} color={c.ink} lineHeight={30}>
+        <Txt serif size={18} weight={700} color={t.ink} lineHeight={30}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
-          <Txt size={26} weight={800} color={c.ink} lineHeight={30}>
+          <Txt size={26} weight={800} color={t.ink} lineHeight={30}>
             {num(n)}
           </Txt>
           <Txt size={12} color={c.meta}>
@@ -49,18 +49,18 @@ export function WeekCard() {
           const state: DayState = kept.has(d) ? 'on' : d === today ? 'now' : started && d >= started && d < today ? 'miss' : 'idle';
           return (
             <View key={d} style={styles.day}>
-              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={state === 'now' ? (c.ink) : c.text}>
+              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={state === 'now' ? t.ink : c.text}>
                 {weekdayName(core.weekdayOf(d))}
               </Txt>
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? c.on : c.soft },
-                  state === 'now' && { borderWidth: 1.5, borderColor: c.on },
+                  { backgroundColor: state === 'on' ? t.base : t.chip },
+                  state === 'now' && { borderWidth: 1.5, borderColor: t.ink },
                 ]}
               >
                 {state === 'on' && <CheckIcon color="#ffffff" size={16} strokeWidth={2.4} />}
-                {state === 'miss' && <CloseMark color={c.meta} />}
+                {state === 'miss' && <CloseMark color={t.ink} />}
               </View>
             </View>
           );

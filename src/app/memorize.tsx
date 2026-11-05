@@ -26,7 +26,6 @@ import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { startKey } from '@/lib/hifdh/listen';
-import { dayText } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { HifTheme, useTheme } from '@/theme/theme';
 
@@ -69,7 +68,7 @@ function Content({
   const pad = { padding: 16, paddingBottom: insets.bottom + 32, gap: 14 };
   return (
     <View style={{ flex: 1 }}>
-      <HifHeader subtitle={view === 'home' ? dayText(plan.today()) : undefined} title={view === 'memorized' ? HIF.memorizedTitle() : view === 'plans' ? HIF.myPlans() : view === 'history' ? HIF.progress() : HIF.title()} onBack={view === 'home' ? undefined : () => go('home')} />
+      <HifHeader big={view === 'home'} title={view === 'memorized' ? HIF.memorizedTitle() : view === 'plans' ? HIF.myPlans() : view === 'history' ? HIF.progress() : HIF.title()} onBack={view === 'home' ? undefined : () => go('home')} />
       {view === 'memorized' ? (
         <ScrollView contentContainerStyle={pad} keyboardShouldPersistTaps="handled">
           <MemorizedScreen />

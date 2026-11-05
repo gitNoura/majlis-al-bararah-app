@@ -50,7 +50,6 @@ export function TodayCard() {
       ) : (
         <Hint>{next ? HIF.nothingTodayNext(dayText(next.day)) : HIF.nothingToday()}</Hint>
       )}
-      {rows.some((r: Row) => r.status !== 'done' && r.status !== 'partial' && r.week == null) && <Hint>{HIF.holdHint()}</Hint>}
     </Section>
   );
 }

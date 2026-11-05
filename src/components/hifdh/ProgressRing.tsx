@@ -10,20 +10,20 @@ import { useTheme } from '@/theme/theme';
 const R = 40;
 const CIRC = 2 * Math.PI * R;
 
-export function ProgressRing({ size = 52, inside = true }: { size?: number; inside?: boolean }) {
+export function ProgressRing({ size = 52, inside = true, color, track }: { size?: number; inside?: boolean; color?: string; track?: string }) {
   const { c } = useTheme();
   const p = plan.planProgress();
   const pct = p == null ? 0 : Math.round(p * 100);
   return (
     <View style={{ width: size, height: size }} accessible accessibilityRole="image" accessibilityLabel={`${pct}%`}>
       <Svg width={size} height={size} viewBox="0 0 96 96">
-        <Circle cx={48} cy={48} r={R} stroke={c.line} strokeWidth={10} fill="none" />
+        <Circle cx={48} cy={48} r={R} stroke={track ?? c.line} strokeWidth={10} fill="none" />
         {pct > 0 && (
           <Circle
             cx={48}
             cy={48}
             r={R}
-            stroke={c.on}
+            stroke={color ?? c.on}
             strokeWidth={10}
             fill="none"
             strokeLinecap="round"

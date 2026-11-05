@@ -14,17 +14,12 @@ export function PlanSummary() {
   const { c } = useTheme();
   return (
     <View style={styles.wrap}>
-      {(plan.get().plans as unknown[]).length === 0 && (
-        <Txt size={14.5} color={c.meta}>
-          {HIF.planIntro()}
-        </Txt>
-      )}
       <WeekCard />
       <View style={styles.todayHead}>
-        <Txt serif size={22} weight={700} color={c.ink} lineHeight={36} style={{ flexShrink: 1 }}>
+        <Txt size={17} weight={700} color={c.meta} style={{ flexShrink: 1 }}>
           {HIF.todayPlan()}
         </Txt>
-        <Txt size={13} color={c.meta}>
+        <Txt size={17} weight={700} color={c.meta}>
           {dayText(plan.today())}
         </Txt>
       </View>

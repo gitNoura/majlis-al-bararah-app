@@ -11,7 +11,7 @@ import { isEnglish } from '@/i18n/i18n';
 import { HOME } from '@/i18n/home';
 import { useTheme } from '@/theme/theme';
 
-export function HifHeader({ title, subtitle, onBack }: { title: string; subtitle?: string; onBack?: () => void }) {
+export function HifHeader({ title, subtitle, big, onBack }: { title: string; subtitle?: string; big?: boolean; onBack?: () => void }) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   return (
@@ -20,7 +20,7 @@ export function HifHeader({ title, subtitle, onBack }: { title: string; subtitle
         <BackIcon color={c.ink} rtl={!isEnglish} />
       </Pressable>
       <View style={styles.text}>
-        <Txt size={subtitle ? 32 : 26} weight={800} color={c.ink} lineHeight={subtitle ? 46 : 38} numberOfLines={1}>
+        <Txt size={big || subtitle ? 32 : 26} weight={800} color={c.ink} lineHeight={big || subtitle ? 46 : 38} numberOfLines={1}>
           {title}
         </Txt>
         {subtitle ? (
