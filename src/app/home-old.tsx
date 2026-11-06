@@ -27,8 +27,7 @@ import { streak } from '@/lib/activity';
 import * as hijri from '@/lib/hijri';
 import { clockTime, locate, nextPrayer, place, placeName, skyNow, skyTimes, times } from '@/lib/prayer';
 import { SURAHS, TOTAL_PAGES } from '@/lib/quran';
-import { stayInQuran } from '@/lib/riwaya';
-import { readJSON, writeJSON } from '@/lib/storage';
+import { readJSON } from '@/lib/storage';
 import { wirdStop } from '@/lib/wird';
 import { HifTheme, useTheme } from '@/theme/theme';
 
@@ -189,15 +188,6 @@ const heroW = Math.min(width, 560) - 32;
 const lamp = lanternBox(LAMP_W);
 const isEnglish = LANG === 'en';
 
-  // after a change of narration the app opens again: straight back on the mushaf, at the same place
-  useEffect(() => {
-    const stay = stayInQuran();
-    if (stay) {
-      if (typeof stay === 'number') writeJSON('lastPage', stay);
-      router.push('/quran');
-    }
-  }, []);
-
   // back on the home screen: everything as it is now (the wird read, a place chosen...)
   useFocusEffect(
     useCallback(() => {
@@ -354,7 +344,7 @@ const isEnglish = LANG === 'en';
               (or «begin from al-Fatiha») with its ayah and page, and the button beside it; how much of the khatma is read;
               and the hadith as plain text. The whole card goes on with the wird. */}
           <Pressable
-  onPress={go({ pathname: '/quran', params: { wird: '1' } })}
+  onPress={go({ pathname: '/reader-old', params: { wird: '1' } })}
   accessibilityRole="button"
   accessibilityLabel={`${HOME.wirdLabel()}: ${wirdTitle}`}
   style={({ pressed }) => [styles.card, { borderColor: hc.line, boxShadow: hc.shadow }, pressed && styles.pressed]}
@@ -445,8 +435,8 @@ const isEnglish = LANG === 'en';
           {/* the app's four sections */}
           {heading(S.sections())}
           <View style={styles.tiles}>
-            <Tile hc={hc} g={g} label={HOME.tabQuran()} sub={S.quranSub()} onPress={go('/quran')} />
-            <Tile hc={hc} g={g} label={HOME.memorize()} sub={HOME.memorizeSub()} onPress={go('/memorize')} />
+            <Tile hc={hc} g={g} label={HOME.tabQuran()} sub={S.quranSub()} onPress={go('/reader-old')} />
+            <Tile hc={hc} g={g} label={HOME.memorize()} sub={HOME.memorizeSub()} onPress={go('/hifdh-old')} />
             <Tile hc={hc} g={g} label={HOME.testShort()} sub={HOME.testSub()} soon onPress={go('/test')} />
             <Tile hc={hc} g={g} label={HOME.tabMajalis()} sub={HOME.majalisSub()} soon onPress={go('/majalis')} />
           </View>

@@ -9,7 +9,6 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'reac
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BackIcon, BookOpenIcon, CheckIcon, ClockIcon, CommentIcon } from '@/components/icons';
-import { ScreenHeader } from '@/components/ScreenHeader';
 import { ScreenBackground } from '@/components/Stars';
 import { Row, Section, Segments, Tag } from '@/components/SettingsList';
 import { Txt } from '@/components/Txt';
@@ -66,8 +65,10 @@ export default function Settings() {
     <View style={{ flex: 1, backgroundColor: c.screen }}>
       <ScreenBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <ScreenHeader title={SETTINGS.title()} />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 28 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: insets.top + 24, paddingBottom: 28 }}>
+        <Txt size={32} weight={800} color={c.ink} style={{ marginHorizontal: 6 }}>
+          {SETTINGS.title()}
+        </Txt>
         <Section title={SETTINGS.appearance()}>
           <Segments<ThemeMode>
             value={mode}
