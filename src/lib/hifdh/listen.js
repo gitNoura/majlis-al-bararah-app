@@ -18,7 +18,7 @@ import { COUNTS, keyOf, ordOf } from './index.js';
 import { addRecord } from './log.js';
 import { HAFS_COUNTS, RECITERS, globalNumber } from './reciters.js';
 
-export const SPEEDS = [1, 1.5, 2];
+export const SPEEDS = [0.25, 0.5, 1, 1.5, 2];
 export const QUICK = [1, 2, 3, 4, 5]; // the usual numbers of times; the box next to them is for any other
 export const METHODS = ['each', 'prev', 'all'];
 export const MAX_TYPED = 99; // the most that can be typed in the «other number» box
@@ -57,7 +57,7 @@ export function loadPrefs() {
     reciter: saved.reciter ?? null,
     repeat: times(saved.repeat ?? saved.repeatAyah ?? 1),
     rounds: times(saved.rounds ?? saved.repeatRange ?? 1),
-    loop: saved.loop === true, // the whole choice again and again, without end
+    loop: false, // the endless loop has no button any more (a saved one must not keep playing with no way to stop it)
     speed: SPEEDS.includes(saved.speed) ? saved.speed : 1,
     method: METHODS.includes(saved.method) ? saved.method : 'each',
   };

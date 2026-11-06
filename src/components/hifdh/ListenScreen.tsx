@@ -1,6 +1,6 @@
 // «Listen» (listen.js of the website), on the mushaf: the same page book as the Quran screen (PageCurl) under
 // its own top bar (back, the index, the surah and page in the middle) and its own player pill. A tap on an
-// ayah chooses it, a second tap takes everything between; the settings sheet (the pill's summary or gear) has
+// ayah chooses it, a second tap takes everything between; the settings sheet (the pill's summary) has
 // the other ways: From / To, whole page or surah, how many times each ayah is heard, speed, reciter and the
 // way of listening, ending with «Play audio». The ayat chosen are tinted green, the ones of the step heard
 // gently, the one heard now gold, and the page turns by itself to follow it. Leaving keeps the reading place:
@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Glass, GlassBackdrop } from '@/components/Glass';
 import { Section } from '@/components/hifdh/Section';
-import { BackIcon, CloseIcon, MenuIcon, PauseIcon, PlayIcon, SettingsIcon } from '@/components/icons';
+import { BackIcon, CloseIcon, MenuIcon, PauseIcon, PlayIcon } from '@/components/icons';
 import { PageCurl, type Marked } from '@/components/PageCurl';
 import { QuranIndex } from '@/components/QuranIndex';
 import { ScreenBackground } from '@/components/Stars';
@@ -125,6 +125,48 @@ function SurahPicker({ open, onPick, onClose }: { open: boolean; onPick: (n: num
   );
 }
 
+// the reciter: the one chosen on a button, and the list of those that can play when it is tapped
+function ReciterPicker({ open, value, onPick, onClose }: { open: boolean; value: string; onPick: (id: string) => void; onClose: () => void }) {
+  const { c } = useTheme();
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={open} animationType="slide" onRequestClose={onClose} transparent>
+      <View style={[styles.modalBack, { backgroundColor: c.dim }]}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={HIF.close()} />
+        <View style={[styles.modal, { backgroundColor: c.screen, paddingBottom: insets.bottom + 8 }]}>
+          <Txt size={18} weight={700} color={c.ink} center style={{ paddingVertical: 12 }}>
+            {HIF.lsReciter()}
+          </Txt>
+          <FlatList
+            data={available()}
+            keyExtractor={(r) => r.id}
+            renderItem={({ item }) => {
+              const on = item.id === value;
+              return (
+                <Pressable
+                  onPress={() => onPick(item.id)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: on }}
+                  style={[styles.surahRow, { borderColor: c.line, gap: 10 }]}
+                >
+                  <Txt size={16} weight={on ? 700 : 600} color={c.ink} style={{ flex: 1 }}>
+                    {item.name[isEnglish ? 1 : 0]}
+                  </Txt>
+                  {on && (
+                    <Txt size={18} weight={700} color={c.on}>
+                      ✓
+                    </Txt>
+                  )}
+                </Pressable>
+              );
+            }}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 // «surah [..] ayah [− n +]»
 function Point({ label, value, onChange }: { label: string; value: string; onChange: (key: string) => void }) {
   const { c } = useTheme();
@@ -198,6 +240,7 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
   const [hint, setHint] = useState('');
   const [setOpen, setSetOpen] = useState(false);
   const [indexOpen, setIndexOpen] = useState(false);
+  const [reciterOpen, setReciterOpen] = useState(false);
   const [seenNow, setSeenNow] = useState<string | null>(null);
 
   useEffect(() => {
@@ -342,7 +385,7 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
               </Pressable>
             </View>
 
-            {/* the bar under the page: what is chosen (and heard), clear, repeat, settings, previous, play, next */}
+            {/* the bar under the page: what is chosen (and heard, a tap opens the settings), clear, previous, play, next */}
             <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end', alignItems: 'center', paddingBottom: insets.bottom + 12 }]}>
               <Glass acrylic style={[styles.player, { width: Math.min(width - 24, 520) }]}>
                 <View style={styles.pillRow}>
@@ -359,20 +402,6 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
                     <CloseIcon color={c.ink} size={20} />
                   </Pressable>
                 )}
-                <Pressable
-                  onPress={() => ls.setPref('loop', !prefs.loop)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: prefs.loop }}
-                  accessibilityLabel={HIF.lsLoop()}
-                  style={[styles.ico, { backgroundColor: prefs.loop ? c.on : c.soft }]}
-                >
-                  <Txt size={18} weight={700} color={prefs.loop ? c.onInk : c.ink}>
-                    ⟲
-                  </Txt>
-                </Pressable>
-                <Pressable onPress={() => setSetOpen(true)} accessibilityRole="button" accessibilityLabel={HIF.lsSettings()} style={[styles.ico, { backgroundColor: c.soft }]}>
-                  <SettingsIcon color={c.ink} size={20} />
-                </Pressable>
                 {s && (
                   <Pressable
                     onPress={() => ls.jump(-1)}
@@ -479,11 +508,23 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
                   <Txt size={18} weight={700} color={c.ink}>
                     {HIF.lsReciter()}
                   </Txt>
-                  <View style={styles.wrapRow}>
-                    {available().map((r) => (
-                      <Chip key={r.id} label={names(r)} on={reciterOf(prefs).id === r.id} onPress={() => ls.setPref('reciter', r.id)} />
-                    ))}
-                  </View>
+                  <Pressable onPress={() => setReciterOpen(true)} accessibilityRole="button" accessibilityLabel={HIF.lsReciter()} style={[styles.surahBtn, styles.reciterBtn, { borderColor: c.line, backgroundColor: c.card }]}>
+                    <Txt size={15} weight={600} color={c.ink} numberOfLines={1} style={{ flex: 1 }}>
+                      {names(reciterOf(prefs))}
+                    </Txt>
+                    <Txt size={14} color={c.meta}>
+                      ▾
+                    </Txt>
+                  </Pressable>
+                  <ReciterPicker
+                    open={reciterOpen}
+                    value={reciterOf(prefs).id}
+                    onClose={() => setReciterOpen(false)}
+                    onPick={(id) => {
+                      ls.setPref('reciter', id);
+                      setReciterOpen(false);
+                    }}
+                  />
                 </Section>
 
                 <Section title={`${HIF.lsMethod()} ${HIF.lsOptional()}`}>
@@ -544,6 +585,7 @@ const styles = StyleSheet.create({
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
   other: { minWidth: 96, height: 40, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, textAlign: 'center', fontSize: 14, fontFamily: ui(600) },
   pointRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  reciterBtn: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   surahBtn: { flex: 1, minHeight: 44, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, justifyContent: 'center' },
   ayahBox: { width: 64, height: 44, borderRadius: radius.chip, borderWidth: 1, textAlign: 'center', fontSize: 16, fontFamily: ui(600) },
   modalBack: { flex: 1, justifyContent: 'flex-end' },
