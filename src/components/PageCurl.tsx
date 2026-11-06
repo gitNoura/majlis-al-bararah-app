@@ -17,8 +17,8 @@
 // bottom: where the finger started) and which way (`mode`: 1 forward, -1 back, 0 at rest). The pictures
 // of the page before, the page read and the page after are in `prev`, `cur`, `next`; when a turn ends,
 // the page shown is already the new one before the app hears of it, so nothing flickers.
-import { Canvas, Group, Image as SkiaImage, LinearGradient, Path, Rect, Skia, type SkImage } from '@shopify/react-native-skia';
-import { useEffect, useMemo, useRef } from 'react';
+import { Canvas, Group, LinearGradient, Morphology, Path, Rect, Skia, Image as SkiaImage, type SkImage, type SkPath } from '@shopify/react-native-skia';
+import { type ComponentProps, useEffect, useMemo, useRef } from 'react';
 import { View } from 'react-native';
 import {
   GestureDetector,
@@ -67,6 +67,9 @@ type Props = {
   // this page, its ribbon and underline drawn (null: none here)
   onHold?: (s: number, a: number) => void;
   ribbon?: Chosen | null;
+  // Tasmee (Recite): parts of the page covered with the paper's own colour, so the words under them cannot be read.
+  // Boxes are fractions of the page picture, like `chosen`.
+  veils?: Record<number, { boxes: number[][] }[] | undefined>;
 };
 
 type Poly = number[][];
@@ -112,7 +115,41 @@ const DONE = 0.28; // past this share of the turn, letting go finishes it
 const MAX_ZOOM = 4;
 const NOTHING: Poly = [];
 
-export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed, onHold, ribbon }: Props) {
+type PictureProps = ComponentProps<typeof SkiaImage>;
+type CoverRole = 'under' | 'over';
+
+// Tasmee's cover of one page: the page's own picture drawn again inside the covered boxes through a dilate filter,
+// so the ink goes and the paper's own tone is left. It shows only while that page is the one drawn in its role:
+// 'under' (the page the turn uncovers) or 'over' (the page turning, and its back).
+function Cover({ page, path, role, at, mode, image, rect, pageW, pageH, paper }: {
+  page: number;
+  path: SkPath;
+  role: CoverRole;
+  at: { get(): number };
+  mode: { get(): number };
+  image: PictureProps['image'];
+  rect: PictureProps['rect'];
+  pageW: number;
+  pageH: number;
+  paper: string;
+}) {
+  const opacity = useDerivedValue(() => {
+    const m = mode.get();
+    const drawn = role === 'under' ? at.get() + (m === 1 ? 1 : 0) : at.get() - (m === -1 ? 1 : 0);
+    return drawn === page ? 1 : 0;
+  });
+  return (
+    <Group clip={path} opacity={opacity}>
+      <Rect x={0} y={0} width={pageW} height={pageH} color={paper} />
+      <SkiaImage image={image} rect={rect} fit="fill">
+        <Morphology operator="dilate" radius={Math.max(4, pageW * 0.02)} />
+      </SkiaImage>
+    </Group>
+  );
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed, onHold, ribbon, veils }: Props) {
   const { c, isDark } = useTheme();
   // night: the page always a little dimmer (its colours never changed); the choice in the settings is
   // only the screen around it in full screen (quran.tsx)
@@ -510,6 +547,25 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
       height: ((y1 - y0) / shown.h) * pageH,
       color,
     }));
+  // Tasmee's cover: the page's own picture, drawn again inside the covered boxes through a dilate filter. A dilate
+  // keeps the lightest colour around each point, so the ink (thin strokes) disappears and what is left is the
+  // paper's own tone: seamless, whatever the page's colour is. One path holds all the boxes (one extra draw).
+    // Tasmee's cover: one path per page given in `veils`, holding all the boxes of that page's cover
+  const coverPaths = useMemo(() => {
+    const out: { p: number; path: SkPath }[] = [];
+    for (const key of Object.keys(veils ?? {})) {
+      const p = Number(key);
+      const list = veils?.[p];
+      if (!list?.length) continue;
+      const crop = cropOf(p, full);
+      const b = Skia.PathBuilder.Make();
+      for (const e of list)
+        for (const [x0, y0, x1, y1] of e.boxes)
+          b.addRect(Skia.XYWHRect(((x0 - crop.x) / crop.w) * pageW, ((y0 - crop.y) / crop.h) * pageH, ((x1 - x0) / crop.w) * pageW, ((y1 - y0) / crop.h) * pageH));
+      out.push({ p, path: b.detach() });
+    }
+    return out;
+  }, [veils, full, pageW, pageH]);
   const lit = [...marks.flatMap((e) => place(e, e.color)), ...chosen.flatMap((e) => place(e, 'rgba(196, 154, 69, 0.3)'))];
   // the wird's ribbon, as a mushaf's own: hanging from the top of the page on the spine's side (the left
   // of odd pages, the right of even ones), its forked end at the stop's line; the stop's ayah underlined
@@ -531,6 +587,12 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
   const onPage = useDerivedValue(() => (mode.get() === -1 ? 0 : 1));
   const unit = pageW / shown.w / 1000; // the badge's thousandths of the page's width
   const bubble = useMemo(() => ({ body: Skia.Path.MakeFromSVGString(BUBBLE)!, lines: Skia.Path.MakeFromSVGString(BUBBLE_LINES)! }), []);
+
+  // Tasmee's covers of every page given in `veils`, drawn over one of the page pictures
+  const covers = (tag: string, role: CoverRole, image: PictureProps['image'], rect: PictureProps['rect']) =>
+    coverPaths.map((v) => (
+      <Cover key={`${tag}${v.p}`} page={v.p} path={v.path} role={role} at={at} mode={mode} image={image} rect={rect} pageW={pageW} pageH={pageH} paper={paper} />
+    ));
 
   return (
     <GestureDetector gesture={gesture}>
@@ -562,6 +624,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
               <Group clip={whole}>
                 <Rect x={0} y={0} width={pageW} height={pageH} color={paper} />
                 <SkiaImage image={under} rect={underAt} fit="fill" />
+                {covers('u', 'under', under, underAt)}
               </Group>
               <Group clip={uncovered}>
                 <Rect x={0} y={0} width={pageW} height={pageH}>
@@ -573,6 +636,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
               <Group clip={flat}>
                 <Rect x={0} y={0} width={pageW} height={pageH} color={paper} />
                 <SkiaImage image={over} rect={overAt} fit="fill" />
+                {covers('o', 'over', over, overAt)}
                 <Group opacity={onPage}>
                   {lit.map((r) => (
                     <Rect key={r.key} x={r.x} y={r.y} width={r.width} height={r.height} color={r.color} />
@@ -609,6 +673,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
                   <Group clip={whole}>
                     <Rect x={0} y={0} width={pageW} height={pageH} color={paper} />
                     <SkiaImage image={over} rect={overAt} fit="fill" />
+                    {covers('f', 'over', over, overAt)}
                   </Group>
                 </Group>
                 <Rect x={-pageW} y={-pageH} width={pageW * 4} height={pageH * 3}>

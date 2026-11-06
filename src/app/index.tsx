@@ -1,91 +1,65 @@
-// The home screen: the day's companion, in the Hifdh page's clean look (near-white screen, white cards, forest green)
-// with colour where it is fun. From the top: the greeting and the member's round; the prayers card, in the sky of the
-// moment (stars at night, clouds by day), with the next prayer, the time left and today's five; the wird card, drawn
-// as a page of the mushaf (paper, a gold frame) with the hadith, where the reader stopped, the button that goes on
-// with the wird and the days read; today's
-// then the app's four sections in
-// soft-coloured tiles - the Quran, memorization, testing it, the majalis (the last two marked «soon») - and the bar
-// along the bottom (src/components/BottomPanel.tsx) with the tools: the qibla, the ahadith, the adhkar, the
-// calendar, settings.
+// The home screen, in the Hifdh page's look (src/theme/theme.tsx HifTheme): a near-white screen, white cards with a
+// hairline and 20 px corners, one green, one font. From the top: the greeting with the menu button (the member's
+// account and the settings); the prayers card in the sky of the moment - the next prayer, the time left, today's
+// five, and the way to the qibla and the calendar; the wird card (the hadith, where the reader stopped, and the
+// button that goes on with the wird); the Quran's sections (the Quran, memorization, testing it, the majalis); and
+// the tools (adhkar, ahadith). No bar along the bottom: everything is on this screen.
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect, type Href } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg';
 
-import { alpha, useGreen } from '@/components/hifdh/Section';
+import { Avatar } from '@/components/Avatar';
+import { useGreen } from '@/components/hifdh/Section';
+import { AsrIcon, DhuhrIcon, FajrIcon, FlameIcon, IshaIcon, MaghribIcon, MenuIcon, PersonIcon, PinIcon, PlusIcon, SettingsIcon } from '@/components/icons';
+import { lanternBox } from '@/components/Lantern';
 import { PlaceSheet } from '@/components/PlaceSheet';
 import { PrayerSky, type Phase } from '@/components/PrayerSky';
-import { MajalisTileIcon, MemorizeTileIcon, QuranTileIcon, TestTileIcon } from '@/components/HomeTileIcons';
-import { AsrIcon, DhuhrIcon, FajrIcon, FlameIcon, IshaIcon, MaghribIcon, PinIcon, PlusIcon, SettingsIcon } from '@/components/icons';
-import { BottomPanel, PANEL_H, PanelTab } from '@/components/BottomPanel';
-import { GlassBackdrop } from '@/components/Glass';
-import { Avatar } from '@/components/Avatar';
 import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
 import { HOME } from '@/i18n/home';
-import { isEnglish, LANG, t } from '@/i18n/i18n';
+import { L, LANG, surahName, t } from '@/i18n/i18n';
 import { useAccount } from '@/lib/account';
 import { streak } from '@/lib/activity';
 import * as hijri from '@/lib/hijri';
 import { clockTime, locate, nextPrayer, place, placeName, skyNow, skyTimes, times } from '@/lib/prayer';
+import { SURAHS, TOTAL_PAGES } from '@/lib/quran';
 import { stayInQuran } from '@/lib/riwaya';
 import { readJSON, writeJSON } from '@/lib/storage';
+import { wirdStop } from '@/lib/wird';
 import { HifTheme, useTheme } from '@/theme/theme';
 
 const IMG = {
-  adhkar: require('@/assets/images/home/icon-adhkar.svg'),
-  ahadith: require('@/assets/images/home/icon-ahadith.svg'),
   qibla: require('@/assets/images/home/icon-qibla.svg'),
   calendar: require('@/assets/images/home/icon-calendar.svg'),
-  read: require('@/assets/images/home/icon-read.svg'),
-  memorize: require('@/assets/images/home/icon-memorize.svg'),
-  test: require('@/assets/images/home/icon-test.svg'),
-  majalis: require('@/assets/images/home/icon-majalis.svg'),
+};
+const LAMP_W = 40; // the wird card's lantern at night
+
+// the words this screen adds (the rest are in src/i18n/home.js)
+const S = {
+  quranSub: () => L('اقرأ المصحف واستمع', 'Read the mushaf and listen', 'Lisez le mushaf et écoutez'),
+  wirdContinue: () => L('أكمل من حيث توقفت', 'Continue where you stopped', 'Reprenez où vous vous êtes arrêté'),
+  wirdPage: (n: number) => L(`الصفحة ${n}`, `Page ${n}`, `Page ${n}`),
+  wirdContinueBtn: () => L('متابعة القراءة', 'Continue reading', 'Continuer la lecture'),
+  wirdStartBtn: () => L('ابدأ القراءة', 'Start reading', 'Commencer la lecture'),
+  sections: () => L('الأقسام', 'Sections', 'Sections'),
+  tools: () => L('أدوات', 'Tools', 'Outils'),
+  adhkarSub: () => L('أذكار الصباح والمساء وغيرها', 'Morning, evening and more', 'Matin, soir et plus'),
+  ahadithSub: () => L('تصفّح كتب الحديث', 'Browse the hadith books', 'Parcourir les livres de hadith'),
+  account: () => L('حسابي', 'My account', 'Mon compte'),
+  menu: () => L('الحساب والإعدادات', 'Account and settings', 'Compte et paramètres'),
 };
 
+
 // the home screen's own colours, by day and by night
-type HomeColours = {
-  ink: string;
-  text: string;
-  meta: string;
-  tile: string;
-  tileEdge: string;
-  heroInk: string;
-  heroSoft: string;
-  button: string;
-  buttonInk: string;
-  streak: string;
-  shadow: string;
-};
+type HomeColours = { ink: string; text: string; meta: string; card: string; line: string; wash: string; screen: string; shadow: string; hadithBg: [string, string] };
+// Darker text and a tinted screen under white cards, so the cards stand out and the words read easily
 const HC: { light: HomeColours; dark: HomeColours } = {
-  light: {
-    ink: '#173f32',
-    text: '#26372f',
-    meta: '#6b7a70',
-    tile: '#ffffff',
-    tileEdge: 'rgba(23, 63, 50, 0.10)',
-    heroInk: '#173f32',
-    heroSoft: 'rgba(23, 63, 50, 0.62)',
-    button: '#173f32',
-    buttonInk: '#fffdf5',
-    streak: 'rgba(255, 253, 245, 0.78)',
-    shadow: '0px 12px 30px rgba(68, 55, 43, 0.12)',
-  },
-  dark: {
-    ink: '#ece3cc',
-    text: '#ddd3bb',
-    meta: '#9fb2a8',
-    tile: 'rgba(255, 255, 255, 0.06)',
-    tileEdge: 'rgba(255, 255, 255, 0.10)',
-    heroInk: '#f3ead2',
-    heroSoft: 'rgba(243, 234, 210, 0.62)',
-    button: '#ead9a6',
-    buttonInk: '#173f32',
-    streak: 'rgba(20, 30, 26, 0.55)',
-    shadow: '0px 12px 30px rgba(0, 0, 0, 0.35)',
-  },
+  light: { ink: '#123629', text: '#1f2e27', meta: '#4a5a51', card: '#ffffff', line: 'rgba(23, 63, 50, 0.16)', wash: '#e2ece4', screen: '#eff2ed', hadithBg: ['#cbdecf', '#e7f0e9'], shadow: '0px 1px 2px rgba(23, 63, 50, 0.06), 0px 6px 16px rgba(23, 63, 50, 0.07)' },
+  dark: { ink: '#f2ead6', text: '#e6dcc4', meta: '#b4c4bb', card: 'rgba(255, 255, 255, 0.07)', line: 'rgba(255, 255, 255, 0.14)', wash: 'rgba(255, 255, 255, 0.08)', screen: '', hadithBg: ['rgba(255, 255, 255, 0.14)', 'rgba(255, 255, 255, 0.05)'], shadow: '0px 0px 0px rgba(0, 0, 0, 0)' },
 };
 
 // ---------- the date, today's prayers, the wird ----------
@@ -196,7 +170,6 @@ export default function Home() {
 function HomeScreen() {
   const { c, isDark } = useTheme();
   const g = useGreen();
-  const panel = <Panel hc={isDark ? HC.dark : HC.light} go={(href: Href) => () => router.push(href)} />;
   const hc = isDark ? HC.dark : HC.light;
   const insets = useSafeAreaInsets();
   // the member signed in (their name and picture; kept on the phone, so shown at once)
@@ -207,7 +180,14 @@ function HomeScreen() {
   const [days, setDays] = useState(() => streak());
   const [started, setStarted] = useState(wirdStarted);
   const [wirdAt, setWirdAt] = useState(wirdPage);
+  const [stop, setStop] = useState(wirdStop); // the ayah where the reader stopped, once they have read
   const [locating, setLocating] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+const [heroH, setHeroH] = useState(0); // the wird card's height; the picture fills it
+const { width } = useWindowDimensions();
+const heroW = Math.min(width, 560) - 32;
+const lamp = lanternBox(LAMP_W);
+const isEnglish = LANG === 'en';
 
   // after a change of narration the app opens again: straight back on the mushaf, at the same place
   useEffect(() => {
@@ -225,6 +205,7 @@ function HomeScreen() {
       setDays(streak());
       setStarted(wirdStarted());
       setWirdAt(wirdPage());
+      setStop(wirdStop());
       setDay(prayersNow());
     }, []),
   );
@@ -260,276 +241,366 @@ function HomeScreen() {
   const hereName = here ? (placeName(here) ?? t('calMyLocation')) : null;
 
   const sky = day?.sky ?? SKIES[skyByClock()]; // the prayers card takes the sky of the moment
-  // the wird card's page: the mushaf's paper by day, a dim paper at night, gold lines
-  const page = isDark
-    ? { paper: '#242826', ink: '#ece3cc', soft: '#9fb2a8', accent: '#d9bd84', frame: 'rgba(197, 161, 90, 0.55)', frameSoft: 'rgba(197, 161, 90, 0.28)', banner: 'rgba(197, 161, 90, 0.16)' }
-    : { paper: '#fffce0', ink: '#173f32', soft: '#6b7a70', accent: '#8a6a22', frame: 'rgba(184, 145, 58, 0.65)', frameSoft: 'rgba(184, 145, 58, 0.32)', banner: 'rgba(197, 161, 90, 0.2)' };
+  // the wird card: before any reading «begin your khatma from al-Fatiha»; after it the surah the reader stopped in,
+  // its ayah and page, and how much of the khatma is read
+  const [stopSurah, stopAyah] = stop ? stop.shown.split(':').map(Number) : [0, 0];
+  const readPage = stop?.page ?? wirdAt ?? 0;
+  const khatmaPct = readPage ? Math.min(100, Math.round((readPage / TOTAL_PAGES) * 100)) : 0;
+  const wirdTitle = stopSurah ? HOME.surah(surahName(SURAHS[stopSurah - 1])) : started && wirdAt ? HOME.wirdContinue() : HOME.wirdBegin();
+  const wirdSub = stopSurah ? HOME.ayahPage(stopAyah, readPage) : started && wirdAt ? S.wirdPage(wirdAt) : null;
+  const deepGreen = isDark ? '#2f6650' : '#173f32'; // the lit prayer's circle
+  const hero = isDark
+  ? { ink: '#f3ead2', soft: 'rgba(243, 234, 210, 0.62)', pill: 'rgba(20, 30, 26, 0.55)', button: '#ead9a6', buttonInk: '#173f32' }
+  : { ink: '#173f32', soft: 'rgba(23, 63, 50, 0.62)', pill: 'rgba(255, 253, 245, 0.78)', button: '#173f32', buttonInk: '#fffdf5' };
+  const heading = (text: string) => (
+    <Txt size={18} weight={800} color={hc.ink} style={styles.heading}>
+      {text}
+    </Txt>
+  );
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.screen }}>
-      <GlassBackdrop glass={panel}>
-        <ScreenBackground />
-        <ScrollView
-          contentContainerStyle={{
-            paddingTop: insets.top + 18,
-            paddingBottom: insets.bottom + PANEL_H + 24,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.inner}>
-            {/* the greeting, and the member's round in the corner */}
-            <View style={styles.head}>
-              <View style={styles.greeting}>
-                <Txt size={19} weight={500} color={hc.text}>
-                  {HOME.salam()}
-                  {LANG === 'ar' ? '،' : ','}
-                </Txt>
-                <Txt size={32} weight={800} color={hc.ink} lineHeight={46} numberOfLines={1}>
-                  {member?.display_name ?? HOME.guest()}
-                </Txt>
-                <Txt size={13.5} weight={500} color={hc.meta}>
-                  {date}
-                </Txt>
-              </View>
-              {/* signed in: the profile; else logging in / creating an account */}
-              <Pressable
-                onPress={go(account.user || member ? '/profile' : '/login')}
-                accessibilityLabel={member ? member.display_name : HOME.login()}
-                style={({ pressed }) => pressed && styles.pressed}
-              >
-                <Avatar name={member?.display_name} size={48} />
-              </Pressable>
+    <View style={{ flex: 1, backgroundColor: hc.screen || c.screen }}>
+      <ScreenBackground />
+      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 18, paddingBottom: insets.bottom + 32 }} showsVerticalScrollIndicator={false}>
+        <View style={styles.inner}>
+          {/* the greeting, and the menu button in the corner: the account and the settings */}
+          <View style={styles.head}>
+            <View style={styles.greeting}>
+              <Txt size={19} weight={500} color={hc.text}>
+                {HOME.salam()}
+                {LANG === 'ar' ? '،' : ','}
+              </Txt>
+              <Txt size={32} weight={800} color={hc.ink} lineHeight={46} numberOfLines={1}>
+                {member?.display_name ?? HOME.guest()}
+              </Txt>
+              <Txt size={14} weight={600} color={hc.meta}>
+                {date}
+              </Txt>
             </View>
+            <Pressable
+              onPress={() => setMenuOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel={S.menu()}
+              style={({ pressed }) => [styles.menuBtn, { backgroundColor: hc.card, borderColor: hc.line, boxShadow: hc.shadow }, pressed && styles.pressed]}
+            >
+              <MenuIcon color={hc.ink} size={24} />
+            </Pressable>
+          </View>
 
-            {/* the next prayer and the time left to it, then today's five, the next one lit; in the sky of
-                the hour */}
-            <Pressable onPress={go('/calendar')} style={({ pressed }) => [styles.prayersBox, { boxShadow: hc.shadow }, pressed && styles.pressed]}>
-              <LinearGradient colors={sky.sky} style={styles.prayers}>
-                <PrayerSky phase={day?.phase ?? skyByClock()} sun={day?.sun ?? 0.5} />
-                <View style={styles.prayersHead}>
-                  <Txt size={18} weight={700} color={sky.ink} style={{ flex: 1 }} numberOfLines={1}>
-                    {day ? `${HOME.nextPrayer()}: ${day.next}` : locating ? HOME.locating() : HOME.setPlace()}
+          {/* the next prayer and the time left to it, today's five (the next one lit), and the qibla and the calendar;
+              in the sky of the hour */}
+          <Pressable onPress={go('/calendar')} style={({ pressed }) => [styles.prayersBox, pressed && styles.pressed]}>
+            <LinearGradient colors={sky.sky} style={styles.prayers}>
+              <PrayerSky phase={day?.phase ?? skyByClock()} sun={day?.sun ?? 0.5} />
+              <View style={styles.prayersHead}>
+                <Txt size={18} weight={700} color={sky.ink} style={{ flex: 1 }} numberOfLines={1}>
+                  {day ? `${HOME.nextPrayer()}: ${day.next}` : locating ? HOME.locating() : HOME.setPlace()}
+                </Txt>
+                {day ? (
+                  <Txt size={17} weight={800} color={sky.ink}>
+                    {day.left}
                   </Txt>
-                  {day ? (
-                    <Txt size={17} weight={800} color={sky.ink}>
-                      {day.left}
-                    </Txt>
-                  ) : (
-                    <Pressable
-                      onPress={askPlace}
-                      hitSlop={8}
-                      style={[styles.plus, { backgroundColor: sky.next }]}
-                      accessibilityLabel={HOME.setPlace()}
-                    >
-                      <PlusIcon color={sky.nextIcon} size={18} />
-                    </Pressable>
-                  )}
-                </View>
-                {/* where the times are for (a tap changes it) */}
-                {!!hereName && (
-                  <Pressable onPress={askPlace} hitSlop={6} style={styles.place} accessibilityLabel={HOME.setPlace()}>
-                    <PinIcon color={sky.soft} size={14} />
-                    <Txt size={12.5} weight={600} color={sky.soft} numberOfLines={1}>
-                      {hereName}
-                    </Txt>
+                ) : (
+                  <Pressable onPress={askPlace} hitSlop={8} style={[styles.plus, { backgroundColor: sky.next }]} accessibilityLabel={HOME.setPlace()}>
+                    <PlusIcon color={sky.nextIcon} size={18} />
                   </Pressable>
                 )}
-                <View style={styles.five}>
-                  {FIVE.map((k, i) => {
-                    const p = day?.list[i];
-                    const Icon = PRAYER_ICON[k];
-                    return (
-                      <View key={k} style={[styles.prayer, p?.past && { opacity: 0.5 }]}>
-                        <View style={[styles.circle, { backgroundColor: p?.next ? sky.next : sky.circle }]}>
-                          <Icon color={p?.next ? sky.nextIcon : sky.ink} size={22} />
-                        </View>
-                        <Txt size={11.5} weight={p?.next ? 700 : 600} center color={sky.ink} numberOfLines={1}>
-                          {t(`pr_${k}`)}
-                        </Txt>
-                        <Txt size={11} weight={500} center color={sky.soft}>
-                          {p ? p.at : '--:--'}
-                        </Txt>
-                      </View>
-                    );
-                  })}
-                </View>
-              </LinearGradient>
-            </Pressable>
-
-            {/* the wird card, drawn as a page of the mushaf (the page the wird opens on): paper, a gold double frame, the
-                surah-style banner naming it, the hadith as its text, where the reader stopped, and the button */}
-            <Pressable
-              onPress={go({ pathname: '/quran', params: { wird: '1' } })}
-              accessibilityRole="button"
-              accessibilityLabel={`${HOME.wirdLabel()}: ${started ? HOME.wirdContinue() : HOME.wirdStart()}`}
-              style={({ pressed }) => [styles.hero, { backgroundColor: page.paper, borderColor: page.frame }, pressed && styles.pressed]}
-            >
-              <View style={[styles.heroInner, { borderColor: page.frameSoft }]}>
-                <View style={[styles.banner, { backgroundColor: page.banner, borderColor: page.frame }]}>
-                  <QuranTileIcon ink={page.ink} size={18} />
-                  <Txt size={15} weight={800} color={page.ink}>
-                    {HOME.wirdLabel()}
+              </View>
+              {/* where the times are for (a tap changes it) */}
+              {!!hereName && (
+                <Pressable onPress={askPlace} hitSlop={6} style={styles.place} accessibilityLabel={HOME.setPlace()}>
+                  <PinIcon color={sky.soft} size={14} />
+                  <Txt size={12.5} weight={600} color={sky.soft} numberOfLines={1}>
+                    {hereName}
                   </Txt>
-                </View>
-                <Txt size={isEnglish ? 15.5 : 17} weight={500} center color={page.ink} lineHeight={isEnglish ? 25 : 31}>
-                  {HOME.hadith()}
-                </Txt>
-                <Txt size={12} weight={500} center color={page.soft} lineHeight={18}>
-                  {HOME.heroSource()}
-                </Txt>
-                <View style={[styles.rule, { backgroundColor: page.frame }]} />
-                <Txt size={13} weight={700} center color={page.accent}>
-                  {started ? `${HOME.wirdContinue()}${wirdAt ? ` · ${HOME.wirdPage(wirdAt)}` : ''}` : HOME.wirdStart()}
-                </Txt>
-                <View style={styles.heroFoot}>
-                  <View style={[styles.heroGo, { backgroundColor: hc.button }]}>
-                    <QuranTileIcon ink={hc.buttonInk} size={18} />
-                    <Txt size={15} weight={700} color={hc.buttonInk}>
-                      {HOME.wirdRead()}
-                    </Txt>
-                  </View>
-                  {days > 0 && (
-                    <View style={[styles.streak, { backgroundColor: page.banner }]}>
-                      <FlameIcon color="#e8903a" size={14} />
-                      <Txt size={12.5} weight={700} color={page.ink}>
-                        {HOME.days(days)}
+                </Pressable>
+              )}
+              <View style={styles.five}>
+                {FIVE.map((k, i) => {
+                  const p = day?.list[i];
+                  const Icon = PRAYER_ICON[k];
+                  return (
+                    <View key={k} style={[styles.prayer, p?.past && { opacity: 0.62 }]}>
+                      <View style={[styles.circle, { backgroundColor: p?.next ? sky.next : sky.circle }]}>
+                        <Icon color={p?.next ? sky.nextIcon : sky.ink} size={22} />
+                      </View>
+                      <Txt size={11.5} weight={p?.next ? 700 : 600} center color={sky.ink} numberOfLines={1}>
+                        {t(`pr_${k}`)}
+                      </Txt>
+                      <Txt size={12} weight={700} center color={sky.ink} style={{ opacity: 0.8 }}>
+                        {p ? p.at : '--:--'}
                       </Txt>
                     </View>
-                  )}
-                </View>
+                  );
+                })}
               </View>
-            </Pressable>
+              <View style={styles.quick}>
+                {[
+                  { label: HOME.qibla(), img: IMG.qibla, href: '/qibla' as Href },
+                  { label: HOME.calendar(), img: IMG.calendar, href: '/calendar' as Href },
+                ].map((q) => (
+                  <Pressable key={q.label} onPress={go(q.href)} style={({ pressed }) => [styles.quickBtn, { backgroundColor: sky.circle }, pressed && styles.pressed]}>
+                    <Image source={q.img} style={styles.quickImg} tintColor={sky.ink} />
+                    <Txt size={13.5} weight={700} color={sky.ink}>
+                      {q.label}
+                    </Txt>
+                  </Pressable>
+                ))}
+              </View>
+            </LinearGradient>
+          </Pressable>
 
-            {/* the app's four sections */}
-            <View style={styles.tiles}>
-              <Tile hc={hc} g={g} tint={g.chip} ink={g.base} icon={QuranTileIcon} label={HOME.tabQuran()} sub={HOME.quranSub()} onPress={go('/quran')} />
-              <Tile hc={hc} g={g} tint={alpha('#c5a15a', 0.2)} ink="#a8832f" icon={MemorizeTileIcon} label={HOME.memorize()} sub={HOME.memorizeSub()} onPress={go('/memorize')} />
-              <Tile hc={hc} g={g} tint={alpha('#4a7f9a', 0.16)} ink="#3d6f8a" icon={TestTileIcon} label={HOME.testShort()} sub={HOME.testSub()} soon onPress={go('/test')} />
-              <Tile hc={hc} g={g} tint={alpha('#b86b6b', 0.15)} ink="#a35656" icon={MajalisTileIcon} label={HOME.tabMajalis()} sub={HOME.majalisSub()} soon onPress={go('/majalis')} />
-            </View>
+          {/* the wird card, as the Hifdh page's week card (a green wash), kept short: the title with the days read; the surah
+              (or «begin from al-Fatiha») with its ayah and page, and the button beside it; how much of the khatma is read;
+              and the hadith as plain text. The whole card goes on with the wird. */}
+          <Pressable
+  onPress={go({ pathname: '/quran', params: { wird: '1' } })}
+  accessibilityRole="button"
+  accessibilityLabel={`${HOME.wirdLabel()}: ${wirdTitle}`}
+  style={({ pressed }) => [styles.card, { borderColor: hc.line, boxShadow: hc.shadow }, pressed && styles.pressed]}
+>
+{/* the background: soft colour blobs under a frosted glass layer */}
+<View style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden', backgroundColor: isDark ? '#1d2a25' : '#e6eee4' }]} pointerEvents="none">
+  <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
+    <Defs>
+      <RadialGradient id="blobGreen" cx="50%" cy="50%" r="50%">
+        <Stop offset="0" stopColor={isDark ? '#3f7d63' : '#7fb095'} stopOpacity={isDark ? 0.55 : 0.7} />
+        <Stop offset="1" stopColor={isDark ? '#3f7d63' : '#7fb095'} stopOpacity={0} />
+      </RadialGradient>
+      <RadialGradient id="blobGold" cx="50%" cy="50%" r="50%">
+        <Stop offset="0" stopColor="#f0c878" stopOpacity={isDark ? 0.3 : 0.65} />
+        <Stop offset="1" stopColor="#f0c878" stopOpacity={0} />
+      </RadialGradient>
+    </Defs>
+    <Circle cx={LANG === 'ar' ? '12%' : '88%'} cy="5%" r={130} fill="url(#blobGold)" />
+    <Circle cx={LANG === 'ar' ? '85%' : '15%'} cy="100%" r={150} fill="url(#blobGreen)" />
+  </Svg>
+  {/* the frosted glass */}
+  <LinearGradient
+    colors={isDark ? ['rgba(255,255,255,0.14)', 'rgba(255,255,255,0.05)'] : ['rgba(255,255,255,0.7)', 'rgba(255,255,255,0.3)']}
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 1 }}
+    style={StyleSheet.absoluteFill}
+  />
+  {/* the light catching the top edge */}
+  <LinearGradient
+    colors={['rgba(255,255,255,0)', isDark ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.95)', 'rgba(255,255,255,0)']}
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 0 }}
+    style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1.5 }}
+  />
+</View>
+
+  <View style={styles.cardHead}>
+    <Txt size={15} weight={700} color={hc.ink} style={{ flex: 1 }}>
+      {HOME.wirdLabel()}
+    </Txt>
+    {days > 0 && (
+      <View style={styles.streak}>
+        <FlameIcon color="#e8903a" size={14} />
+        <Txt size={13} weight={600} color={hc.meta}>
+          {HOME.days(days)}
+        </Txt>
+      </View>
+    )}
+  </View>
+  <View style={styles.wirdRow}>
+    <View style={{ flex: 1 }}>
+      <Txt size={22} weight={800} color={hc.ink} lineHeight={30} numberOfLines={2}>
+        {wirdTitle}
+      </Txt>
+      {!!wirdSub && (
+        <Txt size={13} weight={600} color={hc.meta} numberOfLines={1}>
+          {wirdSub}
+        </Txt>
+      )}
+    </View>
+    <View style={[styles.button, { backgroundColor: deepGreen }]}>
+      <Txt size={14.5} weight={700} color="#fffdf5">
+        {started ? S.wirdContinueBtn() : S.wirdStartBtn()}
+      </Txt>
+      <Arrow color="#fffdf5" size={16} line />
+    </View>
+  </View>
+  <View style={styles.khatma}>
+    <View style={[styles.track, { backgroundColor: g.chip }]}>
+      <View style={[styles.fill, { backgroundColor: g.base, width: `${khatmaPct}%` }]} />
+    </View>
+    <Txt size={12.5} weight={700} color={hc.meta}>
+      {HOME.khatma(khatmaPct)}
+    </Txt>
+  </View>
+  <Txt size={13} weight={500} color={hc.text} lineHeight={21}>
+    <Txt size={13} weight={800} color={hc.ink}>
+      {HOME.hadithIntro()}{' '}
+    </Txt>
+    {HOME.hadith()}
+    <Txt size={11.5} weight={500} color={hc.meta}>
+      {'  '}
+      {HOME.heroSource()}
+    </Txt>
+  </Txt>
+</Pressable>
+
+          {/* the app's four sections */}
+          {heading(S.sections())}
+          <View style={styles.tiles}>
+            <Tile hc={hc} g={g} label={HOME.tabQuran()} sub={S.quranSub()} onPress={go('/quran')} />
+            <Tile hc={hc} g={g} label={HOME.memorize()} sub={HOME.memorizeSub()} onPress={go('/memorize')} />
+            <Tile hc={hc} g={g} label={HOME.testShort()} sub={HOME.testSub()} soon onPress={go('/test')} />
+            <Tile hc={hc} g={g} label={HOME.tabMajalis()} sub={HOME.majalisSub()} soon onPress={go('/majalis')} />
           </View>
-        </ScrollView>
-      </GlassBackdrop>
-      <PlaceSheet
-        open={placeOpen}
-        busy={locating}
-        failed={placeFailed}
-        onClose={() => setPlaceOpen(false)}
-        onLocate={findPlace}
-        onChooseCity={chooseCity}
+
+          {/* the tools */}
+          {heading(S.tools())}
+          <View style={styles.tiles}>
+            <Tile hc={hc} g={g} label={HOME.adhkar()} sub={S.adhkarSub()} compact onPress={go('/adhkar')} />
+            <Tile hc={hc} g={g} label={HOME.ahadith()} sub={S.ahadithSub()} compact onPress={go('/ahadith')} />
+          </View>
+        </View>
+      </ScrollView>
+      <MenuSheet
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        hc={hc}
+        name={member?.display_name}
+        email={account.user?.email}
+        signedIn={!!(account.user || member)}
+        onAccount={() => {
+          setMenuOpen(false);
+          router.push(account.user || member ? '/profile' : '/login');
+        }}
+        onSettings={() => {
+          setMenuOpen(false);
+          router.push('/settings');
+        }}
       />
+      <PlaceSheet open={placeOpen} busy={locating} failed={placeFailed} onClose={() => setPlaceOpen(false)} onLocate={findPlace} onChooseCity={chooseCity} />
     </View>
   );
 }
 
 // ---------- the parts ----------
 
-// the panel along the bottom edge (src/components/BottomPanel.tsx, the same on every screen)
-function Panel({ hc, go }: { hc: HomeColours; go: (href: Href) => () => void }) {
+// The forward arrow, drawn (not a text character, so the direction never depends on how the text is laid out):
+// pointing left in Arabic, right in English. «line» is the longer arrow for buttons, otherwise a chevron.
+function Arrow({ color, size = 18, line }: { color: string; size?: number; line?: boolean }) {
+  const ar = LANG === 'ar';
+  const d = line ? (ar ? 'M19 12H5m6-6-6 6 6 6' : 'M5 12h14m-6-6 6 6-6 6') : ar ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7';
   return (
-    <BottomPanel>
-      <PanelTab label={HOME.qibla()} onPress={go('/qibla')} icon={<Image source={IMG.qibla} style={styles.tabImg} tintColor={hc.meta} />} />
-      <PanelTab label={HOME.ahadith()} onPress={go('/ahadith')} icon={<Image source={IMG.ahadith} style={styles.tabImg} tintColor={hc.meta} />} />
-      <PanelTab label={HOME.adhkar()} onPress={go('/adhkar')} icon={<Image source={IMG.adhkar} style={styles.tabImg} tintColor={hc.meta} />} />
-      <PanelTab label={HOME.calendar()} onPress={go('/calendar')} icon={<Image source={IMG.calendar} style={styles.tabImg} tintColor={hc.meta} />} />
-      <PanelTab label={HOME.tabSettings()} onPress={go('/settings')} icon={<SettingsIcon color={hc.meta} />} />
-    </BottomPanel>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <Path d={d} />
+    </Svg>
   );
 }
 
-// One of the app's sections: a soft-coloured icon, its name and one line about it («soon» where it is still to come)
-function Tile({ hc, g, tint, ink, icon: Icon, label, sub, soon, onPress }: { hc: HomeColours; g: ReturnType<typeof useGreen>; tint: string; ink: string; icon: (p: { ink: string; size?: number }) => React.ReactNode; label: string; sub: string; soon?: boolean; onPress: () => void }) {
+// A section or tool: a card with its name, one line about it, and a quiet arrow (or «soon» where it is still to come)
+function Tile({ hc, g, label, sub, soon, compact, onPress }: { hc: HomeColours; g: ReturnType<typeof useGreen>; label: string; sub: string; soon?: boolean; compact?: boolean; onPress: () => void }) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.tile, { backgroundColor: hc.tile, borderColor: hc.tileEdge }, pressed && styles.pressed]}
-    >
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.tile, compact && styles.tileCompact, { backgroundColor: hc.card, borderColor: hc.line, boxShadow: hc.shadow }, pressed && styles.pressed]}>
       <View style={styles.tileTop}>
-        <View style={[styles.tileChip, { backgroundColor: tint }]}>
-          <Icon ink={ink} size={26} />
-        </View>
-        {soon && (
+        <Txt size={compact ? 16 : 18} weight={700} color={hc.ink} numberOfLines={1} style={{ flex: 1 }}>
+          {label}
+        </Txt>
+        {soon ? (
           <View style={[styles.soon, { backgroundColor: g.chip }]}>
             <Txt size={11} weight={700} color={g.base}>
               {HOME.soon()}
             </Txt>
           </View>
+        ) : (
+          <Arrow color={hc.meta} />
         )}
       </View>
-      <Txt size={16} weight={800} color={hc.ink} numberOfLines={1}>
-        {label}
-      </Txt>
-      <Txt size={12.5} color={hc.meta} numberOfLines={2}>
+      <Txt size={13.5} weight={500} color={hc.meta} numberOfLines={2}>
         {sub}
       </Txt>
     </Pressable>
   );
 }
 
+// The menu button's sheet: the member's account (or logging in) and the settings
+function MenuSheet({ open, onClose, hc, name, email, signedIn, onAccount, onSettings }: { open: boolean; onClose: () => void; hc: HomeColours; name?: string | null; email?: string | null; signedIn: boolean; onAccount: () => void; onSettings: () => void }) {
+  const { c } = useTheme();
+  const insets = useSafeAreaInsets();
+  const row = (icon: React.ReactNode, title: string, onPress: () => void) => (
+    <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.menuRow, { backgroundColor: hc.card, borderColor: hc.line }, pressed && styles.pressed]}>
+      {icon}
+      <Txt size={16} weight={700} color={hc.ink} style={{ flex: 1 }}>
+        {title}
+      </Txt>
+      <Arrow color={hc.meta} />
+    </Pressable>
+  );
+  return (
+    <Modal visible={open} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+      <Pressable style={styles.backdrop} onPress={onClose}>
+        <Pressable onPress={() => {}} style={[styles.sheet, { backgroundColor: c.screen, paddingBottom: insets.bottom + 18 }]}>
+          <View style={styles.sheetHead}>
+            <Avatar name={name} size={52} />
+            <View style={{ flex: 1 }}>
+              <Txt size={19} weight={800} color={hc.ink} numberOfLines={1}>
+                {name ?? HOME.guest()}
+              </Txt>
+              {!!email && (
+                <Txt size={13} color={hc.meta} numberOfLines={1}>
+                  {email}
+                </Txt>
+              )}
+            </View>
+          </View>
+          {row(<PersonIcon color={hc.ink} size={20} />, signedIn ? S.account() : HOME.login(), onAccount)}
+          {row(<SettingsIcon color={hc.ink} size={20} />, HOME.tabSettings(), onSettings)}
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
 const styles = StyleSheet.create({
-  inner: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: 16 },
-  head: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    marginHorizontal: 22,
-    marginBottom: 14,
-  },
+  hero: { alignSelf: 'center', borderRadius: 28, overflow: 'hidden' },
+heroOver: { paddingTop: 22, paddingBottom: 20, paddingHorizontal: 22, gap: 18, alignItems: 'flex-start' },
+heroText: { maxWidth: '78%' },
+wirdLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+wirdChip: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+heroFoot: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+heroGo: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 46, paddingHorizontal: 20, borderRadius: 999 },
+mirror: { transform: [{ scaleX: -1 }] },
+  inner: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: 14 },
+  head: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginHorizontal: 22, marginBottom: 10 },
   greeting: { flex: 1 },
-  streak: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    height: 34,
-    paddingHorizontal: 12,
-    borderRadius: 999,
-  },
-  hero: { marginHorizontal: 16, borderRadius: 24, borderWidth: 1.5, padding: 7 },
-  heroInner: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, paddingVertical: 18, paddingHorizontal: 16, gap: 12, alignItems: 'stretch' },
-  banner: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 8, height: 38, paddingHorizontal: 18, borderRadius: 12, borderWidth: 1 },
-  rule: { height: StyleSheet.hairlineWidth, alignSelf: 'stretch', opacity: 0.7 },
-  heroFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
-  heroGo: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 48, paddingHorizontal: 20, borderRadius: 999 },
+  menuBtn: { width: 46, height: 46, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, alignItems: 'center', justifyContent: 'center' },
   pressed: { opacity: 0.88, transform: [{ scale: 0.99 }] },
+  heading: { marginHorizontal: 18, marginTop: 4 },
+  // the wird card: as the Hifdh page's cards (20 px corners, a hairline), its wash green
+  card: { marginHorizontal: 16, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 10 },
+  wirdRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  streak: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  khatma: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  track: { flex: 1, height: 5, borderRadius: 3, overflow: 'hidden' },
+  fill: { height: 5, borderRadius: 3 },
+  button: { height: 42, paddingHorizontal: 16, borderRadius: 999, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginHorizontal: 16 },
-  tile: { flexBasis: '47%', flexGrow: 1, gap: 4, padding: 14, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth },
-  tileTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  tileChip: { width: 46, height: 46, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  tile: { flexBasis: '47%', flexGrow: 1, minHeight: 108, gap: 4, padding: 16, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth },
+  tileCompact: { minHeight: 0, paddingVertical: 14 },
+  tileTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   soon: { paddingHorizontal: 9, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  // the box's shadow outside, its sky (clouds, stars) cut to its round corners inside
+  // the prayers card: its sky (clouds, stars) cut to its round corners
   prayersBox: { marginHorizontal: 16, borderRadius: 26 },
-  prayers: {
-    borderRadius: 26,
-    overflow: 'hidden',
-    paddingTop: 16,
-    paddingBottom: 14,
-    paddingHorizontal: 14,
-    gap: 12,
-  },
+  prayers: { borderRadius: 26, overflow: 'hidden', paddingTop: 16, paddingBottom: 14, paddingHorizontal: 14, gap: 12 },
   place: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', marginTop: -6, paddingHorizontal: 4 },
-  prayersHead: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 4,
-  },
-  plus: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 253, 245, 0.92)',
-  },
+  prayersHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4 },
+  plus: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 253, 245, 0.92)' },
   five: { flexDirection: 'row', justifyContent: 'space-between' },
   prayer: { flex: 1, alignItems: 'center', gap: 4 },
-  circle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // along the bottom edge, its top corners rounded
-  tabImg: { width: 22, height: 22 },
+  circle: { width: 50, height: 50, borderRadius: 25, alignItems: 'center', justifyContent: 'center' },
+  quick: { flexDirection: 'row', gap: 8 },
+  quickBtn: { flex: 1, height: 40, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  quickImg: { width: 18, height: 18 },
+  // the menu sheet
+  backdrop: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.35)', justifyContent: 'flex-end' },
+  sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, gap: 12 },
+  sheetHead: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 6 },
+  menuRow: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 56, paddingHorizontal: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth },
 });

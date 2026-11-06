@@ -1,14 +1,12 @@
 // The bottom bar of the Plan screen (tabsHTML of the website): Listen · My plans · Recite. It is the Quran reading
 // page's own bar (src/app/quran.tsx): full width along the bottom edge, each button an icon over its name, on the
-// panel colour with a hairline above. «Recite» says «coming soon», as it does on the web.
+// panel colour with a hairline above. «Recite» opens the Tasmee screen.
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useHif } from '@/components/hifdh/HifProvider';
 import { MicIcon, PlansIcon, PlayIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
-import { HOME } from '@/i18n/home';
 import { useTheme } from '@/theme/theme';
 
 export const TABS_HEIGHT = 62; // the bar's height above the phone's own bottom edge (add the inset), as the Quran's BAR_H
@@ -37,12 +35,6 @@ export function HifTabs({ onPlans, onListen, onRecite }: { onPlans: () => void; 
       ))}
     </View>
   );
-}
-
-// «Recite»: the web has no test page yet, it only says «coming soon»
-export function useReciteSoon() {
-  const { toast } = useHif();
-  return () => toast(HOME.coming());
 }
 
 const styles = StyleSheet.create({
