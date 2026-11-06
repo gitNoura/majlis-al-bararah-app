@@ -59,7 +59,7 @@ function items(tab: Tab): Item[] {
 const current = (tab: Tab, page: number) =>
   (tab === 'surahs' ? surahForPage(page) : tab === 'ahzab' ? hizbForPage(page) : juzForPage(page)).number;
 
-// `onPlay` (the Listen screen) puts a play button beside each surah: the whole surah, without opening its page first
+// `onPlay` (the Recite screen) puts a play button in place of each surah's number: that surah's first page, ready to recite
 export function QuranIndex({ open, page, onClose, onGo, onPlay }: { open: boolean; page: number; onClose: () => void; onGo: (page: number) => void; onPlay?: (surah: number) => void }) {
   const { c, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -193,12 +193,28 @@ export function QuranIndex({ open, page, onClose, onGo, onPlay }: { open: boolea
                 ]}
               >
                 {on && <View style={[styles.edge, { backgroundColor: c.accent }]} />}
-                <View style={styles.num}>
-                  <StarBadge fill={on ? c.on : c.surface} stroke={c.gold} />
-                  <Txt size={13} weight={700} color={on ? c.onInk : c.ink}>
-                    {item.number}
-                  </Txt>
-                </View>
+                {onPlay && tab === 'surahs' ? (
+                  // Recite: a play button stands where the surah's number is
+                  <Pressable
+                    onPress={() => {
+                      onPlay(item.number);
+                      close();
+                    }}
+                    hitSlop={6}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${HIF.lsPlay()}: ${item.title}`}
+                    style={[styles.playBtn, { backgroundColor: c.on }]}
+                  >
+                    <PlayIcon color={c.onInk} size={16} />
+                  </Pressable>
+                ) : (
+                  <View style={styles.num}>
+                    <StarBadge fill={on ? c.on : c.surface} stroke={c.gold} />
+                    <Txt size={13} weight={700} color={on ? c.onInk : c.ink}>
+                      {item.number}
+                    </Txt>
+                  </View>
+                )}
                 <View style={{ flex: 1, gap: 2 }}>
                   <Txt size={17} weight={700} color={c.ink} numberOfLines={1}>
                     {item.title}
@@ -219,20 +235,6 @@ export function QuranIndex({ open, page, onClose, onGo, onPlay }: { open: boolea
                     </Txt>
                   )}
                 </View>
-                {onPlay && tab === 'surahs' && (
-                  <Pressable
-                    onPress={() => {
-                      onPlay(item.number);
-                      close();
-                    }}
-                    hitSlop={6}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${HIF.lsPlay()}: ${item.title}`}
-                    style={[styles.playBtn, { backgroundColor: c.on }]}
-                  >
-                    <PlayIcon color={c.onInk} size={16} />
-                  </Pressable>
-                )}
               </Pressable>
             );
           }}

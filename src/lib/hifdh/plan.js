@@ -25,6 +25,26 @@ function init() {
   if (U) return;
   U = core.makeUnits(UNITS_RAW);
   state = clean(readJSON(KEY));
+  if (wholeNumbers(state)) save(); // plans kept in hizb are now whole thumun (kept once)
+}
+
+// A plan in hizb (or juz, kept as hizb) shows «0.25 hizb» on its card: it becomes the same pace in whole thumun.
+function wholeNumbers(s) {
+  let changed = false;
+  for (const p of s.plans) {
+    p.versions = p.versions.map((v) => {
+      if (v.unit !== 'hizb') return v;
+      if (p.period === 'week') {
+        changed = true;
+        return { ...v, unit: 'thumun', amount: Math.max(1, Math.round(v.amount * 8)) }; // a weekly quota: the week's figure itself
+      }
+      const w = core.wholeVersion(v);
+      if (!w) return v;
+      changed = true;
+      return w;
+    });
+  }
+  return changed;
 }
 export function ready() {
   init();

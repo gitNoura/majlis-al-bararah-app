@@ -172,6 +172,13 @@ export const HIF = {
   splitMatches: () => L('يطابق هدفك الأسبوعي', 'Matches your weekly goal', 'Correspond à votre objectif'),
   splitGoal: (goal) => L(`هدفك ${goal}`, `Your goal was ${goal}`, `Votre objectif était ${goal}`),
   splitEven: () => L('تقسيم متساوٍ', 'Split evenly', 'Répartir à parts égales'),
+  splitRest: () => L('راحة', 'Day off', 'Repos'),
+  inThumun: () =>
+    L(
+      'الحزب والجزء يُعرضان بالأثمان: الحزب 8 أثمان والجزء 16 ثمنًا.',
+      'Hizb and juz are shown in thumun: a hizb is 8 thumun, a juz 16.',
+      'Hizb et juz sont comptés en thumun : un hizb fait 8 thumun, un juz 16.',
+    ),
   splitMore: () => L('زِد', 'More', 'Plus'),
   splitLess: () => L('أنقِص', 'Less', 'Moins'),
   perDay: () => L('في كل يوم', 'Each day', 'Chaque jour'),

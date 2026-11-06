@@ -18,7 +18,7 @@ import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import * as core from '@/lib/hifdh/core';
-import { ALL_DAYS, PLAN_UNITS, UNIT_NAME, UNIT_PLURAL, WEEK_ORDER, fmtDate, kindOf, num, perWord, rangeLabel, unitCount, weekdayName } from '@/lib/hifdh/labels';
+import { ALL_DAYS, PLAN_UNITS, UNIT_NAME, UNIT_ONE, UNIT_PLURAL, WEEK_ORDER, fmtDate, kindOf, num, perWord, rangeLabel, unitCount, weekdayName } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { useTheme } from '@/theme/theme';
 
@@ -96,39 +96,45 @@ const amountOf = (p: Pace) => {
   return n > 0 ? n : 0;
 };
 
-// «Juz» is only a way of asking: the plan keeps hizb (a juz is two). For «finish by a date» the unit is chosen
-// for the reader: the biggest one that gives at least 1 per day.
-function calc(p: Pace): { unit: string; amount: number; perDay?: Record<number, number> } {
-  if (p.mode !== 'date') {
-    const r = (x: number) => Math.round(x * 10000) / 10000;
-    const even = amountOf(p) / Math.max(1, p.days.length); // a week's amount over the days chosen
-    const f = p.unit === 'juz' ? 2 : 1; // the plan keeps hizb (a juz is two)
-    const unit = p.unit === 'juz' ? 'hizb' : p.unit;
-    const shown = splitOf(p);
-    if (p.perDay && p.days.length && p.days.some((d) => Math.abs(shown[d] - even) > 1e-6)) {
-      const perDay: Record<number, number> = {};
-      for (const d of p.days) perDay[d] = r(shown[d] * f);
-      return { unit, amount: r((p.days.reduce((n, d) => n + shown[d], 0) / p.days.length) * f), perDay };
-    }
-    return { unit, amount: r(even * f) };
-  }
-  const base = { ...p, period: 'day', target: { kind: 'date', date: p.date } };
-  const derive = (unit: string): number => core.deriveAmount({ ...base, unit }, plan.ctx(), plan.today());
-  for (const unit of ['hizb', 'thumun', 'page']) if (derive(unit) >= 1) return { unit, amount: derive(unit) };
-  return { unit: 'ayah', amount: derive('ayah') };
-}
+// «Hizb» and «juz» are only ways of asking: the plan is kept in whole thumun (a hizb is 8, a juz 16), so a day's card
+// never reads «0.25 hizb». A page is not a fixed length (it depends on the writing), so thumun is the unit for now.
+// Every amount is a whole number. For «finish by a date» the unit is thumun, or ayat when a day needs less than one.
+const planUnitOf = (u: string) => (u === 'hizb' || u === 'juz' ? 'thumun' : u);
+const weekTotal = (p: Pace) => Math.round(amountOf(p) * (p.unit === 'juz' ? 16 : p.unit === 'hizb' ? 8 : 1));
 
-// What each chosen day gives, in the unit asked: the reader's own figure, else the even share of the week
+// What each chosen day gives, as whole numbers: the reader's own figure, else the even share of the week (the first
+// days take the extra when it does not divide). A day at 0 is a day off.
 function splitOf(p: Pace): Record<number, number> {
-  const even = Math.round((amountOf(p) / Math.max(1, p.days.length)) * 10000) / 10000;
+  const ordered = WEEK_ORDER.filter((d: number) => p.days.includes(d));
+  const even = core.wholeSplit(weekTotal(p), ordered) as Record<number, number>;
   const out: Record<number, number> = {};
-  for (const d of p.days) out[d] = p.perDay?.[d] ?? even;
+  for (const d of ordered) out[d] = p.perDay?.[d] ?? even[d] ?? 0;
   return out;
 }
 
-// «1.5 more» snaps to the step (half a unit, a whole ayah) so 2.33 goes to 2.5, not 2.83
-const stepOf = (unit: string) => (unit === 'ayah' ? 1 : 0.5);
-const nudge = (v: number, up: boolean, step: number) => (up ? (Math.floor(v / step + 1e-9) + 1) * step : Math.max(step, (Math.ceil(v / step - 1e-9) - 1) * step));
+function calc(p: Pace): { unit: string; amount: number; days: number[]; perDay?: Record<number, number> } {
+  if (p.mode !== 'date') {
+    const unit = planUnitOf(p.unit);
+    const shown = splitOf(p);
+    const on = p.days.filter((d) => shown[d] > 0);
+    if (!on.length) return { unit, amount: 0, days: [] };
+    const vals = on.map((d) => shown[d]);
+    const even = vals.every((x) => x === vals[0]);
+    return {
+      unit,
+      amount: even ? vals[0] : Math.round(vals.reduce((n, x) => n + x, 0) / vals.length),
+      days: on,
+      ...(even ? {} : { perDay: Object.fromEntries(on.map((d) => [d, shown[d]])) as Record<number, number> }),
+    };
+  }
+  const base = { ...p, period: 'day', target: { kind: 'date', date: p.date } };
+  const raw = core.deriveAmount({ ...base, unit: 'thumun' }, plan.ctx(), plan.today(), true) as number;
+  if (raw >= 1) return { unit: 'thumun', amount: Math.ceil(raw - 1e-9), days: p.days };
+  return { unit: 'ayah', amount: core.deriveAmount({ ...base, unit: 'ayah' }, plan.ctx(), plan.today()), days: p.days };
+}
+
+// one step is a whole unit; a day can go down to 0 (a day off)
+const nudge = (v: number, up: boolean) => (up ? Math.floor(v + 1e-9) + 1 : Math.max(0, Math.ceil(v - 1e-9) - 1));
 
 // how much a week, then which days; for «finish by a date» the days come first (the date needs them)
 const stepKeys = (p: Pace) => ['type', ...(p.askMem && p.type === 'memorize' ? ['memorized'] : []), // revising asks what to revise, not what is memorized
@@ -299,8 +305,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   });
 
   const goStep = (n: number) => patch({ step: Math.max(pace.first, Math.min(n, keys.length - 1)) });
-  const { unit, amount, perDay } = calc(pace);
-  const days = pace.days;
+  const { unit, amount, perDay, days } = calc(pace);
   const draft = () => core.draftPlan({ ...pace, unit, amount, days, perDay }, plan.today());
   const finish: string | null = (key === 'summary' || editing) && amount > 0 ? plan.forecast(draft()) : null;
   const scopeReady = pace.scopeSel === 'all' || (pace.scopeSel === 'part' && pace.bits.some((b) => b === 1));
@@ -431,12 +436,12 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   // how much on each day: the even share to start with, a stepper per day, and the week's total against the goal
   const splitBlock = () => {
     const shown = splitOf(pace);
-    const step = stepOf(pace.unit);
+    const pu = planUnitOf(pace.unit);
     const total = pace.days.reduce((n, d) => n + shown[d], 0);
-    const goal = amountOf(pace);
-    const same = Math.abs(total - goal) < 0.005;
-    const set = (d: number, v: number) => patch({ perDay: { ...shown, [d]: Math.round(v * 10000) / 10000 } });
-    const unitWord = (v: number) => (v === 1 ? UNIT_NAME[pace.unit as keyof typeof UNIT_NAME]() : UNIT_PLURAL[pace.unit as keyof typeof UNIT_PLURAL]());
+    const goal = weekTotal(pace);
+    const same = total === goal;
+    const set = (d: number, v: number) => patch({ perDay: { ...shown, [d]: v } });
+    const unitWord = (v: number) => (v === 1 ? UNIT_ONE[pu as keyof typeof UNIT_ONE]() : UNIT_PLURAL[pu as keyof typeof UNIT_PLURAL]());
     const ordered = WEEK_ORDER.filter((d: number) => pace.days.includes(d));
     return (
       <View style={{ gap: 10 }}>
@@ -446,30 +451,31 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
               <Txt size={16} weight={600} color={c.ink} style={{ flex: 1 }}>
                 {weekdayName(d, 'long')}
               </Txt>
-              <Stepper label={HIF.splitLess()} sign="−" onPress={() => set(d, nudge(shown[d], false, step))} disabled={shown[d] <= step + 1e-9} />
+              <Stepper label={HIF.splitLess()} sign="−" onPress={() => set(d, nudge(shown[d], false))} disabled={shown[d] <= 0} />
               <View style={styles.splitVal}>
                 <Txt size={18} weight={700} center color={c.ink}>
                   {num(shown[d])}
                 </Txt>
                 <Txt size={11.5} center color={c.meta}>
-                  {unitWord(shown[d])}
+                  {shown[d] > 0 ? unitWord(shown[d]) : HIF.splitRest()}
                 </Txt>
               </View>
-              <Stepper label={HIF.splitMore()} sign="+" onPress={() => set(d, nudge(shown[d], true, step))} />
+              <Stepper label={HIF.splitMore()} sign="+" onPress={() => set(d, nudge(shown[d], true))} />
             </View>
           ))}
         </View>
         <View style={styles.totalRow}>
           <View style={{ flex: 1, gap: 2 }}>
             <Txt size={15} weight={700} color={c.ink}>
-              {HIF.splitTotal()}: {unitCount(pace.unit, Math.round(total * 100) / 100)} {perWord('week')}
+              {HIF.splitTotal()}: {unitCount(pu, total)} {perWord('week')}
             </Txt>
             <Txt size={13} color={c.meta}>
-              {same ? HIF.splitMatches() : HIF.splitGoal(unitCount(pace.unit, goal))}
+              {same ? HIF.splitMatches() : HIF.splitGoal(unitCount(pu, goal))}
             </Txt>
           </View>
           {!!pace.perDay && <Link text={HIF.splitEven()} onPress={() => patch({ perDay: null })} />}
         </View>
+        {(pace.unit === 'hizb' || pace.unit === 'juz') && <Hint>{HIF.inThumun()}</Hint>}
       </View>
     );
   };

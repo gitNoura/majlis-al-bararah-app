@@ -12,8 +12,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Glass, GlassBackdrop } from '@/components/Glass';
-import { BackIcon } from '@/components/icons';
+import { BackIcon, MenuIcon } from '@/components/icons';
 import { PageCurl } from '@/components/PageCurl';
+import { QuranIndex } from '@/components/QuranIndex';
 import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
@@ -115,6 +116,7 @@ function Recite({ segs, onBack }: { segs: number[][] | null; onBack: () => void 
   const [override, setOverride] = useState<'hide' | 'show' | null>(null); // the eye: for the whole Quran, kept across pages
   const [words, setWords] = useState<Map<string, string[]>>(new Map()); // kept for the pages seen, and the ones beside
   const [failed, setFailed] = useState(false);
+  const [indexOpen, setIndexOpen] = useState(false);
   const [inkTick, setInkTick] = useState(0); // a page's picture is read (see `veils`)
   const load: 'loading' | 'ready' | 'failed' = failed ? 'failed' : keys.every((k) => words.has(k)) ? 'ready' : 'loading';
 
@@ -160,6 +162,14 @@ function Recite({ segs, onBack }: { segs: number[][] | null; onBack: () => void 
   const bulb = () => reveal(showWord(sess, count));
   const eye = () => setOverride(override === 'hide' ? 'show' : 'hide');
   const tapAyah = (su: number, a: number) => reveal(jumpTo(sess, `${su}:${a}`));
+  // the index's play button: that surah's first page, covered and starting afresh (also when it is the page on screen)
+  const playSurah = (su: number) => {
+    const p = pageOf(su, 1);
+    if (!p) return;
+    setOverride(null);
+    setPage(p);
+    setSt(begin(keysOfPage(p)));
+  };
 
   // the room for the page, as the Quran screen's
   const top = insets.top + 96;
@@ -194,16 +204,19 @@ function Recite({ segs, onBack }: { segs: number[][] | null; onBack: () => void 
               <Pressable onPress={onBack} hitSlop={10} style={styles.back} accessibilityRole="button" accessibilityLabel={HIF.close()}>
                 <BackIcon color={c.ink} rtl={!isEnglish} />
               </Pressable>
+              <Pressable onPress={() => setIndexOpen(true)} hitSlop={10} style={styles.back} accessibilityRole="button" accessibilityLabel={HIF.lsSurah()}>
+                <MenuIcon color={c.ink} />
+              </Pressable>
             </View>
             <View style={[styles.name, { top: nameTop, height: 44 }]} pointerEvents="box-none">
-              <View style={styles.where}>
+              <Pressable onPress={() => setIndexOpen(true)} style={styles.where}>
                 <Txt size={18} weight={700} center color={c.ink} numberOfLines={1}>
                   {where}
                 </Txt>
                 <Txt size={13} center color={c.meta}>
                   {HIF.lsPageN(page)}
                 </Txt>
-              </View>
+              </Pressable>
             </View>
 
             {/* eye · counter · bulb · play, always in this order (as Murajaa) */}
@@ -257,6 +270,14 @@ function Recite({ segs, onBack }: { segs: number[][] | null; onBack: () => void 
           />
         </View>
       </GlassBackdrop>
+
+      <QuranIndex
+        open={indexOpen}
+        page={page}
+        onClose={() => setIndexOpen(false)}
+        onGo={(p) => setPage(Math.min(TOTAL_PAGES, Math.max(1, p)))}
+        onPlay={playSurah}
+      />
     </View>
   );
 }

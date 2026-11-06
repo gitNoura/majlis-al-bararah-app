@@ -510,17 +510,45 @@ export function poolUnits(plan, ctx, unit) {
   return w;
 }
 
-// Rounded up so the target is met: whole for ayat, in halves for the rest.
-export const roundUp = (x, unit) => (unit === 'ayah' ? Math.max(1, Math.ceil(x - EPS)) : Math.max(0.5, Math.ceil(x * 2 - EPS) / 2));
+// Rounded up so the target is met: always a whole number (no «0.5 thumun» on a day's card).
+export const roundUp = (x) => Math.max(1, Math.ceil(x - EPS));
+
+// A week's whole total shared over days as whole numbers: the days (in the order given) each get the even share,
+// and the first few one more when it does not divide. { [weekday]: amount }, a day with 0 is left out.
+export function wholeSplit(total, days) {
+  const n = days.length;
+  const out = {};
+  if (!n) return out;
+  const base = Math.floor(total / n + EPS);
+  const extra = Math.max(0, Math.round(total) - base * n);
+  days.forEach((d, i) => {
+    const a = base + (i < extra ? 1 : 0);
+    if (a > 0) out[d] = a;
+  });
+  return out;
+}
+
+// The weekly figures of a plan version as a daily pace of whole thumun: a hizb is 8 thumun and a juz 16. Returns
+// { unit: 'thumun', amount, days, perDay? } or null when the version is already in whole numbers.
+export function wholeVersion(v) {
+  if (v.unit !== 'hizb') return null;
+  const total = Math.max(1, Math.round(weeklyTotal(v) * 8));
+  const split = wholeSplit(total, [1, 2, 3, 4, 5, 6, 0].filter((d) => v.days.includes(d)));
+  const days = Object.keys(split).map(Number).sort((a, b) => a - b);
+  const vals = days.map((d) => split[d]);
+  const even = vals.every((x) => x === vals[0]);
+  const { perDay: _old, ...rest } = v;
+  return { ...rest, unit: 'thumun', amount: even ? vals[0] : Math.round(total / days.length), days, ...(even ? {} : { perDay: split }) };
+}
 
 // The amount that finishes the pool by the target, for a draft { type, range, period, unit, days, target }.
-export function deriveAmount(draft, ctx, today) {
+export function deriveAmount(draft, ctx, today, raw = false) {
   const total = poolUnits(draft, ctx, draft.unit);
   const span = draft.target.kind === 'days' ? draft.target.n : daysBetween(today, draft.target.date) + 1;
-  if (draft.period === 'week') return roundUp(total / Math.max(1, Math.ceil(span / 7)), draft.unit);
+  if (draft.period === 'week') return raw ? total / Math.max(1, Math.ceil(span / 7)) : roundUp(total / Math.max(1, Math.ceil(span / 7)));
   let planned = 0;
   for (let i = 0; i < Math.max(1, span); i++) if (draft.days.includes(weekdayOf(addDays(today, i)))) planned++;
-  return roundUp(total / Math.max(1, planned), draft.unit);
+  return raw ? total / Math.max(1, planned) : roundUp(total / Math.max(1, planned));
 }
 
 // A plan as it would start today, for the forecast line and for editing.
