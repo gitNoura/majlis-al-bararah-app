@@ -19,3 +19,7 @@ export const ui = (weight: Weight = 400) =>
   weight >= 800 ? 'Tajawal_800ExtraBold' : weight >= 700 ? 'Tajawal_700Bold' : weight >= 500 ? 'Tajawal_500Medium' : 'Tajawal_400Regular';
 
 export const serif = (weight: 400 | 700 = 400) => (weight >= 700 ? 'Amiri_700Bold' : 'Amiri_400Regular');
+
+// The two type roles of the app: `ui` for everything in the interface, `quran` for the Quran's and the hadith's
+// Arabic text only (Amiri). Nothing else uses a second face.
+export const roles = { ui, quran: serif };

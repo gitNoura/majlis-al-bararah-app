@@ -68,14 +68,13 @@ export default function Settings() {
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScreenHeader title={SETTINGS.title()} />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 28 }}>
-        <Section title={SETTINGS.appearance()} note={SETTINGS.byTimeNote()}>
+        <Section title={SETTINGS.appearance()}>
           <Segments<ThemeMode>
             value={mode}
             onChange={setMode}
             options={[
               ['light', SETTINGS.light()],
               ['dark', SETTINGS.dark()],
-              ['time', SETTINGS.byTime()],
               ['auto', SETTINGS.auto()],
             ]}
           />
