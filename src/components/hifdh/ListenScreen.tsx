@@ -449,7 +449,13 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
         </View>
       </GlassBackdrop>
 
-      <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={(p) => setPage(Math.min(TOTAL_PAGES, Math.max(1, p)))} />
+      <QuranIndex
+        open={indexOpen}
+        page={page}
+        onClose={() => setIndexOpen(false)}
+        onGo={(p) => setPage(Math.min(TOTAL_PAGES, Math.max(1, p)))}
+        onPlay={playSurahNo} // a play button stands where each surah's number is: the whole surah, straight from the index
+      />
 
       {setOpen && (
         <View ref={sheetLayer} collapsable={false} style={[StyleSheet.absoluteFill, { zIndex: 30, elevation: 30 }]}>{/* above the top bar (zIndex 5), which would show through */}

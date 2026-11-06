@@ -136,7 +136,152 @@ export function markEnd(page: number, box: Box): number | null {
       end = i;
     }
   }
-  return Math.min(box[2], (columns.xa + end) / columns.w);
+  const ring = ringRight(page, box, columns);
+  const byGap = (columns.xa + end) / columns.w;
+  return Math.min(box[2], ring == null ? byGap : Math.min(byGap, ring));
+}
+
+const ringCache = new Map<string, number | null>();
+
+/**
+ * The right edge of the number circle itself: the ink connected to the circle's leftmost pixels, followed no
+ * further than a circle is wide (the last word often touches it). The nearest empty column (above) can lie a few
+ * pixels past the circle and leave slivers of the word beside it uncovered; this edge cannot.
+ */
+function ringRight(page: number, box: Box, columns: Columns): number | null {
+  const key = `${page}:${box.join(',')}`;
+  if (ringCache.has(key)) return ringCache.get(key) ?? null;
+  const grey = greys.get(page);
+  const first = columns.inked.indexOf(true);
+  let result: number | null = null;
+  if (grey && first >= 0) {
+    const { w, lum } = grey;
+    const x0 = columns.xa + first;
+    const limit = Math.min(columns.xa + columns.inked.length - 1, x0 + Math.ceil((RING_W + 0.003) * w));
+    const cw = limit - x0 + 1;
+    const ch = columns.yb - columns.ya;
+    const seen = new Uint8Array(cw * ch);
+    const stack: number[] = [];
+    for (let y = 0; y < ch; y++) {
+      if (lum[(columns.ya + y) * w + x0] < columns.cut) {
+        seen[y * cw] = 1;
+        stack.push(y * cw);
+      }
+    }
+    let far = 0;
+    while (stack.length) {
+      const at = stack.pop() as number;
+      const cx = at % cw;
+      const cy = (at - cx) / cw;
+      if (cx > far) far = cx;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = cx + dx;
+          const ny = cy + dy;
+          if (nx < 0 || ny < 0 || nx >= cw || ny >= ch) continue;
+          const n = ny * cw + nx;
+          if (seen[n] || lum[(columns.ya + ny) * w + x0 + nx] >= columns.cut) continue;
+          seen[n] = 1;
+          stack.push(n);
+        }
+      }
+    }
+    if (stack.length === 0 && far > 0) result = (x0 + far + 2) / w;
+  }
+  ringCache.set(key, result);
+  return result;
+}
+
+// ---------- The page's own lines and frame ----------
+
+const cutCache = new Map<number, number>();
+
+/** The grey level below which a pixel of this page is ink: the paper's light end less 60. */
+function pageCut(page: number): number | null {
+  const grey = greys.get(page);
+  if (!grey) return null;
+  const known = cutCache.get(page);
+  if (known != null) return known;
+  const histogram = new Uint32Array(256);
+  for (let i = 0; i < grey.lum.length; i++) histogram[grey.lum[i]]++;
+  let lightest = Math.floor(grey.lum.length * 0.1);
+  let paper = 255;
+  for (; paper > 0 && lightest > histogram[paper]; paper--) lightest -= histogram[paper];
+  cutCache.set(page, paper - 60);
+  return paper - 60;
+}
+
+const frameCache = new Map<string, { x0: number; x1: number } | null>();
+
+/**
+ * Where the text area ends inside the page's frame: the columns just inside the thin border lines on the left and
+ * the right (fractions of the page), found as columns that are ink all the way down. `minX` / `maxX` are the
+ * extremes of the ayat's boxes on the page, which sit close to those lines. null while the picture is unread or
+ * when no line is found. A cover kept inside these columns never takes a piece of the border with it.
+ */
+export function frameInner(page: number, minX: number, maxX: number): { x0: number; x1: number } | null {
+  const key = `${page}:${minX.toFixed(4)}:${maxX.toFixed(4)}`;
+  const known = frameCache.get(key);
+  if (known !== undefined) return known;
+  const grey = greys.get(page);
+  const cut = pageCut(page);
+  if (!grey || cut == null) return null;
+  const { w, h, lum } = grey;
+  const ya = Math.floor(h * 0.2);
+  const yb = Math.floor(h * 0.8);
+  const solid = (x: number) => {
+    let dark = 0;
+    for (let y = ya; y < yb; y++) if (lum[y * w + x] < cut) dark++;
+    return dark >= (yb - ya) * 0.92;
+  };
+  let left: number | null = null;
+  for (let x = Math.max(0, Math.floor((minX - 0.04) * w)); x <= Math.ceil((minX + 0.004) * w); x++) if (solid(x)) left = x + 1;
+  let right: number | null = null;
+  for (let x = Math.min(w - 1, Math.ceil((maxX + 0.04) * w)); x >= Math.floor((maxX - 0.004) * w); x--) if (solid(x)) right = x;
+  const result = { x0: left != null ? left / w : minX, x1: right != null ? right / w : maxX };
+  const found = left != null || right != null;
+  frameCache.set(key, found ? result : null);
+  return found ? result : null;
+}
+
+const spanCache = new Map<string, [number, number]>();
+
+/**
+ * The rows a line's cover takes, `y0`..`y1` being the line's box on the page (fractions): from the quietest row
+ * (fewest ink pixels across the text area) near the line's top to the quietest near its bottom. The signs that
+ * hang over and under the line go with it, and the line beside it - the basmala above, an ayah left uncovered -
+ * keeps its own. null while the picture is unread.
+ */
+export function lineSpan(page: number, y0: number, y1: number, x0: number, x1: number): [number, number] | null {
+  const grey = greys.get(page);
+  const cut = pageCut(page);
+  if (!grey || cut == null) return null;
+  const key = `${page}:${y0.toFixed(4)}:${y1.toFixed(4)}:${x0.toFixed(3)}:${x1.toFixed(3)}`;
+  const known = spanCache.get(key);
+  if (known) return known;
+  const { w, h, lum } = grey;
+  const xa = Math.max(0, Math.floor(x0 * w));
+  const xb = Math.min(w, Math.ceil(x1 * w));
+  const quiet = (y: number, lo: number, hi: number) => {
+    let best = Math.round(y);
+    let least = Infinity;
+    for (let r = Math.max(0, Math.floor(lo)); r <= Math.min(h - 1, Math.ceil(hi)); r++) {
+      let ink = 0;
+      for (let x = xa; x < xb; x++) if (lum[r * w + x] < cut) ink++;
+      const score = ink + Math.abs(r - y) * 0.25; // the nearer row wins a tie
+      if (score < least) {
+        least = score;
+        best = r;
+      }
+    }
+    return best;
+  };
+  const win = 0.012 * h;
+  const top = quiet(y0 * h, y0 * h - win, y0 * h + win * 0.5);
+  const bottom = quiet(y1 * h, y1 * h - win * 0.5, y1 * h + win);
+  const span: [number, number] = [top / h, (bottom + 1) / h];
+  spanCache.set(key, span);
+  return span;
 }
 
 /**

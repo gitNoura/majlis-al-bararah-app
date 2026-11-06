@@ -10,7 +10,7 @@
 import { ayatOn, pageOf } from '../boxes.js';
 import { fetchData } from '../remote.js';
 import { HAFS } from '../riwaya.js';
-import { markBox, markEnd, RING_W, snapX } from './ink';
+import { frameInner, lineSpan, markBox, markEnd, RING_W, snapX } from './ink';
 
 const parse = (key) => key.split(':').map(Number);
 
@@ -115,6 +115,25 @@ const PAD_X = 0.0008; // a hair beyond a word's edge, which sits on a real gap
 const PAD_Y = 0.004; // the signs above and below the line
 const RING_PAD = 0.0015; // between the number circle and what is covered around it
 
+// The columns the page's text fills (the ayat's boxes' extremes): the word-meanings in the margin are left out of it
+const ranges = new Map();
+function textRange(page) {
+  if (!ranges.has(page)) {
+    const all = ayatOn(page).flatMap((e) => e.boxes);
+    ranges.set(page, all.length ? [Math.min(...all.map((b) => b[0])), Math.max(...all.map((b) => b[2]))] : [0.05, 0.96]);
+  }
+  return ranges.get(page);
+}
+
+// The rows a line's cover takes: from the quiet gap above the line to the one below it (see ink.ts lineSpan), so the
+// signs hanging over and under the line are covered and the lines beside it are not touched. A hair beyond the box
+// while the page's picture is unread.
+function rowsOf(page, box) {
+  const [x0, x1] = textRange(page);
+  const span = lineSpan(page, box[1], box[3], x0, x1);
+  return span ?? [box[1] - PAD_Y, box[3] + PAD_Y];
+}
+
 // Boxes that touch on one line become one box (no hairline between them)
 function merge(boxes) {
   const merged = [];
@@ -134,11 +153,12 @@ function ringStrips(key, page) {
   if (!last || last.page !== page) return [];
   const ring = markBox(page, last.box);
   if (!ring) return [];
-  const [x0, y0, , y1] = last.box;
+  const [x0] = last.box;
   const left = Math.max(x0, ring.x0 - 0.001);
   const strips = [];
-  if (ring.y0 - RING_PAD > y0 - PAD_Y) strips.push([left, y0 - PAD_Y, ring.x1, ring.y0 - RING_PAD]);
-  if (y1 + PAD_Y > ring.y1 + RING_PAD) strips.push([left, ring.y1 + RING_PAD, ring.x1, y1 + PAD_Y]);
+  const [top, bottom] = rowsOf(page, last.box);
+  if (ring.y0 - RING_PAD > top) strips.push([left, top, ring.x1, ring.y0 - RING_PAD]);
+  if (bottom > ring.y1 + RING_PAD) strips.push([left, ring.y1 + RING_PAD, ring.x1, bottom]);
   return strips;
 }
 
@@ -149,9 +169,10 @@ function wholeAyah(key, page) {
   const boxes = [];
   parts.forEach((part, i) => {
     if (part.page !== page) return;
-    const [x0, y0, x1, y1] = part.box;
+    const [x0, , x1] = part.box;
     const from = i === parts.length - 1 ? Math.min(x1, Math.max(x0, markEnd(page, part.box) ?? x0 + RING_W)) : x0;
-    if (x1 - from > 1e-6) boxes.push([from, y0 - PAD_Y, x1, y1 + PAD_Y]);
+    const [top, bottom] = rowsOf(page, part.box);
+    if (x1 - from > 1e-6) boxes.push([from, top, x1, bottom]);
   });
   return [...boxes, ...ringStrips(key, page)];
 }
@@ -163,11 +184,24 @@ function wordsFrom(key, page, words, shown) {
     if (k < shown) return;
     for (const piece of pieces) {
       if (piece.page !== page) continue;
-      const [x0, y0, x1, y1] = piece.box;
-      boxes.push([x0 - PAD_X, y0 - PAD_Y, x1 + PAD_X, y1 + PAD_Y]);
+      const [x0, , x1] = piece.box;
+      const [top, bottom] = rowsOf(page, piece.box);
+      boxes.push([x0 - PAD_X, top, x1 + PAD_X, bottom]);
     }
   });
   return [...boxes, ...ringStrips(key, page)];
+}
+
+// The cover never goes past the thin border lines of the page's frame: the part of a box over them is cut off.
+function keepInFrame(page, veil) {
+  const [first, last] = textRange(page);
+  const frame = frameInner(page, first, last);
+  if (!frame) return veil;
+  return veil.map((v) => ({
+    boxes: v.boxes
+      .map(([x0, y0, x1, y1]) => [Math.max(x0, frame.x0), y0, Math.min(x1, frame.x1), y1])
+      .filter(([x0, , x1]) => x1 - x0 > 1e-6),
+  }));
 }
 
 // What to cover on a page: [{ boxes }], boxes as fractions of the page, for PageCurl's `veils`.
@@ -187,7 +221,7 @@ export function veilFor(page, st, wordsByKey, override) {
     const boxes = words && shown > 0 ? wordsFrom(key, page, words, shown) : wholeAyah(key, page);
     veil.push({ boxes: merge(boxes) });
   }
-  return veil;
+  return keepInFrame(page, veil);
 }
 
 // The ayat of a portion (Hifdh positions, as the plan keeps them) as keys of the narration that is open

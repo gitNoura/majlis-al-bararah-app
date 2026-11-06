@@ -162,14 +162,7 @@ function Recite({ segs, onBack }: { segs: number[][] | null; onBack: () => void 
   const bulb = () => reveal(showWord(sess, count));
   const eye = () => setOverride(override === 'hide' ? 'show' : 'hide');
   const tapAyah = (su: number, a: number) => reveal(jumpTo(sess, `${su}:${a}`));
-  // the index's play button: that surah's first page, covered and starting afresh (also when it is the page on screen)
-  const playSurah = (su: number) => {
-    const p = pageOf(su, 1);
-    if (!p) return;
-    setOverride(null);
-    setPage(p);
-    setSt(begin(keysOfPage(p)));
-  };
+
 
   // the room for the page, as the Quran screen's
   const top = insets.top + 96;
@@ -271,13 +264,7 @@ function Recite({ segs, onBack }: { segs: number[][] | null; onBack: () => void 
         </View>
       </GlassBackdrop>
 
-      <QuranIndex
-        open={indexOpen}
-        page={page}
-        onClose={() => setIndexOpen(false)}
-        onGo={(p) => setPage(Math.min(TOTAL_PAGES, Math.max(1, p)))}
-        onPlay={playSurah}
-      />
+      <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={(p) => setPage(Math.min(TOTAL_PAGES, Math.max(1, p)))} />
     </View>
   );
 }
