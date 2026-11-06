@@ -18,7 +18,7 @@
 // of the page before, the page read and the page after are in `prev`, `cur`, `next`; when a turn ends,
 // the page shown is already the new one before the app hears of it, so nothing flickers.
 import { Canvas, Group, LinearGradient, Morphology, Path, Rect, Skia, Image as SkiaImage, type SkImage, type SkPath } from '@shopify/react-native-skia';
-import { type ComponentProps, useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { View } from 'react-native';
 import {
   GestureDetector,
@@ -29,7 +29,7 @@ import {
   usePinchGesture,
   useTapGesture,
 } from 'react-native-gesture-handler';
-import { Easing, useAnimatedReaction, useDerivedValue, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
+import { Easing, useAnimatedReaction, useDerivedValue, useSharedValue, withSequence, withTiming, type DerivedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { ayahAt } from '@/lib/boxes';
@@ -115,8 +115,9 @@ const DONE = 0.28; // past this share of the turn, letting go finishes it
 const MAX_ZOOM = 4;
 const NOTHING: Poly = [];
 
-type PictureProps = ComponentProps<typeof SkiaImage>;
 type CoverRole = 'under' | 'over';
+type Picture = DerivedValue<SkImage | null>; // `under` or `over`
+type Place = DerivedValue<ReturnType<typeof placeOf>>; // `underAt` or `overAt`
 
 // Tasmee's cover of one page: the page's own picture drawn again inside the covered boxes through a dilate filter,
 // so the ink goes and the paper's own tone is left. It shows only while that page is the one drawn in its role:
@@ -127,8 +128,8 @@ function Cover({ page, path, role, at, mode, image, rect, pageW, pageH, paper }:
   role: CoverRole;
   at: { get(): number };
   mode: { get(): number };
-  image: PictureProps['image'];
-  rect: PictureProps['rect'];
+  image: Picture;
+  rect: Place;
   pageW: number;
   pageH: number;
   paper: string;
@@ -589,7 +590,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
   const bubble = useMemo(() => ({ body: Skia.Path.MakeFromSVGString(BUBBLE)!, lines: Skia.Path.MakeFromSVGString(BUBBLE_LINES)! }), []);
 
   // Tasmee's covers of every page given in `veils`, drawn over one of the page pictures
-  const covers = (tag: string, role: CoverRole, image: PictureProps['image'], rect: PictureProps['rect']) =>
+  const covers = (tag: string, role: CoverRole, image: Picture, rect: Place) =>
     coverPaths.map((v) => (
       <Cover key={`${tag}${v.p}`} page={v.p} path={v.path} role={role} at={at} mode={mode} image={image} rect={rect} pageW={pageW} pageH={pageH} paper={paper} />
     ));
