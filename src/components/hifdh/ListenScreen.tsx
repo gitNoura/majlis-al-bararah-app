@@ -125,48 +125,6 @@ function SurahPicker({ open, onPick, onClose }: { open: boolean; onPick: (n: num
   );
 }
 
-// the reciter: the one chosen on a button, and the list of those that can play when it is tapped
-function ReciterPicker({ open, value, onPick, onClose }: { open: boolean; value: string; onPick: (id: string) => void; onClose: () => void }) {
-  const { c } = useTheme();
-  const insets = useSafeAreaInsets();
-  return (
-    <Modal visible={open} animationType="slide" onRequestClose={onClose} transparent>
-      <View style={[styles.modalBack, { backgroundColor: c.dim }]}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={HIF.close()} />
-        <View style={[styles.modal, { backgroundColor: c.screen, paddingBottom: insets.bottom + 8 }]}>
-          <Txt size={18} weight={700} color={c.ink} center style={{ paddingVertical: 12 }}>
-            {HIF.lsReciter()}
-          </Txt>
-          <FlatList
-            data={available()}
-            keyExtractor={(r) => r.id}
-            renderItem={({ item }) => {
-              const on = item.id === value;
-              return (
-                <Pressable
-                  onPress={() => onPick(item.id)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: on }}
-                  style={[styles.surahRow, { borderColor: c.line, gap: 10 }]}
-                >
-                  <Txt size={16} weight={on ? 700 : 600} color={c.ink} style={{ flex: 1 }}>
-                    {item.name[isEnglish ? 1 : 0]}
-                  </Txt>
-                  {on && (
-                    <Txt size={18} weight={700} color={c.on}>
-                      ✓
-                    </Txt>
-                  )}
-                </Pressable>
-              );
-            }}
-          />
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 // «surah [..] ayah [− n +]»
 function Point({ label, value, onChange }: { label: string; value: string; onChange: (key: string) => void }) {
   const { c } = useTheme();
@@ -351,6 +309,15 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
     all: [HIF.lsMethodAll(), HIF.lsMethodAllD()],
   };
   const play = () => ls.togglePlay(keys, selId);
+  // «Whole surah», straight from the bar: the surah the page is on, from its first ayah, and it starts at once
+  const playSurah = () => {
+    if (!first) return;
+    const su = first.s;
+    const range = { from: `${su}:1`, to: `${su}:${counts()[su - 1]}` };
+    setSel(range);
+    setAnchor(false);
+    ls.begin(keysFromTo(range.from, range.to), `${range.from}-${range.to}|${prefs.method}`);
+  };
   const startFromSheet = () => {
     const range = sel ?? { from: base, to: base }; // the sheet shows From / To even when nothing was tapped yet
     setSel(range);
@@ -385,7 +352,7 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
               </Pressable>
             </View>
 
-            {/* the bar under the page: what is chosen (and heard, a tap opens the settings), clear, previous, play, next */}
+            {/* the bar under the page: what is chosen (and heard, a tap opens the settings) or, with nothing chosen, «whole surah» to play it at once, clear, previous, play, next */}
             <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end', alignItems: 'center', paddingBottom: insets.bottom + 12 }]}>
               <Glass acrylic style={[styles.player, { width: Math.min(width - 24, 520) }]}>
                 <View style={styles.pillRow}>
@@ -397,6 +364,19 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
                     {sub}
                   </Txt>
                 </Pressable>
+                {!sel && !!first && (
+                  <Pressable
+                    onPress={playSurah}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${HIF.lsQuickSurah()}: ${where}`}
+                    style={[styles.surahPlay, { backgroundColor: c.soft, borderColor: c.line }]}
+                  >
+                    <PlayIcon color={c.ink} size={14} />
+                    <Txt size={13} weight={700} color={c.ink} numberOfLines={1}>
+                      {HIF.lsQuickSurah()}
+                    </Txt>
+                  </Pressable>
+                )}
                 {sel && (
                   <Pressable onPress={clear} accessibilityRole="button" accessibilityLabel={HIF.lsQuickClear()} style={[styles.ico, { backgroundColor: c.soft }]}>
                     <CloseIcon color={c.ink} size={20} />
@@ -508,23 +488,50 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
                   <Txt size={18} weight={700} color={c.ink}>
                     {HIF.lsReciter()}
                   </Txt>
-                  <Pressable onPress={() => setReciterOpen(true)} accessibilityRole="button" accessibilityLabel={HIF.lsReciter()} style={[styles.surahBtn, styles.reciterBtn, { borderColor: c.line, backgroundColor: c.card }]}>
-                    <Txt size={15} weight={600} color={c.ink} numberOfLines={1} style={{ flex: 1 }}>
-                      {names(reciterOf(prefs))}
-                    </Txt>
-                    <Txt size={14} color={c.meta}>
-                      ▾
-                    </Txt>
-                  </Pressable>
-                  <ReciterPicker
-                    open={reciterOpen}
-                    value={reciterOf(prefs).id}
-                    onClose={() => setReciterOpen(false)}
-                    onPick={(id) => {
-                      ls.setPref('reciter', id);
-                      setReciterOpen(false);
-                    }}
-                  />
+                  <View>
+                    <Pressable
+                      onPress={() => setReciterOpen((v) => !v)}
+                      accessibilityRole="button"
+                      accessibilityState={{ expanded: reciterOpen }}
+                      accessibilityLabel={HIF.lsReciter()}
+                      style={[styles.surahBtn, styles.reciterBtn, { borderColor: reciterOpen ? c.on : c.line, backgroundColor: c.card }]}
+                    >
+                      <Txt size={15} weight={600} color={c.ink} numberOfLines={1} style={{ flex: 1 }}>
+                        {names(reciterOf(prefs))}
+                      </Txt>
+                      <Txt size={14} color={c.meta}>
+                        {reciterOpen ? '▴' : '▾'}
+                      </Txt>
+                    </Pressable>
+                    {reciterOpen && (
+                      <View style={[styles.dropdown, { borderColor: c.line, backgroundColor: c.card }]}>
+                        {available().map((r, i) => {
+                          const on = reciterOf(prefs).id === r.id;
+                          return (
+                            <Pressable
+                              key={r.id}
+                              onPress={() => {
+                                ls.setPref('reciter', r.id);
+                                setReciterOpen(false);
+                              }}
+                              accessibilityRole="button"
+                              accessibilityState={{ selected: on }}
+                              style={[styles.dropRow, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderColor: c.line }, on && { backgroundColor: c.soft }]}
+                            >
+                              <Txt size={15} weight={on ? 700 : 600} color={c.ink} style={{ flex: 1 }}>
+                                {names(r)}
+                              </Txt>
+                              {on && (
+                                <Txt size={16} weight={700} color={c.on}>
+                                  ✓
+                                </Txt>
+                              )}
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    )}
+                  </View>
                 </Section>
 
                 <Section title={`${HIF.lsMethod()} ${HIF.lsOptional()}`}>
@@ -575,6 +582,7 @@ const styles = StyleSheet.create({
   player: { height: PLAYER_H, borderRadius: PLAYER_H / 2 },
   pillRow: { alignSelf: 'stretch', height: PLAYER_H, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8 },
   summary: { flex: 1, minWidth: 0, paddingVertical: 6, paddingHorizontal: 10, gap: 1 },
+  surahPlay: { height: 36, paddingHorizontal: 12, borderRadius: 18, borderWidth: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
   ico: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   play: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   sheetWrap: { flex: 1, justifyContent: 'flex-end' },
@@ -585,6 +593,8 @@ const styles = StyleSheet.create({
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
   other: { minWidth: 96, height: 40, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, textAlign: 'center', fontSize: 14, fontFamily: ui(600) },
   pointRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dropdown: { marginTop: 6, borderRadius: radius.chip, borderWidth: 1, overflow: 'hidden' },
+  dropRow: { minHeight: 46, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 10 },
   reciterBtn: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   surahBtn: { flex: 1, minHeight: 44, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, justifyContent: 'center' },
   ayahBox: { width: 64, height: 44, borderRadius: radius.chip, borderWidth: 1, textAlign: 'center', fontSize: 16, fontFamily: ui(600) },
