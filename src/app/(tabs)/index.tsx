@@ -1,5 +1,5 @@
 // HOME tab (stub until phase e: the dashboard). It also keeps one behaviour of the old home screen: after a change
-// of narration the app opens again, and must land on the mushaf at the same place, not on the home screen.
+// of narration the app opens again, and must land on the Quran tab at the same place, not on the home screen.
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 
@@ -14,7 +14,7 @@ export default function HomeTab() {
     const stay = stayInQuran();
     if (stay) {
       if (typeof stay === 'number') writeJSON('lastPage', stay);
-      router.push('/reader-old');
+      router.navigate('/quran');
     }
   }, []);
   return (

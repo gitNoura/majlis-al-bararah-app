@@ -6,12 +6,19 @@
 // was when the day began. Reaching the last ayah of an-Nas completes a khatma.
 import { L, surahName, t } from '@/i18n/i18n';
 import { displayKeys, storedKeys } from '@/lib/ayahmap';
+import { ayatOn, pageOf } from '@/lib/boxes';
 import { SURAHS, TOTAL_PAGES } from '@/lib/quran';
 import { fetchData } from '@/lib/remote';
 import { dayKey, readJSON, writeJSON } from '@/lib/storage';
 
 export type Stop = { page: number; key: string };
-type State = { stop: Stop | null; dayStart: Record<string, Stop | null>; days: Record<string, { ayat: number; letters: number }>; khatmas: number };
+type State = {
+  stop: Stop | null; // the exact pin (the ayah the reader marked)
+  dayStart: Record<string, Stop | null>; // legacy: used by markStop (the old reader) only
+  days: Record<string, { ayat: number; letters: number }>;
+  khatmas: number;
+  pages?: Record<string, number[]>; // the pages already counted today (turning back must not count twice)
+};
 
 const KEY = 'wird';
 const LAST_AYAH = '114:6'; // an-Nas has 6 ayat in Warsh
@@ -57,6 +64,20 @@ async function readBetween(from: string | null, to: string) {
   return { ayat, letters };
 }
 
+
+// tomorrow begins with the next ayah (or the next surah), numbered as in the narration read
+async function nextAfter(key: string) {
+  const [s, a] = parse(key);
+  let count = 0;
+  try {
+    count = (await surahAyat(s)).length;
+  } catch {}
+  const nextSurah = count && a < count ? s : (s % 114) + 1;
+  const nextAyah = count && a < count ? a + 1 : 1;
+  const shown = displayKeys(`${nextSurah}:${nextAyah}`)[0];
+  return t('wirdNextStep', surahName(SURAHS[nextSurah - 1]), (shown ? parse(shown)[1] : nextAyah).toLocaleString(L('ar', 'en', 'fr')));
+}
+
 export type Done = { khatma: boolean; khatmas: number; progress: number; next: string };
 
 // Holding an ayah (`tapped`: as numbered in the narration read; `firstOnPage`: the page's first ayah, the
@@ -97,15 +118,80 @@ export async function markStop(tapped: string, page: number, firstOnPage: string
   if (read.ayat) state.days[day] = read;
   save(state);
 
-  // tomorrow begins with the next ayah (or the next surah), numbered as in this narration
-  const [s, a] = parse(key);
-  let count = 0;
-  try {
-    count = (await surahAyat(s)).length;
-  } catch {}
-  const nextSurah = count && a < count ? s : (s % 114) + 1;
-  const nextAyah = count && a < count ? a + 1 : 1;
-  const shown = displayKeys(`${nextSurah}:${nextAyah}`)[0];
-  const next = t('wirdNextStep', surahName(SURAHS[nextSurah - 1]), (shown ? parse(shown)[1] : nextAyah).toLocaleString(L('ar', 'en', 'fr')));
+  const next = await nextAfter(key);
   return { khatma, khatmas: state.khatmas, progress: khatma ? 100 : (page / TOTAL_PAGES) * 100, next };
+}
+
+// ---------- the Quran tab: ONE position marker ('lastPage', src/lib/position.ts) plus an exact pin ----------
+// The marker follows every page turn. The pin is an ayah the reader marked («Mark here»); it stays where it was put
+// until it is moved. The day's reading is counted from the pages turned (below), not from the pin.
+
+// «Mark here»: the pin goes on this ayah (`tapped`: as numbered in the narration read). Returns what the closing card
+// shows (the khatma, if this is the last ayah of an-Nas), or null when the ayah has no Warsh key.
+export async function setPin(tapped: string, page: number): Promise<Done | null> {
+  const key = storedKeys(tapped).at(-1); // saved under the Warsh key
+  if (!key) return null; // the Basmala of al-Fatiha in Hafs has no Warsh ayah
+  const state = loadWird();
+  const khatma = key === LAST_AYAH && state.stop?.key !== LAST_AYAH;
+  if (khatma) state.khatmas = (state.khatmas || 0) + 1;
+  state.stop = { page, key };
+  save(state);
+  const next = await nextAfter(key);
+  return { khatma, khatmas: state.khatmas, progress: khatma ? 100 : (page / TOTAL_PAGES) * 100, next };
+}
+
+export function clearPin() {
+  const state = loadWird();
+  state.stop = null;
+  save(state);
+}
+
+export const khatmasDone = () => loadWird().khatmas || 0;
+
+// the ayat that begin on a page (Warsh keys), grouped by surah
+function startingOn(page: number) {
+  const bySurah = new Map<number, Set<number>>();
+  for (const e of ayatOn(page) as { s: number; a: number }[]) {
+    if (pageOf(e.s, e.a) !== page) continue; // an ayah that runs over from the page before was counted there
+    for (const k of storedKeys(`${e.s}:${e.a}`)) {
+      const [s, a] = parse(k);
+      bySurah.set(s, (bySurah.get(s) ?? new Set()).add(a));
+    }
+  }
+  return bySurah;
+}
+
+let counting: Promise<void> = Promise.resolve(); // one count at a time: two quick turns must not overwrite each other
+
+// A page was read: the reader turned from it to the next one. Counted once a day per page. A jump (the Find sheet)
+// never calls this, so skipping ahead does not count as reading.
+export function countPage(page: number): Promise<void> {
+  counting = counting.then(async () => {
+    const day = dayKey();
+    const state = loadWird();
+    state.pages = { [day]: state.pages?.[day] ?? [] }; // only today's list is kept
+    if (state.pages[day].includes(page)) return;
+    let ayat = 0;
+    let letters = 0;
+    try {
+      for (const [s, wanted] of startingOn(page)) {
+        for (const x of await surahAyat(s)) {
+          if (!wanted.has(x.ayah)) continue;
+          ayat++;
+          letters += letterCount(x.text);
+        }
+      }
+    } catch {
+      return; // offline: nothing is counted, and the page may be counted when it is turned again
+    }
+    // the data may have changed while the surahs loaded
+    const fresh = loadWird();
+    const done = fresh.pages?.[day] ?? [];
+    if (done.includes(page)) return;
+    const was = fresh.days[day] ?? { ayat: 0, letters: 0 };
+    fresh.days[day] = { ayat: was.ayat + ayat, letters: was.letters + letters };
+    fresh.pages = { [day]: [...done, page] };
+    save(fresh);
+  });
+  return counting;
 }

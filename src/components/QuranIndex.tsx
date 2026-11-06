@@ -8,56 +8,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CloseIcon, PlayIcon, SearchIcon, StarBadge } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
-import { isEnglish, surahName, surahType, t } from '@/i18n/i18n';
+import { isEnglish, t } from '@/i18n/i18n';
 import { READER } from '@/i18n/reader';
-import { AHZAB, AJZA, hizbForPage, juzForPage, surahForPage, SURAHS } from '@/lib/quran';
-import { HAFS } from '@/lib/riwaya';
+import { current, filterItems, type Item, type Tab } from '@/lib/find';
 import { ui } from '@/theme/fonts';
 import { useTheme } from '@/theme/theme';
-
-type Tab = 'surahs' | 'ahzab' | 'ajza';
-type Item = { number: number; title: string; other: string; sub: string; page: number; type?: string };
-
-// Search ignores hamza forms, tashkeel and the "ال" prefix, so "انعام" finds "الأنعام"; English names
-// without accents, marks or case, so "fatiha" finds "Al-Fatihah" (as on the website).
-const normalize = (text: string) =>
-  text
-    .replace(/[ً-ْٰ]/g, '')
-    .replace(/[أإآٱ]/g, 'ا')
-    .replace(/ى/g, 'ي')
-    .replace(/ة/g, 'ه')
-    .replace(/(^|\s)ال/g, '$1')
-    .trim();
-const latin = (text: string) =>
-  text
-    .normalize('NFD')
-    .toLowerCase()
-    .replace(/[^a-z]/g, '');
-
-function items(tab: Tab): Item[] {
-  if (tab === 'surahs')
-    return SURAHS.map((s: any) =>
-      isEnglish
-        ? { number: s.number, title: s.latin, other: s.name, sub: '', page: s.page, type: surahType(s) }
-        : { number: s.number, title: `سورة ${s.name}`, other: s.english, sub: '', page: s.page, type: s.type },
-    );
-  if (tab === 'ahzab')
-    return AHZAB.map((h: any) => ({
-      number: h.number,
-      title: t('hizb', h.number),
-      other: '',
-      sub: HAFS
-        ? ''
-        : h.ayah === 1
-          ? t('hizbStartsSurah', surahName(SURAHS[h.surah - 1]))
-          : t('hizbStartsAyah', surahName(SURAHS[h.surah - 1]), h.ayah),
-      page: h.page,
-    }));
-  return AJZA.map((j: any) => ({ number: j.number, title: t('juz', j.number), other: '', sub: '', page: j.page }));
-}
-
-const current = (tab: Tab, page: number) =>
-  (tab === 'surahs' ? surahForPage(page) : tab === 'ahzab' ? hizbForPage(page) : juzForPage(page)).number;
 
 // `onPlay` (the Listen screen) puts a play button in place of each surah's number: the whole surah, played at once
 export function QuranIndex({ open, page, onClose, onGo, onPlay }: { open: boolean; page: number; onClose: () => void; onGo: (page: number) => void; onPlay?: (surah: number) => void }) {
@@ -76,16 +31,7 @@ export function QuranIndex({ open, page, onClose, onGo, onPlay }: { open: boolea
   const close = () => Animated.timing(slide, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => onClose());
 
   const shown = useMemo(() => {
-    const q = normalize(query);
-    const lq = latin(query);
-    return items(tab).filter(
-      (it) =>
-        !q ||
-        normalize(it.title).includes(q) ||
-        normalize(it.other).includes(q) ||
-        String(it.number) === q ||
-        (lq && (latin(it.title).includes(lq) || latin(it.other).includes(lq))),
-    );
+    return filterItems(tab, query);
   }, [tab, query]);
   const here = current(tab, page);
 
