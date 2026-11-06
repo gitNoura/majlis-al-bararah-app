@@ -5,8 +5,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, FlatList, Modal, Pressable, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CloseIcon, SearchIcon, StarBadge } from '@/components/icons';
+import { CloseIcon, PlayIcon, SearchIcon, StarBadge } from '@/components/icons';
 import { Txt } from '@/components/Txt';
+import { HIF } from '@/i18n/hifdh';
 import { isEnglish, surahName, surahType, t } from '@/i18n/i18n';
 import { READER } from '@/i18n/reader';
 import { AHZAB, AJZA, hizbForPage, juzForPage, surahForPage, SURAHS } from '@/lib/quran';
@@ -58,7 +59,8 @@ function items(tab: Tab): Item[] {
 const current = (tab: Tab, page: number) =>
   (tab === 'surahs' ? surahForPage(page) : tab === 'ahzab' ? hizbForPage(page) : juzForPage(page)).number;
 
-export function QuranIndex({ open, page, onClose, onGo }: { open: boolean; page: number; onClose: () => void; onGo: (page: number) => void }) {
+// `onPlay` (the Listen screen) puts a play button beside each surah: the whole surah, without opening its page first
+export function QuranIndex({ open, page, onClose, onGo, onPlay }: { open: boolean; page: number; onClose: () => void; onGo: (page: number) => void; onPlay?: (surah: number) => void }) {
   const { c, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -217,6 +219,20 @@ export function QuranIndex({ open, page, onClose, onGo }: { open: boolean; page:
                     </Txt>
                   )}
                 </View>
+                {onPlay && tab === 'surahs' && (
+                  <Pressable
+                    onPress={() => {
+                      onPlay(item.number);
+                      close();
+                    }}
+                    hitSlop={6}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${HIF.lsPlay()}: ${item.title}`}
+                    style={[styles.playBtn, { backgroundColor: c.on }]}
+                  >
+                    <PlayIcon color={c.onInk} size={16} />
+                  </Pressable>
+                )}
               </Pressable>
             );
           }}
@@ -238,5 +254,6 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 15, paddingVertical: 0 },
   row: { height: ROW, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderRadius: 12 },
   edge: { position: 'absolute', end: 0, top: 10, bottom: 10, width: 3, borderRadius: 2 },
+  playBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   num: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
 });

@@ -89,7 +89,7 @@ export const paceText = (p) => {
   const v = core.versionAt(p, plan.today());
   const days = p.period === 'week' || v.days.length === 7 ? '' : ` · ${WEEK_ORDER.filter((d) => v.days.includes(d)).map((d) => weekdayName(d)).join(' ')}`;
   // shown as a week's amount, as it was asked (a daily plan's portion times its days)
-  const weekly = p.period === 'week' ? v.amount : Math.round(v.amount * v.days.length * 100) / 100;
+  const weekly = p.period === 'week' ? v.amount : Math.round(core.weeklyTotal(v) * 100) / 100;
   return `${unitCount(v.unit, weekly)} ${perWord('week')}${days}`;
 };
 

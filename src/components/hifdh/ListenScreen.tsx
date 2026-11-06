@@ -9,8 +9,8 @@
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BackHandler, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BackHandler, FlatList, type HostInstance, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Glass, GlassBackdrop } from '@/components/Glass';
@@ -198,7 +198,14 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
   const [hint, setHint] = useState('');
   const [setOpen, setSetOpen] = useState(false);
   const [indexOpen, setIndexOpen] = useState(false);
-  const [reciterOpen, setReciterOpen] = useState(false);
+  // the reciter list opens over the sheet (its place under the button, measured when it is pressed), so the card keeps its size
+  const [reciterAt, setReciterAt] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const reciterBtn = useRef<HostInstance>(null);
+  const sheetLayer = useRef<HostInstance>(null);
+  const closeSheet = () => {
+    setReciterAt(null);
+    setSetOpen(false);
+  };
   const [seenNow, setSeenNow] = useState<string | null>(null);
 
   useEffect(() => {
@@ -206,9 +213,9 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
     return () => ls.release();
   }, [ls]);
   useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => (setOpen ? setSetOpen(false) : onBack(), true));
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => (reciterAt ? setReciterAt(null) : setOpen ? closeSheet() : onBack(), true));
     return () => sub.remove();
-  }, [onBack, setOpen]);
+  }, [onBack, setOpen, reciterAt]);
   useEffect(() => {
     const ahead = [page + 1, page + 2, page + 3, page - 1].filter((n) => n >= 1 && n <= TOTAL_PAGES).map(pageUrl);
     Image.prefetch(ahead, 'disk').catch(() => {});
@@ -310,19 +317,18 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
   };
   const play = () => ls.togglePlay(keys, selId);
   // «Whole surah», straight from the bar: the surah the page is on, from its first ayah, and it starts at once
-  const playSurah = () => {
-    if (!first) return;
-    const su = first.s;
+  const playSurahNo = (su: number) => {
     const range = { from: `${su}:1`, to: `${su}:${counts()[su - 1]}` };
     setSel(range);
     setAnchor(false);
     ls.begin(keysFromTo(range.from, range.to), `${range.from}-${range.to}|${prefs.method}`);
   };
+  const playSurah = () => first && playSurahNo(first.s);
   const startFromSheet = () => {
     const range = sel ?? { from: base, to: base }; // the sheet shows From / To even when nothing was tapped yet
     setSel(range);
     setAnchor(false);
-    setSetOpen(false);
+    closeSheet();
     ls.begin(keysFromTo(range.from, range.to), `${range.from}-${range.to}|${prefs.method}`);
   };
 
@@ -443,18 +449,24 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
         </View>
       </GlassBackdrop>
 
-      <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={(p) => setPage(Math.min(TOTAL_PAGES, Math.max(1, p)))} />
+      <QuranIndex
+        open={indexOpen}
+        page={page}
+        onClose={() => setIndexOpen(false)}
+        onGo={(p) => setPage(Math.min(TOTAL_PAGES, Math.max(1, p)))}
+        onPlay={(su) => playSurahNo(su)} // a play button beside each surah: the whole surah, straight from the index
+      />
 
       {setOpen && (
-        <View style={[StyleSheet.absoluteFill, { zIndex: 30, elevation: 30 }]}>{/* above the top bar (zIndex 5), which would show through */}
-          <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]} onPress={() => setSetOpen(false)} accessibilityLabel={HIF.lsClose()} />
+        <View ref={sheetLayer} collapsable={false} style={[StyleSheet.absoluteFill, { zIndex: 30, elevation: 30 }]}>{/* above the top bar (zIndex 5), which would show through */}
+          <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]} onPress={() => closeSheet()} accessibilityLabel={HIF.lsClose()} />
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetWrap} pointerEvents="box-none">
             <View style={[styles.sheet, { backgroundColor: c.panel, paddingBottom: insets.bottom + 12, maxHeight: height - insets.top - 24 }]}>
               <View style={styles.sheetHead}>
                 <Txt size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
                   {HIF.lsSettings()}
                 </Txt>
-                <Pressable onPress={() => setSetOpen(false)} hitSlop={10} accessibilityRole="button" accessibilityLabel={HIF.lsClose()}>
+                <Pressable onPress={() => closeSheet()} hitSlop={10} accessibilityRole="button" accessibilityLabel={HIF.lsClose()}>
                   <CloseIcon color={c.ink} size={22} />
                 </Pressable>
               </View>
@@ -488,49 +500,24 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
                   <Txt size={18} weight={700} color={c.ink}>
                     {HIF.lsReciter()}
                   </Txt>
-                  <View>
+                  <View ref={reciterBtn} collapsable={false}>
                     <Pressable
-                      onPress={() => setReciterOpen((v) => !v)}
+                      onPress={() => {
+                        if (reciterAt) return setReciterAt(null);
+                        if (reciterBtn.current && sheetLayer.current) reciterBtn.current.measureLayout(sheetLayer.current, (x, y, w, h) => setReciterAt({ x, y, w, h }), () => {});
+                      }}
                       accessibilityRole="button"
-                      accessibilityState={{ expanded: reciterOpen }}
+                      accessibilityState={{ expanded: !!reciterAt }}
                       accessibilityLabel={HIF.lsReciter()}
-                      style={[styles.surahBtn, styles.reciterBtn, { borderColor: reciterOpen ? c.on : c.line, backgroundColor: c.card }]}
+                      style={[styles.surahBtn, styles.reciterBtn, { borderColor: reciterAt ? c.on : c.line, backgroundColor: c.card }]}
                     >
                       <Txt size={15} weight={600} color={c.ink} numberOfLines={1} style={{ flex: 1 }}>
                         {names(reciterOf(prefs))}
                       </Txt>
                       <Txt size={14} color={c.meta}>
-                        {reciterOpen ? '▴' : '▾'}
+                        {reciterAt ? '▴' : '▾'}
                       </Txt>
                     </Pressable>
-                    {reciterOpen && (
-                      <View style={[styles.dropdown, { borderColor: c.line, backgroundColor: c.card }]}>
-                        {available().map((r, i) => {
-                          const on = reciterOf(prefs).id === r.id;
-                          return (
-                            <Pressable
-                              key={r.id}
-                              onPress={() => {
-                                ls.setPref('reciter', r.id);
-                                setReciterOpen(false);
-                              }}
-                              accessibilityRole="button"
-                              accessibilityState={{ selected: on }}
-                              style={[styles.dropRow, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderColor: c.line }, on && { backgroundColor: c.soft }]}
-                            >
-                              <Txt size={15} weight={on ? 700 : 600} color={c.ink} style={{ flex: 1 }}>
-                                {names(r)}
-                              </Txt>
-                              {on && (
-                                <Txt size={16} weight={700} color={c.on}>
-                                  ✓
-                                </Txt>
-                              )}
-                            </Pressable>
-                          );
-                        })}
-                      </View>
-                    )}
                   </View>
                 </Section>
 
@@ -568,6 +555,51 @@ function Listen({ start, onBack }: { start: string | null; onBack: () => void })
               </Pressable>
             </View>
           </KeyboardAvoidingView>
+          {reciterAt && (
+            <>
+              <Pressable style={StyleSheet.absoluteFill} onPress={() => setReciterAt(null)} accessibilityLabel={HIF.lsClose()} />
+              <View
+                style={[
+                  styles.dropdown,
+                  {
+                    left: reciterAt.x,
+                    top: reciterAt.y + reciterAt.h + 4,
+                    width: reciterAt.w,
+                    maxHeight: Math.max(120, Math.min(300, height - (reciterAt.y + reciterAt.h + 4) - insets.bottom - 12)),
+                    borderColor: c.line,
+                    backgroundColor: c.card,
+                  },
+                ]}
+              >
+                <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+                  {available().map((r, i) => {
+                    const on = reciterOf(prefs).id === r.id;
+                    return (
+                      <Pressable
+                        key={r.id}
+                        onPress={() => {
+                          ls.setPref('reciter', r.id);
+                          setReciterAt(null);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: on }}
+                        style={[styles.dropRow, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderColor: c.line }, on && { backgroundColor: c.soft }]}
+                      >
+                        <Txt size={15} weight={on ? 700 : 600} color={c.ink} style={{ flex: 1 }}>
+                          {names(r)}
+                        </Txt>
+                        {on && (
+                          <Txt size={16} weight={700} color={c.on}>
+                            ✓
+                          </Txt>
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            </>
+          )}
         </View>
       )}
     </View>
@@ -593,7 +625,7 @@ const styles = StyleSheet.create({
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
   other: { minWidth: 96, height: 40, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, textAlign: 'center', fontSize: 14, fontFamily: ui(600) },
   pointRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dropdown: { marginTop: 6, borderRadius: radius.chip, borderWidth: 1, overflow: 'hidden' },
+  dropdown: { position: 'absolute', borderRadius: radius.chip, borderWidth: 1, overflow: 'hidden', zIndex: 40, elevation: 40, shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } },
   dropRow: { minHeight: 46, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 10 },
   reciterBtn: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   surahBtn: { flex: 1, minHeight: 44, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, justifyContent: 'center' },

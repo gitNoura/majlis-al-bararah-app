@@ -159,6 +159,22 @@ export const HIF = {
   daysSub: () => L('اختر الأيام التي تريد أن يظهر فيها وِردك.', 'Your plan will appear on the days you pick.', 'Votre plan apparaîtra les jours choisis.'),
   everyDay: () => L('كل يوم', 'Every day', 'Tous les jours'),
   pickADay: () => L('اختر يوماً واحداً على الأقل.', 'Choose at least one day.', 'Choisissez au moins un jour.'),
+  everyDaySub: () => L('تحديد كل أيام الأسبوع', 'Select all seven days', 'Sélectionner les sept jours'),
+  selectedDays: (n) => L(`${n} من 7`, `${n} of 7`, `${n} sur 7`),
+  splitQuestion: () => L('كم تحفظ في كل يوم؟', 'How much on each day?', 'Combien chaque jour ?'),
+  splitSub: () =>
+    L(
+      'قسّمنا المقدار بالتساوي. عدّل أي يوم كما تشاء، نصفاً في يوم وأكثر في آخر.',
+      'We split your week evenly. Change any day you like: half one day, more the next.',
+      'Nous avons réparti la semaine à parts égales. Modifiez un jour à votre guise : la moitié un jour, davantage le suivant.',
+    ),
+  splitTotal: () => L('المجموع', 'Total', 'Total'),
+  splitMatches: () => L('يطابق هدفك الأسبوعي', 'Matches your weekly goal', 'Correspond à votre objectif'),
+  splitGoal: (goal) => L(`هدفك ${goal}`, `Your goal was ${goal}`, `Votre objectif était ${goal}`),
+  splitEven: () => L('تقسيم متساوٍ', 'Split evenly', 'Répartir à parts égales'),
+  splitMore: () => L('زِد', 'More', 'Plus'),
+  splitLess: () => L('أنقِص', 'Less', 'Moins'),
+  perDay: () => L('في كل يوم', 'Each day', 'Chaque jour'),
   planSaved: () => L('سُجّلت خطتك.', 'Plan saved.', 'Plan enregistré.'),
 
   // editing a plan (one page)

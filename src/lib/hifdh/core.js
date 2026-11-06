@@ -20,6 +20,7 @@
 export const UNITS = ['ayah', 'page', 'thumun', 'hizb'];
 const EPS = 1e-9;
 export const WEEK_START = 1; // a weekly plan's week begins on this day (0 Sunday ... 1 Monday)
+const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Monday first
 
 // ---------- Ring ----------
 
@@ -136,7 +137,8 @@ export const sessionDay = (now = new Date(), dayStart = 0) => dayOf(new Date(now
 //   id, type: 'memorize' | 'revise', period: 'day' | 'week',
 //   range: [[from, to), ...] | null     null: the whole Quran (memorize) or all that is memorized (revise)
 //   start: day the plan begins,
-//   versions: [{ from: day, unit, amount, days: [0-6] }]    the pace, each effective from its day
+//   versions: [{ from: day, unit, amount, days: [0-6], perDay?: { [weekday]: amount } }]    the pace, each
+//             effective from its day; `amount` is what each day gives, unless `perDay` sets a day's own
 //   target: null | { kind: 'days', n } | { kind: 'date', date }   what the amount was derived from
 //   pauses: [{ from, to }]   (to: null while paused)
 // }
@@ -150,6 +152,13 @@ export const versionAt = (plan, day) => {
   for (const x of plan.versions) if (x.from <= day) v = x;
   return v;
 };
+
+// A version's amount on one weekday: its own entry in `perDay` (a reader who wants half a thumun one day and
+// two the next), or the even `amount` the other days share.
+export const amountOn = (v, weekday) => (v.perDay && v.perDay[weekday] > 0 ? v.perDay[weekday] : v.amount);
+
+// What a version gives in a week: the sum of its planned days' amounts.
+export const weeklyTotal = (v) => Math.round(v.days.reduce((n, d) => n + amountOn(v, d), 0) * 10000) / 10000;
 
 export const isPaused = (plan, day) => (plan.pauses || []).some((p) => p.from <= day && (!p.to || day < p.to));
 export const pausedNow = (plan) => (plan.pauses || []).some((p) => !p.to);
@@ -209,6 +218,24 @@ function cursor(R, N, cycles) {
       for (let k = at; k < R.length && slot(R[k]) === s; k++) if (!used[R[k]]) out.push(R[k]);
       return out;
     },
+    // The next portion when the days do not share one amount: `amount` units counted from the first ayah not
+    // used up (an ayah belongs to the portion its middle falls in), so a day of 2 thumun after a day of 1
+    // still gives 2, not what is left of a fixed grid.
+    peekFrom(amount, info) {
+      while (at < R.length && used[R[at]]) at++;
+      if (at >= R.length) return [];
+      const { uid, size, start } = info;
+      const g0 = R[at];
+      const from = uid[g0] + (g0 - start[uid[g0]]) / size[uid[g0]];
+      const out = [];
+      for (let k = at; k < R.length; k++) {
+        const g = R[k];
+        if (used[g]) continue;
+        if (out.length && uid[g] + (g - start[uid[g]] + 0.5) / size[uid[g]] >= from + amount - EPS) break;
+        out.push(g);
+      }
+      return out;
+    },
     // Uses ayat up. True when the pool has been used up and a revision begins again.
     use(ids) {
       let any = false;
@@ -246,6 +273,19 @@ function cycleLength(R, N, amount, info) {
   return n;
 }
 
+// The same for days with different amounts: the weekly pattern of the version, repeated (an estimate for «day k of n»).
+function cycleLengthSeq(R, N, amounts, info) {
+  const c = cursor(R, N, false);
+  let n = 0;
+  while (c.left() > 0 && n < 5000) {
+    const p = c.peekFrom(amounts[n % amounts.length], info);
+    if (!p.length) break;
+    c.use(p);
+    n++;
+  }
+  return n;
+}
+
 const entriesOf = (plan, ctx) => ctx.log.filter((e) => e.plan === plan.id).sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : a.ts - b.ts));
 
 // Walks a daily plan's planned days from its start, one row per day:
@@ -270,10 +310,15 @@ export function* walkDaily(plan, ctx, limit = 4000) {
       continue;
     }
     const info = U.unit[v.unit];
-    let ids = cur.peek(v.amount, info);
+    const uneven = Boolean(v.perDay) && v.days.some((d) => amountOn(v, d) !== v.amount);
+    const amount = amountOn(v, weekdayOf(day));
+    let ids = uneven ? cur.peekFrom(amount, info) : cur.peek(amount, info);
     if (!ids.length) return;
-    const key = `${v.unit}/${v.amount}`;
-    if (revise && !lens.has(key)) lens.set(key, cycleLength(R, U.N, v.amount, info));
+    const key = uneven ? `${v.unit}/${v.days.map((d) => amountOn(v, d)).join(',')}` : `${v.unit}/${v.amount}`;
+    if (revise && !lens.has(key)) {
+      const order = WEEKDAY_ORDER.filter((d) => v.days.includes(d)).map((d) => amountOn(v, d));
+      lens.set(key, uneven ? cycleLengthSeq(R, U.N, order, info) : cycleLength(R, U.N, v.amount, info));
+    }
     const row = { day, plan, version: v, segs: segsOf(ids), ayat: ids.length, status: 'untouched', entry: null, k: cur.cycleDay + 1, n: lens.get(key) || 0, cycle: cur.cycle };
     if (entry) {
       row.entry = entry;
@@ -486,7 +531,7 @@ export function draftPlan(d, today) {
     period: d.period,
     range: d.range || null,
     start: today,
-    versions: [{ from: today, unit: d.unit, amount: d.amount, days: d.days }],
+    versions: [{ from: today, unit: d.unit, amount: d.amount, days: d.days, ...(d.perDay ? { perDay: d.perDay } : {}) }],
     pauses: [],
   };
 }
