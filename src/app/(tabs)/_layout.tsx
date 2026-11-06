@@ -3,7 +3,7 @@
 //
 // A screen hides the bar by setting its own option: navigation.setOptions({ tabBarStyle: { display: 'none' } })
 // (the Quran page does it when a tap on the page hides everything).
-import { Tabs } from 'expo-router';
+import { router, Tabs, type Href } from 'expo-router';
 import type { ComponentProps, ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 
@@ -14,14 +14,14 @@ import { HOME } from '@/i18n/home';
 // the props the navigator gives a custom bar, taken from Tabs itself
 type BarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
 
-const TABS: Record<string, { label: () => string; icon: (color: string) => ReactNode }> = {
-  index: { label: () => HOME.tabHome(), icon: (color) => <HomeIcon color={color} /> },
-  quran: { label: () => HOME.tabQuran(), icon: (color) => <BookOpenIcon color={color} /> },
-  hifdh: { label: () => HOME.tabMemorize(), icon: (color) => <HifdhIcon color={color} /> },
-  settings: { label: () => HOME.tabSettings(), icon: (color) => <SettingsIcon color={color} /> },
+const TABS: Record<string, { label: () => string; icon: (color: string) => ReactNode; href: Href }> = {
+  index: { href: '/', label: () => HOME.tabHome(), icon: (color) => <HomeIcon color={color} /> },
+  quran: { href: '/quran', label: () => HOME.tabQuran(), icon: (color) => <BookOpenIcon color={color} /> },
+  hifdh: { href: '/hifdh', label: () => HOME.tabMemorize(), icon: (color) => <HifdhIcon color={color} /> },
+  settings: { href: '/settings', label: () => HOME.tabSettings(), icon: (color) => <SettingsIcon color={color} /> },
 };
 
-function AppTabBar({ state, descriptors, navigation }: BarProps) {
+function AppTabBar({ state, descriptors }: BarProps) {
   const current = state.routes[state.index];
   const hidden = StyleSheet.flatten(descriptors[current.key]?.options.tabBarStyle)?.display === 'none';
   const tabs: TabItem[] = state.routes
@@ -33,11 +33,10 @@ function AppTabBar({ state, descriptors, navigation }: BarProps) {
         label: TABS[route.name].label(),
         icon: TABS[route.name].icon,
         focused,
+        // the router switches tabs itself (this version's bar props carry no `navigation`)
         onPress: () => {
-          const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-          if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
+          if (!focused) router.navigate(TABS[route.name].href);
         },
-        onLongPress: () => navigation.emit({ type: 'tabLongPress', target: route.key }),
       };
     });
   return <TabBar tabs={tabs} hidden={hidden} />;
