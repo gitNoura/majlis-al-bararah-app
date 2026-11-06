@@ -4,8 +4,13 @@
 // HAFS so far: ayah-by-ayah MP3 files from https://docs.islamic.app/api-reference/audio-ayah.md,
 //   https://cdn.islamic.app/quran/audio/{reciter}/{number}.mp3  where {number} is the ayah's place
 //   in the whole Quran, 1-6236 (Hafs counting: 7 ayat in al-Fātiḥa, 286 in al-Baqarah...).
-// WARSH: none yet. To add a reciter, add one line below; nothing else changes. `url` gets the
-//   surah and ayah in the narration's own numbering, and the ayah's number in the whole Quran.
+// WARSH: ayah-by-ayah MP3 files from the QuranHub catalogue (https://qurani.ai/en/docs/mcp),
+//   https://quranhub.b-cdn.net/quran/audio/versebyverse/{kbps}/{reciter}/{number}.mp3  where {number} is the
+//   ayah's place in the whole Warsh Quran, 1-6214 (7 ayat in al-Fātiḥa with the Basmala as the first, 285 in
+//   al-Baqarah...). Only the reciters that have ayah-by-ayah files are here; those with whole surahs only
+//   (al-Qazabri, Mohammad Saayed, Hicham Lharraz) cannot play in Listen.
+// To add a reciter, add one line below; nothing else changes. `url` gets the surah and ayah in the
+//   narration's own numbering, and the ayah's number in the whole Quran (in that narration's counting).
 
 // Ayat in each surah, Hafs numbering (the sum is 6236). Same as public/data/surah-hafs/N.json.
 export const HAFS_COUNTS = [
@@ -24,7 +29,16 @@ export function globalNumber(surah, ayah) {
 
 const islamicApp = (id) => (surah, ayah, number) => `https://cdn.islamic.app/quran/audio/${id}/${number}.mp3`;
 
+const quranHub = (id, kbps) => (surah, ayah, number) => `https://quranhub.b-cdn.net/quran/audio/versebyverse/${kbps}/${id}/${number}.mp3`;
+
 export const RECITERS = [
   { id: 'ar.alafasy', riwaya: 'hafs', name: ['مشاري راشد العفاسي', 'Mishary Alafasy'], url: islamicApp('ar.alafasy') },
   { id: 'ar.abdurrahmaansudais', riwaya: 'hafs', name: ['عبد الرحمن السديس', 'Abdurrahman As-Sudais'], url: islamicApp('ar.abdurrahmaansudais') },
+  { id: 'ar.alkouchi.warsh', riwaya: 'warsh', name: ['العيون الكوشي', 'Al-Ayoune Al-Kouchi'], url: quranHub('ar.alkouchi.warsh', 128) },
+  { id: 'ar.husary.warsh', riwaya: 'warsh', name: ['محمود خليل الحصري', 'Mahmoud Khalil Al-Husary'], url: quranHub('ar.husary.warsh', 48) },
+  { id: 'ar.abdulsamad.warsh', riwaya: 'warsh', name: ['عبد الباسط عبد الصمد', 'Abdul Basit Abdul Samad'], url: quranHub('ar.abdulsamad.warsh', 128) },
+  { id: 'ar.aljazairi.warsh', riwaya: 'warsh', name: ['ياسين الجزائري', 'Yassin Al Jazairi'], url: quranHub('ar.aljazairi.warsh', 32) },
+  { id: 'ar.belalya.warsh', riwaya: 'warsh', name: ['رشيد بلعالية', 'Rachid Belalya'], url: quranHub('ar.belalya.warsh', 128) },
+  { id: 'ar.aldaghoush.warsh', riwaya: 'warsh', name: ['عبد الكريم الدغوش', 'Abdul Karim Al-Daghoush'], url: quranHub('ar.aldaghoush.warsh', 96) },
+  { id: 'ar.muhammadabdulkareem.warsh', riwaya: 'warsh', name: ['محمد عبد الكريم', 'Muhammad Abdul Kareem'], url: quranHub('ar.muhammadabdulkareem.warsh', 192) },
 ];

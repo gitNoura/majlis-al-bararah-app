@@ -66,7 +66,7 @@ export const savePrefs = (prefs) => writeJSON('listenPrefs', prefs);
 export const reciterOf = (prefs) => available().find((r) => r.id === prefs.reciter) ?? available()[0];
 const urlOf = (prefs, key) => {
   const [su, a] = parse(key);
-  return reciterOf(prefs).url(su, a, globalNumber(su, a));
+  return reciterOf(prefs).url(su, a, pos(key)); // the ayah's place in the whole Quran, in the narration that is open
 };
 
 // ---------- The steps: what is heard, in which order ----------
