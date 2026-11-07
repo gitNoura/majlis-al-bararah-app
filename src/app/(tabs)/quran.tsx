@@ -17,20 +17,19 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AyahMenu, type MenuAt } from '@/components/AyahMenu';
 import { AyahSheet, type Ayah } from '@/components/AyahSheet';
-import { ZoomOutIcon } from '@/components/icons';
+import { ContrastIcon, NotebookIcon, SearchIcon, ZoomOutIcon } from '@/components/icons';
 import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
 import { PageCurl, type Chosen, type Marked, type Pin as NotePin } from '@/components/PageCurl';
 import { DisplaySheet } from '@/components/quran/DisplaySheet';
 import { FindSheet } from '@/components/quran/FindSheet';
 import { KhatmaSheet } from '@/components/quran/KhatmaSheet';
-import { QuranHeader } from '@/components/quran/QuranHeader';
-import { ReadTools } from '@/components/quran/ReadTools';
+import { DropMenu } from '@/components/quran/DropMenu';
+import { menuTop, QuranHeader } from '@/components/quran/QuranHeader';
 import { Txt } from '@/components/Txt';
-import { SegmentedControl } from '@/components/ui';
 import { WirdEnd } from '@/components/Wird';
+import { LANG, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
 import { READER } from '@/i18n/reader';
-import { t } from '@/i18n/i18n';
 import { markToday } from '@/lib/activity';
 import { ayatOn, pageOf, stepAyah } from '@/lib/boxes';
 import { FULL_SHAPE, PAGE_SHAPE } from '@/lib/crop';
@@ -42,7 +41,6 @@ import { pageUrl } from '@/lib/remote';
 import { trackPlace } from '@/lib/riwaya';
 import { clearPin, countPage, setPin, type Done } from '@/lib/wird';
 import { QuranTheme, useTheme } from '@/theme/theme';
-import { space } from '@/theme/tokens';
 
 type Mode = 'read' | 'listen' | 'recite';
 type Room = { width: number; height: number };
@@ -71,6 +69,8 @@ function Quran() {
   const [findOpen, setFindOpen] = useState(false);
   const [displayOpen, setDisplayOpen] = useState(false);
   const [khatmaOpen, setKhatmaOpen] = useState(false);
+  const [modeOpen, setModeOpen] = useState(false); // the drop-down of the modes
+  const [toolsOpen, setToolsOpen] = useState(false); // the drop-down of the tools
   const [ayah, setAyah] = useState<Ayah | null>(null); // its tafsir open
   const [menu, setMenu] = useState<MenuAt | null>(null); // its options open
   const [note, setNote] = useState<NoteFor | null>(null); // its comment open
@@ -79,13 +79,11 @@ function Quran() {
   const [done, setDone] = useState<Done | null>(null); // the khatma's closing card
   const [toast, setToast] = useState('');
   const flashTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     markToday('quran');
     return () => {
       clearTimeout(flashTimer.current);
-      clearTimeout(toastTimer.current);
     };
   }, []);
 
@@ -106,11 +104,13 @@ function Quran() {
     }, [hidden]),
   );
 
-  const say = (text: string) => {
-    setToast(text);
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(''), 1800);
-  };
+  // a short message over the page; it clears itself
+  const say = (text: string) => setToast(text);
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(''), 1800);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   // The marker moves: kept at once. A turn forward by one page counts the page left behind as read today; a jump
   // (Find, the tafsir sheet's next ayah) never does.
@@ -214,10 +214,14 @@ function Quran() {
       <StatusBar style={isDark ? 'light' : 'dark'} hidden={hidden} />
       {!hidden && (
         <View onLayout={(e) => setHeadH(e.nativeEvent.layout.height)}>
-          <QuranHeader page={page} onFind={() => setFindOpen(true)} onKhatma={() => setKhatmaOpen(true)} />
-          <View style={styles.modes}>
-            <SegmentedControl<Mode> value="read" options={modes} onChange={(m) => m !== 'read' && say(READER.soon())} compact />
-          </View>
+          <QuranHeader
+            page={page}
+            mode={modes[0].label}
+            onFind={() => setFindOpen(true)}
+            onKhatma={() => setKhatmaOpen(true)}
+            onMode={() => setModeOpen(true)}
+            onTools={() => setToolsOpen(true)}
+          />
         </View>
       )}
 
@@ -272,7 +276,26 @@ function Quran() {
         </View>
       </View>
 
-      {!hidden && <ReadTools onFind={() => setFindOpen(true)} onNotes={() => say(READER.soon())} onDisplay={() => setDisplayOpen(true)} />}
+      {/* the drop-downs hang from the header's two corners: the modes at the end of the line (the wird's old place), the
+          tools at its start. The modes keep the line's direction: Arabic's end is the left of the screen. */}
+      <DropMenu
+        open={modeOpen}
+        onClose={() => setModeOpen(false)}
+        top={menuTop(insets.top)}
+        side={LANG === 'ar' ? 'left' : 'right'}
+        items={modes.map((m) => ({ key: m.value, label: m.label, chosen: m.value === 'read', onPress: () => m.value !== 'read' && say(READER.soon()) }))}
+      />
+      <DropMenu
+        open={toolsOpen}
+        onClose={() => setToolsOpen(false)}
+        top={menuTop(insets.top)}
+        side={LANG === 'ar' ? 'right' : 'left'}
+        items={[
+          { key: 'find', label: QURAN.find(), icon: <SearchIcon color={c.ink} size={20} />, onPress: () => setFindOpen(true) },
+          { key: 'notes', label: QURAN.notes(), icon: <NotebookIcon color={c.ink} size={20} />, onPress: () => say(READER.soon()) },
+          { key: 'display', label: QURAN.display(), icon: <ContrastIcon color={c.ink} size={20} />, onPress: () => setDisplayOpen(true) },
+        ]}
+      />
 
       <FindSheet
         open={findOpen}
@@ -323,7 +346,6 @@ function Quran() {
 }
 
 const styles = StyleSheet.create({
-  modes: { paddingHorizontal: space.md, paddingBottom: space.sm },
   side: { position: 'absolute', bottom: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
   whole: { position: 'absolute', bottom: 12, alignSelf: 'center', width: 44, height: 44, borderRadius: 22, borderWidth: StyleSheet.hairlineWidth, alignItems: 'center', justifyContent: 'center' },
   toast: { position: 'absolute', bottom: 16, alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 18, borderRadius: 999 },

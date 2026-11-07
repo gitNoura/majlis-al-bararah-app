@@ -8,6 +8,7 @@ export const QURAN = {
   modeRead: () => L('قراءة', 'Read', 'Lire'),
   modeListen: () => L('استماع', 'Listen', 'Écouter'),
   modeRecite: () => L('تسميع', 'Recite', 'Réciter'),
+  tools: () => L('الأدوات', 'Tools', 'Outils'),
   find: () => L('بحث وفهرس', 'Find', 'Chercher'),
   notes: () => L('ملاحظاتي', 'Notes', 'Notes'),
   display: () => L('العرض', 'Display', 'Affichage'),

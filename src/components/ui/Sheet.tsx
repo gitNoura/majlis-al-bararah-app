@@ -2,10 +2,11 @@
 // a tap outside it, on the phone's back button, and on `onClose`. Its content scrolls when it is taller than
 // 88 % of the screen. The bottom safe area is padded.
 import type { ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Txt } from '@/components/Txt';
+import { LANG } from '@/i18n/i18n';
 import { useTheme } from '@/theme/theme';
 import { radius, space } from '@/theme/tokens';
 
@@ -16,7 +17,7 @@ export function Sheet({ open, onClose, title, children }: Props) {
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={open} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable style={[styles.backdrop, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]} onPress={onClose} accessibilityLabel={title}>
+      <Pressable style={[styles.backdrop, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }, Platform.OS !== 'web' && { direction: LANG === 'ar' ? 'rtl' : 'ltr' }]} onPress={onClose} accessibilityLabel={title}>
         {/* a tap inside the sheet must not reach the backdrop */}
         <Pressable onPress={() => {}} style={[styles.sheet, { backgroundColor: c.card, paddingBottom: insets.bottom + space.md }]}>
           <View style={[styles.handle, { backgroundColor: c.surface3 }]} />
