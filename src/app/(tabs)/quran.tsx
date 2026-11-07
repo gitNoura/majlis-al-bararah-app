@@ -120,6 +120,13 @@ function Quran() {
 
   // where the back button goes: Home, or the Hifdh tab when a Hifdh task opened this page
   const params = useLocalSearchParams<{ mode?: string; from?: string; to?: string; back?: string; n?: string }>();
+  // a Hifdh task's request (params: mode, from, to, n = a new one each time) switches the mode while rendering, not in an effect
+  const [seenReq, setSeenReq] = useState<string | undefined>(undefined);
+  if (params.n && params.n !== seenReq && (params.mode === 'listen' || params.mode === 'recite')) {
+    setSeenReq(params.n);
+    setMode(params.mode);
+    setHidden(false);
+  }
   const goBack = useCallback(() => {
     const toHifdh = params.back === 'hifdh';
     router.setParams({ mode: undefined, from: undefined, to: undefined, back: undefined, n: undefined });
@@ -189,8 +196,6 @@ function Quran() {
   useEffect(() => {
     if (!params.n || (params.mode !== 'listen' && params.mode !== 'recite')) return;
     const { from, to } = params;
-    setMode(params.mode);
-    setHidden(false);
     if (!from) return;
     const [s, a] = from.split(':').map(Number);
     jump(pageOf(s, a) ?? pageRef.current);
