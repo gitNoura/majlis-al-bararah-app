@@ -88,14 +88,15 @@ export function useRecite(active: boolean, page: number) {
       live = false;
     };
   }, [active, page]);
-  // a fresh start each time the mode is entered
-  useEffect(() => {
+  // a fresh start each time the mode is entered (state adjusted while rendering, not in an effect)
+  const [was, setWas] = useState(active);
+  if (active !== was) {
+    setWas(active);
     if (active) {
       setOverride(null);
       setSt(begin(keys));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
+  }
 
   const count = useCallback((key: string) => Math.max(1, words.get(key)?.length ?? 1), [words]);
   const n = keys.length;
