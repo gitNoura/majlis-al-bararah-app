@@ -1,6 +1,8 @@
-// The Find sheet: ONE place to get to a page. Surah / Juz / Hizb tabs, and one field that takes a name, words of an
-// ayah, or a reference like 2:255 (the website's text search, src/lib/search.js). A row or a result opens its page; a
-// result also lights its ayah for a moment.
+// One sheet, two ways to get to a page (`mode`):
+//   index   the fahras: Surah / Juz / Hizb tabs, each listing its rows with their pages
+//   search  one field that takes a name, words of an ayah, or a reference like 2:255 (the website's text search,
+//           src/lib/search.js); the surahs whose name matches come first, then the ayat
+// A row or a result opens its page; a result also lights its ayah for a moment.
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -24,26 +26,32 @@ type Piece = { text: string; mark: boolean };
 
 const SHOWN = 30; // the most ayat listed (the sheet draws them all at once)
 
-type Props = { open: boolean; page: number; onClose: () => void; onGo: (page: number, ayah: { s: number; a: number } | null) => void };
+export type FindMode = 'index' | 'search';
 
-export function FindSheet({ open, page, onClose, onGo }: Props) {
+type Props = { open: boolean; mode: FindMode; page: number; onClose: () => void; onGo: (page: number, ayah: { s: number; a: number } | null) => void };
+
+export function FindSheet({ open, mode, page, onClose, onGo }: Props) {
   const { c, isDark } = useTheme();
   const [tab, setTab] = useState<Tab>('surahs');
   const [query, setQuery] = useState('');
   const [state, setState] = useState<'loading' | 'ready' | 'failed'>('loading');
 
+  const searching = mode === 'search';
+
+  // the text of the Quran is needed only to search it
   useEffect(() => {
-    if (!open) return;
+    if (!open || !searching) return;
     loadSearch()
       .then(() => setState('ready'))
       .catch(() => setState('failed'));
-  }, [open]);
+  }, [open, searching]);
 
   const q = query.trim();
-  const rows = filterItems(tab, q);
-  const found = q && state === 'ready' ? search(q) : null;
+  const listed: Tab = searching ? 'surahs' : tab;
+  const rows = searching && !q ? [] : filterItems(listed, searching ? q : '');
+  const found = searching && q && state === 'ready' ? search(q) : null;
   const matches: Match[] = found && found.kind !== 'help' ? found.matches.slice(0, SHOWN) : [];
-  const here = current(tab, page);
+  const here = current(listed, page);
 
   const go = (target: number, ayah: { s: number; a: number } | null) => {
     onClose();
@@ -51,35 +59,40 @@ export function FindSheet({ open, page, onClose, onGo }: Props) {
   };
 
   return (
-    <Sheet open={open} onClose={onClose} title={QURAN.find()}>
-      <SegmentedControl
-        value={tab}
-        options={[
-          { value: 'surahs' as Tab, label: QURAN.tabSurah() },
-          { value: 'ajza' as Tab, label: QURAN.tabJuz() },
-          { value: 'ahzab' as Tab, label: QURAN.tabHizb() },
-        ]}
-        onChange={setTab}
-      />
-
-      <View style={[styles.field, { backgroundColor: c.surface2, borderColor: c.line }]}>
-        <SearchIcon color={c.meta} size={20} />
-        <TextInput
-          value={query}
-          onChangeText={setQuery}
-          placeholder={QURAN.findField()}
-          placeholderTextColor={c.meta}
-          autoCorrect={false}
-          returnKeyType="search"
-          onSubmitEditing={() => matches[0] && go(pageOf(matches[0].entry.s, matches[0].entry.a) ?? SURAHS[matches[0].entry.s - 1].page, { s: matches[0].entry.s, a: matches[0].entry.a })}
-          style={[styles.input, { color: c.ink, fontFamily: ui(500), textAlign: isEnglish && !/[؀-ۿ]/.test(query) ? 'left' : 'right' }]}
+    <Sheet open={open} onClose={onClose} title={searching ? QURAN.search() : QURAN.index()}>
+      {!searching && (
+        <SegmentedControl
+          value={tab}
+          options={[
+            { value: 'surahs' as Tab, label: QURAN.tabSurah() },
+            { value: 'ajza' as Tab, label: QURAN.tabJuz() },
+            { value: 'ahzab' as Tab, label: QURAN.tabHizb() },
+          ]}
+          onChange={setTab}
         />
-        {!!query && (
-          <Pressable onPress={() => setQuery('')} hitSlop={10} accessibilityLabel={QURAN.find()}>
-            <CloseIcon color={c.meta} size={18} />
-          </Pressable>
-        )}
-      </View>
+      )}
+
+      {searching && (
+        <View style={[styles.field, { backgroundColor: c.surface2, borderColor: c.line }]}>
+          <SearchIcon color={c.meta} size={20} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder={QURAN.findField()}
+            placeholderTextColor={c.meta}
+            autoFocus
+            autoCorrect={false}
+            returnKeyType="search"
+            onSubmitEditing={() => matches[0] && go(pageOf(matches[0].entry.s, matches[0].entry.a) ?? SURAHS[matches[0].entry.s - 1].page, { s: matches[0].entry.s, a: matches[0].entry.a })}
+            style={[styles.input, { color: c.ink, fontFamily: ui(500), textAlign: isEnglish && !/[؀-ۿ]/.test(query) ? 'left' : 'right' }]}
+          />
+          {!!query && (
+            <Pressable onPress={() => setQuery('')} hitSlop={10} accessibilityLabel={QURAN.search()}>
+              <CloseIcon color={c.meta} size={18} />
+            </Pressable>
+          )}
+        </View>
+      )}
 
       {!!rows.length && (
         <Card style={{ paddingVertical: 4 }}>
@@ -103,7 +116,7 @@ export function FindSheet({ open, page, onClose, onGo }: Props) {
         </Card>
       )}
 
-      {!!q && state === 'loading' && (
+      {searching && !!q && state === 'loading' && (
         <View style={styles.middle}>
           <ActivityIndicator color={c.accent} />
           <Txt size={13} color={c.meta}>
@@ -111,7 +124,7 @@ export function FindSheet({ open, page, onClose, onGo }: Props) {
           </Txt>
         </View>
       )}
-      {!!q && state === 'failed' && (
+      {searching && !!q && state === 'failed' && (
         <Txt size={13} color={c.meta}>
           {QURAN.searchOffline()}
         </Txt>
@@ -129,7 +142,7 @@ export function FindSheet({ open, page, onClose, onGo }: Props) {
       {matches.map((m) => (
         <AyahResult key={`${m.entry.s}:${m.entry.a}`} match={m} dark={isDark} onPress={() => go(pageOf(m.entry.s, m.entry.a) ?? SURAHS[m.entry.s - 1].page, { s: m.entry.s, a: m.entry.a })} />
       ))}
-      {!!q && state === 'ready' && !rows.length && !matches.length && !(found?.kind === 'ayah' && found.missing) && (
+      {searching && !!q && state === 'ready' && !rows.length && !matches.length && !(found?.kind === 'ayah' && found.missing) && (
         <Txt size={14} center color={c.meta}>
           {QURAN.noResults()}
         </Txt>

@@ -1,18 +1,18 @@
-// The Quran page's header. One row: at the start corner a button that opens the tools menu (Find, Notes, Display), in
-// the middle the surah(s), the juz and the page (a tap opens the Find sheet), and at the end corner - where the wird
-// button was - the drop-down of the page's modes (Read, Listen, Recite). Under it a thin bar of the khatma's progress
-// (a tap opens the khatma sheet). No art; the colours and spacing come from the tokens.
+// The Quran page's header: a row of buttons, and under it the name of what is being read.
+//   row    at the start the index (the fahras), the search and the notes; at the end - where the wird button was -
+//          the drop-down of the page's modes (Read, Listen, Recite)
+//   name   the surah(s), the juz and the page, just above the page (a tap opens the khatma and pin sheet)
+// No art; the colours and spacing come from the tokens.
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { MenuIcon } from '@/components/icons';
+import { MenuIcon, NotebookIcon, SearchIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
-import { ProgressStrip } from '@/components/ui';
 import { surahName, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
 import { surahsOn } from '@/lib/boxes';
-import { khatmaShare } from '@/lib/position';
 import { juzForPage, SURAHS } from '@/lib/quran';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
@@ -37,27 +37,44 @@ function ChevronDown({ color }: { color: string }) {
   );
 }
 
-type Props = { page: number; mode: string; onFind: () => void; onKhatma: () => void; onMode: () => void; onTools: () => void };
+type Props = {
+  page: number;
+  mode: string; // the name of the mode shown (Read)
+  onIndex: () => void;
+  onSearch: () => void;
+  onNotes: () => void;
+  onName: () => void;
+  onMode: () => void;
+};
 
-export function QuranHeader({ page, mode, onFind, onKhatma, onMode, onTools }: Props) {
+// one of the round buttons at the start of the row
+function Tool({ label, onPress, children }: { label: string; onPress: () => void; children: ReactNode }) {
+  const { c } = useTheme();
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={4} style={[styles.round, { backgroundColor: c.surface2 }]}>
+      {children}
+    </Pressable>
+  );
+}
+
+export function QuranHeader({ page, mode, onIndex, onSearch, onNotes, onName, onMode }: Props) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const here = placeOf(page);
-  const share = khatmaShare(page);
   return (
     <View style={[styles.box, { paddingTop: insets.top + space.sm }]}>
       <View style={styles.row}>
-        <Pressable onPress={onTools} accessibilityRole="button" accessibilityLabel={QURAN.tools()} hitSlop={6} style={[styles.round, { backgroundColor: c.surface2 }]}>
-          <MenuIcon color={c.ink} size={20} />
-        </Pressable>
-        <Pressable onPress={onFind} accessibilityRole="button" accessibilityLabel={QURAN.find()} style={styles.where}>
-          <Txt size={19} weight={700} center color={c.ink} numberOfLines={1}>
-            {here.surahs}
-          </Txt>
-          <Txt size={13} center color={c.meta} numberOfLines={1}>
-            {here.extra}
-          </Txt>
-        </Pressable>
+        <View style={styles.tools}>
+          <Tool label={QURAN.index()} onPress={onIndex}>
+            <MenuIcon color={c.ink} size={20} />
+          </Tool>
+          <Tool label={QURAN.search()} onPress={onSearch}>
+            <SearchIcon color={c.ink} size={20} />
+          </Tool>
+          <Tool label={QURAN.notes()} onPress={onNotes}>
+            <NotebookIcon color={c.ink} size={20} />
+          </Tool>
+        </View>
         <Pressable onPress={onMode} accessibilityRole="button" accessibilityLabel={mode} hitSlop={6} style={[styles.pill, { backgroundColor: c.surface2 }]}>
           <Txt size={14} weight={700} color={c.ink} numberOfLines={1}>
             {mode}
@@ -65,8 +82,13 @@ export function QuranHeader({ page, mode, onFind, onKhatma, onMode, onTools }: P
           <ChevronDown color={c.ink} />
         </Pressable>
       </View>
-      <Pressable onPress={onKhatma} hitSlop={{ top: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel={QURAN.khatmaProgress(Math.round(share * 100))}>
-        <ProgressStrip value={share} height={4} label={QURAN.khatma()} />
+      <Pressable onPress={onName} accessibilityRole="button" accessibilityLabel={QURAN.khatma()} style={styles.name}>
+        <Txt size={19} weight={700} center color={c.ink} numberOfLines={1}>
+          {here.surahs}
+        </Txt>
+        <Txt size={13} center color={c.meta} numberOfLines={1}>
+          {here.extra}
+        </Txt>
       </Pressable>
     </View>
   );
@@ -74,8 +96,9 @@ export function QuranHeader({ page, mode, onFind, onKhatma, onMode, onTools }: P
 
 const styles = StyleSheet.create({
   box: { paddingHorizontal: space.md, paddingBottom: space.sm, gap: space.sm },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm, height: HEADER_ROW_H },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: HEADER_ROW_H },
+  tools: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   round: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   pill: { minWidth: 40, height: 40, borderRadius: 20, paddingHorizontal: space.md - 2, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  where: { flex: 1, alignItems: 'center' },
+  name: { alignItems: 'center', paddingVertical: space.xs },
 });

@@ -1,12 +1,12 @@
-// QURAN tab: the mushaf page, opened at the last page read. One page, three modes under the header (Read, Listen,
-// Recite); this is Read. Listen and Recite come next (phase c2) on this same page.
-//   header   surah, juz and page (a tap opens Find), and a thin bar of the khatma's progress (a tap opens the khatma sheet)
-//   tools    Find, Notes, Display
+// QURAN tab: the mushaf page, opened at the last page read. One page, three modes (Read, Listen, Recite) chosen from
+// the drop-down at the header's end; this is Read. Listen and Recite come next (phase c2) on this same page.
+//   header   the index (fahras), the search and the notes; the mode drop-down; under them the surah, juz and page
+//            (a tap on the name opens the khatma and pin sheet)
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
 //            («Mark here» in an ayah's menu), shown as a ribbon on its page
-//   a tap on the page outside its ayat hides the header, the switch, the tools and the tab bar (the page is then cut to
-//   its text and fills the screen, as the website's full screen); another tap brings them back
-// The page itself is src/components/PageCurl.tsx, unchanged.
+//   a tap on the page outside its ayat hides the header and the tab bar (the page is then cut to its text and fills
+//   the screen, as the website's full screen); another tap brings them back
+// The page itself is src/components/PageCurl.tsx.
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { useFocusEffect, useNavigation } from 'expo-router';
@@ -17,11 +17,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AyahMenu, type MenuAt } from '@/components/AyahMenu';
 import { AyahSheet, type Ayah } from '@/components/AyahSheet';
-import { ContrastIcon, NotebookIcon, SearchIcon, ZoomOutIcon } from '@/components/icons';
+import { ZoomOutIcon } from '@/components/icons';
 import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
 import { PageCurl, type Chosen, type Marked, type Pin as NotePin } from '@/components/PageCurl';
-import { DisplaySheet } from '@/components/quran/DisplaySheet';
-import { FindSheet } from '@/components/quran/FindSheet';
+import { FindSheet, type FindMode } from '@/components/quran/FindSheet';
 import { KhatmaSheet } from '@/components/quran/KhatmaSheet';
 import { DropMenu } from '@/components/quran/DropMenu';
 import { menuTop, QuranHeader } from '@/components/quran/QuranHeader';
@@ -66,11 +65,10 @@ function Quran() {
   const [room, setRoom] = useState<Room>({ width: 0, height: 0 });
   const [zoomed, setZoomed] = useState(false);
   const [unzoom, setUnzoom] = useState(0); // counts the «whole page» presses (PageCurl zooms out on each)
-  const [findOpen, setFindOpen] = useState(false);
-  const [displayOpen, setDisplayOpen] = useState(false);
+  const [find, setFind] = useState<FindMode | null>(null); // the index or the search sheet open
+  const [lastFind, setLastFind] = useState<FindMode>('index'); // what the sheet shows while it closes
   const [khatmaOpen, setKhatmaOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false); // the drop-down of the modes
-  const [toolsOpen, setToolsOpen] = useState(false); // the drop-down of the tools
   const [ayah, setAyah] = useState<Ayah | null>(null); // its tafsir open
   const [menu, setMenu] = useState<MenuAt | null>(null); // its options open
   const [note, setNote] = useState<NoteFor | null>(null); // its comment open
@@ -103,6 +101,11 @@ function Quran() {
       return () => sub.remove();
     }, [hidden]),
   );
+
+  const openFind = (mode: FindMode) => {
+    setLastFind(mode);
+    setFind(mode);
+  };
 
   // a short message over the page; it clears itself
   const say = (text: string) => setToast(text);
@@ -217,10 +220,11 @@ function Quran() {
           <QuranHeader
             page={page}
             mode={modes[0].label}
-            onFind={() => setFindOpen(true)}
-            onKhatma={() => setKhatmaOpen(true)}
+            onIndex={() => openFind('index')}
+            onSearch={() => openFind('search')}
+            onNotes={() => say(READER.soon())}
+            onName={() => setKhatmaOpen(true)}
             onMode={() => setModeOpen(true)}
-            onTools={() => setToolsOpen(true)}
           />
         </View>
       )}
@@ -276,8 +280,7 @@ function Quran() {
         </View>
       </View>
 
-      {/* the drop-downs hang from the header's two corners: the modes at the end of the line (the wird's old place), the
-          tools at its start. The modes keep the line's direction: Arabic's end is the left of the screen. */}
+      {/* the modes hang from the header's end corner, the wird's old place (Arabic's end is the left of the screen) */}
       <DropMenu
         open={modeOpen}
         onClose={() => setModeOpen(false)}
@@ -285,28 +288,16 @@ function Quran() {
         side={LANG === 'ar' ? 'left' : 'right'}
         items={modes.map((m) => ({ key: m.value, label: m.label, chosen: m.value === 'read', onPress: () => m.value !== 'read' && say(READER.soon()) }))}
       />
-      <DropMenu
-        open={toolsOpen}
-        onClose={() => setToolsOpen(false)}
-        top={menuTop(insets.top)}
-        side={LANG === 'ar' ? 'right' : 'left'}
-        items={[
-          { key: 'find', label: QURAN.find(), icon: <SearchIcon color={c.ink} size={20} />, onPress: () => setFindOpen(true) },
-          { key: 'notes', label: QURAN.notes(), icon: <NotebookIcon color={c.ink} size={20} />, onPress: () => say(READER.soon()) },
-          { key: 'display', label: QURAN.display(), icon: <ContrastIcon color={c.ink} size={20} />, onPress: () => setDisplayOpen(true) },
-        ]}
-      />
-
       <FindSheet
-        open={findOpen}
+        open={find !== null}
+        mode={find ?? lastFind}
         page={page}
-        onClose={() => setFindOpen(false)}
+        onClose={() => setFind(null)}
         onGo={(p, found) => {
           jump(p);
           light(found);
         }}
       />
-      <DisplaySheet open={displayOpen} onClose={() => setDisplayOpen(false)} />
       <KhatmaSheet
         open={khatmaOpen}
         onClose={() => setKhatmaOpen(false)}

@@ -162,7 +162,8 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
   // the page's size, the page read, full screen or not, the fold
   const W = useSharedValue(pageW);
   const H = useSharedValue(pageH);
-  const at = useSharedValue(page);
+  const at = useSharedValue(page); // the page drawn (a finished turn moves it at once)
+  const given = useSharedValue(page); // the page the app has told us about: what `chosen`, `marks`, `pins`, `ribbon` are for
   const isFull = useSharedValue(full);
   const px = useSharedValue(0);
   const py = useSharedValue(pageH);
@@ -193,6 +194,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
   useEffect(() => {
     reading.current = page;
     at.set(page);
+    given.set(page);
     const show = () => {
       const p = reading.current;
       prev.set(images.current.get(p - 1) ?? null);
@@ -212,7 +214,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
         });
     }
     for (const p of [...images.current.keys()]) if (Math.abs(p - page) > 3) images.current.delete(p);
-  }, [page, at, prev, cur, next]);
+  }, [page, at, given, prev, cur, next]);
 
   // ---------- the fold ----------
 
@@ -585,7 +587,9 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
     const lines = ribbon.boxes.map(([bx0, , bx1, by1], i) => ({ key: i, x: X(bx0), y: Y(by1) - 2.5, w: X(bx1) - X(bx0) }));
     return { body, shine: { x: x0 + (x1 - x0) * 0.18, h: Math.max(0, end - fork) }, lines };
   }, [ribbon, shown.x, shown.y, shown.w, shown.h, pageW, pageH, page]);
-  const onPage = useDerivedValue(() => (mode.get() === -1 ? 0 : 1));
+  // They are drawn only on the page they are for: not while the page before folds back over it, and not in the
+  // moment after a turn when the picture is already the new page but the app has not yet given its own marks
+  const onPage = useDerivedValue(() => (mode.get() === -1 || at.get() !== given.get() ? 0 : 1));
   const unit = pageW / shown.w / 1000; // the badge's thousandths of the page's width
   const bubble = useMemo(() => ({ body: Skia.Path.MakeFromSVGString(BUBBLE)!, lines: Skia.Path.MakeFromSVGString(BUBBLE_LINES)! }), []);
 
