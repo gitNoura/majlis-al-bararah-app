@@ -1,14 +1,15 @@
 // The chosen ayah (the website's tafsir panel), as a sheet from the bottom: its surah and number, two
 // tabs - the tafsir and the translation, each with the sources chosen (src/lib/sources.js) - and the
-// texts, the ayat they quote in their own colour, each source's name under its text. Previous and
-// next go from ayah to ayah.
+// texts in the interface's own font (Tajawal), the ayat they quote in the Quran's (Amiri) and their own colour, each
+// source's name under its text. Previous (on the left) and next (on the right) go from ayah to ayah.
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Animated, Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 
 import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
-import { isEnglish, L, surahName, t } from '@/i18n/i18n';
+import { L, surahName, t } from '@/i18n/i18n';
 import { SURAHS } from '@/lib/quran';
 import { tafsirSources } from '@/lib/sources';
 import { loadTafsir, withQuotes } from '@/lib/tafsir';
@@ -99,19 +100,14 @@ export function AyahSheet({ ayah, onClose, onMove }: { ayah: Ayah | null; onClos
           )}
           {blocks?.map(({ src, paragraphs }) => {
             const arabic = src.lang === 'ar';
+            const size = arabic ? 18 : 16;
+            const line = arabic ? 32 : 26;
             return (
               <View key={src.id} style={{ gap: 10 }}>
                 {(paragraphs ?? [t('loadFailed')]).map((text, i) => (
-                  <Txt
-                    key={i}
-                    serif={arabic}
-                    size={arabic ? 20 : 16}
-                    lineHeight={arabic ? 38 : 26}
-                    color={c.text}
-                    style={{ textAlign: textSide(arabic ? 'right' : 'left'), writingDirection: arabic ? 'rtl' : 'ltr' }}
-                  >
+                  <Txt key={i} size={size} lineHeight={line} color={c.text} style={{ textAlign: textSide(arabic ? 'right' : 'left'), writingDirection: arabic ? 'rtl' : 'ltr' }}>
                     {withQuotes(text.replace(/^## /, '')).map((part, j) => (
-                      <Txt key={j} serif={arabic || part.quote} size={arabic ? 20 : 16} color={part.quote ? c.meta : c.text}>
+                      <Txt key={j} serif={part.quote} size={part.quote ? size + 2 : size} lineHeight={line} color={part.quote ? c.meta : c.text}>
                         {part.text}
                       </Txt>
                     ))}
@@ -125,23 +121,31 @@ export function AyahSheet({ ayah, onClose, onMove }: { ayah: Ayah | null; onClos
           })}
         </ScrollView>
 
-        {/* previous and next ayah (in Arabic «next» is on the left, the way the mushaf reads) */}
+        {/* previous on the left, next on the right, in every language (the row is laid out left to right on purpose) */}
         <View style={[styles.moves, { borderTopColor: c.divider }]}>
           <Pressable onPress={() => onMove(-1)} style={[styles.move, { borderColor: c.line }]}>
-            <Txt size={14} weight={700} color={c.ink}>
-              {isEnglish ? '‹ ' : '› '}
+            <Chevron left color={c.ink} />
+            <Txt size={15} weight={700} color={c.ink}>
               {L('السابقة', 'Previous', 'Précédent')}
             </Txt>
           </Pressable>
           <Pressable onPress={() => onMove(1)} style={[styles.move, { backgroundColor: c.on, borderColor: c.on }]}>
-            <Txt size={14} weight={700} color={c.onInk}>
+            <Txt size={15} weight={700} color={c.onInk}>
               {L('التالية', 'Next', 'Suivant')}
-              {isEnglish ? ' ›' : ' ‹'}
             </Txt>
+            <Chevron color={c.onInk} />
           </Pressable>
         </View>
       </Animated.View>
     </Modal>
+  );
+}
+
+function Chevron({ left, color }: { left?: boolean; color: string }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+      <Path d={left ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6'} />
+    </Svg>
   );
 }
 
@@ -164,6 +168,6 @@ const styles = StyleSheet.create({
   round: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   tabs: { flexDirection: 'row', padding: 4, borderRadius: 14 },
   tab: { flex: 1, paddingVertical: 9, borderRadius: 11 },
-  moves: { flexDirection: 'row', gap: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth },
-  move: { flex: 1, alignItems: 'center', paddingVertical: 11, borderRadius: 22, borderWidth: 1 },
+  moves: { flexDirection: 'row', direction: 'ltr', gap: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth },
+  move: { flex: 1, flexDirection: 'row', direction: 'ltr', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 24, borderWidth: 1 },
 });

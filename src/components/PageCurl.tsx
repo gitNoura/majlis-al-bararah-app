@@ -17,8 +17,8 @@
 // bottom: where the finger started) and which way (`mode`: 1 forward, -1 back, 0 at rest). The pictures
 // of the page before, the page read and the page after are in `prev`, `cur`, `next`; when a turn ends,
 // the page shown is already the new one before the app hears of it, so nothing flickers.
-import { Canvas, Group, LinearGradient, Morphology, Path, Rect, RoundedRect, Skia, Image as SkiaImage, type SkImage, type SkPath } from '@shopify/react-native-skia';
-import { useEffect, useMemo, useRef } from 'react';
+import { Canvas, Circle, Group, LinearGradient, Morphology, Path, Rect, RoundedRect, Skia, Image as SkiaImage, type SkImage, type SkPath } from '@shopify/react-native-skia';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { View } from 'react-native';
 import {
   GestureDetector,
@@ -150,6 +150,15 @@ function Cover({ page, path, role, at, mode, image, rect, pageW, pageH, paper }:
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
+// The marks on one page (highlights, the chosen ayah, comment badges, the pin). Each page's marks are their own copy,
+// made for that page and drawn only while that page is the one on screen. Skia and the page picture are updated on the
+// graphics side at once when a turn ends, the marks a moment later (the app has to render first); because this copy
+// compares the page on screen with the page it was made for, the previous page's marks can never show on the next page.
+function Overlay({ mine, at, mode, children }: { mine: number; at: { get(): number }; mode: { get(): number }; children: ReactNode }) {
+  const opacity = useDerivedValue(() => (mode.get() === -1 || at.get() !== mine ? 0 : 1));
+  return <Group opacity={opacity}>{children}</Group>;
+}
+
 export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed, onHold, ribbon, veils }: Props) {
   const { c, isDark } = useTheme();
   // night: the page always a little dimmer (its colours never changed); the choice in the settings is
@@ -163,7 +172,6 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
   const W = useSharedValue(pageW);
   const H = useSharedValue(pageH);
   const at = useSharedValue(page); // the page drawn (a finished turn moves it at once)
-  const given = useSharedValue(page); // the page the app has told us about: what `chosen`, `marks`, `pins`, `ribbon` are for
   const isFull = useSharedValue(full);
   const px = useSharedValue(0);
   const py = useSharedValue(pageH);
@@ -194,7 +202,6 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
   useEffect(() => {
     reading.current = page;
     at.set(page);
-    given.set(page);
     const show = () => {
       const p = reading.current;
       prev.set(images.current.get(p - 1) ?? null);
@@ -214,7 +221,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
         });
     }
     for (const p of [...images.current.keys()]) if (Math.abs(p - page) > 3) images.current.delete(p);
-  }, [page, at, given, prev, cur, next]);
+  }, [page, at, prev, cur, next]);
 
   // ---------- the fold ----------
 
@@ -570,26 +577,17 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
     return out;
   }, [veils, full, pageW, pageH]);
   const lit = [...marks.flatMap((e) => place(e, e.color)), ...chosen.flatMap((e) => place(e, 'rgba(196, 154, 69, 0.3)'))];
-  // the mark (Mark here), flat and in the accent: a slim bookmark tab hanging from the top of the page on the spine's
-  // side (the left of odd pages, the right of even ones), and a rounded line under the marked ayah
+  // the mark (Mark here): a thin rounded line under the marked ayah, and a small dot where the ayah ends (the left end of
+  // its last line); flat, in the accent, nothing heavy
   const ribbonDraw = useMemo(() => {
     if (!ribbon?.boxes.length) return null;
     const X = (fx: number) => ((fx - shown.x) / shown.w) * pageW;
     const Y = (fy: number) => ((fy - shown.y) / shown.h) * pageH;
-    const tabW = 0.026;
-    const want = page % 2 ? 0.006 : 1 - 0.006 - tabW;
-    const fx0 = Math.min(Math.max(want, shown.x + 0.004), shown.x + shown.w - tabW - 0.004);
-    const x0 = X(fx0);
-    const x1 = X(fx0 + tabW);
-    const h = Math.min(Y(Math.max(...ribbon.boxes.map((b) => b[3])) + 0.006), pageH * 0.07);
-    const r = (x1 - x0) / 2; // the tab's end is a half circle
-    const body = Skia.Path.MakeFromSVGString(`M${x0} 0H${x1}V${h - r}A${r} ${r} 0 0 1 ${x0} ${h - r}Z`);
-    const lines = ribbon.boxes.map(([bx0, , bx1, by1], i) => ({ key: i, x: X(bx0), y: Y(by1) - 3, w: X(bx1) - X(bx0) }));
-    return { body, lines };
-  }, [ribbon, shown.x, shown.y, shown.w, shown.h, pageW, pageH, page]);
-  // They are drawn only on the page they are for: not while the page before folds back over it, and not in the
-  // moment after a turn when the picture is already the new page but the app has not yet given its own marks
-  const onPage = useDerivedValue(() => (mode.get() === -1 || at.get() !== given.get() ? 0 : 1));
+    const lines = ribbon.boxes.map(([bx0, , bx1, by1], i) => ({ key: i, x: X(bx0), y: Y(by1) - 2, w: X(bx1) - X(bx0) }));
+    const [lx0, , , ly1] = ribbon.boxes[ribbon.boxes.length - 1];
+    const dot = { x: X(lx0) - 7, y: Y(ly1) - 2 + 0.9, r: 3 };
+    return { lines, dot };
+  }, [ribbon, shown.x, shown.y, shown.w, shown.h, pageW, pageH]);
   const unit = pageW / shown.w / 1000; // the badge's thousandths of the page's width
   const bubble = useMemo(() => ({ body: Skia.Path.MakeFromSVGString(BUBBLE)!, lines: Skia.Path.MakeFromSVGString(BUBBLE_LINES)! }), []);
 
@@ -642,7 +640,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
                 <Rect x={0} y={0} width={pageW} height={pageH} color={paper} />
                 <SkiaImage image={over} rect={overAt} fit="fill" />
                 {covers('o', 'over', over, overAt)}
-                <Group opacity={onPage}>
+                <Overlay key={page} mine={page} at={at} mode={mode}>
                   {lit.map((r) => (
                     <Rect key={r.key} x={r.x} y={r.y} width={r.width} height={r.height} color={r.color} />
                   ))}
@@ -662,10 +660,10 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
                     </Group>
                   ))}
                   {ribbonDraw?.lines.map((l) => (
-                    <RoundedRect key={l.key} x={l.x} y={l.y} width={l.w} height={3} r={1.5} color={c.accent} opacity={0.9} />
+                    <RoundedRect key={l.key} x={l.x} y={l.y} width={l.w} height={1.8} r={0.9} color={c.accent} opacity={0.85} />
                   ))}
-                  {ribbonDraw?.body && <Path path={ribbonDraw.body} color={c.accent} />}
-                </Group>
+                  {ribbonDraw?.dot && <Circle cx={ribbonDraw.dot.x} cy={ribbonDraw.dot.y} r={ribbonDraw.dot.r} color={c.accent} />}
+                </Overlay>
                 <Rect x={0} y={0} width={pageW} height={pageH}>
                   <LinearGradient start={foldAt} end={flatShadeEnd} colors={['rgba(0,0,0,0.16)', 'rgba(0,0,0,0)']} />
                 </Rect>

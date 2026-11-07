@@ -1,5 +1,5 @@
 // The Quran page's header: a row of buttons, and under it the name of what is being read.
-//   row    at the start the index (the fahras), the search and the full screen; at the end - where the wird button was -
+//   row    at the start the index (the fahras) and the search; at the end - where the wird button was -
 //          the notes and the drop-down of the page's modes (Read, Listen, Recite)
 //   name   the surah(s) and the juz, just above the page (the page's own number is printed on the page)
 // No art; the colours and spacing come from the tokens.
@@ -8,11 +8,10 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { ExpandIcon, MenuIcon, NotebookIcon, SearchIcon } from '@/components/icons';
+import { MenuIcon, NotebookIcon, SearchIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { surahName, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
-import { READER } from '@/i18n/reader';
 import { surahsOn } from '@/lib/boxes';
 import { juzForPage, SURAHS } from '@/lib/quran';
 import { useTheme } from '@/theme/theme';
@@ -43,7 +42,6 @@ type Props = {
   mode: string; // the name of the mode shown (Read)
   onIndex: () => void;
   onSearch: () => void;
-  onFull: () => void;
   onNotes: () => void;
   onMode: () => void;
 };
@@ -58,7 +56,7 @@ function Tool({ label, onPress, children }: { label: string; onPress: () => void
   );
 }
 
-export function QuranHeader({ page, mode, onIndex, onSearch, onFull, onNotes, onMode }: Props) {
+export function QuranHeader({ page, mode, onIndex, onSearch, onNotes, onMode }: Props) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const here = placeOf(page);
@@ -71,9 +69,6 @@ export function QuranHeader({ page, mode, onIndex, onSearch, onFull, onNotes, on
           </Tool>
           <Tool label={QURAN.search()} onPress={onSearch}>
             <SearchIcon color={c.ink} size={20} />
-          </Tool>
-          <Tool label={READER.fullscreen()} onPress={onFull}>
-            <ExpandIcon color={c.ink} size={20} />
           </Tool>
         </View>
         <View style={styles.group}>

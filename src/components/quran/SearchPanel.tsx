@@ -1,9 +1,9 @@
-// The search panel: drops from the top of the screen, with one field that takes a name, words of an ayah, or a
+// The search page: fills the screen (it slides in from the top), with one field that takes a name, words of an ayah, or a
 // reference like 2:255 (the website's text search, src/lib/search.js). The surahs whose name matches come first, then
 // the ayat. A row or a result opens its page; a result also lights its ayah for a moment. (The index of surahs,
-// ahzab and ajza is src/components/QuranIndex.tsx.) The list is kept above the keyboard.
+// ahzab and ajza is src/components/QuranIndex.tsx.) The list fills the page and is kept above the keyboard.
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Animated, Keyboard, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, Animated, Keyboard, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CloseIcon, SearchIcon } from '@/components/icons';
@@ -32,7 +32,6 @@ type Props = { open: boolean; onClose: () => void; onGo: (page: number, ayah: { 
 export function SearchPanel({ open, onClose, onGo }: Props) {
   const { c, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { height } = useWindowDimensions();
   const [query, setQuery] = useState('');
   const [state, setState] = useState<'loading' | 'ready' | 'failed'>('loading');
   const [keyboard, setKeyboard] = useState(0); // the keyboard's height
@@ -58,7 +57,6 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
   const rows = q ? filterItems('surahs', q) : [];
   const found = q && state === 'ready' ? search(q) : null;
   const matches: Match[] = found && found.kind !== 'help' ? found.matches.slice(0, SHOWN) : [];
-  const listH = Math.max(160, height - keyboard - insets.top - 96); // what is left under the field
 
   const go = (target: number, ayah: { s: number; a: number } | null) => {
     onClose();
@@ -70,11 +68,16 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
     <Modal visible={open} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
       {/* a Modal is its own window: the language's direction is set again inside it */}
       <View style={[StyleSheet.absoluteFill, Platform.OS !== 'web' && { direction: LANG === 'ar' ? 'rtl' : 'ltr' }]}>
-        <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: c.dim }]} onPress={onClose} accessibilityLabel={READER.close()} />
         <Animated.View
           style={[
             styles.panel,
-            { backgroundColor: c.card, paddingTop: insets.top + space.sm, opacity: slide, transform: [{ translateY: slide.interpolate({ inputRange: [0, 1], outputRange: [-60, 0] }) }] },
+            {
+              backgroundColor: c.card,
+              paddingTop: insets.top + space.sm,
+              paddingBottom: Math.max(keyboard, insets.bottom) + space.sm, // the list stops above the keyboard
+              opacity: slide,
+              transform: [{ translateY: slide.interpolate({ inputRange: [0, 1], outputRange: [-40, 0] }) }],
+            },
           ]}
         >
           <View style={styles.top}>
@@ -103,7 +106,7 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
           </View>
 
           {!!q && (
-            <ScrollView style={{ maxHeight: listH }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
+            <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
               {!!rows.length && (
                 <Card style={{ paddingVertical: 4 }}>
                   {rows.map((item, i) => (
@@ -196,7 +199,7 @@ function AyahResult({ match, dark, onPress }: { match: Match; dark: boolean; onP
 }
 
 const styles = StyleSheet.create({
-  panel: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: space.md, paddingBottom: space.md, gap: space.sm, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
+  panel: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, paddingHorizontal: space.md, gap: space.sm },
   top: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   field: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.md, height: 48, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth },
   input: { flex: 1, fontSize: 16, paddingVertical: 0 },
