@@ -13,7 +13,7 @@
 // The page itself is src/components/PageCurl.tsx.
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { useFocusEffect, useNavigation } from 'expo-router';
+import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { BackHandler, Pressable, StyleSheet, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
@@ -21,12 +21,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AyahMenu, type MenuAt } from '@/components/AyahMenu';
 import { AyahSheet, type Ayah } from '@/components/AyahSheet';
-import { CollapseIcon, MoonIcon, SunIcon, ZoomOutIcon } from '@/components/icons';
+import { CollapseIcon, MoonIcon, SunIcon } from '@/components/icons';
 import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
 import { PageCurl, type Chosen, type Marked, type Pin as NotePin } from '@/components/PageCurl';
 import { DropMenu } from '@/components/quran/DropMenu';
 import { useListen } from '@/components/quran/ListenMode';
 import { menuTop, QuranHeader } from '@/components/quran/QuranHeader';
+import { ReadBar } from '@/components/quran/ReadBar';
 import { useRecite } from '@/components/quran/ReciteMode';
 import { SearchPanel } from '@/components/quran/SearchPanel';
 import { QuranIndex } from '@/components/QuranIndex';
@@ -93,6 +94,7 @@ function Quran() {
   const [room, setRoom] = useState<Room>({ width: 0, height: 0 });
   const [zoomed, setZoomed] = useState(false);
   const [unzoom, setUnzoom] = useState(0); // counts the «whole page» presses (PageCurl zooms out on each)
+  const [zoomIn, setZoomIn] = useState(0); // counts the «zoom in» presses
   const [indexOpen, setIndexOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false); // the drop-down of the modes
@@ -112,10 +114,10 @@ function Quran() {
     };
   }, []);
 
-  // the tab bar is drawn by src/app/(tabs)/_layout.tsx, which reads this option
+  // the tab bar is drawn by src/app/(tabs)/_layout.tsx, which reads this option (always hidden here)
   useEffect(() => {
-    navigation.setOptions({ tabBarStyle: { display: hidden ? 'none' : 'flex' } });
-  }, [hidden, navigation]);
+    navigation.setOptions({ tabBarStyle: { display: 'none' } }); // the Quran page has no tab bar: its back button returns to Home
+  }, [navigation]);
 
   // the phone's back button leaves full screen, then Listen / Recite, before it leaves the page
   useFocusEffect(
@@ -250,9 +252,8 @@ function Quran() {
           <QuranHeader
             page={page}
             mode={modes.find((m) => m.value === mode)?.label ?? modes[0].label}
+            onBack={() => router.navigate('/')}
             onIndex={() => setIndexOpen(true)}
-            onSearch={() => setSearchOpen(true)}
-            onNotes={() => say(READER.soon())}
             onMode={() => setModeOpen(true)}
           />
         </View>
@@ -270,6 +271,7 @@ function Quran() {
             full={hidden}
             chosen={chosen}
             unzoom={unzoom}
+            zoomIn={zoomIn}
             onTurned={turned}
             marks={marks}
             pins={pins}
@@ -283,19 +285,8 @@ function Quran() {
           />
         )}
 
-        {/* the controls of Listen / Recite: one compact pill floating over the page's foot, just above the tab bar (which stays, as in Read) */}
-        {!hidden && mode !== 'read' && (
-          <View pointerEvents="box-none" style={styles.float}>
-            {mode === 'listen' ? listen.bar : recite.bar}
-          </View>
-        )}
-        {zoomed && (
-          <Pressable onPress={() => setUnzoom((n) => n + 1)} accessibilityLabel={READER.wholePage()} style={[styles.whole, { backgroundColor: c.card, borderColor: c.line, bottom: mode === 'read' ? 12 : 84 }]}>
-            <ZoomOutIcon color={c.ink} />
-          </Pressable>
-        )}
         {!!toast && (
-          <View pointerEvents="none" style={[styles.toast, { backgroundColor: c.on, bottom: mode === 'read' ? 16 : 88 }]}>
+          <View pointerEvents="none" style={[styles.toast, { backgroundColor: c.on, bottom: 16 }]}>
             <Txt size={14} weight={600} color={c.onInk}>
               {toast}
             </Txt>
@@ -304,6 +295,25 @@ function Quran() {
       </View>
 
       {/* the bar of Listen or Recite, under the page (the page's room is what is left between the header and it) */}
+      {/* the one bar at the bottom: Read's tools, or the controls of Listen / Recite */}
+      {!hidden && (
+        <View style={{ paddingBottom: insets.bottom }}>
+          {mode === 'read' ? (
+            <ReadBar
+              zoomed={zoomed}
+              onSearch={() => setSearchOpen(true)}
+              onNotes={() => say(READER.soon())}
+              onZoom={() => (zoomed ? setUnzoom((n) => n + 1) : setZoomIn((n) => n + 1))}
+              onSettings={() => router.push('/quran-settings')}
+            />
+          ) : mode === 'listen' ? (
+            listen.bar
+          ) : (
+            recite.bar
+          )}
+        </View>
+      )}
+
       {/* in full screen: exit and the day / night switch, at the top corner just under the clock and the wifi */}
       {hidden && (
         <View style={[{ position: 'absolute', zIndex: 5, top: insets.top + 8, flexDirection: 'row', gap: 10, direction: 'ltr' }, LANG === 'ar' ? { left: 12 } : { right: 12 }]}>
@@ -364,7 +374,5 @@ function Quran() {
 }
 
 const styles = StyleSheet.create({
-  float: { position: 'absolute', left: 0, right: 0, bottom: 4 },
-  whole: { position: 'absolute', bottom: 12, alignSelf: 'center', width: 44, height: 44, borderRadius: 22, borderWidth: StyleSheet.hairlineWidth, alignItems: 'center', justifyContent: 'center' },
   toast: { position: 'absolute', bottom: 16, alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 18, borderRadius: 999 },
 });

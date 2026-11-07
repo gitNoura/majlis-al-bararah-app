@@ -147,6 +147,12 @@ export const RiwayaIcon = (p: IconProps) => (
   </Line>
 );
 // «the whole page» while zoomed in (the website's #pinch-out): a magnifier with a minus
+export const ZoomInIcon = (p: IconProps) => (
+  <Line {...p}>
+    <Circle cx={11} cy={11} r={7} />
+    <Path d="M16.5 16.5L21 21M8 11h6M11 8v6" />
+  </Line>
+);
 export const ZoomOutIcon = (p: IconProps) => (
   <Line {...p}>
     <Circle cx={11} cy={11} r={7} />

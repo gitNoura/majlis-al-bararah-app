@@ -1,6 +1,6 @@
 // The Quran page's header: a row of buttons, and under it the name of what is being read.
-//   row    at the start the index (the fahras) and the search; at the end - where the wird button was -
-//          the notes and the drop-down of the page's modes (Read, Listen, Recite)
+//   row    at the start the back button (to Home) and the index (the fahras); at the end the drop-down of the page's
+//          modes (Read, Listen, Recite). Search, notes, zoom and settings are in the bottom bar (ReadBar.tsx)
 //   name   the surah(s) and the juz, just above the page (the page's own number is printed on the page)
 // No art; the colours and spacing come from the tokens.
 import type { ReactNode } from 'react';
@@ -8,9 +8,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { MenuIcon, NotebookIcon, SearchIcon } from '@/components/icons';
+import { BackIcon, MenuIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
-import { surahName, t } from '@/i18n/i18n';
+import { isEnglish, surahName, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
 import { surahsOn } from '@/lib/boxes';
 import { juzForPage, SURAHS } from '@/lib/quran';
@@ -40,9 +40,8 @@ function ChevronDown({ color }: { color: string }) {
 type Props = {
   page: number;
   mode: string; // the name of the mode shown (Read)
+  onBack: () => void;
   onIndex: () => void;
-  onSearch: () => void;
-  onNotes: () => void;
   onMode: () => void;
 };
 
@@ -56,7 +55,7 @@ function Tool({ label, onPress, children }: { label: string; onPress: () => void
   );
 }
 
-export function QuranHeader({ page, mode, onIndex, onSearch, onNotes, onMode }: Props) {
+export function QuranHeader({ page, mode, onBack, onIndex, onMode }: Props) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const here = placeOf(page);
@@ -64,17 +63,14 @@ export function QuranHeader({ page, mode, onIndex, onSearch, onNotes, onMode }: 
     <View style={[styles.box, { paddingTop: insets.top + space.sm }]}>
       <View style={styles.row}>
         <View style={styles.group}>
+          <Tool label={QURAN.back()} onPress={onBack}>
+            <BackIcon color={c.ink} size={20} rtl={!isEnglish} />
+          </Tool>
           <Tool label={QURAN.index()} onPress={onIndex}>
             <MenuIcon color={c.ink} size={20} />
           </Tool>
-          <Tool label={QURAN.search()} onPress={onSearch}>
-            <SearchIcon color={c.ink} size={20} />
-          </Tool>
         </View>
         <View style={styles.group}>
-          <Tool label={QURAN.notes()} onPress={onNotes}>
-            <NotebookIcon color={c.ink} size={20} />
-          </Tool>
           <Pressable onPress={onMode} accessibilityRole="button" accessibilityLabel={mode} hitSlop={6} style={[styles.pill, { backgroundColor: c.surface2 }]}>
             <Txt size={14} weight={700} color={c.ink} numberOfLines={1}>
               {mode}
