@@ -28,7 +28,7 @@ import { radius, space } from '@/theme/tokens';
 type Sel = { from: string; to: string };
 type Ayat = { s: number; a: number; boxes: number[][] }[];
 
-export const LISTEN_BAR_H = 56;
+export const LISTEN_BAR_H = 64;
 const CHOSEN = 'rgba(27, 107, 83, 0.2)';
 const STEP = 'rgba(27, 107, 83, 0.14)';
 const NOW = 'rgba(217, 185, 106, 0.42)';
@@ -269,7 +269,7 @@ function Pill({ children }: { children: ReactNode }) {
 
 function Btn({ label, onPress, children, disabled, main, wide }: { label: string; onPress: () => void; children: ReactNode; disabled?: boolean; main?: boolean; wide?: boolean }) {
   const { c } = useTheme();
-  const size = main ? 44 : 34;
+  const size = main ? 50 : 38;
   return (
     <Pressable
       onPress={onPress}
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
   pill: { alignSelf: 'stretch', maxWidth: 520, height: LISTEN_BAR_H, borderRadius: LISTEN_BAR_H / 2, borderWidth: StyleSheet.hairlineWidth, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: space.sm, shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
   summary: { flex: 1, minWidth: 0, paddingVertical: 6, paddingHorizontal: 10, gap: 1 },
   btn: { alignItems: 'center', justifyContent: 'center' },
-  wideBtn: { height: 36, paddingHorizontal: 12, borderRadius: 18, flexDirection: 'row', gap: 6 },
+  wideBtn: { height: 38, paddingHorizontal: 12, borderRadius: 19, flexDirection: 'row', gap: 6 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, alignItems: 'center' },
   chip: { minHeight: 40, minWidth: 44, paddingHorizontal: 14, borderRadius: radius.chip, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   other: { minWidth: 96, height: 40, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, textAlign: 'center', fontSize: 14, fontFamily: ui(600) },

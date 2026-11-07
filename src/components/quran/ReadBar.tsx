@@ -16,7 +16,7 @@ type Props = { zoomed: boolean; onSearch: () => void; onNotes: () => void; onZoo
 function Tool({ label, onPress, children }: { label: string; onPress: () => void; children: ReactNode }) {
   const { c } = useTheme();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={6} style={[styles.round, { backgroundColor: c.surface2 }]}>
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={6} style={({ pressed }) => [styles.round, pressed && { backgroundColor: c.surface2 }]}>
       {children}
     </Pressable>
   );
@@ -28,16 +28,16 @@ export function ReadBar({ zoomed, onSearch, onNotes, onZoom, onSettings }: Props
     <View style={styles.box}>
       <View style={[styles.row, { backgroundColor: c.card, borderColor: c.line }]}>
         <Tool label={QURAN.search()} onPress={onSearch}>
-          <SearchIcon color={c.ink} size={22} />
+          <SearchIcon color={c.ink} size={25} />
         </Tool>
         <Tool label={QURAN.notes()} onPress={onNotes}>
-          <NotebookIcon color={c.ink} size={22} />
+          <NotebookIcon color={c.ink} size={25} />
         </Tool>
         <Tool label={zoomed ? READER.wholePage() : QURAN.fullView()} onPress={onZoom}>
-          {zoomed ? <ZoomOutIcon color={c.ink} size={22} /> : <ExpandIcon color={c.ink} size={22} />}
+          {zoomed ? <ZoomOutIcon color={c.ink} size={25} /> : <ExpandIcon color={c.ink} size={25} />}
         </Tool>
         <Tool label={READER.settingsTitle()} onPress={onSettings}>
-          <SettingsIcon color={c.ink} size={22} />
+          <SettingsIcon color={c.ink} size={25} />
         </Tool>
       </View>
     </View>
@@ -46,6 +46,6 @@ export function ReadBar({ zoomed, onSearch, onNotes, onZoom, onSettings }: Props
 
 const styles = StyleSheet.create({
   box: { paddingHorizontal: space.md, paddingVertical: space.sm, alignItems: 'center' },
-  row: { alignSelf: 'stretch', maxWidth: 420, height: 56, borderRadius: 28, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: space.sm, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
-  round: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  row: { alignSelf: 'stretch', maxWidth: 420, height: 64, borderRadius: 32, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: space.sm, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
+  round: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
 });
