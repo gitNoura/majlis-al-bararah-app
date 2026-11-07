@@ -257,7 +257,7 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
     </Sheet>
   );
 
-  return { bar, sheet, marks, tap, playAyah, clear };
+  return { bar, sheet, marks, tap, playAyah, clear, choose: setRange };
 }
 
 // ---------- small parts ----------

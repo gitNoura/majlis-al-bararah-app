@@ -6,7 +6,7 @@ import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
 import type { Row } from '@/components/hifdh/StopSheet';
-import { CheckIcon, PlayIcon } from '@/components/icons';
+import { CheckIcon, MicIcon, PlayIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { STATUS, dayText, findRow, isDone, portionName, startsAt, weekLine } from '@/lib/hifdh/labels';
@@ -15,7 +15,7 @@ import { useTheme } from '@/theme/theme';
 
 export function TaskRow({ row, locked = false, ahead = false, first = false }: { row: Row; locked?: boolean; ahead?: boolean; first?: boolean }) {
   const { c } = useTheme();
-  const { refresh, toast, burst, openStop, listen } = useHif();
+  const { refresh, toast, burst, openStop, listen, recite } = useHif();
   const btn = useRef<any>(null); // the Pressable's instance (measureInWindow), whose type RN does not export
 
   const weekly = row.week != null;
@@ -107,6 +107,14 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
           style={[styles.icon, { backgroundColor: c.soft }]}
         >
           <PlayIcon color={c.ink} size={20} />
+        </Pressable>
+        <Pressable
+          onPress={() => recite(findRow(key) ?? row)}
+          accessibilityRole="button"
+          accessibilityLabel={HIF.recitePortion()}
+          style={[styles.icon, { backgroundColor: c.soft }]}
+        >
+          <MicIcon color={c.ink} size={20} />
         </Pressable>
         {row.status !== 'notdone' && (
           <Pressable

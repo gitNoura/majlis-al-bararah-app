@@ -13,7 +13,7 @@
 // The page itself is src/components/PageCurl.tsx.
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { router, useFocusEffect, useNavigation } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { BackHandler, Pressable, StyleSheet, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
@@ -118,17 +118,26 @@ function Quran() {
     navigation.setOptions({ tabBarStyle: { display: 'none' } }); // the Quran page has no tab bar: its back button returns to Home
   }, [navigation]);
 
+  // where the back button goes: Home, or the Hifdh tab when a Hifdh task opened this page
+  const params = useLocalSearchParams<{ mode?: string; from?: string; to?: string; back?: string; n?: string }>();
+  const goBack = useCallback(() => {
+    const toHifdh = params.back === 'hifdh';
+    router.setParams({ mode: undefined, from: undefined, to: undefined, back: undefined, n: undefined });
+    router.navigate(toHifdh ? '/hifdh' : '/');
+  }, [params.back]);
+
   // the phone's back button leaves full screen, then Listen / Recite, before it leaves the page
   useFocusEffect(
     useCallback(() => {
       const sub = BackHandler.addEventListener('hardwareBackPress', () => {
         if (hidden) setHidden(false);
         else if (mode !== 'read') setMode('read');
+        else if (params.back === 'hifdh') goBack();
         else return false;
         return true;
       });
       return () => sub.remove();
-    }, [hidden, mode]),
+    }, [hidden, mode, params.back, goBack]),
   );
 
   // a short message over the page; it clears itself
@@ -172,6 +181,23 @@ function Quran() {
   // the two other modes: each gives a bar under the page and its own handling of a tap on an ayah
   const listen = useListen(mode === 'listen', page, jump);
   const recite = useRecite(mode === 'recite', page);
+
+  // A Hifdh task opens this page in Listen or Recite on its ayat (params: mode, from, to, n = a new request each time):
+  // the page of its first ayah, Listen with the range chosen, Recite with the ayat before it shown.
+  const { choose } = listen;
+  const { startAt } = recite;
+  useEffect(() => {
+    if (!params.n || (params.mode !== 'listen' && params.mode !== 'recite')) return;
+    const { from, to } = params;
+    setMode(params.mode);
+    setHidden(false);
+    if (!from) return;
+    const [s, a] = from.split(':').map(Number);
+    jump(pageOf(s, a) ?? pageRef.current);
+    if (params.mode === 'listen') choose({ from, to: to || from });
+    else startAt(from);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.n]);
 
   // previous / next ayah from the tafsir sheet, going to its page when it is on another one
   const moveAyah = (step: 1 | -1) => {
@@ -251,7 +277,7 @@ function Quran() {
           <QuranHeader
             page={page}
             mode={modes.find((m) => m.value === mode)?.label ?? modes[0].label}
-            onBack={() => router.navigate('/')}
+            onBack={goBack}
             onIndex={() => setIndexOpen(true)}
             onMode={() => setModeOpen(true)}
           />

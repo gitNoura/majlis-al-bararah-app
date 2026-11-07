@@ -24,7 +24,7 @@ const PAGE = 40; // days shown at a time
 
 // «Progress» (the home of the history): a heading with a link to the history, then two cards side by side, as in the
 // reference: how far the plans are (a ring and the big value beside it) and the way into the past days.
-export function ProgressSection({ onPress }: { onPress: () => void }) {
+export function ProgressSection({ onPress, plain }: { onPress: () => void; plain?: boolean }) {
   const { c } = useTheme();
   const g = useGreen();
   const p = plan.planProgress();
@@ -32,7 +32,7 @@ export function ProgressSection({ onPress }: { onPress: () => void }) {
   const arrow = <Txt size={20} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>›</Txt>;
   return (
     <View style={{ gap: 12 }}>
-      <Heading title={HIF.progress()} link={HIF.history()} onLink={onPress} />
+      {!plain && <Heading title={HIF.progress()} link={HIF.history()} onLink={onPress} />}
       <View style={styles.pair}>
         <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: c.line }]}>
           <Txt size={13.5} color={c.meta}>
@@ -50,6 +50,7 @@ export function ProgressSection({ onPress }: { onPress: () => void }) {
             </View>
           </View>
         </Pressable>
+        {!plain && (
         <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: c.line }]}>
           <Txt size={13.5} color={c.meta}>
             {HIF.history()}
@@ -61,6 +62,7 @@ export function ProgressSection({ onPress }: { onPress: () => void }) {
             <View style={{ alignSelf: 'flex-end' }}>{arrow}</View>
           </View>
         </Pressable>
+        )}
       </View>
     </View>
   );

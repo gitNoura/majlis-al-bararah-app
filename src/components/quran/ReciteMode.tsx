@@ -88,6 +88,8 @@ export function useRecite(active: boolean, page: number) {
       live = false;
     };
   }, [active, page]);
+  // «start at this ayah» (from a Hifdh task): the ayat of the page before it are shown, it and the rest covered
+  const [pending, setPending] = useState<string | null>(null);
   // a fresh start each time the mode is entered (state adjusted while rendering, not in an effect)
   const [was, setWas] = useState(active);
   if (active !== was) {
@@ -96,6 +98,11 @@ export function useRecite(active: boolean, page: number) {
       setOverride(null);
       setSt(begin(keys));
     }
+  }
+  if (active && pending && keys.includes(pending)) {
+    setPending(null);
+    setOverride(null);
+    setSt(jumpTo(begin(keys), pending));
   }
 
   const count = useCallback((key: string) => Math.max(1, words.get(key)?.length ?? 1), [words]);
@@ -147,7 +154,7 @@ export function useRecite(active: boolean, page: number) {
     </View>
   );
 
-  return { bar, veils, tap };
+  return { bar, veils, tap, startAt: setPending };
 }
 
 function Round({ children, onPress, label, disabled, big, fill }: { children: ReactNode; onPress: () => void; label: string; disabled?: boolean; big?: boolean; fill?: string }) {
