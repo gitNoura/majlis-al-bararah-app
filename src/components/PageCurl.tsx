@@ -17,7 +17,7 @@
 // bottom: where the finger started) and which way (`mode`: 1 forward, -1 back, 0 at rest). The pictures
 // of the page before, the page read and the page after are in `prev`, `cur`, `next`; when a turn ends,
 // the page shown is already the new one before the app hears of it, so nothing flickers.
-import { Canvas, Group, LinearGradient, Morphology, Path, Rect, Skia, Image as SkiaImage, type SkImage, type SkPath } from '@shopify/react-native-skia';
+import { Canvas, Group, LinearGradient, Morphology, Path, Rect, RoundedRect, Skia, Image as SkiaImage, type SkImage, type SkPath } from '@shopify/react-native-skia';
 import { useEffect, useMemo, useRef } from 'react';
 import { View } from 'react-native';
 import {
@@ -570,22 +570,22 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
     return out;
   }, [veils, full, pageW, pageH]);
   const lit = [...marks.flatMap((e) => place(e, e.color)), ...chosen.flatMap((e) => place(e, 'rgba(196, 154, 69, 0.3)'))];
-  // the wird's ribbon, as a mushaf's own: hanging from the top of the page on the spine's side (the left
-  // of odd pages, the right of even ones), its forked end at the stop's line; the stop's ayah underlined
+  // the mark (Mark here), flat and in the accent: a slim bookmark tab hanging from the top of the page on the spine's
+  // side (the left of odd pages, the right of even ones), and a rounded line under the marked ayah
   const ribbonDraw = useMemo(() => {
     if (!ribbon?.boxes.length) return null;
     const X = (fx: number) => ((fx - shown.x) / shown.w) * pageW;
     const Y = (fy: number) => ((fy - shown.y) / shown.h) * pageH;
-    const rw = 0.032;
-    const want = page % 2 ? 0.006 : 1 - 0.006 - rw;
-    const fx0 = Math.min(Math.max(want, shown.x + 0.004), shown.x + shown.w - rw - 0.004);
+    const tabW = 0.026;
+    const want = page % 2 ? 0.006 : 1 - 0.006 - tabW;
+    const fx0 = Math.min(Math.max(want, shown.x + 0.004), shown.x + shown.w - tabW - 0.004);
     const x0 = X(fx0);
-    const x1 = X(fx0 + rw);
-    const end = Y(Math.max(...ribbon.boxes.map((b) => b[3])) + 0.006);
-    const fork = (x1 - x0) * 0.45;
-    const body = Skia.Path.MakeFromSVGString(`M${x0} 0H${x1}V${end}L${(x0 + x1) / 2} ${end - fork}L${x0} ${end}Z`);
-    const lines = ribbon.boxes.map(([bx0, , bx1, by1], i) => ({ key: i, x: X(bx0), y: Y(by1) - 2.5, w: X(bx1) - X(bx0) }));
-    return { body, shine: { x: x0 + (x1 - x0) * 0.18, h: Math.max(0, end - fork) }, lines };
+    const x1 = X(fx0 + tabW);
+    const h = Math.min(Y(Math.max(...ribbon.boxes.map((b) => b[3])) + 0.006), pageH * 0.07);
+    const r = (x1 - x0) / 2; // the tab's end is a half circle
+    const body = Skia.Path.MakeFromSVGString(`M${x0} 0H${x1}V${h - r}A${r} ${r} 0 0 1 ${x0} ${h - r}Z`);
+    const lines = ribbon.boxes.map(([bx0, , bx1, by1], i) => ({ key: i, x: X(bx0), y: Y(by1) - 3, w: X(bx1) - X(bx0) }));
+    return { body, lines };
   }, [ribbon, shown.x, shown.y, shown.w, shown.h, pageW, pageH, page]);
   // They are drawn only on the page they are for: not while the page before folds back over it, and not in the
   // moment after a turn when the picture is already the new page but the app has not yet given its own marks
@@ -662,10 +662,9 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
                     </Group>
                   ))}
                   {ribbonDraw?.lines.map((l) => (
-                    <Rect key={l.key} x={l.x} y={l.y} width={l.w} height={2} color="#c9a24a" />
+                    <RoundedRect key={l.key} x={l.x} y={l.y} width={l.w} height={3} r={1.5} color={c.accent} opacity={0.9} />
                   ))}
-                  {ribbonDraw?.body && <Path path={ribbonDraw.body} color="#c9a24a" />}
-                  {ribbonDraw?.body && <Rect x={ribbonDraw.shine.x} y={0} width={1.4} height={ribbonDraw.shine.h} color="rgba(241, 220, 156, 0.8)" />}
+                  {ribbonDraw?.body && <Path path={ribbonDraw.body} color={c.accent} />}
                 </Group>
                 <Rect x={0} y={0} width={pageW} height={pageH}>
                   <LinearGradient start={foldAt} end={flatShadeEnd} colors={['rgba(0,0,0,0.16)', 'rgba(0,0,0,0)']} />

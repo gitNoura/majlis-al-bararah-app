@@ -1,10 +1,12 @@
 // QURAN tab: the mushaf page, opened at the last page read. One page, three modes (Read, Listen, Recite) chosen from
 // the drop-down at the header's end; this is Read. Listen and Recite come next (phase c2) on this same page.
-//   header   the index (fahras) and the search and the notes; the mode drop-down; under them the surah and juz
+//   header   the index (fahras), the search and the full screen; the notes and the mode drop-down; under them the surah
+//            and juz
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
 //            («Mark here» in an ayah's menu, «Remove mark» on the marked ayah), shown as a ribbon on its page
-//   a tap on the page outside its ayat fades the header and takes the tab bar away; the page stays exactly where it
-//   and as big as it was (nothing is cropped or zoomed); another tap brings them back
+//   full screen   the button in the header fades it and takes the tab bar away; the page stays exactly where it was and
+//            as big as it was (nothing is cropped or zoomed); a small button (or the phone's back button) brings them back
+//   a long press on an ayah marks it (the same as «Mark here»); a tap on one opens its menu
 // The page itself is src/components/PageCurl.tsx.
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
@@ -17,12 +19,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AyahMenu, type MenuAt } from '@/components/AyahMenu';
 import { AyahSheet, type Ayah } from '@/components/AyahSheet';
-import { ZoomOutIcon } from '@/components/icons';
+import { CollapseIcon, ZoomOutIcon } from '@/components/icons';
 import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
 import { PageCurl, type Chosen, type Marked, type Pin as NotePin } from '@/components/PageCurl';
 import { DropMenu } from '@/components/quran/DropMenu';
 import { menuTop, QuranHeader } from '@/components/quran/QuranHeader';
-import { SearchSheet } from '@/components/quran/SearchSheet';
+import { SearchPanel } from '@/components/quran/SearchPanel';
 import { QuranIndex } from '@/components/QuranIndex';
 import { Txt } from '@/components/Txt';
 import { LANG } from '@/i18n/i18n';
@@ -38,9 +40,12 @@ import { pageUrl } from '@/lib/remote';
 import { trackPlace } from '@/lib/riwaya';
 import { clearPin, countPage, setPin } from '@/lib/wird';
 import { QuranTheme, useTheme } from '@/theme/theme';
+import { space } from '@/theme/tokens';
 
 type Mode = 'read' | 'listen' | 'recite';
 type Room = { width: number; height: number };
+
+const noop = () => {};
 
 // the Quran's screens have their own day / night (src/theme/theme.tsx)
 export default function QuranTab() {
@@ -58,7 +63,7 @@ function Quran() {
   const [headH, setHeadH] = useState(0); // the header block's height: where the page's room begins on the screen
   const [page, setPage] = useState(savedPage);
   const pageRef = useRef(page); // the page before a turn, to tell a turn from a jump
-  const [hidden, setHidden] = useState(false); // the header faded and the tab bar gone; the page where it was
+  const [hidden, setHidden] = useState(false); // full screen: the header faded and the tab bar gone; the page where it was
   const [room, setRoom] = useState<Room>({ width: 0, height: 0 });
   const [zoomed, setZoomed] = useState(false);
   const [unzoom, setUnzoom] = useState(0); // counts the «whole page» presses (PageCurl zooms out on each)
@@ -151,13 +156,11 @@ function Quran() {
     if (next.page !== page) jump(next.page);
   };
 
-  // «Mark here» puts the exact pin on the tapped ayah; on the ayah that carries it, «Remove mark» takes it off
-  const pinned = !!menu && pin?.shown === `${menu.s}:${menu.a}`;
-  const toggleMark = () => {
-    if (!menu) return;
-    const { s, a } = menu;
-    setMenu(null);
-    if (pinned) {
+  // «Mark here» puts the exact pin on an ayah (a long press, or the ayah menu); on the ayah that carries it, the same
+  // gesture takes it off
+  const pinnedAt = (s: number, a: number) => pin?.shown === `${s}:${a}`;
+  const markAyah = (s: number, a: number) => {
+    if (pinnedAt(s, a)) {
       clearPin();
       say(QURAN.unmarked());
     } else if (setPin(`${s}:${a}`, page)) {
@@ -217,10 +220,22 @@ function Quran() {
           mode={modes[0].label}
           onIndex={() => setIndexOpen(true)}
           onSearch={() => setSearchOpen(true)}
+          onFull={() => setHidden(true)}
           onNotes={() => say(READER.soon())}
           onMode={() => setModeOpen(true)}
         />
       </Animated.View>
+      {hidden && (
+        <Pressable
+          onPress={() => setHidden(false)}
+          accessibilityRole="button"
+          accessibilityLabel={READER.exitFull()}
+          hitSlop={8}
+          style={[styles.exit, { top: insets.top + space.sm, backgroundColor: c.surface2 }, LANG === 'ar' ? { left: space.md } : { right: space.md }]}
+        >
+          <CollapseIcon color={c.ink} size={20} />
+        </Pressable>
+      )}
 
       {/* the page's room: what is left under the header */}
       <View style={{ flex: 1 }} onLayout={onLayout}>
@@ -239,7 +254,8 @@ function Quran() {
             pins={pins}
             onAyah={(s, a, x, y) => setMenu({ s, a, x, y: y + headH })}
             onPin={(s, a) => setNote({ s, a })}
-            onEmptyTap={() => setHidden((h) => !h)}
+            onHold={markAyah}
+            onEmptyTap={noop}
             onZoomed={setZoomed}
             ribbon={ribbon}
           />
@@ -268,7 +284,7 @@ function Quran() {
         items={modes.map((m) => ({ key: m.value, label: m.label, chosen: m.value === 'read', onPress: () => m.value !== 'read' && say(READER.soon()) }))}
       />
       <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={jump} />
-      <SearchSheet
+      <SearchPanel
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
         onGo={(p, found) => {
@@ -288,8 +304,12 @@ function Quran() {
           setMenu(null);
           if (menu) setNote({ s: menu.s, a: menu.a });
         }}
-        onMark={toggleMark}
-        pinned={pinned}
+        onMark={() => {
+          if (!menu) return;
+          setMenu(null);
+          markAyah(menu.s, menu.a);
+        }}
+        pinned={!!menu && pinnedAt(menu.s, menu.a)}
       />
       <NoteSheet note={note} onClose={() => setNote(null)} />
     </View>
@@ -297,6 +317,7 @@ function Quran() {
 }
 
 const styles = StyleSheet.create({
+  exit: { position: 'absolute', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', opacity: 0.9 },
   whole: { position: 'absolute', bottom: 12, alignSelf: 'center', width: 44, height: 44, borderRadius: 22, borderWidth: StyleSheet.hairlineWidth, alignItems: 'center', justifyContent: 'center' },
   toast: { position: 'absolute', bottom: 16, alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 18, borderRadius: 999 },
 });

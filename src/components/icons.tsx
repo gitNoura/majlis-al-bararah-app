@@ -327,3 +327,11 @@ export const PauseIcon = (p: IconProps) => (
     <Path d="M8 5.5v13M16 5.5v13" />
   </Line>
 );
+
+export function CollapseIcon({ size = 22, color, strokeWidth = 1.8 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" />
+    </Svg>
+  );
+}
