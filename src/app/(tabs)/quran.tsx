@@ -94,7 +94,6 @@ function Quran() {
   const [room, setRoom] = useState<Room>({ width: 0, height: 0 });
   const [zoomed, setZoomed] = useState(false);
   const [unzoom, setUnzoom] = useState(0); // counts the «whole page» presses (PageCurl zooms out on each)
-  const [zoomIn, setZoomIn] = useState(0); // counts the «zoom in» presses
   const [indexOpen, setIndexOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false); // the drop-down of the modes
@@ -271,7 +270,6 @@ function Quran() {
             full={hidden}
             chosen={chosen}
             unzoom={unzoom}
-            zoomIn={zoomIn}
             onTurned={turned}
             marks={marks}
             pins={pins}
@@ -303,7 +301,7 @@ function Quran() {
               zoomed={zoomed}
               onSearch={() => setSearchOpen(true)}
               onNotes={() => say(READER.soon())}
-              onZoom={() => (zoomed ? setUnzoom((n) => n + 1) : setZoomIn((n) => n + 1))}
+              onZoom={() => (zoomed ? setUnzoom((n) => n + 1) : setHidden(true))}
               onSettings={() => router.push('/quran-settings')}
             />
           ) : mode === 'listen' ? (

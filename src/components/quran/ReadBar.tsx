@@ -1,10 +1,11 @@
-// The bottom bar of Read: search, notes, zoom (in, or back to the whole page when zoomed) and settings.
+// The bottom bar of Read: search, notes, full view (the page filling the screen) and settings. When the page has been
+// pinched in, the third button brings it back to the whole page instead.
 // It is the only bar on the Quran page (the app's tab bar is not shown there); Listen and Recite put their own
 // controls in this same place.
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { NotebookIcon, SearchIcon, SettingsIcon, ZoomInIcon, ZoomOutIcon } from '@/components/icons';
+import { ExpandIcon, NotebookIcon, SearchIcon, SettingsIcon, ZoomOutIcon } from '@/components/icons';
 import { QURAN } from '@/i18n/quran';
 import { READER } from '@/i18n/reader';
 import { useTheme } from '@/theme/theme';
@@ -25,15 +26,15 @@ export function ReadBar({ zoomed, onSearch, onNotes, onZoom, onSettings }: Props
   const { c } = useTheme();
   return (
     <View style={styles.box}>
-      <View style={styles.row}>
+      <View style={[styles.row, { backgroundColor: c.card, borderColor: c.line }]}>
         <Tool label={QURAN.search()} onPress={onSearch}>
           <SearchIcon color={c.ink} size={22} />
         </Tool>
         <Tool label={QURAN.notes()} onPress={onNotes}>
           <NotebookIcon color={c.ink} size={22} />
         </Tool>
-        <Tool label={zoomed ? READER.wholePage() : QURAN.zoomIn()} onPress={onZoom}>
-          {zoomed ? <ZoomOutIcon color={c.ink} size={22} /> : <ZoomInIcon color={c.ink} size={22} />}
+        <Tool label={zoomed ? READER.wholePage() : QURAN.fullView()} onPress={onZoom}>
+          {zoomed ? <ZoomOutIcon color={c.ink} size={22} /> : <ExpandIcon color={c.ink} size={22} />}
         </Tool>
         <Tool label={READER.settingsTitle()} onPress={onSettings}>
           <SettingsIcon color={c.ink} size={22} />
@@ -45,6 +46,6 @@ export function ReadBar({ zoomed, onSearch, onNotes, onZoom, onSettings }: Props
 
 const styles = StyleSheet.create({
   box: { paddingHorizontal: space.md, paddingVertical: space.sm, alignItems: 'center' },
-  row: { alignSelf: 'stretch', maxWidth: 420, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' },
-  round: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  row: { alignSelf: 'stretch', maxWidth: 420, height: 56, borderRadius: 28, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: space.sm, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
+  round: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
 });

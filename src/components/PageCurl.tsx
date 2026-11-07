@@ -59,7 +59,6 @@ type Props = {
   pins: Pin[]; // the comments' badges in the page's margin
   onPin: (s: number, a: number) => void; // a badge tapped
   unzoom: number; // changed by the app: back to the whole page
-  zoomIn?: number; // changed by the app: zoom in on the middle of the page
   onTurned: (page: number) => void; // a turn finished: the page now read
   onAyah: (s: number, a: number, x: number, y: number) => void; // x, y: where the finger was, in the room
   onEmptyTap: () => void; // a tap on the page outside its ayat and edges
@@ -160,7 +159,7 @@ function Overlay({ mine, at, mode, children }: { mine: number; at: { get(): numb
   return <Group opacity={opacity}>{children}</Group>;
 }
 
-export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed, onHold, ribbon, veils, zoomIn }: Props) {
+export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed, onHold, ribbon, veils }: Props) {
   const { c, isDark } = useTheme();
   // night: the page always a little dimmer (its colours never changed); the choice in the settings is
   // only the screen around it in full screen (quran.tsx)
@@ -485,14 +484,6 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
     zx.set(withTiming(0, ease));
     zy.set(withTiming(0, ease));
   }, [unzoom, zs, zx, zy]);
-  useEffect(() => {
-    if (!zoomIn) return;
-    const ease = { duration: 250, easing: Easing.out(Easing.cubic) };
-    const k = Math.min(MAX_ZOOM, 2);
-    zs.set(withTiming(k, ease));
-    zx.set(withTiming((W.get() * (1 - k)) / 2, ease));
-    zy.set(withTiming((H.get() * (1 - k)) / 2, ease));
-  }, [zoomIn, zs, zx, zy, W, H]);
   useEffect(() => {
     zs.set(1);
     zx.set(0);

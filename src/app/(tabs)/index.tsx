@@ -21,7 +21,6 @@ export default function HomeTab() {
     <TabStub
       title={HOME.tabHome()}
       links={[
-        { title: HOME.tabQuran(), sub: HOME.wirdContinue(), href: '/quran' },
         { title: NAV.previous(), sub: NAV.previousSub(), href: '/home-old' },
         { title: HOME.adhkar(), href: '/adhkar' },
         { title: HOME.ahadith(), href: '/ahadith' },
