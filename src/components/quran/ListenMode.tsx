@@ -1,0 +1,355 @@
+// LISTEN mode of the Quran page: the same mushaf page, with a player bar under it and a settings sheet.
+//   tap an ayah   chooses it; a second tap takes everything between (then taps do nothing until the choice is cleared)
+//   the bar       what is chosen (or heard now; a tap opens the settings), clear, previous step, play / pause, next step;
+//                 with nothing chosen: «Whole surah» plays the surah the page is on
+//   the page      the chosen ayat are tinted green, the ones of the step heard lighter, the one heard now gold; the page
+//                 turns by itself to follow the ayah heard (a jump: it does not count as reading)
+//   the sheet     whole page / whole surah, how many times each ayah and the whole part are heard, speed, reciter, way
+//                 of listening, then «Play audio»
+// The engine (steps, two players taking turns, the log) is `Listener` in src/lib/hifdh/listen.js and is only alive while
+// this mode is on. Nothing here writes 'lastPage' except through the page turn the Quran tab already handles.
+'use no memo'; // reads the Listener's own state (a class), which the React Compiler cannot see change: it would keep the first drawing
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+
+import { BackIcon, CloseIcon, PauseIcon, PlayIcon } from '@/components/icons';
+import type { Marked } from '@/components/PageCurl';
+import { Sheet } from '@/components/ui';
+import { Txt } from '@/components/Txt';
+import { HIF } from '@/i18n/hifdh';
+import { isEnglish, surahName } from '@/i18n/i18n';
+import { ayatOn, pageOf } from '@/lib/boxes';
+import { available, counts, keysFromTo, Listener, MAX_TYPED, METHODS, ordered, parse, QUICK, reciterOf, SPEEDS, times } from '@/lib/hifdh/listen';
+import { SURAHS } from '@/lib/quran';
+import { ui } from '@/theme/fonts';
+import { useTheme } from '@/theme/theme';
+import { radius, space } from '@/theme/tokens';
+
+type Sel = { from: string; to: string };
+type Ayat = { s: number; a: number; boxes: number[][] }[];
+
+export const LISTEN_BAR_H = 64;
+const CHOSEN = 'rgba(27, 107, 83, 0.2)';
+const STEP = 'rgba(27, 107, 83, 0.14)';
+const NOW = 'rgba(217, 185, 106, 0.42)';
+
+// «al-Baqarah 7», «al-Baqarah 7–9», «al-Baqarah 286 ← Āl ʿImrān 3»
+function labelOf(from: string, to: string) {
+  const [s1, a1] = parse(from);
+  const [s2, a2] = parse(to);
+  if (from === to) return `${surahName(SURAHS[s1 - 1])} ${a1}`;
+  if (s1 === s2) return `${surahName(SURAHS[s1 - 1])} ${a1}–${a2}`;
+  return `${surahName(SURAHS[s1 - 1])} ${a1} ${isEnglish ? '→' : '←'} ${surahName(SURAHS[s2 - 1])} ${a2}`;
+}
+
+export function useListen(active: boolean, page: number, follow: (page: number) => void) {
+  const { c } = useTheme();
+  const [, bump] = useState(0);
+  const [ls] = useState(() => new Listener());
+  const [sel, setSel] = useState<Sel | null>(null);
+  const [anchor, setAnchor] = useState(false); // exactly one ayah is chosen: a second tap takes everything between
+  const [hint, setHint] = useState('');
+  const [open, setOpen] = useState(false); // the settings sheet
+
+  // the players live only while the mode is on
+  useEffect(() => {
+    if (!active) return;
+    ls.start(() => bump((n) => n + 1));
+    return () => {
+      ls.release();
+      setSel(null);
+      setAnchor(false);
+      setOpen(false);
+    };
+  }, [active, ls]);
+  useEffect(() => {
+    if (!hint) return;
+    const id = setTimeout(() => setHint(''), 2800);
+    return () => clearTimeout(id);
+  }, [hint]);
+
+  const prefs = ls.prefs;
+  const keys = useMemo(() => (sel ? keysFromTo(sel.from, sel.to) : []), [sel]);
+  const selId = sel ? `${sel.from}-${sel.to}|${prefs.method}` : '';
+  const s = ls.s && ls.s.selId === selId ? ls.s : null;
+  const playing = ls.playing && !!s;
+  const step: string[] | null = s ? s.steps[s.si] : null;
+  const now: string | null = s && !s.finished ? s.steps[s.si][s.ki] : null;
+
+  // the page follows the ayah that is heard
+  useEffect(() => {
+    if (!active || !now) return;
+    const p = pageOf(...(parse(now) as [number, number]));
+    if (p && p !== page) follow(p);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [now]);
+
+  const onPage = ayatOn(page) as Ayat;
+  const first = onPage[0];
+  const base = sel?.from ?? (first ? `${first.s}:${first.a}` : '1:1');
+
+  const chosenSet = new Set(keys);
+  const stepSet = new Set(step ?? []);
+  const marks: Marked[] = active
+    ? [
+        ...onPage.filter((e) => chosenSet.has(`${e.s}:${e.a}`)).map((e) => ({ ...e, color: CHOSEN })),
+        ...onPage.filter((e) => stepSet.has(`${e.s}:${e.a}`) && `${e.s}:${e.a}` !== now).map((e) => ({ ...e, color: STEP })),
+        ...onPage.filter((e) => `${e.s}:${e.a}` === now).map((e) => ({ ...e, color: NOW })),
+      ]
+    : [];
+
+  const setRange = (next: Sel) => {
+    setSel(next);
+    setAnchor(false);
+  };
+  // a tap on the page chooses an ayah, a second one completes the range; once it is complete or something plays, taps do nothing
+  const tap = (su: number, a: number) => {
+    const key = `${su}:${a}`;
+    if (ls.s || (sel && !anchor)) return setHint(HIF.lsLocked());
+    if (!sel || !anchor) {
+      setSel({ from: key, to: key });
+      setAnchor(true);
+    } else {
+      const [from, to] = ordered(sel.from, key);
+      setSel({ from, to });
+      setAnchor(false);
+    }
+  };
+  const clear = () => {
+    ls.halt();
+    setSel(null);
+    setAnchor(false);
+  };
+  const begin = (range: Sel) => {
+    setRange(range);
+    ls.begin(keysFromTo(range.from, range.to), `${range.from}-${range.to}|${prefs.method}`);
+  };
+  const surahOf = (su: number): Sel => ({ from: `${su}:1`, to: `${su}:${counts()[su - 1]}` });
+  const wholeSurah = () => setRange(surahOf(parse(base)[0]));
+  const wholePage = () => {
+    if (!onPage.length) return;
+    const last = onPage[onPage.length - 1];
+    setRange({ from: `${onPage[0].s}:${onPage[0].a}`, to: `${last.s}:${last.a}` });
+  };
+  const playSurah = () => first && begin(surahOf(first.s));
+  // from the sheet: the chosen range, or the ayah at the top of the page when nothing was tapped
+  const playFromSheet = () => {
+    setOpen(false);
+    begin(sel ?? { from: base, to: base });
+  };
+  // from the ayah's menu: that ayah, alone
+  const playAyah = (su: number, a: number) => begin({ from: `${su}:${a}`, to: `${su}:${a}` });
+
+  let title = sel ? labelOf(sel.from, sel.to) : HIF.lsNothingChosen();
+  let sub = sel ? (anchor ? `${HIF.lsAyatCount(keys.length)} · ${HIF.lsPickMore()}` : HIF.lsAyatCount(keys.length)) : HIF.lsPickShort();
+  if (s && step) {
+    const bits = [HIF.lsStep(s.si + 1, s.steps.length), HIF.lsTime(s.pass + 1, prefs.repeat)];
+    if (prefs.loop || prefs.rounds !== 1) bits.push(HIF.lsRound(s.round + 1, prefs.loop ? 0 : prefs.rounds));
+    const [x, y] = step.length > 1 ? ordered(step[0], step[step.length - 1]) : [step[0], step[0]];
+    title = labelOf(x, y);
+    sub = s.error ? HIF.lsError() : s.finished ? HIF.lsDone() : bits.join(' · ');
+  }
+  if (hint) sub = hint;
+
+  const bar = (
+    <View style={styles.barBox}>
+      <Pill>
+        <Pressable onPress={() => setOpen(true)} accessibilityRole="button" accessibilityLabel={HIF.lsSettings()} style={styles.summary}>
+          <Txt size={16} weight={700} color={c.ink} numberOfLines={1}>
+            {title}
+          </Txt>
+          <Txt size={12.5} color={s?.error ? '#b3402e' : c.meta} numberOfLines={1}>
+            {sub}
+          </Txt>
+        </Pressable>
+        {!sel && !!first && (
+          <Btn label={`${HIF.lsQuickSurah()}: ${surahName(SURAHS[first.s - 1])}`} onPress={playSurah} wide>
+            <PlayIcon color={c.ink} size={14} />
+            <Txt size={13} weight={700} color={c.ink} numberOfLines={1}>
+              {HIF.lsQuickSurah()}
+            </Txt>
+          </Btn>
+        )}
+        {!!sel && (
+          <Btn label={HIF.lsQuickClear()} onPress={clear}>
+            <CloseIcon color={c.ink} size={20} />
+          </Btn>
+        )}
+        {!!s && (
+          <Btn label={HIF.lsPrevStep()} onPress={() => ls.jump(-1)} disabled={s.si === 0}>
+            <BackIcon color={c.ink} size={20} rtl={!isEnglish} />
+          </Btn>
+        )}
+        <Btn label={playing ? HIF.lsPause() : HIF.lsPlay()} onPress={() => ls.togglePlay(keys, selId)} disabled={!sel} main>
+          {playing ? <PauseIcon color={c.onInk} size={22} /> : <PlayIcon color={c.onInk} size={22} />}
+        </Btn>
+        {!!s && (
+          <Btn label={HIF.lsNextStep()} onPress={() => ls.jump(1)} disabled={s.si >= s.steps.length - 1}>
+            <View style={{ transform: [{ scaleX: -1 }] }}>
+              <BackIcon color={c.ink} size={20} rtl={!isEnglish} />
+            </View>
+          </Btn>
+        )}
+      </Pill>
+    </View>
+  );
+
+  const names = (r: { name: string[] }) => r.name[isEnglish ? 1 : 0];
+  const methodText: Record<string, [string, string]> = {
+    each: [HIF.lsMethodEach(), HIF.lsMethodEachD()],
+    prev: [HIF.lsMethodPrev(), HIF.lsMethodPrevD()],
+    all: [HIF.lsMethodAll(), HIF.lsMethodAllD()],
+  };
+  const sheet = (
+    <Sheet open={active && open} onClose={() => setOpen(false)} title={HIF.lsSettings()}>
+      <Label>{HIF.lsQuickH()}</Label>
+      <View style={styles.wrap}>
+        <Chip label={HIF.lsQuickPage()} onPress={wholePage} />
+        <Chip label={HIF.lsQuickSurah()} onPress={wholeSurah} />
+      </View>
+      <Label>{HIF.lsEachH()}</Label>
+      <Nums value={prefs.repeat} onChange={(n) => ls.setPref('repeat', n)} />
+      <Label>{HIF.lsRoundsH()}</Label>
+      <Nums value={prefs.rounds} onChange={(n) => ls.setPref('rounds', n)} />
+      <Label>{HIF.lsSpeed()}</Label>
+      <View style={styles.wrap}>
+        {SPEEDS.map((v: number) => (
+          <Chip key={v} label={`${v}×`} on={prefs.speed === v} onPress={() => ls.setPref('speed', v)} />
+        ))}
+      </View>
+      <Label>{HIF.lsReciter()}</Label>
+      <View style={styles.wrap}>
+        {available().map((r: { id: string; name: string[] }) => (
+          <Chip key={r.id} label={names(r)} on={reciterOf(prefs).id === r.id} onPress={() => ls.setPref('reciter', r.id)} />
+        ))}
+      </View>
+      <Label>{`${HIF.lsMethod()} ${HIF.lsOptional()}`}</Label>
+      {METHODS.map((m: string) => (
+        <Method key={m} on={prefs.method === m} title={methodText[m][0]} text={methodText[m][1]} onPress={() => ls.setPref('method', m)} />
+      ))}
+      <GoButton label={HIF.lsGo()} onPress={playFromSheet} />
+    </Sheet>
+  );
+
+  return { bar, sheet, marks, tap, playAyah, clear };
+}
+
+// ---------- small parts ----------
+
+function Pill({ children }: { children: ReactNode }) {
+  const { c } = useTheme();
+  return <View style={[styles.pill, { backgroundColor: c.card, borderColor: c.line }]}>{children}</View>;
+}
+
+function Btn({ label, onPress, children, disabled, main, wide }: { label: string; onPress: () => void; children: ReactNode; disabled?: boolean; main?: boolean; wide?: boolean }) {
+  const { c } = useTheme();
+  const size = main ? 48 : 36;
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={[
+        wide ? styles.wideBtn : { width: size, height: size, borderRadius: size / 2 },
+        styles.btn,
+        { backgroundColor: main ? c.on : c.surface2, opacity: disabled ? 0.35 : 1 },
+      ]}
+    >
+      {children}
+    </Pressable>
+  );
+}
+
+function Label({ children }: { children: string }) {
+  const { c } = useTheme();
+  return (
+    <Txt size={13} weight={700} color={c.meta} style={{ marginTop: space.sm }}>
+      {children}
+    </Txt>
+  );
+}
+
+function Chip({ label, on, onPress }: { label: string; on?: boolean; onPress: () => void }) {
+  const { c } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: !!on }}
+      style={[styles.chip, { backgroundColor: on ? c.on : c.surface2, borderColor: on ? c.on : c.line }]}
+    >
+      <Txt size={14} weight={700} color={on ? c.onInk : c.ink}>
+        {label}
+      </Txt>
+    </Pressable>
+  );
+}
+
+// 1-5, and one box for any other number
+function Nums({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  const { c } = useTheme();
+  const other = value > QUICK[QUICK.length - 1];
+  const [typed, setTyped] = useState<string | null>(null);
+  return (
+    <View style={styles.wrap}>
+      {QUICK.map((n: number) => (
+        <Chip key={n} label={String(n)} on={value === n} onPress={() => onChange(n)} />
+      ))}
+      <TextInput
+        value={typed ?? (other ? String(value) : '')}
+        onChangeText={(v) => {
+          const d = v.replace(/\D/g, '').slice(0, 2);
+          setTyped(d);
+          if (d) onChange(times(d));
+        }}
+        onBlur={() => setTyped(null)}
+        keyboardType="number-pad"
+        placeholder={HIF.lsOther()}
+        placeholderTextColor={c.meta}
+        maxLength={String(MAX_TYPED).length}
+        accessibilityLabel={HIF.lsOther()}
+        style={[styles.other, { color: c.ink, borderColor: other ? c.on : c.line, backgroundColor: c.card }]}
+      />
+    </View>
+  );
+}
+
+function Method({ on, title, text, onPress }: { on: boolean; title: string; text: string; onPress: () => void }) {
+  const { c } = useTheme();
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }} style={[styles.method, { backgroundColor: on ? c.surface2 : c.card, borderColor: on ? c.on : c.line }]}>
+      <Txt size={15} weight={700} color={c.ink}>
+        {title}
+      </Txt>
+      <Txt size={13} color={c.meta}>
+        {text}
+      </Txt>
+    </Pressable>
+  );
+}
+
+function GoButton({ label, onPress }: { label: string; onPress: () => void }) {
+  const { c } = useTheme();
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.go, { backgroundColor: c.on }]}>
+      <PlayIcon color={c.onInk} size={22} />
+      <Txt size={16} weight={700} color={c.onInk}>
+        {label}
+      </Txt>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  barBox: { paddingHorizontal: space.md, paddingTop: space.sm, paddingBottom: space.sm, alignItems: 'center' },
+  pill: { alignSelf: 'stretch', maxWidth: 520, height: LISTEN_BAR_H, borderRadius: LISTEN_BAR_H / 2, borderWidth: StyleSheet.hairlineWidth, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: space.sm },
+  summary: { flex: 1, minWidth: 0, paddingVertical: 6, paddingHorizontal: 10, gap: 1 },
+  btn: { alignItems: 'center', justifyContent: 'center' },
+  wideBtn: { height: 36, paddingHorizontal: 12, borderRadius: 18, flexDirection: 'row', gap: 6 },
+  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, alignItems: 'center' },
+  chip: { minHeight: 40, minWidth: 44, paddingHorizontal: 14, borderRadius: radius.chip, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  other: { minWidth: 96, height: 40, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, textAlign: 'center', fontSize: 14, fontFamily: ui(600) },
+  method: { borderRadius: radius.chip, borderWidth: 1, padding: 12, gap: 2 },
+  go: { minHeight: 52, borderRadius: radius.button, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: space.sm },
+});

@@ -1,5 +1,7 @@
 // QURAN tab: the mushaf page, opened at the last page read. One page, three modes (Read, Listen, Recite) chosen from
-// the drop-down at the header's end; this is Read. Listen and Recite come next (phase c2) on this same page.
+// the drop-down at the header's end. Read is this file; Listen and Recite are src/components/quran/ListenMode.tsx and
+// ReciteMode.tsx: each adds a bar under the page and changes what a tap on an ayah does (Read: its menu; Listen: chooses
+// it; Recite: starts the cover again from it).
 //   header   the index (fahras) and the search; the notes and the mode drop-down; under them the surah and juz
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
 //            («Mark here» in an ayah's menu, «Remove mark» on the marked ayah), shown as a ribbon on its page
@@ -23,7 +25,9 @@ import { CollapseIcon, MoonIcon, SunIcon, ZoomOutIcon } from '@/components/icons
 import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
 import { PageCurl, type Chosen, type Marked, type Pin as NotePin } from '@/components/PageCurl';
 import { DropMenu } from '@/components/quran/DropMenu';
+import { useListen } from '@/components/quran/ListenMode';
 import { menuTop, QuranHeader } from '@/components/quran/QuranHeader';
+import { useRecite } from '@/components/quran/ReciteMode';
 import { SearchPanel } from '@/components/quran/SearchPanel';
 import { QuranIndex } from '@/components/QuranIndex';
 import { Txt } from '@/components/Txt';
@@ -92,6 +96,7 @@ function Quran() {
   const [indexOpen, setIndexOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false); // the drop-down of the modes
+  const [mode, setMode] = useState<Mode>('read');
   const [ayah, setAyah] = useState<Ayah | null>(null); // its tafsir open
   const [menu, setMenu] = useState<MenuAt | null>(null); // its options open
   const [note, setNote] = useState<NoteFor | null>(null); // its comment open
@@ -162,6 +167,10 @@ function Quran() {
     });
   }, [page]);
 
+  // the two other modes: each gives a bar under the page and its own handling of a tap on an ayah
+  const listen = useListen(mode === 'listen', page, jump);
+  const recite = useRecite(mode === 'recite', page);
+
   // previous / next ayah from the tafsir sheet, going to its page when it is on another one
   const moveAyah = (step: 1 | -1) => {
     if (!ayah) return;
@@ -187,15 +196,16 @@ function Quran() {
 
   const lit = ayah ?? menu ?? flash;
   const onPage: Chosen[] = ayatOn(page);
-  const chosen: Chosen[] = lit ? onPage.filter((e) => e.s === lit.s && e.a === lit.a) : [];
+  const chosen: Chosen[] = mode === 'read' && lit ? onPage.filter((e) => e.s === lit.s && e.a === lit.a) : [];
 
   // the highlighted ayat of the page, and the badges of its comments: in the margin beside the line where the ayah
   // begins, on its outer side (the wider margin), never two on one height (as on the website)
   const notes = useMarks();
-  const marks: Marked[] = onPage.flatMap((e) => {
+  const readMarks: Marked[] = onPage.flatMap((e) => {
     const h = notes.highlightOf(`${e.s}:${e.a}`);
     return h ? [{ ...e, color: hlColor(h.color).value }] : [];
   });
+  const marks: Marked[] = mode === 'listen' ? listen.marks : mode === 'read' ? readMarks : [];
   const pins: NotePin[] = [];
   const xs = onPage.flatMap((e) => e.boxes.flatMap((b) => [b[0], b[2]]));
   const [minX, maxX] = [Math.min(...xs), Math.max(...xs)];
@@ -208,7 +218,7 @@ function Quran() {
     pins.push({ s: e.s, a: e.a, x: (minX + maxX) / 2 < 0.5 ? maxX + 0.042 : minX - 0.042, y, color: noteColor(n.color).dot });
   }
   // the exact pin, when it is on this page: its ribbon and underline
-  const ribbon: Chosen | null = pin && pin.page === page ? (onPage.find((e) => `${e.s}:${e.a}` === pin.shown) ?? null) : null;
+  const ribbon: Chosen | null = mode === 'read' && pin && pin.page === page ? (onPage.find((e) => `${e.s}:${e.a}` === pin.shown) ?? null) : null;
 
   // the page's size: as big as the room allows, its own shape kept. In full screen the header and the tab bar are gone, so
   // the room is the whole screen (less the notch and the home bar) and the page is the text's own shape, edge to edge.
@@ -238,7 +248,7 @@ function Quran() {
         <View onLayout={(e) => setHeadH(e.nativeEvent.layout.height)}>
           <QuranHeader
             page={page}
-            mode={modes[0].label}
+            mode={modes.find((m) => m.value === mode)?.label ?? modes[0].label}
             onIndex={() => setIndexOpen(true)}
             onSearch={() => setSearchOpen(true)}
             onNotes={() => say(READER.soon())}
@@ -262,12 +272,13 @@ function Quran() {
             onTurned={turned}
             marks={marks}
             pins={pins}
-            onAyah={(s, a, x, y) => setMenu({ s, a, x, y: y + top })}
+            onAyah={(s, a, x, y) => (mode === 'listen' ? listen.tap(s, a) : mode === 'recite' ? recite.tap(s, a) : setMenu({ s, a, x, y: y + top }))}
             onPin={(s, a) => setNote({ s, a })}
-            onHold={markAyah}
+            onHold={mode === 'read' ? markAyah : undefined}
             onEmptyTap={() => setHidden((h) => !h)}
             onZoomed={setZoomed}
             ribbon={ribbon}
+            veils={mode === 'recite' ? recite.veils : undefined}
           />
         )}
 
@@ -284,6 +295,10 @@ function Quran() {
           </View>
         )}
       </View>
+
+      {/* the bar of Listen or Recite, under the page (the page's room is what is left between the header and it) */}
+      {!hidden && mode === 'listen' && listen.bar}
+      {!hidden && mode === 'recite' && recite.bar}
 
       {/* in full screen: exit and the day / night switch, at the top corner just under the clock and the wifi */}
       {hidden && (
@@ -308,8 +323,9 @@ function Quran() {
         onClose={() => setModeOpen(false)}
         top={menuTop(insets.top)}
         side={LANG === 'ar' ? 'left' : 'right'}
-        items={modes.map((m) => ({ key: m.value, label: m.label, chosen: m.value === 'read', onPress: () => m.value !== 'read' && say(READER.soon()) }))}
+        items={modes.map((m) => ({ key: m.value, label: m.label, chosen: m.value === mode, onPress: () => setMode(m.value) }))}
       />
+      {listen.sheet}
       <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={jump} />
       <SearchPanel
         open={searchOpen}
