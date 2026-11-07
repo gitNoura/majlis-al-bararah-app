@@ -33,6 +33,9 @@ for (const page of Object.keys(BOXES).map(Number).sort((x, y) => x - y)) {
   }
 }
 
+// the Quran's own order, whatever order a page's boxes were listed in: next is always the next ayah
+ORDER.sort((x, y) => x.s - y.s || x.a - y.a);
+
 // The page of an ayah ("2:255" -> 42), the first one it is on
 export const pageOf = (s, a) => ORDER.find((e) => e.s === s && e.a === a)?.page ?? null;
 

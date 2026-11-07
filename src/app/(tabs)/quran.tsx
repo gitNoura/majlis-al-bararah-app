@@ -3,10 +3,10 @@
 //   header   the index (fahras) and the search; the notes and the mode drop-down; under them the surah and juz
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
 //            («Mark here» in an ayah's menu, «Remove mark» on the marked ayah), shown as a ribbon on its page
-//   full screen   a pill under the page, above the tab bar, where the thumb is (nothing on the page, nothing in the header).
-//            Pressed, the header, the tab bar and the status bar go and the page grows to fill the screen, on a background
-//            of the page's own paper (cut to its text, as the website's full screen). In that same place: the exit button
-//            and the day / night switch; the phone's back button also exits
+//   full screen   a tap on the page's empty paper (the margins around the text) toggles it: the header, the tab bar and the
+//            status bar go and the page grows to fill the screen, on a background of the page's own paper (cut to its
+//            text, as the website's full screen). Another tap on the empty paper brings them back, and so does the exit
+//            button at the top corner (under the clock), next to the day / night switch, and the phone's back button
 //   a long press on an ayah marks it (the same as «Mark here»); a tap on one opens its menu
 // The page itself is src/components/PageCurl.tsx.
 import { Image } from 'expo-image';
@@ -19,7 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AyahMenu, type MenuAt } from '@/components/AyahMenu';
 import { AyahSheet, type Ayah } from '@/components/AyahSheet';
-import { CollapseIcon, ExpandIcon, MoonIcon, SunIcon, ZoomOutIcon } from '@/components/icons';
+import { CollapseIcon, MoonIcon, SunIcon, ZoomOutIcon } from '@/components/icons';
 import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
 import { PageCurl, type Chosen, type Marked, type Pin as NotePin } from '@/components/PageCurl';
 import { DropMenu } from '@/components/quran/DropMenu';
@@ -44,9 +44,6 @@ import { QuranTheme, useTheme } from '@/theme/theme';
 type Mode = 'read' | 'listen' | 'recite';
 type Room = { width: number; height: number };
 
-const noop = () => {};
-
-const STRIP = 48; // the height of the row under the page
 
 // the buttons on the paper: dark ink on a faint tint, readable on the page's cream in day and in night
 const INK = '#3a3326';
@@ -214,16 +211,15 @@ function Quran() {
   const ribbon: Chosen | null = pin && pin.page === page ? (onPage.find((e) => `${e.s}:${e.a}` === pin.shown) ?? null) : null;
 
   // the page's size: as big as the room allows, its own shape kept. In full screen the header and the tab bar are gone, so
-  // the room is the whole screen (less the notch) down to the strip of buttons, and the page is the text's own shape,
-  // edge to edge.
+  // the room is the whole screen (less the notch and the home bar) and the page is the text's own shape, edge to edge.
   const padTop = hidden ? insets.top : 0;
-  const strip = STRIP + (hidden ? insets.bottom : 0); // the row under the page that holds the full-screen buttons
+  const padBottom = hidden ? insets.bottom : 0;
   const shape = hidden ? FULL_SHAPE : PAGE_SHAPE;
   const pageW = Math.min(room.width - (hidden ? 0 : 10), (room.height - (hidden ? 0 : 12)) * shape);
   const pageH = pageW / shape;
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
-    const usable = height - padTop;
+    const usable = height - padTop - padBottom;
     setRoom((r) => (r.width === width && r.height === usable ? r : { width, height: usable }));
   };
   const top = hidden ? insets.top : headH; // where the room begins on the screen (the ayah's menu is placed by it)
@@ -252,7 +248,7 @@ function Quran() {
       )}
 
       {/* the page's room: what is left under the header */}
-      <View style={{ flex: 1, paddingTop: padTop }} onLayout={onLayout}>
+      <View style={{ flex: 1, paddingTop: padTop, paddingBottom: padBottom }} onLayout={onLayout}>
         {room.width > 0 && room.height > 0 && (
           <PageCurl
             page={page}
@@ -269,7 +265,7 @@ function Quran() {
             onAyah={(s, a, x, y) => setMenu({ s, a, x, y: y + top })}
             onPin={(s, a) => setNote({ s, a })}
             onHold={markAyah}
-            onEmptyTap={noop}
+            onEmptyTap={() => setHidden((h) => !h)}
             onZoomed={setZoomed}
             ribbon={ribbon}
           />
@@ -289,32 +285,22 @@ function Quran() {
         )}
       </View>
 
-      {/* under the page: the full-screen pill; in full screen, the exit and the day / night buttons in its place */}
-      <View style={{ height: strip, paddingBottom: hidden ? insets.bottom : 0, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 16, direction: 'ltr' }}>
-        {hidden ? (
-          <>
-            <RoundButton size={44} label={READER.theme()} onPress={() => setQuranMode(isDark ? 'light' : 'dark')}>
-              {isDark ? <SunIcon color={INK} size={22} /> : <MoonIcon color={INK} size={22} />}
-            </RoundButton>
-            <RoundButton size={44} label={READER.exitFull()} onPress={() => setHidden(false)}>
-              <CollapseIcon color={INK} size={22} />
-            </RoundButton>
-          </>
-        ) : (
-          <Pressable
-            onPress={() => setHidden(true)}
-            accessibilityRole="button"
-            accessibilityLabel={READER.fullscreen()}
-            hitSlop={6}
-            style={[styles.pill, { backgroundColor: c.surface2 }]}
-          >
-            <ExpandIcon color={c.ink} size={18} />
-            <Txt size={13} weight={700} color={c.ink}>
-              {READER.fullscreen()}
-            </Txt>
-          </Pressable>
-        )}
-      </View>
+      {/* in full screen: exit and the day / night switch, at the top corner just under the clock and the wifi */}
+      {hidden && (
+        <View style={[{ position: 'absolute', zIndex: 5, top: insets.top + 8, flexDirection: 'row', gap: 10, direction: 'ltr' }, LANG === 'ar' ? { left: 12 } : { right: 12 }]}>
+          {(LANG === 'ar' ? ['exit', 'theme'] : ['theme', 'exit']).map((k) =>
+            k === 'exit' ? (
+              <RoundButton key={k} size={44} label={READER.exitFull()} onPress={() => setHidden(false)}>
+                <CollapseIcon color={INK} size={22} />
+              </RoundButton>
+            ) : (
+              <RoundButton key={k} size={44} label={READER.theme()} onPress={() => setQuranMode(isDark ? 'light' : 'dark')}>
+                {isDark ? <SunIcon color={INK} size={22} /> : <MoonIcon color={INK} size={22} />}
+              </RoundButton>
+            ),
+          )}
+        </View>
+      )}
 
       {/* the modes hang from the header's end corner, the wird's old place (Arabic's end is the left of the screen) */}
       <DropMenu
@@ -358,7 +344,6 @@ function Quran() {
 }
 
 const styles = StyleSheet.create({
-  pill: { height: 38, borderRadius: 19, paddingHorizontal: 16, flexDirection: 'row', direction: 'ltr', alignItems: 'center', gap: 8 },
   whole: { position: 'absolute', bottom: 12, alignSelf: 'center', width: 44, height: 44, borderRadius: 22, borderWidth: StyleSheet.hairlineWidth, alignItems: 'center', justifyContent: 'center' },
   toast: { position: 'absolute', bottom: 16, alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 18, borderRadius: 999 },
 });

@@ -2,14 +2,14 @@
 // tabs - the tafsir and the translation, each with the sources chosen (src/lib/sources.js) - and the
 // texts in the interface's own font (Tajawal), the ayat they quote in the Quran's (Amiri) and their own colour, each
 // source's name under its text. Previous (on the left) and next (on the right) go from ayah to ayah.
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ActivityIndicator, Animated, Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
-import { L, surahName, t } from '@/i18n/i18n';
+import { L, LANG, surahName, t } from '@/i18n/i18n';
 import { SURAHS } from '@/lib/quran';
 import { tafsirSources } from '@/lib/sources';
 import { loadTafsir, withQuotes } from '@/lib/tafsir';
@@ -121,25 +121,35 @@ export function AyahSheet({ ayah, onClose, onMove }: { ayah: Ayah | null; onClos
           })}
         </ScrollView>
 
-        {/* previous on the left, next on the right, in every language (the row is laid out left to right on purpose) */}
+        {/* previous on the left, next on the right, in every language. In Arabic a row runs from the right, so there the
+            order is reversed (the layout's direction is not touched: that is what the rest of the screen uses) */}
         <View style={[styles.moves, { borderTopColor: c.divider }]}>
-          <Pressable onPress={() => onMove(-1)} style={[styles.move, { borderColor: c.line }]}>
-            <Chevron left color={c.ink} />
-            <Txt size={15} weight={700} color={c.ink}>
-              {L('السابقة', 'Previous', 'Précédent')}
-            </Txt>
-          </Pressable>
-          <Pressable onPress={() => onMove(1)} style={[styles.move, { backgroundColor: c.on, borderColor: c.on }]}>
-            <Txt size={15} weight={700} color={c.onInk}>
-              {L('التالية', 'Next', 'Suivant')}
-            </Txt>
-            <Chevron color={c.onInk} />
-          </Pressable>
+          {visual([
+            <Pressable key="prev" onPress={() => onMove(-1)} style={[styles.move, { borderColor: c.line }]}>
+              {visual([
+                <Chevron key="c" left color={c.ink} />,
+                <Txt key="t" size={15} weight={700} color={c.ink}>
+                  {L('السابقة', 'Previous', 'Précédent')}
+                </Txt>,
+              ])}
+            </Pressable>,
+            <Pressable key="next" onPress={() => onMove(1)} style={[styles.move, { backgroundColor: c.on, borderColor: c.on }]}>
+              {visual([
+                <Txt key="t" size={15} weight={700} color={c.onInk}>
+                  {L('التالية', 'Next', 'Suivant')}
+                </Txt>,
+                <Chevron key="c" color={c.onInk} />,
+              ])}
+            </Pressable>,
+          ])}
         </View>
       </Animated.View>
     </Modal>
   );
 }
+
+// what is laid out left to right, in the order it is meant to be seen: reversed in Arabic, whose rows run from the right
+const visual = (items: ReactNode[]) => (LANG === 'ar' ? [...items].reverse() : items);
 
 function Chevron({ left, color }: { left?: boolean; color: string }) {
   return (
@@ -168,6 +178,6 @@ const styles = StyleSheet.create({
   round: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   tabs: { flexDirection: 'row', padding: 4, borderRadius: 14 },
   tab: { flex: 1, paddingVertical: 9, borderRadius: 11 },
-  moves: { flexDirection: 'row', direction: 'ltr', gap: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth },
-  move: { flex: 1, flexDirection: 'row', direction: 'ltr', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 24, borderWidth: 1 },
+  moves: { flexDirection: 'row', gap: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth },
+  move: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 24, borderWidth: 1 },
 });
