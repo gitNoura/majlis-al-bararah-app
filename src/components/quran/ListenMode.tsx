@@ -19,7 +19,7 @@ import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish, surahName } from '@/i18n/i18n';
 import { ayatOn, pageOf } from '@/lib/boxes';
-import { available, counts, keysFromTo, Listener, MAX_TYPED, METHODS, ordered, parse, QUICK, reciterOf, SPEEDS, times } from '@/lib/hifdh/listen';
+import { available, counts, keysFromTo, Listener, MAX_TYPED, METHODS, ordered, parse, pos, QUICK, reciterOf, SPEEDS, times } from '@/lib/hifdh/listen';
 import { SURAHS } from '@/lib/quran';
 import { ui } from '@/theme/fonts';
 import { useTheme } from '@/theme/theme';
@@ -50,6 +50,7 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
   const [anchor, setAnchor] = useState(false); // exactly one ayah is chosen: a second tap takes everything between
   const [hint, setHint] = useState('');
   const [open, setOpen] = useState(false); // the settings sheet
+  const [picker, setPicker] = useState<'from' | 'to' | null>(null); // the surah list, in the sheet's place
 
   // the players live only while the mode is on
   useEffect(() => {
@@ -60,6 +61,7 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
       setSel(null);
       setAnchor(false);
       setOpen(false);
+      setPicker(null);
     };
   }, [active, ls]);
   useEffect(() => {
@@ -125,6 +127,8 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
     ls.begin(keysFromTo(range.from, range.to), `${range.from}-${range.to}|${prefs.method}`);
   };
   const surahOf = (su: number): Sel => ({ from: `${su}:1`, to: `${su}:${counts()[su - 1]}` });
+  const setFrom = (from: string) => setRange({ from, to: sel && pos(sel.to) >= pos(from) ? sel.to : from });
+  const setTo = (to: string) => setRange({ from: sel?.from ?? to, to: sel && pos(to) < pos(sel.from) ? sel.from : to }); // an end before the start is taken as the start
   const wholeSurah = () => setRange(surahOf(parse(base)[0]));
   const wholePage = () => {
     if (!onPage.length) return;
@@ -201,7 +205,27 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
     all: [HIF.lsMethodAll(), HIF.lsMethodAllD()],
   };
   const sheet = (
-    <Sheet open={active && open} onClose={() => setOpen(false)} title={HIF.lsSettings()}>
+    <Sheet open={active && open} onClose={() => (picker ? setPicker(null) : setOpen(false))} title={picker ? HIF.lsSurah() : HIF.lsSettings()}>
+      {picker ? (
+        SURAHS.map((su: { number: number }) => (
+          <SurahRow
+            key={su.number}
+            n={su.number}
+            name={surahName(su)}
+            onPress={() => {
+              const [, a] = parse(picker === 'from' ? (sel?.from ?? base) : (sel?.to ?? base));
+              const key = `${su.number}:${Math.min(a, counts()[su.number - 1])}`;
+              if (picker === 'from') setFrom(key);
+              else setTo(key);
+              setPicker(null);
+            }}
+          />
+        ))
+      ) : (
+        <>
+      <Label>{HIF.lsRangeH()}</Label>
+      <Point label={HIF.lsFrom()} value={sel?.from ?? base} onChange={setFrom} onSurah={() => setPicker('from')} />
+      <Point label={HIF.lsTo()} value={sel?.to ?? base} onChange={setTo} onSurah={() => setPicker('to')} />
       <Label>{HIF.lsQuickH()}</Label>
       <View style={styles.wrap}>
         <Chip label={HIF.lsQuickPage()} onPress={wholePage} />
@@ -228,6 +252,8 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
         <Method key={m} on={prefs.method === m} title={methodText[m][0]} text={methodText[m][1]} onPress={() => ls.setPref('method', m)} />
       ))}
       <GoButton label={HIF.lsGo()} onPress={playFromSheet} />
+        </>
+      )}
     </Sheet>
   );
 
@@ -315,6 +341,57 @@ function Nums({ value, onChange }: { value: number; onChange: (n: number) => voi
   );
 }
 
+// «surah [..] ayah [− n +]»
+function Point({ label, value, onChange, onSurah }: { label: string; value: string; onChange: (key: string) => void; onSurah: () => void }) {
+  const { c } = useTheme();
+  const [su, a] = parse(value);
+  const [typed, setTyped] = useState<string | null>(null);
+  const max = counts()[su - 1];
+  const setAyah = (n: number) => onChange(`${su}:${Math.min(max, Math.max(1, n))}`);
+  return (
+    <View style={{ gap: 6 }}>
+      <Txt size={13} weight={700} color={c.meta}>
+        {label}
+      </Txt>
+      <View style={styles.pointRow}>
+        <Pressable onPress={onSurah} accessibilityRole="button" style={[styles.surahBtn, { borderColor: c.line, backgroundColor: c.card }]}>
+          <Txt size={15} weight={600} color={c.ink} numberOfLines={1}>
+            {surahName(SURAHS[su - 1])}
+          </Txt>
+        </Pressable>
+        <Chip label="−" onPress={() => setAyah(a - 1)} />
+        <TextInput
+          value={typed ?? String(a)}
+          onChangeText={(v) => {
+            const d = v.replace(/\D/g, '').slice(0, 3);
+            setTyped(d);
+            if (d) setAyah(Number(d));
+          }}
+          onBlur={() => setTyped(null)}
+          keyboardType="number-pad"
+          accessibilityLabel={HIF.lsAyah()}
+          style={[styles.ayahBox, { color: c.ink, borderColor: c.line, backgroundColor: c.card }]}
+        />
+        <Chip label="+" onPress={() => setAyah(a + 1)} />
+      </View>
+    </View>
+  );
+}
+
+function SurahRow({ n, name, onPress }: { n: number; name: string; onPress: () => void }) {
+  const { c } = useTheme();
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.surahRow, { borderColor: c.line }]}>
+      <Txt size={13} color={c.meta} style={{ width: 34 }}>
+        {n}
+      </Txt>
+      <Txt size={16} weight={600} color={c.ink}>
+        {name}
+      </Txt>
+    </Pressable>
+  );
+}
+
 function Method({ on, title, text, onPress }: { on: boolean; title: string; text: string; onPress: () => void }) {
   const { c } = useTheme();
   return (
@@ -350,6 +427,10 @@ const styles = StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, alignItems: 'center' },
   chip: { minHeight: 40, minWidth: 44, paddingHorizontal: 14, borderRadius: radius.chip, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   other: { minWidth: 96, height: 40, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, textAlign: 'center', fontSize: 14, fontFamily: ui(600) },
+  pointRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  surahBtn: { flex: 1, minHeight: 44, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, justifyContent: 'center' },
+  ayahBox: { width: 64, height: 44, borderRadius: radius.chip, borderWidth: 1, textAlign: 'center', fontSize: 16, fontFamily: ui(600) },
+  surahRow: { flexDirection: 'row', alignItems: 'center', minHeight: 46, borderBottomWidth: StyleSheet.hairlineWidth },
   method: { borderRadius: radius.chip, borderWidth: 1, padding: 12, gap: 2 },
   go: { minHeight: 52, borderRadius: radius.button, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: space.sm },
 });

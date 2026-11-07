@@ -114,19 +114,20 @@ function Quran() {
 
   // the tab bar is drawn by src/app/(tabs)/_layout.tsx, which reads this option
   useEffect(() => {
-    navigation.setOptions({ tabBarStyle: { display: hidden ? 'none' : 'flex' } });
-  }, [hidden, navigation]);
+    navigation.setOptions({ tabBarStyle: { display: hidden || mode !== 'read' ? 'none' : 'flex' } });
+  }, [hidden, mode, navigation]);
 
-  // the phone's back button leaves full screen before it leaves the page
+  // the phone's back button leaves full screen, then Listen / Recite, before it leaves the page
   useFocusEffect(
     useCallback(() => {
       const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-        if (!hidden) return false;
-        setHidden(false);
+        if (hidden) setHidden(false);
+        else if (mode !== 'read') setMode('read');
+        else return false;
         return true;
       });
       return () => sub.remove();
-    }, [hidden]),
+    }, [hidden, mode]),
   );
 
   // a short message over the page; it clears itself
@@ -297,8 +298,8 @@ function Quran() {
       </View>
 
       {/* the bar of Listen or Recite, under the page (the page's room is what is left between the header and it) */}
-      {!hidden && mode === 'listen' && listen.bar}
-      {!hidden && mode === 'recite' && recite.bar}
+      {/* the tab bar is hidden in these modes, so this is the only bar at the bottom: it takes the home bar's room itself */}
+      {!hidden && mode !== 'read' && <View style={{ paddingBottom: insets.bottom }}>{mode === 'listen' ? listen.bar : recite.bar}</View>}
 
       {/* in full screen: exit and the day / night switch, at the top corner just under the clock and the wifi */}
       {hidden && (
