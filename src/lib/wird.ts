@@ -126,18 +126,16 @@ export async function markStop(tapped: string, page: number, firstOnPage: string
 // The marker follows every page turn. The pin is an ayah the reader marked («Mark here»); it stays where it was put
 // until it is moved. The day's reading is counted from the pages turned (below), not from the pin.
 
-// «Mark here»: the pin goes on this ayah (`tapped`: as numbered in the narration read). Returns what the closing card
-// shows (the khatma, if this is the last ayah of an-Nas), or null when the ayah has no Warsh key.
-export async function setPin(tapped: string, page: number): Promise<Done | null> {
+// «Mark here»: the pin goes on this ayah (`tapped`: as numbered in the narration read). Marking the last ayah of an-Nas
+// completes a khatma. False when the ayah has no Warsh key (the Basmala of al-Fatiha in Hafs).
+export function setPin(tapped: string, page: number): boolean {
   const key = storedKeys(tapped).at(-1); // saved under the Warsh key
-  if (!key) return null; // the Basmala of al-Fatiha in Hafs has no Warsh ayah
+  if (!key) return false;
   const state = loadWird();
-  const khatma = key === LAST_AYAH && state.stop?.key !== LAST_AYAH;
-  if (khatma) state.khatmas = (state.khatmas || 0) + 1;
+  if (key === LAST_AYAH && state.stop?.key !== LAST_AYAH) state.khatmas = (state.khatmas || 0) + 1;
   state.stop = { page, key };
   save(state);
-  const next = await nextAfter(key);
-  return { khatma, khatmas: state.khatmas, progress: khatma ? 100 : (page / TOTAL_PAGES) * 100, next };
+  return true;
 }
 
 export function clearPin() {
@@ -145,8 +143,6 @@ export function clearPin() {
   state.stop = null;
   save(state);
 }
-
-export const khatmasDone = () => loadWird().khatmas || 0;
 
 // the ayat that begin on a page (Warsh keys), grouped by surah
 function startingOn(page: number) {

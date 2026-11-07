@@ -20,6 +20,3 @@ export const savePage = (page: number) => writeJSON(KEY, clampPage(page));
 
 // the pin: { page, shown } (shown: the ayah as numbered in the narration read, "2:255"), or null
 export const savedPin = wirdStop;
-
-// how much of the Quran lies behind the marker, 0 to 1 (the khatma's progress)
-export const khatmaShare = (page: number) => clampPage(page) / TOTAL_PAGES;

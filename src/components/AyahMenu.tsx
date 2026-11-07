@@ -21,8 +21,9 @@ export type MenuAt = { s: number; a: number; x: number; y: number };
 
 const W = 268;
 
-// `onMark` (the Quran tab): adds «Mark here», which puts the exact pin on the ayah
-export function AyahMenu({ at, onClose, onTafsir, onNote, onMark }: { at: MenuAt | null; onClose: () => void; onTafsir: () => void; onNote: () => void; onMark?: () => void }) {
+// `onMark` (the Quran tab): adds «Mark here», which puts the exact pin on the ayah (or, when the ayah already carries it
+// - `pinned` - «Remove mark»)
+export function AyahMenu({ at, onClose, onTafsir, onNote, onMark, pinned }: { at: MenuAt | null; onClose: () => void; onTafsir: () => void; onNote: () => void; onMark?: () => void; pinned?: boolean }) {
   const { c, isDark } = useTheme();
   const { width, height } = useWindowDimensions();
   const [h, setH] = useState(0); // the box's height, once laid out
@@ -76,7 +77,7 @@ export function AyahMenu({ at, onClose, onTafsir, onNote, onMark }: { at: MenuAt
         <Item icon={<TafsirIcon color={c.ink} size={20} />} label={READER.tafsirRow()} onPress={onTafsir} />
         <Item icon={<CommentIcon color={c.ink} size={20} />} label={t(marked.noteOf(key) ? 'noteEdit' : 'noteAdd')} onPress={onNote} />
 
-        {onMark && <Item icon={<PinIcon color={c.ink} size={20} />} label={QURAN.markHere()} onPress={onMark} />}
+        {onMark && <Item icon={<PinIcon color={c.ink} size={20} />} label={pinned ? QURAN.unmark() : QURAN.markHere()} onPress={onMark} />}
 
         {/* the highlight colours */}
         <View style={styles.row}>

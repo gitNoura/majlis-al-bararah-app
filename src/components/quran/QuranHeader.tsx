@@ -1,7 +1,7 @@
 // The Quran page's header: a row of buttons, and under it the name of what is being read.
 //   row    at the start the index (the fahras), the search and the notes; at the end - where the wird button was -
 //          the drop-down of the page's modes (Read, Listen, Recite)
-//   name   the surah(s), the juz and the page, just above the page (a tap opens the khatma and pin sheet)
+//   name   the surah(s) and the juz, just above the page (the page's own number is printed on the page)
 // No art; the colours and spacing come from the tokens.
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -21,12 +21,12 @@ export const HEADER_ROW_H = 44;
 // where a menu hanging from the header's buttons starts, from the top of the screen
 export const menuTop = (insetTop: number) => insetTop + space.sm + HEADER_ROW_H + 4;
 
-// where a page is: its surah(s) and, under them, its juz and page number
+// where a page is: its surah(s) and, under them, its juz
 export function placeOf(page: number) {
   const on: number[] = surahsOn(page).length ? surahsOn(page) : [1];
   const names = on.map((n) => surahName(SURAHS[n - 1]));
   const surahs = names.length > 2 ? `${names[0]} – ${names[names.length - 1]}` : names.join(' – ');
-  return { surahs, extra: `${t('juz', juzForPage(page).number)}  •  ${t('pageShort', page)}` };
+  return { surahs, extra: t('juz', juzForPage(page).number) };
 }
 
 function ChevronDown({ color }: { color: string }) {
@@ -43,7 +43,6 @@ type Props = {
   onIndex: () => void;
   onSearch: () => void;
   onNotes: () => void;
-  onName: () => void;
   onMode: () => void;
 };
 
@@ -57,7 +56,7 @@ function Tool({ label, onPress, children }: { label: string; onPress: () => void
   );
 }
 
-export function QuranHeader({ page, mode, onIndex, onSearch, onNotes, onName, onMode }: Props) {
+export function QuranHeader({ page, mode, onIndex, onSearch, onNotes, onMode }: Props) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const here = placeOf(page);
@@ -82,14 +81,14 @@ export function QuranHeader({ page, mode, onIndex, onSearch, onNotes, onName, on
           <ChevronDown color={c.ink} />
         </Pressable>
       </View>
-      <Pressable onPress={onName} accessibilityRole="button" accessibilityLabel={QURAN.khatma()} style={styles.name}>
+      <View style={styles.name}>
         <Txt size={19} weight={700} center color={c.ink} numberOfLines={1}>
           {here.surahs}
         </Txt>
         <Txt size={13} center color={c.meta} numberOfLines={1}>
           {here.extra}
         </Txt>
-      </Pressable>
+      </View>
     </View>
   );
 }
