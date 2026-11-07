@@ -114,8 +114,8 @@ function Quran() {
 
   // the tab bar is drawn by src/app/(tabs)/_layout.tsx, which reads this option
   useEffect(() => {
-    navigation.setOptions({ tabBarStyle: { display: hidden || mode !== 'read' ? 'none' : 'flex' } });
-  }, [hidden, mode, navigation]);
+    navigation.setOptions({ tabBarStyle: { display: hidden ? 'none' : 'flex' } });
+  }, [hidden, navigation]);
 
   // the phone's back button leaves full screen, then Listen / Recite, before it leaves the page
   useFocusEffect(
@@ -283,13 +283,19 @@ function Quran() {
           />
         )}
 
+        {/* the controls of Listen / Recite: one compact pill floating over the page's foot, just above the tab bar (which stays, as in Read) */}
+        {!hidden && mode !== 'read' && (
+          <View pointerEvents="box-none" style={styles.float}>
+            {mode === 'listen' ? listen.bar : recite.bar}
+          </View>
+        )}
         {zoomed && (
-          <Pressable onPress={() => setUnzoom((n) => n + 1)} accessibilityLabel={READER.wholePage()} style={[styles.whole, { backgroundColor: c.card, borderColor: c.line, bottom: 12 }]}>
+          <Pressable onPress={() => setUnzoom((n) => n + 1)} accessibilityLabel={READER.wholePage()} style={[styles.whole, { backgroundColor: c.card, borderColor: c.line, bottom: mode === 'read' ? 12 : 84 }]}>
             <ZoomOutIcon color={c.ink} />
           </Pressable>
         )}
         {!!toast && (
-          <View pointerEvents="none" style={[styles.toast, { backgroundColor: c.on, bottom: 16 }]}>
+          <View pointerEvents="none" style={[styles.toast, { backgroundColor: c.on, bottom: mode === 'read' ? 16 : 88 }]}>
             <Txt size={14} weight={600} color={c.onInk}>
               {toast}
             </Txt>
@@ -298,9 +304,6 @@ function Quran() {
       </View>
 
       {/* the bar of Listen or Recite, under the page (the page's room is what is left between the header and it) */}
-      {/* the tab bar is hidden in these modes, so this is the only bar at the bottom: it takes the home bar's room itself */}
-      {!hidden && mode !== 'read' && <View style={{ paddingBottom: insets.bottom }}>{mode === 'listen' ? listen.bar : recite.bar}</View>}
-
       {/* in full screen: exit and the day / night switch, at the top corner just under the clock and the wifi */}
       {hidden && (
         <View style={[{ position: 'absolute', zIndex: 5, top: insets.top + 8, flexDirection: 'row', gap: 10, direction: 'ltr' }, LANG === 'ar' ? { left: 12 } : { right: 12 }]}>
@@ -361,6 +364,7 @@ function Quran() {
 }
 
 const styles = StyleSheet.create({
+  float: { position: 'absolute', left: 0, right: 0, bottom: 4 },
   whole: { position: 'absolute', bottom: 12, alignSelf: 'center', width: 44, height: 44, borderRadius: 22, borderWidth: StyleSheet.hairlineWidth, alignItems: 'center', justifyContent: 'center' },
   toast: { position: 'absolute', bottom: 16, alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 18, borderRadius: 999 },
 });

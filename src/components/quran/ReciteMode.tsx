@@ -19,7 +19,7 @@ import { TOTAL_PAGES } from '@/lib/quran';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
-export const RECITE_BAR_H = 72;
+export const RECITE_BAR_H = 64;
 const ICON = { fill: 'none', strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
 
 const EyeClosed = ({ color }: { color: string }) => (
@@ -123,7 +123,7 @@ export function useRecite(active: boolean, page: number) {
   const shown = sess.finished ? n : Math.min(sess.i + 1, n);
   const bar = (
     <View style={styles.box}>
-      <View style={styles.row}>
+      <View style={[styles.row, { backgroundColor: c.card, borderColor: c.line }]}>
         <Round onPress={eye} label={override === 'hide' ? HIF.reciteShowAll() : HIF.reciteHideAll()}>
           {override === 'hide' ? <EyeOpen color={c.ink} /> : <EyeClosed color={c.ink} />}
         </Round>
@@ -152,7 +152,7 @@ export function useRecite(active: boolean, page: number) {
 
 function Round({ children, onPress, label, disabled, big, fill }: { children: ReactNode; onPress: () => void; label: string; disabled?: boolean; big?: boolean; fill?: string }) {
   const { c } = useTheme();
-  const size = big ? 56 : 46;
+  const size = big ? 48 : 40;
   return (
     <Pressable
       onPress={onPress}
@@ -169,8 +169,8 @@ function Round({ children, onPress, label, disabled, big, fill }: { children: Re
 const styles = StyleSheet.create({
   box: { paddingHorizontal: space.md, paddingVertical: space.sm, alignItems: 'center' },
   // the buttons keep the same left-to-right order in every language (as Murajaa)
-  row: { alignSelf: 'stretch', maxWidth: 460, height: RECITE_BAR_H - space.sm * 2, flexDirection: 'row', alignItems: 'center', gap: 10, direction: 'ltr' },
+  row: { alignSelf: 'stretch', maxWidth: 460, height: RECITE_BAR_H - space.sm * 2 + 8, borderRadius: 32, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: space.sm, flexDirection: 'row', alignItems: 'center', gap: 8, direction: 'ltr', shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
   round: { alignItems: 'center', justifyContent: 'center' },
-  counter: { flex: 1, height: 46, borderRadius: 23, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  counter: { flex: 1, height: 40, borderRadius: 20, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
   fill: { position: 'absolute', left: 0, top: 0, bottom: 0 },
 });
