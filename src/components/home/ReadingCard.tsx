@@ -20,7 +20,7 @@ const digits = (n: number) => n.toLocaleString(L('ar', 'en', 'fr'));
 // an arrow that points to the end of the line (left in Arabic)
 function Arrow({ color }: { color: string }) {
   return (
-    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+    <Svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
       <Path d={LANG === 'ar' ? 'M19 12H5M11 6l-6 6 6 6' : 'M5 12h14M13 6l6 6-6 6'} />
     </Svg>
   );
@@ -65,7 +65,7 @@ export function ReadingCard() {
         accessibilityRole="button"
         style={({ pressed }) => [styles.btn, { backgroundColor: h.lime }, pressed && { opacity: 0.88 }]}
       >
-        <Txt size={14} weight={800} color={h.limeInk}>
+        <Txt size={13} weight={800} color={h.limeInk}>
           {r.started ? DASH.continueReading() : DASH.startReading()}
         </Txt>
         <View style={[styles.go, { backgroundColor: h.limeInk }]}>
@@ -89,6 +89,6 @@ const styles = StyleSheet.create({
   card: { borderRadius: 24, paddingHorizontal: 16, paddingVertical: 14, gap: 10, overflow: 'hidden' },
   frame: { position: 'absolute', top: 6, bottom: 6, start: 6, end: 6, borderRadius: 19, borderWidth: 1 },
   top: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  btn: { height: 40, borderRadius: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: 18, paddingEnd: 5 },
-  go: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  btn: { alignSelf: 'flex-start', height: 34, borderRadius: 17, flexDirection: 'row', alignItems: 'center', gap: 10, paddingStart: 16, paddingEnd: 4 },
+  go: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
 });
