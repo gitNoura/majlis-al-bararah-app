@@ -2,7 +2,7 @@
 // tabs - the tafsir and the translation, each with the sources chosen (src/lib/sources.js) - and the
 // texts in the interface's own font (Tajawal), the ayat they quote in the Quran's (Amiri) and their own colour, each
 // source's name under its text. Previous (on the left) and next (on the right) go from ayah to ayah.
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Animated, Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -121,35 +121,26 @@ export function AyahSheet({ ayah, onClose, onMove }: { ayah: Ayah | null; onClos
           })}
         </ScrollView>
 
-        {/* previous on the left, next on the right, in every language. In Arabic a row runs from the right, so there the
-            order is reversed (the layout's direction is not touched: that is what the rest of the screen uses) */}
+        {/* Previous, then Next, in the row's own flow: in Arabic the row runs from the right, so «next» is on the left, the
+            way the mushaf reads, with its arrow pointing left; in English and French «previous» is on the left. */}
         <View style={[styles.moves, { borderTopColor: c.divider }]}>
-          {visual([
-            <Pressable key="prev" onPress={() => onMove(-1)} style={[styles.move, { borderColor: c.line }]}>
-              {visual([
-                <Chevron key="c" left color={c.ink} />,
-                <Txt key="t" size={15} weight={700} color={c.ink}>
-                  {L('السابقة', 'Previous', 'Précédent')}
-                </Txt>,
-              ])}
-            </Pressable>,
-            <Pressable key="next" onPress={() => onMove(1)} style={[styles.move, { backgroundColor: c.on, borderColor: c.on }]}>
-              {visual([
-                <Txt key="t" size={15} weight={700} color={c.onInk}>
-                  {L('التالية', 'Next', 'Suivant')}
-                </Txt>,
-                <Chevron key="c" color={c.onInk} />,
-              ])}
-            </Pressable>,
-          ])}
+          <Pressable onPress={() => onMove(-1)} style={[styles.move, { borderColor: c.line }]}>
+            <Chevron left={LANG !== 'ar'} color={c.ink} />
+            <Txt size={15} weight={700} color={c.ink}>
+              {L('السابقة', 'Previous', 'Précédent')}
+            </Txt>
+          </Pressable>
+          <Pressable onPress={() => onMove(1)} style={[styles.move, { backgroundColor: c.on, borderColor: c.on }]}>
+            <Txt size={15} weight={700} color={c.onInk}>
+              {L('التالية', 'Next', 'Suivant')}
+            </Txt>
+            <Chevron left={LANG === 'ar'} color={c.onInk} />
+          </Pressable>
         </View>
       </Animated.View>
     </Modal>
   );
 }
-
-// what is laid out left to right, in the order it is meant to be seen: reversed in Arabic, whose rows run from the right
-const visual = (items: ReactNode[]) => (LANG === 'ar' ? [...items].reverse() : items);
 
 function Chevron({ left, color }: { left?: boolean; color: string }) {
   return (

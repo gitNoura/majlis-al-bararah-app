@@ -14,10 +14,10 @@ import { juzRange } from '@/lib/hifdh';
 import { isDone } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { clockTime, nextPrayer, place, skyNow, skyTimes, times } from '@/lib/prayer';
-import { savedPage } from '@/lib/position';
+import { pageOf } from '@/lib/boxes';
 import { AJZA, TOTAL_PAGES } from '@/lib/quran';
-import { dayKey, readJSON } from '@/lib/storage';
-import { loadWird } from '@/lib/wird';
+import { dayKey } from '@/lib/storage';
+import { loadWird, wirdStop } from '@/lib/wird';
 
 // ---------- the date ----------
 
@@ -118,9 +118,13 @@ export function readingCells(page: number): number[] {
   });
 }
 
+// «Continue reading» follows the mark the reader put in Read («Mark here», the wird's stop), NOT the marker that
+// follows every page turn in every mode (Listen and Recite included). No mark yet: reading has not begun.
 export function readingView() {
-  const started = readJSON('lastPage', null) != null;
-  const page = savedPage();
+  const pin = wirdStop();
+  const started = pin != null;
+  const [ps, pa] = (pin?.shown ?? '').split(':').map(Number);
+  const page = pin ? ((ps && pageOf(ps, pa)) || pin.page) : 1;
   const wird = loadWird();
   const cells = started ? readingCells(page) : readingCells(1);
   return {

@@ -1,17 +1,16 @@
-// The bottom bar of Read: search, notes, full view (the page filling the screen) and settings. When the page has been
-// pinched in, the third button brings it back to the whole page instead.
+// The bottom bar of Read: search, notes and settings.
 // It is the only bar on the Quran page (the app's tab bar is not shown there); Listen and Recite put their own
 // controls in this same place.
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { ExpandIcon, NotebookIcon, SearchIcon, SettingsIcon, ZoomOutIcon } from '@/components/icons';
+import { NotebookIcon, SearchIcon, SettingsIcon } from '@/components/icons';
 import { QURAN } from '@/i18n/quran';
 import { READER } from '@/i18n/reader';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
-type Props = { zoomed: boolean; onSearch: () => void; onNotes: () => void; onZoom: () => void; onSettings: () => void };
+type Props = { onSearch: () => void; onNotes: () => void; onSettings: () => void };
 
 function Tool({ label, onPress, children }: { label: string; onPress: () => void; children: ReactNode }) {
   const { c } = useTheme();
@@ -22,7 +21,7 @@ function Tool({ label, onPress, children }: { label: string; onPress: () => void
   );
 }
 
-export function ReadBar({ zoomed, onSearch, onNotes, onZoom, onSettings }: Props) {
+export function ReadBar({ onSearch, onNotes, onSettings }: Props) {
   const { c } = useTheme();
   return (
     <View style={styles.box}>
@@ -32,9 +31,6 @@ export function ReadBar({ zoomed, onSearch, onNotes, onZoom, onSettings }: Props
         </Tool>
         <Tool label={QURAN.notes()} onPress={onNotes}>
           <NotebookIcon color={c.ink} size={25} />
-        </Tool>
-        <Tool label={zoomed ? READER.wholePage() : QURAN.fullView()} onPress={onZoom}>
-          {zoomed ? <ZoomOutIcon color={c.ink} size={25} /> : <ExpandIcon color={c.ink} size={25} />}
         </Tool>
         <Tool label={READER.settingsTitle()} onPress={onSettings}>
           <SettingsIcon color={c.ink} size={25} />

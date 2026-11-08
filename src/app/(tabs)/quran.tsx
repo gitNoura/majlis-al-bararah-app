@@ -94,8 +94,6 @@ function Quran() {
   const pageRef = useRef(page); // the page before a turn, to tell a turn from a jump
   const [hidden, setHidden] = useState(false); // full screen: header, tab bar and status bar gone; the page fills the screen
   const [room, setRoom] = useState<Room>({ width: 0, height: 0 });
-  const [zoomed, setZoomed] = useState(false);
-  const [unzoom, setUnzoom] = useState(0); // counts the «whole page» presses (PageCurl zooms out on each)
   const [indexOpen, setIndexOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false); // the drop-down of the modes
@@ -121,7 +119,7 @@ function Quran() {
   }, [navigation]);
 
   // where the back button goes: Home, or the Hifdh tab when a Hifdh task opened this page
-  const params = useLocalSearchParams<{ mode?: string; from?: string; to?: string; back?: string; n?: string }>();
+  const params = useLocalSearchParams<{ mode?: string; from?: string; to?: string; back?: string; n?: string; resume?: string }>();
   // a Hifdh task's request (params: mode, from, to, n = a new one each time) switches the mode while rendering, not in an effect
   const [seenReq, setSeenReq] = useState<string | undefined>(undefined);
   if (params.n && params.n !== seenReq && (params.mode === 'listen' || params.mode === 'recite')) {
@@ -129,9 +127,16 @@ function Quran() {
     setMode(params.mode);
     setHidden(false);
   }
+  // Home's «Continue reading»: Read, at the page of the mark (resume = that page, n = a new one each time)
+  const [seenResume, setSeenResume] = useState<string | undefined>(undefined);
+  if (params.resume && params.n && params.n !== seenResume) {
+    setSeenResume(params.n);
+    setMode('read');
+    setHidden(false);
+  }
   const goBack = useCallback(() => {
     const toHifdh = params.back === 'hifdh';
-    router.setParams({ mode: undefined, from: undefined, to: undefined, back: undefined, n: undefined });
+    router.setParams({ mode: undefined, from: undefined, to: undefined, back: undefined, n: undefined, resume: undefined });
     router.navigate(toHifdh ? '/hifdh' : '/');
   }, [params.back]);
 
@@ -169,6 +174,11 @@ function Quran() {
   }, []);
   const turned = useCallback((p: number) => move(p, true), [move]);
   const jump = useCallback((p: number) => move(p, false), [move]);
+  useEffect(() => {
+    // Home's «Continue reading» asks for the page of the mark: a request from another screen, answered once per request
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (params.resume && params.n) jump(Number(params.resume));
+  }, [params.resume, params.n, jump]);
 
   const light = (found: Ayah | null) => {
     clearTimeout(flashTimer.current);
@@ -302,7 +312,7 @@ function Quran() {
             pageH={pageH}
             full={hidden}
             chosen={chosen}
-            unzoom={unzoom}
+            unzoom={0}
             onTurned={turned}
             marks={marks}
             pins={pins}
@@ -310,7 +320,7 @@ function Quran() {
             onPin={(s, a) => setNote({ s, a })}
             onHold={mode === 'read' ? markAyah : undefined}
             onEmptyTap={() => setHidden((h) => !h)}
-            onZoomed={setZoomed}
+            onZoomed={() => {}}
             ribbon={ribbon}
             veils={mode === 'recite' ? recite.veils : undefined}
           />
@@ -331,11 +341,9 @@ function Quran() {
         <View style={{ paddingBottom: insets.bottom }}>
           {mode === 'read' ? (
             <ReadBar
-              zoomed={zoomed}
               onSearch={() => setSearchOpen(true)}
               onNotes={() => say(READER.soon())}
-              onZoom={() => (zoomed ? setUnzoom((n) => n + 1) : setHidden(true))}
-              onSettings={() => router.navigate('/settings')}
+              onSettings={() => router.push('/quran-settings')}
             />
           ) : mode === 'listen' ? (
             listen.bar

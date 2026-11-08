@@ -63,7 +63,7 @@ export function ReadingCard() {
         </Ring>
       </View>
       <Pressable
-        onPress={() => router.navigate('/quran')}
+        onPress={() => router.navigate({ pathname: '/quran', params: r.started ? { resume: String(r.page), n: String(Date.now()) } : undefined })}
         accessibilityRole="button"
         style={({ pressed }) => [styles.btn, { backgroundColor: h.lime }, pressed && { opacity: 0.88 }]}
       >
