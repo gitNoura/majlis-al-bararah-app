@@ -60,16 +60,6 @@ export function ReadingCard() {
           </Txt>
         </Ring>
       </View>
-      {/* the hadith of the reader («read and rise») and who told it: plain text on the card, same font as the rest */}
-      <View style={[styles.rule, { backgroundColor: h.goldLine }]} />
-      <View style={{ gap: 2 }}>
-        <Txt size={13} weight={500} lineHeight={20} color={h.forestInk}>
-          {HOME.hadith()}
-        </Txt>
-        <Txt size={12} lineHeight={17} color={h.gold}>
-          {HOME.heroSource()}
-        </Txt>
-      </View>
       <Pressable
         onPress={() => router.navigate({ pathname: '/quran', params: r.started ? { resume: String(r.page), n: String(Date.now()) } : undefined })}
         accessibilityRole="button"
@@ -82,6 +72,15 @@ export function ReadingCard() {
           <Arrow color={h.lime} />
         </View>
       </Pressable>
+      {/* the hadith of the reader («read and rise») and who told it: plain text on the card, same font as the rest */}
+      <View style={{ gap: 2 }}>
+        <Txt size={13} weight={500} lineHeight={20} color={h.forestInk}>
+          {HOME.hadith()}
+        </Txt>
+        <Txt size={12} lineHeight={17} color={h.gold}>
+          {HOME.heroSource()}
+        </Txt>
+      </View>
     </View>
   );
 }
@@ -90,7 +89,6 @@ const styles = StyleSheet.create({
   card: { borderRadius: 24, paddingHorizontal: 16, paddingVertical: 14, gap: 10, overflow: 'hidden' },
   frame: { position: 'absolute', top: 6, bottom: 6, start: 6, end: 6, borderRadius: 19, borderWidth: 1 },
   top: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  rule: { height: StyleSheet.hairlineWidth, alignSelf: 'stretch' },
   btn: { height: 40, borderRadius: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: 18, paddingEnd: 5 },
   go: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
 });
