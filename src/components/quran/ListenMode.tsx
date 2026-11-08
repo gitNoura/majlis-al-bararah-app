@@ -19,7 +19,7 @@ import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish, surahName } from '@/i18n/i18n';
 import { ayatOn, pageOf } from '@/lib/boxes';
-import { available, counts, keysFromTo, Listener, MAX_TYPED, METHODS, ordered, parse, pos, QUICK, reciterOf, SPEEDS, times } from '@/lib/hifdh/listen';
+import { available, counts, keysFromTo, Listener, MAX_TYPED, METHODS, ordered, parse, pos, QUICK, reciterOf, SPEEDS, times, together } from '@/lib/hifdh/listen';
 import { SURAHS } from '@/lib/quran';
 import { ui } from '@/theme/fonts';
 import { useTheme } from '@/theme/theme';
@@ -91,12 +91,14 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
   const base = sel?.from ?? (first ? `${first.s}:${first.a}` : '1:1');
 
   const chosenSet = new Set(keys);
-  const stepSet = new Set(step ?? []);
+  // an ayah that is heard together with another one (al-Mulk 9 and 10 in Warsh, one audio file) is lit with it
+  const stepSet = new Set((step ?? []).flatMap(together));
+  const nowSet = new Set(now ? together(now) : []);
   const marks: Marked[] = active
     ? [
         ...onPage.filter((e) => chosenSet.has(`${e.s}:${e.a}`)).map((e) => ({ ...e, color: CHOSEN })),
-        ...onPage.filter((e) => stepSet.has(`${e.s}:${e.a}`) && `${e.s}:${e.a}` !== now).map((e) => ({ ...e, color: STEP })),
-        ...onPage.filter((e) => `${e.s}:${e.a}` === now).map((e) => ({ ...e, color: NOW })),
+        ...onPage.filter((e) => stepSet.has(`${e.s}:${e.a}`) && !nowSet.has(`${e.s}:${e.a}`)).map((e) => ({ ...e, color: STEP })),
+        ...onPage.filter((e) => nowSet.has(`${e.s}:${e.a}`)).map((e) => ({ ...e, color: NOW })),
       ]
     : [];
 

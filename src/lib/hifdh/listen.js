@@ -44,6 +44,37 @@ export function keysFromTo(a, b) {
 }
 export const ordered = (a, b) => (pos(a) <= pos(b) ? [a, b] : [b, a]);
 
+// ---------- Where the Warsh audio and the Warsh text count differently ----------
+// The QuranHub Warsh audio has ONE file for al-Mulk 9 and 10, while the mushaf text (and so the app) has two
+// ayat there: 31 ayat in the surah against 30 files, 6,214 against 6,213 in the whole Quran. So in Warsh:
+//   · 67:9 and 67:10 are one step: it plays the file of 67:9 and lights up both ayat;
+//   · every ayah after 67:10 is one file earlier than its place in the app's numbering.
+// Nothing changes in Hafs (its audio and text count the same).
+const MERGED_FIRST = '67:9';
+const MERGED_SECOND = '67:10';
+
+// the ayat that are heard together with this one (itself included)
+export const together = (key) => (!HAFS && (key === MERGED_FIRST || key === MERGED_SECOND) ? [MERGED_FIRST, MERGED_SECOND] : [key]);
+
+// the chosen ayat as steps can play them: 67:10 is heard inside 67:9, so it is never a step of its own
+export function playable(keys) {
+  if (HAFS) return keys;
+  const out = [];
+  for (const k of keys) {
+    const p = k === MERGED_SECOND ? MERGED_FIRST : k;
+    if (out[out.length - 1] !== p) out.push(p);
+  }
+  return out;
+}
+
+// the number of the ayah's file in the whole Quran, in the audio's own counting
+export function audioNumber(key) {
+  const n = pos(key);
+  if (HAFS) return n;
+  const [su, a] = parse(key);
+  return su > 67 || (su === 67 && a > 10) ? n - 1 : n; // 67:10 never gets here (see playable), 67:9 keeps its number
+}
+
 // The key of the ayah at a Hifdh position (Warsh), in the narration that is open
 export const startKey = (g) => (g == null ? null : (displayKeys(keyOf(g))[0] ?? null));
 
@@ -66,7 +97,7 @@ export const savePrefs = (prefs) => writeJSON('listenPrefs', prefs);
 export const reciterOf = (prefs) => available().find((r) => r.id === prefs.reciter) ?? available()[0];
 const urlOf = (prefs, key) => {
   const [su, a] = parse(key);
-  return reciterOf(prefs).url(su, a, pos(key)); // the ayah's place in the whole Quran, in the narration that is open
+  return reciterOf(prefs).url(su, a, audioNumber(key)); // the file's place in the whole Quran, in the audio's counting
 };
 
 // ---------- The steps: what is heard, in which order ----------
@@ -94,7 +125,7 @@ function upcoming(s, prefs) {
 // The part that was heard, in Warsh positions (the map's own): one record, once.
 function logSession(s, prefs) {
   if (!s || s.logged || !s.heard.size) return;
-  const heard = [...s.heard].sort((x, y) => pos(x) - pos(y));
+  const heard = [...new Set([...s.heard].flatMap(together))].sort((x, y) => pos(x) - pos(y));
   const stored = (k) => storedKeys(k)[0] ?? null;
   const first = heard.map(stored).find(Boolean);
   const last = [...heard].reverse().map(stored).find(Boolean);
@@ -212,7 +243,7 @@ export class Listener {
   begin(keys, selId) {
     if (!this.decks || !keys.length) return;
     this.halt();
-    this.s = { steps: stepsFor(keys, this.prefs.method), si: 0, ki: 0, pass: 0, round: 0, heard: new Set(), finished: false, error: false, logged: false, selId };
+    this.s = { steps: stepsFor(playable(keys), this.prefs.method), si: 0, ki: 0, pass: 0, round: 0, heard: new Set(), finished: false, error: false, logged: false, selId };
     this.playCurrent();
   }
 
