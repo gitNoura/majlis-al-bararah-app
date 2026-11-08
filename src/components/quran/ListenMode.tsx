@@ -420,7 +420,7 @@ function GoButton({ label, onPress }: { label: string; onPress: () => void }) {
 
 const styles = StyleSheet.create({
   barBox: { paddingHorizontal: space.md, paddingVertical: space.sm, alignItems: 'center' },
-  pill: { alignSelf: 'stretch', maxWidth: 520, height: LISTEN_BAR_H, borderRadius: LISTEN_BAR_H / 2, borderWidth: StyleSheet.hairlineWidth, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: space.sm, shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
+  pill: { alignSelf: 'stretch', maxWidth: 520, height: LISTEN_BAR_H, borderRadius: LISTEN_BAR_H / 2, borderWidth: StyleSheet.hairlineWidth, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: space.sm, boxShadow: '0px 8px 22px rgba(20, 50, 38, 0.14)' },
   summary: { flex: 1, minWidth: 0, paddingVertical: 6, paddingHorizontal: 10, gap: 1 },
   btn: { alignItems: 'center', justifyContent: 'center' },
   wideBtn: { height: 38, paddingHorizontal: 12, borderRadius: 19, flexDirection: 'row', gap: 6 },

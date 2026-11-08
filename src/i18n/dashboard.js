@@ -34,6 +34,11 @@ export const DASH = {
   activity: () => L('النشاط', 'Activity', 'Activité'),
   streakLabel: () => L('أيام متتالية', 'days in a row', 'jours d’affilée'),
   last4: () => L('آخر 4 أسابيع', 'Last 4 weeks', '4 dernières semaines'),
+  thisWeek: () => L('هذا الأسبوع', 'This week', 'Cette semaine'),
+  lastWeek: () => L('الأسبوع الماضي', 'Last week', 'Semaine dernière'),
+  pagesLabel: () => L('صفحات اليوم', 'Pages today', 'Pages aujourd’hui'),
+  juzLabel: () => L('أجزاء مقروءة', 'Juz read', 'Juz lus'),
+  daysLabel: () => L('أيام متتالية', 'day streak', 'jours d’affilée'),
   // additional resources
   resources: () => L('مصادر إضافية', 'Additional resources', 'Ressources complémentaires'),
   libAdhkar: () => L('مكتبة الأذكار', 'Adhkar library', 'Bibliothèque d’adhkar'),

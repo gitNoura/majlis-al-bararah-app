@@ -176,7 +176,7 @@ function Round({ children, onPress, label, disabled, big, fill }: { children: Re
 const styles = StyleSheet.create({
   box: { paddingHorizontal: space.md, paddingVertical: space.sm, alignItems: 'center' },
   // the buttons keep the same left-to-right order in every language (as Murajaa)
-  row: { alignSelf: 'stretch', maxWidth: 460, height: RECITE_BAR_H - space.sm * 2 + 8, borderRadius: 32, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: space.sm, flexDirection: 'row', alignItems: 'center', gap: 8, direction: 'ltr', shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
+  row: { alignSelf: 'stretch', maxWidth: 460, height: RECITE_BAR_H - space.sm * 2 + 8, borderRadius: 32, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: space.sm, flexDirection: 'row', alignItems: 'center', gap: 8, direction: 'ltr', boxShadow: '0px 8px 22px rgba(20, 50, 38, 0.14)' },
   round: { alignItems: 'center', justifyContent: 'center' },
   counter: { flex: 1, height: 44, borderRadius: 22, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
   fill: { position: 'absolute', left: 0, top: 0, bottom: 0 },

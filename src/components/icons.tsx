@@ -263,21 +263,6 @@ export const ToTopIcon = (p: IconProps) => (
   </Line>
 );
 
-// The index's number badge: an eight-pointed star outlined in gold, filled forest green when chosen
-export function StarBadge({ size = 38, fill, stroke }: { size?: number; fill: string; stroke: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" style={{ position: 'absolute' }}>
-      <Path
-        d="M20 1.4L25.45 6.85H33.15V14.55L38.6 20L33.15 25.45V33.15H25.45L20 38.6L14.55 33.15H6.85V25.45L1.4 20L6.85 14.55V6.85H14.55Z"
-        fill={fill}
-        stroke={stroke}
-        strokeWidth={1.4}
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
 // «back»: a chevron pointing to where the reader came from (right in Arabic, left in English/French)
 export function BackIcon({ size = 24, color, rtl }: IconProps & { rtl: boolean }) {
   return (

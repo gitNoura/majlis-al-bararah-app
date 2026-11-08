@@ -46,6 +46,6 @@ export function ReadBar({ zoomed, onSearch, onNotes, onZoom, onSettings }: Props
 
 const styles = StyleSheet.create({
   box: { paddingHorizontal: space.md, paddingVertical: space.sm, alignItems: 'center' },
-  row: { alignSelf: 'stretch', maxWidth: 420, height: 64, borderRadius: 32, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: space.sm, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
+  row: { alignSelf: 'stretch', maxWidth: 420, height: 64, borderRadius: 32, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: space.sm, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', boxShadow: '0px 8px 22px rgba(20, 50, 38, 0.14)' },
   round: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
 });

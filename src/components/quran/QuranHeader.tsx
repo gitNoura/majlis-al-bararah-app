@@ -2,7 +2,7 @@
 //   row    at the start the back button (to Home) and the index (the fahras); at the end the drop-down of the page's
 //          modes (Read, Listen, Recite). Search, notes, zoom and settings are in the bottom bar (ReadBar.tsx)
 //   name   the surah(s) and the juz, just above the page (the page's own number is printed on the page)
-// No art; the colours and spacing come from the tokens.
+// Dressed like Home (src/theme/home.ts): round paper buttons with a soft shadow.
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +14,7 @@ import { isEnglish, surahName, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
 import { surahsOn } from '@/lib/boxes';
 import { juzForPage, SURAHS } from '@/lib/quran';
+import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
@@ -47,9 +48,15 @@ type Props = {
 
 // one of the round buttons at the start of the row
 function Tool({ label, onPress, children }: { label: string; onPress: () => void; children: ReactNode }) {
-  const { c } = useTheme();
+  const h = useHome();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={4} style={[styles.round, { backgroundColor: c.surface2 }]}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      hitSlop={4}
+      style={[styles.round, { backgroundColor: h.card, borderColor: h.cardLine, borderWidth: StyleSheet.hairlineWidth, boxShadow: `0px 4px 12px ${h.shadow}` }]}
+    >
       {children}
     </Pressable>
   );
@@ -57,6 +64,7 @@ function Tool({ label, onPress, children }: { label: string; onPress: () => void
 
 export function QuranHeader({ page, mode, onBack, onIndex, onMode }: Props) {
   const { c } = useTheme();
+  const h = useHome();
   const insets = useSafeAreaInsets();
   const here = placeOf(page);
   return (
@@ -71,7 +79,7 @@ export function QuranHeader({ page, mode, onBack, onIndex, onMode }: Props) {
           </Tool>
         </View>
         <View style={styles.group}>
-          <Pressable onPress={onMode} accessibilityRole="button" accessibilityLabel={mode} hitSlop={6} style={[styles.pill, { backgroundColor: c.surface2 }]}>
+          <Pressable onPress={onMode} accessibilityRole="button" accessibilityLabel={mode} hitSlop={6} style={[styles.pill, { backgroundColor: h.card, borderColor: h.cardLine, borderWidth: StyleSheet.hairlineWidth, boxShadow: `0px 4px 12px ${h.shadow}` }]}>
             <Txt size={14} weight={700} color={c.ink} numberOfLines={1}>
               {mode}
             </Txt>
@@ -80,10 +88,10 @@ export function QuranHeader({ page, mode, onBack, onIndex, onMode }: Props) {
         </View>
       </View>
       <View style={styles.name}>
-        <Txt size={19} weight={700} center color={c.ink} numberOfLines={1}>
+        <Txt size={19} weight={700} center color={h.ink} numberOfLines={1}>
           {here.surahs}
         </Txt>
-        <Txt size={13} center color={c.meta} numberOfLines={1}>
+        <Txt size={13} center color={h.meta} numberOfLines={1}>
           {here.extra}
         </Txt>
       </View>

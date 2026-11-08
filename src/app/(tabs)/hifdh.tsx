@@ -29,6 +29,7 @@ import { displayKeys } from '@/lib/ayahmap';
 import { keyOf } from '@/lib/hifdh';
 import * as plan from '@/lib/hifdh/plan';
 import { keysOfSegs } from '@/lib/hifdh/recite';
+import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
@@ -49,6 +50,7 @@ function openQuran(mode: 'listen' | 'recite', row: Row | null) {
 
 function Content({ screen, setScreen, seg, setSeg, setup, open, exit }: { screen: Screen; setScreen: (s: Screen) => void; seg: Seg; setSeg: (s: Seg) => void; setup: Setup; open: (s: Setup) => void; exit: () => void }) {
   const insets = useSafeAreaInsets();
+  const home = useHome();
   useHif(); // subscribing here redraws the whole screen when `rev` changes
 
   // the phone's back button steps out of «What I've memorized» (the plan setup has its own: it steps back through its questions)
@@ -60,7 +62,7 @@ function Content({ screen, setScreen, seg, setSeg, setup, open, exit }: { screen
 
   if (screen === 'pace') return <PlanSetup type={setup.type} id={setup.id} onExit={exit} />;
 
-  const pad = { padding: space.md, paddingBottom: space.lg + space.md, gap: 14 };
+  const pad = { padding: space.md, paddingBottom: space.lg + space.md, gap: 12 };
   if (screen === 'memorized') {
     return (
       <View style={{ flex: 1 }}>
@@ -75,10 +77,11 @@ function Content({ screen, setScreen, seg, setSeg, setup, open, exit }: { screen
   return (
     <View style={{ flex: 1 }}>
       <View style={{ paddingHorizontal: space.md, paddingTop: insets.top + space.sm, paddingBottom: space.sm, gap: space.md }}>
-        <Txt size={32} weight={800} lineHeight={44} numberOfLines={1}>
+        <Txt size={28} weight={800} lineHeight={36} color={home.ink} numberOfLines={1}>
           {HIF.title()}
         </Txt>
         <SegmentedControl
+          pill
           value={seg}
           onChange={setSeg}
           options={[
@@ -110,6 +113,7 @@ function Content({ screen, setScreen, seg, setSeg, setup, open, exit }: { screen
 
 export default function HifdhTab() {
   const { c } = useTheme();
+  const home = useHome();
   const [load, setLoad] = useState<Load>('loading');
   const [screen, setScreen] = useState<Screen>('tabs');
   const [seg, setSeg] = useState<Seg>('today');
@@ -137,7 +141,7 @@ export default function HifdhTab() {
   const exit = useCallback(() => setScreen('tabs'), []); // back to the segment it was opened from
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.screen }}>
+    <View style={{ flex: 1, backgroundColor: home.screen }}>
       {load === 'loading' && <ActivityIndicator color={c.meta} style={{ marginTop: 80 }} />}
       {load === 'failed' && (
         <Txt size={14} center color={c.meta} style={{ marginTop: 80 }}>

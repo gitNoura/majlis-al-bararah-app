@@ -9,14 +9,16 @@ import { BackIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { isEnglish } from '@/i18n/i18n';
 import { HOME } from '@/i18n/home';
+import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
 
 export function HifHeader({ title, subtitle, big, onBack }: { title: string; subtitle?: string; big?: boolean; onBack?: () => void }) {
   const { c } = useTheme();
+  const h = useHome();
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.head, { paddingTop: insets.top + 6 }]}>
-      <Pressable onPress={onBack ?? (() => router.back())} hitSlop={10} style={styles.back} accessibilityRole="button" accessibilityLabel={HOME.back()}>
+      <Pressable onPress={onBack ?? (() => router.back())} hitSlop={10} style={[styles.back, { backgroundColor: h.card, borderColor: h.cardLine, borderWidth: StyleSheet.hairlineWidth, boxShadow: `0px 4px 12px ${h.shadow}` }]} accessibilityRole="button" accessibilityLabel={HOME.back()}>
         <BackIcon color={c.ink} rtl={!isEnglish} />
       </Pressable>
       <View style={styles.text}>
@@ -35,6 +37,6 @@ export function HifHeader({ title, subtitle, big, onBack }: { title: string; sub
 
 const styles = StyleSheet.create({
   head: { paddingHorizontal: 12, paddingBottom: 10 },
-  back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  text: { paddingHorizontal: 10 },
+  back: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  text: { paddingHorizontal: 4, paddingTop: 8 },
 });

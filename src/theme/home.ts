@@ -1,0 +1,75 @@
+// The Home screen's palette: the app's own page and card colours (src/theme/tokens.ts), plus the prayer card's own
+// deep forest green and cream (its chosen-prayer pill is #173f32 with cream words), so the hero, the tiles and the
+// prayer card belong together under every sky (night, dawn, midday, afternoon, sunset). The key names `forest`,
+// `lime` and `limeInk` are kept from the first draft: `lime` is now the cream of the button and ring on the hero.
+import { useTheme } from './theme';
+
+export type HomePalette = {
+  screen: string; // the page (the app's own)
+  card: string; // a paper card
+  cardLine: string; // its hairline
+  well: string; // a track or an empty capsule on a card
+  ink: string; // titles and numbers
+  meta: string; // second lines
+  forest: string; // the hero card
+  forestInk: string; // words on the hero
+  forestSoft: string; // quiet words on the hero
+  forestLine: string; // the hero's inset frame
+  lime: string; // the cream button and ring on the hero
+  limeInk: string; // words on that button
+  tile: string; // the streak tile and the done pills: a soft tint of the green
+  tileInk: string; // words on it
+  mint: string; // the paler green a completed Hifdh card turns (its wash on the paper, as one solid colour)
+  mintLine: string; // that card's border
+  leaf: string; // fills on a paper card
+  ghost: string; // last week's capsule
+  shadow: string;
+};
+
+const light: HomePalette = {
+  screen: '#f6f8f5',
+  card: '#ffffff',
+  cardLine: 'rgba(20, 50, 38, 0.08)',
+  well: '#eef2ee',
+  ink: '#14261e',
+  meta: '#5d6d64',
+  forest: '#173f32',
+  forestInk: '#fffdf5',
+  forestSoft: 'rgba(255, 253, 245, 0.72)',
+  forestLine: 'rgba(255, 253, 245, 0.22)',
+  lime: '#fffdf5',
+  limeInk: '#173f32',
+  tile: '#dce9df',
+  tileInk: '#173f32',
+  mint: '#eff4f2',
+  mintLine: 'rgba(31, 90, 69, 0.22)',
+  leaf: '#1f5a45',
+  ghost: 'rgba(20, 50, 38, 0.14)',
+  shadow: 'rgba(20, 50, 38, 0.08)',
+};
+
+const dark: HomePalette = {
+  screen: '#141816',
+  card: '#1c211e',
+  cardLine: 'rgba(255, 255, 255, 0.07)',
+  well: '#232925',
+  ink: '#f1f5f2',
+  meta: '#9db0a5',
+  forest: '#1d4a3a',
+  forestInk: '#fffdf5',
+  forestSoft: 'rgba(255, 253, 245, 0.72)',
+  forestLine: 'rgba(255, 253, 245, 0.16)',
+  lime: '#fffdf5',
+  limeInk: '#173f32',
+  tile: '#27382f',
+  tileInk: '#d8eadf',
+  mint: '#28362f',
+  mintLine: 'rgba(111, 181, 151, 0.4)',
+  leaf: '#6fb597',
+  ghost: 'rgba(255, 255, 255, 0.14)',
+  shadow: 'rgba(0, 0, 0, 0.3)',
+};
+
+export function useHome(): HomePalette {
+  return useTheme().isDark ? dark : light;
+}

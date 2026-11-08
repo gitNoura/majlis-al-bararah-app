@@ -7,7 +7,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { Heading, Hint, Section, useGreen } from '@/components/hifdh/Section';
+import { Heading, Hint, Section } from '@/components/hifdh/Section';
 import { ProgressRing } from '@/components/hifdh/ProgressRing';
 import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
@@ -17,6 +17,7 @@ import * as core from '@/lib/hifdh/core';
 import { dayText, kindOf, num, portionName, rangeLabel, STATUS } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { radius } from '@/theme/tokens';
+import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
 import type { Row } from '@/components/hifdh/StopSheet';
 
@@ -26,7 +27,7 @@ const PAGE = 40; // days shown at a time
 // reference: how far the plans are (a ring and the big value beside it) and the way into the past days.
 export function ProgressSection({ onPress, plain }: { onPress: () => void; plain?: boolean }) {
   const { c } = useTheme();
-  const g = useGreen();
+  const h = useHome();
   const p = plan.planProgress();
   const pct = p == null ? null : Math.round(p * 100);
   const arrow = <Txt size={20} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>›</Txt>;
@@ -34,29 +35,29 @@ export function ProgressSection({ onPress, plain }: { onPress: () => void; plain
     <View style={{ gap: 12 }}>
       {!plain && <Heading title={HIF.progress()} link={HIF.history()} onLink={onPress} />}
       <View style={styles.pair}>
-        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: c.line }]}>
-          <Txt size={13.5} color={c.meta}>
+        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: h.forest, borderColor: h.forest, boxShadow: `0px 12px 24px ${h.shadow}` }]}>
+          <Txt size={13.5} color={h.forestSoft}>
             {HIF.progressLabel()}
           </Txt>
           <View style={styles.miniRow}>
-            <ProgressRing size={60} inside={false} color={g.base} track={g.chip} />
+            <ProgressRing size={60} inside={false} color={h.lime} track="rgba(255, 253, 245, 0.16)" />
             <View style={{ flex: 1 }}>
-              <Txt size={pct == null ? 20 : 26} weight={800} color={c.ink} lineHeight={pct == null ? 28 : 32}>
+              <Txt size={pct == null ? 20 : 26} weight={800} color={h.forestInk} lineHeight={pct == null ? 28 : 32}>
                 {pct == null ? HIF.progressNone() : `${num(pct)}%`}
               </Txt>
-              <Txt size={12.5} color={c.meta} lineHeight={18}>
+              <Txt size={12.5} color={h.forestSoft} lineHeight={18}>
                 {pct == null ? HIF.progressNoneSub() : HIF.progressOfPlans()}
               </Txt>
             </View>
           </View>
         </Pressable>
         {!plain && (
-        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: c.card, borderColor: c.line }]}>
-          <Txt size={13.5} color={c.meta}>
+        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: h.tile, borderColor: h.cardLine }]}>
+          <Txt size={13.5} color={h.tileInk} style={{ opacity: 0.7 }}>
             {HIF.history()}
           </Txt>
           <View style={{ flex: 1, justifyContent: 'space-between', gap: 6 }}>
-            <Txt size={15} weight={600} color={c.ink} lineHeight={22}>
+            <Txt size={15} weight={600} color={h.tileInk} lineHeight={22}>
               {HIF.historySub()}
             </Txt>
             <View style={{ alignSelf: 'flex-end' }}>{arrow}</View>
@@ -214,7 +215,7 @@ export function HistoryScreen() {
 
 const styles = StyleSheet.create({
   pair: { flexDirection: 'row', gap: 12 },
-  mini: { flex: 1, minHeight: 128, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 10, overflow: 'hidden' },
+  mini: { flex: 1, minHeight: 116, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 10, overflow: 'hidden' },
   miniRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   root: { flex: 1, justifyContent: 'flex-end' },
   panel: { maxHeight: '80%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingTop: 18 },

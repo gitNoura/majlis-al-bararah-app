@@ -44,6 +44,7 @@ import { TOTAL_PAGES } from '@/lib/quran';
 import { pageUrl } from '@/lib/remote';
 import { trackPlace } from '@/lib/riwaya';
 import { clearPin, countPage, setPin } from '@/lib/wird';
+import { useHome } from '@/theme/home';
 import { QuranTheme, useTheme } from '@/theme/theme';
 
 type Mode = 'read' | 'listen' | 'recite';
@@ -85,6 +86,7 @@ export default function QuranTab() {
 
 function Quran() {
   const { c, isDark, setQuranMode } = useTheme();
+  const home = useHome();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const [headH, setHeadH] = useState(0); // the header block's height: where the page's room begins on the screen
@@ -275,7 +277,7 @@ function Quran() {
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: hidden ? paperBg : c.screen }}>
+    <View style={{ flex: 1, backgroundColor: hidden ? paperBg : home.screen }}>
       <StatusBar style={isDark ? 'light' : 'dark'} hidden={hidden} />
       {!hidden && (
         <View onLayout={(e) => setHeadH(e.nativeEvent.layout.height)}>
@@ -315,8 +317,8 @@ function Quran() {
         )}
 
         {!!toast && (
-          <View pointerEvents="none" style={[styles.toast, { backgroundColor: c.on, bottom: 16 }]}>
-            <Txt size={14} weight={600} color={c.onInk}>
+          <View pointerEvents="none" style={[styles.toast, { backgroundColor: home.forest, bottom: 16 }]}>
+            <Txt size={14} weight={600} color={home.forestInk}>
               {toast}
             </Txt>
           </View>

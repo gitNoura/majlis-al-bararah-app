@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, FlatList, Modal, Pressable, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CloseIcon, PlayIcon, SearchIcon, StarBadge } from '@/components/icons';
+import { CloseIcon, PlayIcon, SearchIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish, t } from '@/i18n/i18n';
@@ -154,8 +154,8 @@ export function QuranIndex({ open, page, onClose, onGo, onPlay }: { open: boolea
                     <PlayIcon color={c.onInk} size={16} />
                   </Pressable>
                 ) : (
-                  <View style={styles.num}>
-                    <StarBadge fill={on ? c.on : c.surface} stroke={c.gold} />
+                  // a simple rounded square, as on Home
+                  <View style={[styles.num, { backgroundColor: on ? c.on : c.surface2 }]}>
                     <Txt size={13} weight={700} color={on ? c.onInk : c.ink}>
                       {item.number}
                     </Txt>
@@ -196,12 +196,12 @@ const styles = StyleSheet.create({
   panel: { position: 'absolute', top: 0, bottom: 0, paddingHorizontal: 16, elevation: 12, shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 24 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
   round: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  tabs: { flexDirection: 'row', padding: 4, borderRadius: 16, marginTop: 8 },
-  tab: { flex: 1, paddingVertical: 10, borderRadius: 12 },
+  tabs: { flexDirection: 'row', padding: 4, borderRadius: 22, marginTop: 8 },
+  tab: { flex: 1, paddingVertical: 10, borderRadius: 18 },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 12, paddingHorizontal: 16, height: 48, borderRadius: 24, borderWidth: 1 },
   input: { flex: 1, fontSize: 15, paddingVertical: 0 },
   row: { height: ROW, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderRadius: 12 },
   edge: { position: 'absolute', end: 0, top: 10, bottom: 10, width: 3, borderRadius: 2 },
   playBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  num: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
+  num: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
 });

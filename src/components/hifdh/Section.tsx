@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'rea
 import type { ReactNode } from 'react';
 
 import { Txt } from '@/components/Txt';
-import { radius } from '@/theme/tokens';
+import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
 
 export type Tone = 'done';
@@ -15,25 +15,26 @@ export function alpha(hex: string, a: number) {
   const n = parseInt(hex.slice(1), 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
 }
+// (the greens are Home's: src/theme/home.ts)
 export function useGreen() {
   const { isDark } = useTheme();
-  const base = isDark ? '#6fb597' : '#2f6650';
-  return { base, chip: alpha(base, isDark ? 0.22 : 0.1), line: alpha(base, isDark ? 0.4 : 0.28), wash: alpha(base, isDark ? 0.16 : 0.1) };
+  const h = useHome();
+  return { base: h.leaf, chip: h.tile, ink: h.tileInk, line: alpha(h.leaf, isDark ? 0.4 : 0.22), wash: alpha(h.leaf, isDark ? 0.14 : 0.07) };
 }
 
-// A card: white on the light screen, a hairline border, 20 px corners, the title in the UI font. The icon chip is the
+// A card: paper on Home's page, a hairline border and a soft shadow, 24 px corners, the title in the UI font. The icon chip is the
 // card's only colour. `tone="done"` is a finished card: a soft green wash and border (the icon stays as it was).
 // Nothing is ever written under the title: the card's content goes below the head. Hifdh and Murajaa are identical.
 export function Section({ title, icon, tone, children, style }: { title: string; icon?: (color: string) => ReactNode; tone?: Tone; children: ReactNode; style?: StyleProp<ViewStyle> }) {
-  const { c } = useTheme();
+  const h = useHome();
   const g = useGreen();
   const done = tone === 'done';
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: done ? g.line : c.line }, style]}>
+    <View style={[styles.card, { backgroundColor: h.card, borderColor: done ? g.line : h.cardLine, boxShadow: `0px 8px 20px ${h.shadow}` }, style]}>
       {done && <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: g.wash }]} />}
       <View style={styles.head}>
-        {icon ? <View style={[styles.chip, { backgroundColor: g.chip }]}>{icon(g.base)}</View> : null}
-        <Txt size={18} weight={700} color={c.ink} style={{ flex: 1 }}>
+        {icon ? <View style={[styles.chip, { backgroundColor: g.chip }]}>{icon(g.ink)}</View> : null}
+        <Txt size={18} weight={700} color={h.ink} style={{ flex: 1 }}>
           {title}
         </Txt>
       </View>
@@ -71,16 +72,16 @@ export function Hint({ children }: { children: ReactNode }) {
 }
 
 export function PrimaryButton({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
-  const { c } = useTheme();
+  const h = useHome();
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
-      style={[styles.btn, { backgroundColor: c.on, opacity: disabled ? 0.45 : 1 }]}
+      style={[styles.btn, { backgroundColor: h.forest, opacity: disabled ? 0.45 : 1 }]}
     >
-      <Txt size={16} weight={700} color={c.onInk}>
+      <Txt size={16} weight={700} color={h.forestInk}>
         {label}
       </Txt>
     </Pressable>
@@ -88,16 +89,16 @@ export function PrimaryButton({ label, onPress, disabled }: { label: string; onP
 }
 
 export function SecondaryButton({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
-  const { c } = useTheme();
+  const h = useHome();
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
-      style={[styles.btn, { borderWidth: 1.5, borderColor: c.chosenLine, backgroundColor: 'transparent', opacity: disabled ? 0.4 : 1 }]}
+      style={[styles.btn, { borderWidth: 1.5, borderColor: h.forest, backgroundColor: 'transparent', opacity: disabled ? 0.4 : 1 }]}
     >
-      <Txt size={16} weight={700} color={c.ink}>
+      <Txt size={16} weight={700} color={h.ink}>
         {label}
       </Txt>
     </Pressable>
@@ -105,9 +106,9 @@ export function SecondaryButton({ label, onPress, disabled }: { label: string; o
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, overflow: 'hidden' },
+  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, overflow: 'hidden' },
   head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   chip: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
-  btn: { minHeight: 48, borderRadius: radius.button, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
+  btn: { minHeight: 50, borderRadius: 25, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
 });
