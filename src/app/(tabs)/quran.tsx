@@ -261,7 +261,7 @@ function Quran() {
   // carries its marks from the first frame of the turn (src/components/PageCurl.tsx draws them with the page).
   const notes = useMarks();
   const marksOf = (p: number): PageMarks => {
-    const list = ayatOn(p);
+    const list = ayatOn(p) as Chosen[]; // boxes.js is untyped
     const found: Marked[] = list.flatMap((e) => {
       const h = notes.highlightOf(`${e.s}:${e.a}`);
       return h ? [{ ...e, color: hlColor(h.color).value }] : [];
@@ -399,7 +399,7 @@ function Quran() {
         items={modes.map((m) => ({ key: m.value, label: m.label, chosen: m.value === mode, onPress: () => setMode(m.value) }))}
       />
       {listen.sheet}
-      <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={jump} />
+      <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={jump} onPlay={mode === 'listen' ? listen.playSurahNo : undefined} />
       <SearchPanel
         open={searchOpen}
         onClose={() => setSearchOpen(false)}

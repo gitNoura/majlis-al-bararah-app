@@ -26,7 +26,7 @@ export function Sheet({ open, onClose, title, children }: Props) {
               {title}
             </Txt>
           )}
-          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+          <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
             {children}
           </ScrollView>
         </Pressable>
@@ -40,4 +40,6 @@ const styles = StyleSheet.create({
   sheet: { maxHeight: '88%', borderTopLeftRadius: radius.sheet, borderTopRightRadius: radius.sheet, paddingHorizontal: space.md, paddingTop: space.sm, gap: space.sm },
   handle: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: space.xs },
   title: { marginBottom: space.xs },
+  // lets the list shrink to the sheet's maximum height, so what is taller than it scrolls instead of being cut off
+  scroll: { flexShrink: 1 },
 });

@@ -1,7 +1,7 @@
 // LISTEN mode of the Quran page: the same mushaf page, with a player bar under it and a settings sheet.
 //   tap an ayah   chooses it; a second tap takes everything between (then taps do nothing until the choice is cleared)
 //   the bar       what is chosen (or heard now; a tap opens the settings), clear, previous step, play / pause, next step;
-//                 with nothing chosen: «Whole surah» plays the surah the page is on
+//                 («Whole surah» is in the settings; the index's play buttons play a surah at once)
 //   the page      the chosen ayat are tinted green, the ones of the step heard lighter, the one heard now gold; the page
 //                 turns by itself to follow the ayah heard (a jump: it does not count as reading)
 //   the sheet     whole page / whole surah, how many times each ayah and the whole part are heard, speed, reciter, way
@@ -137,7 +137,8 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
     const last = onPage[onPage.length - 1];
     setRange({ from: `${onPage[0].s}:${onPage[0].a}`, to: `${last.s}:${last.a}` });
   };
-  const playSurah = () => first && begin(surahOf(first.s));
+  // from the index: that whole surah, played at once
+  const playSurahNo = (su: number) => begin(surahOf(su));
   // from the sheet: the chosen range, or the ayah at the top of the page when nothing was tapped
   const playFromSheet = () => {
     setOpen(false);
@@ -168,14 +169,6 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
             {sub}
           </Txt>
         </Pressable>
-        {!sel && !!first && (
-          <Btn label={`${HIF.lsQuickSurah()}: ${surahName(SURAHS[first.s - 1])}`} onPress={playSurah} wide>
-            <PlayIcon color={c.ink} size={14} />
-            <Txt size={13} weight={700} color={c.ink} numberOfLines={1}>
-              {HIF.lsQuickSurah()}
-            </Txt>
-          </Btn>
-        )}
         {!!sel && (
           <Btn label={HIF.lsQuickClear()} onPress={clear}>
             <CloseIcon color={c.ink} size={20} />
@@ -244,11 +237,12 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
         ))}
       </View>
       <Label>{HIF.lsReciter()}</Label>
-      <View style={styles.wrap}>
-        {available().map((r: { id: string; name: string[] }) => (
-          <Chip key={r.id} label={names(r)} on={reciterOf(prefs).id === r.id} onPress={() => ls.setPref('reciter', r.id)} />
-        ))}
-      </View>
+      <Reciters
+        current={names(reciterOf(prefs))}
+        list={available().map((r: { id: string; name: string[] }) => ({ id: r.id, name: names(r) }))}
+        chosen={reciterOf(prefs).id}
+        onChoose={(id) => ls.setPref('reciter', id)}
+      />
       <Label>{`${HIF.lsMethod()} ${HIF.lsOptional()}`}</Label>
       {METHODS.map((m: string) => (
         <Method key={m} on={prefs.method === m} title={methodText[m][0]} text={methodText[m][1]} onPress={() => ls.setPref('method', m)} />
@@ -259,7 +253,7 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
     </Sheet>
   );
 
-  return { bar, sheet, marks, tap, playAyah, clear, choose: setRange };
+  return { bar, sheet, marks, tap, playAyah, playSurahNo, clear, choose: setRange };
 }
 
 // ---------- small parts ----------
@@ -380,6 +374,49 @@ function Point({ label, value, onChange, onSurah }: { label: string; value: stri
   );
 }
 
+// the reciter: one field showing the name; a press opens the list under it, and choosing a name closes it
+function Reciters({ current, list, chosen, onChoose }: { current: string; list: { id: string; name: string }[]; chosen: string; onChoose: (id: string) => void }) {
+  const { c } = useTheme();
+  const [open, setOpen] = useState(false);
+  return (
+    <View style={{ gap: 6 }}>
+      <Pressable
+        onPress={() => setOpen((o) => !o)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        style={[styles.field, { borderColor: open ? c.on : c.line, backgroundColor: c.card }]}
+      >
+        <Txt size={15} weight={600} color={c.ink} numberOfLines={1} style={{ flex: 1 }}>
+          {current}
+        </Txt>
+        <View style={{ transform: [{ rotate: open ? '90deg' : '-90deg' }] }}>
+          <BackIcon color={c.ink} size={18} rtl={false} />
+        </View>
+      </Pressable>
+      {open && (
+        <View style={[styles.menu, { borderColor: c.line, backgroundColor: c.card }]}>
+          {list.map((r, i) => (
+            <Pressable
+              key={r.id}
+              onPress={() => {
+                onChoose(r.id);
+                setOpen(false);
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: r.id === chosen }}
+              style={[styles.option, i > 0 && { borderTopColor: c.line, borderTopWidth: StyleSheet.hairlineWidth }, r.id === chosen && { backgroundColor: c.surface2 }]}
+            >
+              <Txt size={15} weight={r.id === chosen ? 700 : 500} color={c.ink} numberOfLines={1} style={{ flex: 1 }}>
+                {r.name}
+              </Txt>
+            </Pressable>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
 function SurahRow({ n, name, onPress }: { n: number; name: string; onPress: () => void }) {
   const { c } = useTheme();
   return (
@@ -432,6 +469,9 @@ const styles = StyleSheet.create({
   pointRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   surahBtn: { flex: 1, minHeight: 44, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, justifyContent: 'center' },
   ayahBox: { width: 64, height: 44, borderRadius: radius.chip, borderWidth: 1, textAlign: 'center', fontSize: 16, fontFamily: ui(600) },
+  field: { minHeight: 48, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  menu: { borderRadius: radius.chip, borderWidth: 1, overflow: 'hidden' },
+  option: { minHeight: 46, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center' },
   surahRow: { flexDirection: 'row', alignItems: 'center', minHeight: 46, borderBottomWidth: StyleSheet.hairlineWidth },
   method: { borderRadius: radius.chip, borderWidth: 1, padding: 12, gap: 2 },
   go: { minHeight: 52, borderRadius: radius.button, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: space.sm },
