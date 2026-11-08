@@ -5,7 +5,7 @@
 'use no memo'; // reads saved state (modules) when it draws, which the React Compiler cannot see change
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CheckIcon, DownloadIcon } from '@/components/icons';
@@ -13,7 +13,7 @@ import { ScreenHeader } from '@/components/ScreenHeader';
 import { Toggle } from '@/components/Toggle';
 import { Txt } from '@/components/Txt';
 import { Card, Row, SegmentedControl } from '@/components/ui';
-import { isEnglish, isFrench } from '@/i18n/i18n';
+import { isEnglish, isFrench, LANG } from '@/i18n/i18n';
 import { READER } from '@/i18n/reader';
 import { setNightPage, useNightPage } from '@/lib/nightPage';
 import { HAFS, setRiwaya } from '@/lib/riwaya';
@@ -73,7 +73,8 @@ function QuranSettings() {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.screen }}>
+    // the page's own direction (right to left in Arabic), so it never falls back to left to right
+    <View style={[{ flex: 1, backgroundColor: c.screen }, Platform.OS !== 'web' && { direction: LANG === 'ar' ? 'rtl' : 'ltr' }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScreenHeader title={READER.settingsTitle()} />
       <ScrollView contentContainerStyle={{ padding: space.md, paddingBottom: insets.bottom + space.lg, gap: space.lg }}>
