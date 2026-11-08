@@ -1,7 +1,7 @@
 // The Quran page's header: a row of buttons, and under it the name of what is being read.
-//   row    at the start the back button (to Home) and the index (the fahras); at the end the drop-down of the page's
-//          modes (Read, Listen, Recite). Settings, search and marks are in the bottom bar (ReadBar.tsx); the page's
-//          bookmark is a ribbon on the page itself (PageBookmark.tsx)
+//   row    at the start the back button (to Home) and the index (the fahras); at the end search, the drop-down of the
+//          page's modes (Read, Listen, Recite) and «more» (My marks, Settings) in the corner. There is no bottom bar in
+//          Read: the page has all the room; the page's bookmark is a ribbon on the page itself (PageCurl.tsx)
 //   name   the surah(s) and the juz, just above the page (the page's own number is printed on the page)
 // Dressed like Home (src/theme/home.ts): round paper buttons with a soft shadow.
 import type { ReactNode } from 'react';
@@ -9,7 +9,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { BackIcon, MenuIcon } from '@/components/icons';
+import { BackIcon, MenuIcon, MoreIcon, SearchIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { isEnglish, surahName, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
@@ -20,6 +20,9 @@ import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
 export const HEADER_ROW_H = 44;
+// how far the mode's menu stands in from the end corner, so it hangs under the mode button (the «more» button is in
+// the corner: 40 wide, and a gap)
+export const MORE_INSET = 40 + space.sm;
 // where a menu hanging from the header's buttons starts, from the top of the screen
 export const menuTop = (insetTop: number) => insetTop + space.sm + HEADER_ROW_H + 4;
 
@@ -45,6 +48,8 @@ type Props = {
   onBack: () => void;
   onIndex: () => void;
   onMode: () => void;
+  onSearch: () => void;
+  onMore: () => void; // the menu of My marks and Settings
 };
 
 // one of the round buttons at the start of the row
@@ -63,7 +68,7 @@ function Tool({ label, onPress, children }: { label: string; onPress: () => void
   );
 }
 
-export function QuranHeader({ page, mode, onBack, onIndex, onMode }: Props) {
+export function QuranHeader({ page, mode, onBack, onIndex, onMode, onSearch, onMore }: Props) {
   const { c } = useTheme();
   const h = useHome();
   const insets = useSafeAreaInsets();
@@ -80,12 +85,18 @@ export function QuranHeader({ page, mode, onBack, onIndex, onMode }: Props) {
           </Tool>
         </View>
         <View style={styles.group}>
+          <Tool label={QURAN.search()} onPress={onSearch}>
+            <SearchIcon color={c.ink} size={20} />
+          </Tool>
           <Pressable onPress={onMode} accessibilityRole="button" accessibilityLabel={mode} hitSlop={6} style={[styles.pill, { backgroundColor: h.card, borderColor: h.cardLine, borderWidth: StyleSheet.hairlineWidth, boxShadow: `0px 4px 12px ${h.shadow}` }]}>
             <Txt size={14} weight={700} color={c.ink} numberOfLines={1}>
               {mode}
             </Txt>
             <ChevronDown color={c.ink} />
           </Pressable>
+          <Tool label={QURAN.more()} onPress={onMore}>
+            <MoreIcon color={c.ink} size={20} />
+          </Tool>
         </View>
       </View>
       <View style={styles.name}>

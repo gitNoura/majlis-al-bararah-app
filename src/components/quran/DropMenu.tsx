@@ -1,5 +1,5 @@
 // A drop-down menu: a small card that opens under a button at the top of the screen, over a transparent backdrop (a
-// tap outside closes it). `side` is the physical side of the screen it hangs from. Items may show a chosen mark.
+// tap outside closes it). `side` is the physical side of the screen it hangs from, `inset` how far it stands in from that side's margin. Items may show a chosen mark.
 import type { ReactNode } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 
@@ -12,9 +12,9 @@ import { space } from '@/theme/tokens';
 
 export type DropItem = { key: string; label: string; icon?: ReactNode; chosen?: boolean; onPress: () => void };
 
-type Props = { open: boolean; onClose: () => void; top: number; side: 'left' | 'right'; items: DropItem[] };
+type Props = { open: boolean; onClose: () => void; top: number; side: 'left' | 'right'; inset?: number; items: DropItem[] };
 
-export function DropMenu({ open, onClose, top, side, items }: Props) {
+export function DropMenu({ open, onClose, top, side, inset = 0, items }: Props) {
   const { c } = useTheme();
   const h = useHome();
   return (
@@ -22,7 +22,7 @@ export function DropMenu({ open, onClose, top, side, items }: Props) {
       {/* a Modal is its own window: the language's direction is set again inside it */}
       <View style={[StyleSheet.absoluteFill, Platform.OS !== 'web' && { direction: LANG === 'ar' ? 'rtl' : 'ltr' }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={items[0]?.label} />
-        <View style={[styles.menu, { top, [side]: space.md, backgroundColor: h.card, borderColor: h.cardLine }]}>
+        <View style={[styles.menu, { top, [side]: space.md + inset, backgroundColor: h.card, borderColor: h.cardLine }]}>
           {items.map((item, i) => (
             <Pressable
               key={item.key}

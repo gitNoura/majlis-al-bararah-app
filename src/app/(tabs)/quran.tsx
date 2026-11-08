@@ -2,10 +2,10 @@
 // the drop-down at the header's end. Read is this file; Listen and Recite are src/components/quran/ListenMode.tsx and
 // ReciteMode.tsx: each adds a bar under the page and changes what a tap on an ayah does (Read: its menu; Listen: chooses
 // it; Recite: starts the cover again from it).
-//   header   the back button and the index (fahras); the mode drop-down; under them the surah and juz
-//   bottom bar   settings, search and «My marks» (settings first: at the right end in Arabic)
-//   bookmark   a slim ribbon hanging from the page's top edge, on the page itself (PageBookmark.tsx): on the left of odd
-//            pages, on the right of even ones; a tap puts it on or off
+//   header   the back button and the index (fahras) at the start; at the end search, the modes' drop-down and «more» in the
+//            corner (My marks, Settings); under them the surah and juz. Read has no bottom bar
+//   bookmark   a slim ribbon hanging from the page's top edge, drawn on the page itself (PageCurl.tsx, so it turns with the
+//            page): on the left of odd pages, on the right of even ones; a tap puts it on or off
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
 //            («Mark here» in an ayah's menu, «Remove mark» on the marked ayah), shown as a slim tab on the paper's edge,
 //            as tall as that ayah
@@ -25,15 +25,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AyahMenu, type MenuAt } from '@/components/AyahMenu';
 import { AyahSheet, type Ayah } from '@/components/AyahSheet';
-import { CollapseIcon, MoonIcon, SunIcon } from '@/components/icons';
+import { CollapseIcon, MoonIcon, NoteIcon, SettingsIcon, SunIcon } from '@/components/icons';
 import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
-import { PageCurl, type Chosen, type Marked, type Pin as NotePin } from '@/components/PageCurl';
+import { PageCurl, type Chosen, type Marked, type PageMarks, type Pin as NotePin } from '@/components/PageCurl';
 import { DropMenu } from '@/components/quran/DropMenu';
 import { useListen } from '@/components/quran/ListenMode';
 import { MarksSheet } from '@/components/quran/MarksSheet';
-import { PageBookmark } from '@/components/quran/PageBookmark';
-import { menuTop, QuranHeader } from '@/components/quran/QuranHeader';
-import { ReadBar } from '@/components/quran/ReadBar';
+import { menuTop, MORE_INSET, QuranHeader } from '@/components/quran/QuranHeader';
 import { useRecite } from '@/components/quran/ReciteMode';
 import { SearchPanel } from '@/components/quran/SearchPanel';
 import { QuranIndex } from '@/components/QuranIndex';
@@ -104,6 +102,7 @@ function Quran() {
   const [marksOpen, setMarksOpen] = useState(false); // «My marks»
   const [searchOpen, setSearchOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false); // the drop-down of the modes
+  const [moreOpen, setMoreOpen] = useState(false); // the menu of My marks and Settings
   const [mode, setMode] = useState<Mode>('read');
   const [ayah, setAyah] = useState<Ayah | null>(null); // its tafsir open
   const [menu, setMenu] = useState<MenuAt | null>(null); // its options open
@@ -246,31 +245,54 @@ function Quran() {
     setPinState(savedPin());
   };
 
+  // a tap on the page's bookmark ribbon puts it on or takes it off
+  const toggleBookmark = () => {
+    Haptics.selectionAsync().catch(() => {});
+    say(togglePageMark(page) ? QURAN.pageMarked() : QURAN.pageUnmarked());
+  };
+
   const lit = ayah ?? menu ?? flash;
   const onPage: Chosen[] = ayatOn(page);
   const chosen: Chosen[] = mode === 'read' && lit ? onPage.filter((e) => e.s === lit.s && e.a === lit.a) : [];
 
-  // the highlighted ayat of the page, and the badges of its comments: in the margin beside the line where the ayah
-  // begins, on its outer side (the wider margin), never two on one height (as on the website)
+  // What is drawn on a page: its highlighted ayat, the badges of its comments (in the margin beside the line where the ayah
+  // begins, on its outer side (the wider margin), never two on one height, as on the website), the pin's ayah, and whether
+  // the page is bookmarked. The page read and the pages either side are all made here, so a page turning in already
+  // carries its marks from the first frame of the turn (src/components/PageCurl.tsx draws them with the page).
   const notes = useMarks();
-  const readMarks: Marked[] = onPage.flatMap((e) => {
-    const h = notes.highlightOf(`${e.s}:${e.a}`);
-    return h ? [{ ...e, color: hlColor(h.color).value }] : [];
-  });
-  const marks: Marked[] = mode === 'listen' ? listen.marks : mode === 'read' ? readMarks : [];
-  const pins: NotePin[] = [];
-  const xs = onPage.flatMap((e) => e.boxes.flatMap((b) => [b[0], b[2]]));
-  const [minX, maxX] = [Math.min(...xs), Math.max(...xs)];
-  for (const e of onPage) {
-    const n = notes.noteOf(`${e.s}:${e.a}`);
-    if (!n || pageOf(e.s, e.a) !== page || !e.boxes.length) continue;
-    const [, y0, , y1] = e.boxes[0];
-    let y = (y0 + y1) / 2;
-    while (pins.some((p) => Math.abs(p.y - y) < 0.04)) y += 0.042;
-    pins.push({ s: e.s, a: e.a, x: (minX + maxX) / 2 < 0.5 ? maxX + 0.042 : minX - 0.042, y, color: noteColor(n.color).dot });
+  const marksOf = (p: number): PageMarks => {
+    const list = ayatOn(p);
+    const found: Marked[] = list.flatMap((e) => {
+      const h = notes.highlightOf(`${e.s}:${e.a}`);
+      return h ? [{ ...e, color: hlColor(h.color).value }] : [];
+    });
+    const badges: NotePin[] = [];
+    const xs = list.flatMap((e) => e.boxes.flatMap((b) => [b[0], b[2]]));
+    const [minX, maxX] = [Math.min(...xs), Math.max(...xs)];
+    for (const e of list) {
+      const n = notes.noteOf(`${e.s}:${e.a}`);
+      if (!n || pageOf(e.s, e.a) !== p || !e.boxes.length) continue;
+      const [, y0, , y1] = e.boxes[0];
+      let y = (y0 + y1) / 2;
+      while (badges.some((q) => Math.abs(q.y - y) < 0.04)) y += 0.042;
+      badges.push({ s: e.s, a: e.a, x: (minX + maxX) / 2 < 0.5 ? maxX + 0.042 : minX - 0.042, y, color: noteColor(n.color).dot });
+    }
+    // the exact pin, when it is on this page
+    const pinned: Chosen | null = pin && pin.page === p ? (list.find((e) => `${e.s}:${e.a}` === pin.shown) ?? null) : null;
+    return { marks: found, pins: badges, ribbon: pinned, bookmarked: notes.pageMarked(p) };
+  };
+  const here = marksOf(page);
+  // the page read in Listen shows the ayat being listened to as its highlights; in Recite nothing is marked
+  const marks: Marked[] = mode === 'listen' ? listen.marks : mode === 'read' ? here.marks : [];
+  const pins: NotePin[] = here.pins;
+  const ribbon: Chosen | null = mode === 'read' ? here.ribbon : null;
+  // the pages either side, made the same way as the page read (Listen and Recite mark none of their ayat there)
+  const around: Record<number, PageMarks> = {};
+  for (const p of [page - 1, page + 1]) {
+    if (p < 1 || p > TOTAL_PAGES) continue;
+    const m = marksOf(p);
+    around[p] = mode === 'read' ? m : { ...m, marks: [], ribbon: null };
   }
-  // the exact pin, when it is on this page: its ribbon and underline
-  const ribbon: Chosen | null = mode === 'read' && pin && pin.page === page ? (onPage.find((e) => `${e.s}:${e.a}` === pin.shown) ?? null) : null;
 
   // the page's size: as big as the room allows, its own shape kept. In full screen the header and the tab bar are gone, so
   // the room is the whole screen (less the notch and the home bar) and the page is the text's own shape, edge to edge.
@@ -304,6 +326,8 @@ function Quran() {
             onBack={goBack}
             onIndex={() => setIndexOpen(true)}
             onMode={() => setModeOpen(true)}
+            onSearch={() => setSearchOpen(true)}
+            onMore={() => setMoreOpen(true)}
           />
         </View>
       )}
@@ -329,20 +353,10 @@ function Quran() {
             onEmptyTap={() => setHidden((h) => !h)}
             onZoomed={() => {}}
             ribbon={ribbon}
+            bookmarked={here.bookmarked}
+            onBookmark={mode === 'read' ? toggleBookmark : undefined}
+            around={around}
             veils={mode === 'recite' ? recite.veils : undefined}
-          />
-        )}
-
-        {/* the page's bookmark: a slim ribbon hanging from the page's top edge, at the left corner of odd pages and the
-            right corner of even ones; in full screen it shows only when the page is bookmarked */}
-        {room.width > 0 && room.height > 0 && mode === 'read' && (!hidden || notes.pageMarked(page)) && (
-          <PageBookmark
-            marked={notes.pageMarked(page)}
-            label={notes.pageMarked(page) ? QURAN.unmarkPage() : QURAN.markPage()}
-            onPress={() => say(togglePageMark(page) ? QURAN.pageMarked() : QURAN.pageUnmarked())}
-            side={page % 2 ? 'left' : 'right'}
-            top={padTop + (room.height - pageH) / 2}
-            inset={(room.width - pageW) / 2 + 16}
           />
         )}
 
@@ -355,23 +369,9 @@ function Quran() {
         )}
       </View>
 
-      {/* the bar of Listen or Recite, under the page (the page's room is what is left between the header and it) */}
-      {/* the one bar at the bottom: Read's tools, or the controls of Listen / Recite */}
-      {!hidden && (
-        <View style={{ paddingBottom: insets.bottom }}>
-          {mode === 'read' ? (
-            <ReadBar
-              onSearch={() => setSearchOpen(true)}
-              onNotes={() => setMarksOpen(true)}
-              onSettings={() => router.push('/quran-settings')}
-            />
-          ) : mode === 'listen' ? (
-            listen.bar
-          ) : (
-            recite.bar
-          )}
-        </View>
-      )}
+      {/* under the page: the controls of Listen or Recite. Read has no bar: its tools are in the header, so the page has all
+          the room (the page's room is what is left between the header and this) */}
+      {!hidden && <View style={{ paddingBottom: insets.bottom + (mode === 'read' ? 6 : 0) }}>{mode === 'listen' ? listen.bar : mode === 'recite' ? recite.bar : null}</View>}
 
       {/* in full screen: exit and the day / night switch, at the top corner just under the clock and the wifi */}
       {hidden && (
@@ -396,7 +396,19 @@ function Quran() {
         onClose={() => setModeOpen(false)}
         top={menuTop(insets.top)}
         side={LANG === 'ar' ? 'left' : 'right'}
+        inset={MORE_INSET}
         items={modes.map((m) => ({ key: m.value, label: m.label, chosen: m.value === mode, onPress: () => setMode(m.value) }))}
+      />
+      {/* «more», in the header's end corner: the marks and the Quran's settings */}
+      <DropMenu
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        top={menuTop(insets.top)}
+        side={LANG === 'ar' ? 'left' : 'right'}
+        items={[
+          { key: 'marks', label: QURAN.notes(), icon: <NoteIcon color={c.ink} size={20} />, onPress: () => setMarksOpen(true) },
+          { key: 'settings', label: READER.settingsTitle(), icon: <SettingsIcon color={c.ink} size={20} />, onPress: () => router.push('/quran-settings') },
+        ]}
       />
       {listen.sheet}
       <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={jump} />

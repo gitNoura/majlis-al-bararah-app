@@ -11,6 +11,7 @@ export const QURAN = {
   index: () => L('الفهرس', 'Index', 'Index'),
   search: () => L('بحث', 'Search', 'Rechercher'),
   notes: () => L('علاماتي', 'My marks', 'Mes repères'),
+  more: () => L('المزيد', 'More', 'Plus'),
   findField: () => L('اسم سورة، كلمة، أو رقم مثل 2:255', 'Surah, words, or a number like 2:255', 'Sourate, mots, ou numéro comme 2:255'),
   ayatFound: () => L('الآيات', 'Ayat', 'Versets'),
   noResults: () => L('لا نتائج', 'No results', 'Aucun résultat'),

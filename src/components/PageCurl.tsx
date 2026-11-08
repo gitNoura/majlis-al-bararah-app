@@ -10,8 +10,9 @@
 // website (src/reader/pinch.js); zoomed in, one finger moves the page around and nothing turns (a tap
 // still opens an ayah). Back to the whole page: pinching out, the app's «whole page» button
 // (`unzoom`), or any change of page. In full screen the page is cut as on the website (src/lib/crop.ts).
-// On the page read: the highlighted ayat in their colours, the chosen one in gold, and the comments'
-// badges in the margin (a tap on one opens its comment).
+// On each page, as it is drawn (the page read and the pages either side, so a turn brings its marks with it): the
+// highlighted ayat in their colours, the chosen one in gold, the comments' badges in the margin (a tap on one opens its
+// comment), the pin's tab on the paper's edge, and the bookmark ribbon at the top corner (a tap on it puts it on or off).
 //
 // Where the fold is: the corner's position `px, py` (the page's own coordinates), which corner (top or
 // bottom: where the finger started) and which way (`mode`: 1 forward, -1 back, 0 at rest). The pictures
@@ -42,10 +43,21 @@ export type Chosen = { s: number; a: number; boxes: number[][] };
 export type Marked = Chosen & { color: string };
 // a comment's badge: where (fractions of the page picture), and its note's colour
 export type Pin = { s: number; a: number; x: number; y: number; color: string };
+// everything drawn on one page: its highlights, comment badges, the pin's ayah and whether the page is bookmarked. The page
+// read passes its own as `marks`, `pins`, `ribbon` and `bookmarked`; the pages either side pass theirs in `around`, so a
+// page turning in already carries its marks from the first frame of the turn
+export type PageMarks = { marks: Marked[]; pins: Pin[]; ribbon: Chosen | null; bookmarked: boolean };
 
 // the website's badge (notes.js), in thousandths of the page's width: a speech bubble with two lines
 const BUBBLE = 'M-17 -15h34a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4h-20l-9 9v-9h-5a4 4 0 0 1-4-4v-18a4 4 0 0 1 4-4z';
 const BUBBLE_LINES = 'M-10 -5h20M-10 2h13';
+// the page's bookmark: a slim ribbon hanging from the top edge, a swallow-tail notch at its foot. It is drawn on the page
+// (so it turns with it): on the left of odd pages, on the right of even ones
+export const RIBBON_W = 11;
+export const RIBBON_H = 28;
+const RIBBON_INSET = 16;
+const RIBBON = `M0 0H${RIBBON_W}V${RIBBON_H}L${RIBBON_W / 2} ${RIBBON_H - 5.5}L0 ${RIBBON_H}Z`;
+const ribbonX = (page: number, pageW: number) => (page % 2 ? RIBBON_INSET : pageW - RIBBON_INSET - RIBBON_W);
 
 type Props = {
   page: number;
@@ -67,6 +79,9 @@ type Props = {
   // this page, marked by a slim tab on the paper's edge (null: none here)
   onHold?: (s: number, a: number) => void;
   ribbon?: Chosen | null;
+  bookmarked?: boolean; // the page read carries a bookmark
+  onBookmark?: () => void; // a tap on the ribbon (given only where the page can be bookmarked)
+  around?: Record<number, PageMarks>; // the marks of the pages before and after the one read
   // Tasmee (Recite): parts of the page covered with the paper's own colour, so the words under them cannot be read.
   // Boxes are fractions of the page picture, like `chosen`.
   veils?: Record<number, { boxes: number[][] }[] | undefined>;
@@ -149,16 +164,21 @@ function Cover({ page, path, role, at, mode, image, rect, pageW, pageH, paper }:
   );
 }
 
-// The marks on one page (highlights, the chosen ayah, comment badges, the pin). Each page's marks are their own copy,
-// made for that page and drawn only while that page is the one on screen. Skia and the page picture are updated on the
-// graphics side at once when a turn ends, the marks a moment later (the app has to render first); because this copy
-// compares the page on screen with the page it was made for, the previous page's marks can never show on the next page.
-function Overlay({ mine, at, mode, children }: { mine: number; at: { get(): number }; mode: { get(): number }; children: ReactNode }) {
-  const opacity = useDerivedValue(() => (mode.get() === -1 || at.get() !== mine ? 0 : 1));
+// The marks of one page, drawn where that page is: on the page turning (role 'over') or on the page it uncovers (role 'under').
+// The layers of the page read and of the pages either side are all there before a turn begins, and which one shows is
+// decided on the graphics side from the page drawn (`at`) and the turn's direction (`mode`), exactly as the pictures are:
+// so a page turning in has its highlights, badges, pin and ribbon on the first frame, and the moment a turn ends the
+// new page's marks are already the ones showing (the app's own update, a moment later, changes nothing).
+function PageLayer({ mine, role, at, mode, children }: { mine: number; role: CoverRole; at: { get(): number }; mode: { get(): number }; children: ReactNode }) {
+  const opacity = useDerivedValue(() => {
+    const m = mode.get();
+    const drawn = role === 'under' ? at.get() + (m === 1 ? 1 : 0) : at.get() - (m === -1 ? 1 : 0);
+    return drawn === mine ? 1 : 0;
+  });
   return <Group opacity={opacity}>{children}</Group>;
 }
 
-export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed, onHold, ribbon, veils }: Props) {
+export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed, onHold, ribbon, bookmarked = false, onBookmark, around, veils }: Props) {
   const { c, isDark } = useTheme();
   // night: the page always a little dimmer (its colours never changed); the choice in the settings is
   // only the screen around it in full screen (quran.tsx)
@@ -511,7 +531,14 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
       const fx = (e.x - ox - zx.get()) / k / pageW;
       const fy = (e.y - oy - zy.get()) / k / pageH;
       const crop = cropOf(page, full);
-      // a comment's badge first (it sits in the margin, beside its ayah)
+      // the page's bookmark ribbon first (in the paper's top margin; in full screen only when it is on)
+      if (onBookmark && (!full || bookmarked)) {
+        const bx = (e.x - ox - zx.get()) / k;
+        const by = (e.y - oy - zy.get()) / k;
+        const rx = ribbonX(page, pageW);
+        if (bx > rx - 14 && bx < rx + RIBBON_W + 14 && by > -6 && by < RIBBON_H + 18) return onBookmark();
+      }
+      // a comment's badge (it sits in the margin, beside its ayah)
       const pin = pins.find((p) => Math.hypot(((p.x - crop.x) / crop.w - fx) * pageW * k, ((p.y - crop.y) / crop.h - fy) * pageH * k) < 22);
       if (pin) return onPin(pin.s, pin.a);
       const inside = fx >= 0 && fx <= 1 && fy >= 0 && fy <= 1;
@@ -544,16 +571,14 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
   const pages = useExclusiveGestures(drag, hold, tap);
   const gesture = useCompetingGestures(pinch, pages);
 
-  // the highlighted ayat and the chosen one, where their parts are on the page as shown (only on the
-  // page read: hidden while the page before folds back over it); the comments' badges
-  const shown = cropOf(page, full);
-  const place = (e: Chosen, color: string) =>
+  // the highlighted ayat and the chosen one, where their parts are on a page as shown (each page by its own crop)
+  const place = (e: Chosen, color: string, crop: ReturnType<typeof cropOf>) =>
     e.boxes.map(([x0, y0, x1, y1], i) => ({
       key: `${e.s}:${e.a}:${i}:${color}`,
-      x: ((x0 - shown.x) / shown.w) * pageW,
-      y: ((y0 - shown.y) / shown.h) * pageH,
-      width: ((x1 - x0) / shown.w) * pageW,
-      height: ((y1 - y0) / shown.h) * pageH,
+      x: ((x0 - crop.x) / crop.w) * pageW,
+      y: ((y0 - crop.y) / crop.h) * pageH,
+      width: ((x1 - x0) / crop.w) * pageW,
+      height: ((y1 - y0) / crop.h) * pageH,
       color,
     }));
   // Tasmee's cover: the page's own picture, drawn again inside the covered boxes through a dilate filter. A dilate
@@ -575,20 +600,58 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
     }
     return out;
   }, [veils, full, pageW, pageH]);
-  const lit = [...marks.flatMap((e) => place(e, e.color)), ...chosen.flatMap((e) => place(e, 'rgba(196, 154, 69, 0.3)'))];
-  // the mark (Mark here, where the reader will continue): a slim rounded tab of the accent colour flush against the edge of
-  // the paper, as tall as the marked ayah, on the same side as the page's bookmark (the left on odd pages, the right on
-  // even ones). It touches no word and cannot be taken for a highlight
-  const ribbonDraw = useMemo(() => {
-    if (!ribbon?.boxes.length) return null;
-    const Y = (fy: number) => ((fy - shown.y) / shown.h) * pageH;
-    const top = Y(Math.min(...ribbon.boxes.map((b) => b[1]))) - 1;
-    const bottom = Y(Math.max(...ribbon.boxes.map((b) => b[3]))) + 1;
-    const w = 3.5;
-    return { x: page % 2 ? 1.5 : pageW - w - 1.5, y: top, w, h: Math.max(16, bottom - top) };
-  }, [ribbon, page, shown.y, shown.h, pageW, pageH]);
-  const unit = pageW / shown.w / 1000; // the badge's thousandths of the page's width
   const bubble = useMemo(() => ({ body: Skia.Path.MakeFromSVGString(BUBBLE)!, lines: Skia.Path.MakeFromSVGString(BUBBLE_LINES)! }), []);
+  const tab = useMemo(() => Skia.Path.MakeFromSVGString(RIBBON)!, []);
+  const layers: Record<number, PageMarks> = { ...around, [page]: { marks, pins, ribbon: ribbon ?? null, bookmarked } };
+  const near = [page - 1, page, page + 1].filter((p) => p >= 1 && p <= TOTAL_PAGES);
+  // everything drawn on page `p`: highlights, the chosen ayah (the page read only), comment badges, the pin's edge tab and
+  // the bookmark ribbon
+  const marksOn = (p: number) => {
+    const d = layers[p];
+    if (!d) return null;
+    const crop = cropOf(p, full);
+    const lit = [...d.marks.flatMap((e) => place(e, e.color, crop)), ...(p === page ? chosen.flatMap((e) => place(e, 'rgba(196, 154, 69, 0.3)', crop)) : [])];
+    const unit = pageW / crop.w / 1000; // the badge's thousandths of the page's width
+    // the pin (Mark here, where the reader will continue): a slim rounded tab of the accent colour flush against the edge
+    // of the paper, as tall as the marked ayah, on the side of the page's bookmark. It touches no word and cannot be taken
+    // for a highlight
+    let edge: { x: number; y: number; w: number; h: number } | null = null;
+    if (d.ribbon?.boxes.length) {
+      const Y = (fy: number) => ((fy - crop.y) / crop.h) * pageH;
+      const top = Y(Math.min(...d.ribbon.boxes.map((b) => b[1]))) - 1;
+      const bottom = Y(Math.max(...d.ribbon.boxes.map((b) => b[3]))) + 1;
+      edge = { x: p % 2 ? 1.5 : pageW - 3.5 - 1.5, y: top, w: 3.5, h: Math.max(16, bottom - top) };
+    }
+    const ribbonColor = d.bookmarked ? c.accent : onBookmark && !full ? (isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(58, 51, 38, 0.13)') : null;
+    return (
+      <>
+        {lit.map((r) => (
+          <Rect key={r.key} x={r.x} y={r.y} width={r.width} height={r.height} color={r.color} />
+        ))}
+        {d.pins.map((pin) => (
+          <Group
+            key={`${pin.s}:${pin.a}`}
+            opacity={0.75}
+            transform={[
+              { translateX: ((pin.x - crop.x) / crop.w) * pageW },
+              { translateY: ((pin.y - crop.y) / crop.h) * pageH },
+              { scale: unit },
+            ]}
+          >
+            <Path path={bubble.body} color={pin.color} />
+            <Path path={bubble.body} color="#fffaf0" style="stroke" strokeWidth={2.5} strokeJoin="round" />
+            <Path path={bubble.lines} color="#fffaf0" style="stroke" strokeWidth={3} strokeCap="round" />
+          </Group>
+        ))}
+        {edge && <RoundedRect x={edge.x} y={edge.y} width={edge.w} height={edge.h} r={edge.w / 2} color={c.accent} opacity={0.95} />}
+        {ribbonColor && (
+          <Group transform={[{ translateX: ribbonX(p, pageW) }]}>
+            <Path path={tab} color={ribbonColor} />
+          </Group>
+        )}
+      </>
+    );
+  };
 
   // Tasmee's covers of every page given in `veils`, drawn over one of the page pictures
   const covers = (tag: string, role: CoverRole, image: Picture, rect: Place) =>
@@ -627,6 +690,11 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
                 <Rect x={0} y={0} width={pageW} height={pageH} color={paper} />
                 <SkiaImage image={under} rect={underAt} fit="fill" />
                 {covers('u', 'under', under, underAt)}
+                {near.map((p) => (
+                  <PageLayer key={`u${p}`} mine={p} role="under" at={at} mode={mode}>
+                    {marksOn(p)}
+                  </PageLayer>
+                ))}
               </Group>
               <Group clip={uncovered}>
                 <Rect x={0} y={0} width={pageW} height={pageH}>
@@ -634,32 +702,16 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
                 </Rect>
               </Group>
 
-              {/* the page turning, as much as still lies flat (the chosen ayah lit on it) */}
+              {/* the page turning, as much as still lies flat (its marks and bookmark on it) */}
               <Group clip={flat}>
                 <Rect x={0} y={0} width={pageW} height={pageH} color={paper} />
                 <SkiaImage image={over} rect={overAt} fit="fill" />
                 {covers('o', 'over', over, overAt)}
-                <Overlay key={page} mine={page} at={at} mode={mode}>
-                  {lit.map((r) => (
-                    <Rect key={r.key} x={r.x} y={r.y} width={r.width} height={r.height} color={r.color} />
-                  ))}
-                  {pins.map((p) => (
-                    <Group
-                      key={`${p.s}:${p.a}`}
-                      opacity={0.75}
-                      transform={[
-                        { translateX: ((p.x - shown.x) / shown.w) * pageW },
-                        { translateY: ((p.y - shown.y) / shown.h) * pageH },
-                        { scale: unit },
-                      ]}
-                    >
-                      <Path path={bubble.body} color={p.color} />
-                      <Path path={bubble.body} color="#fffaf0" style="stroke" strokeWidth={2.5} strokeJoin="round" />
-                      <Path path={bubble.lines} color="#fffaf0" style="stroke" strokeWidth={3} strokeCap="round" />
-                    </Group>
-                  ))}
-                  {ribbonDraw && <RoundedRect x={ribbonDraw.x} y={ribbonDraw.y} width={ribbonDraw.w} height={ribbonDraw.h} r={ribbonDraw.w / 2} color={c.accent} opacity={0.95} />}
-                </Overlay>
+                {near.map((p) => (
+                  <PageLayer key={`o${p}`} mine={p} role="over" at={at} mode={mode}>
+                    {marksOn(p)}
+                  </PageLayer>
+                ))}
                 <Rect x={0} y={0} width={pageW} height={pageH}>
                   <LinearGradient start={foldAt} end={flatShadeEnd} colors={['rgba(0,0,0,0.16)', 'rgba(0,0,0,0)']} />
                 </Rect>
