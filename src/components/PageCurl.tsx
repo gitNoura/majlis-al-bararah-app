@@ -191,7 +191,9 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
   const dimmed = isDark;
   const paper = c.paper;
   const ox = (width - pageW) / 2;
-  const oy = (height - pageH) / 2;
+  // the page hangs from the top of its room (6 below the header), so it sits at the same height in Read, Listen and Recite
+  // whatever each mode puts under it; in full screen it is centred on the screen
+  const oy = full ? (height - pageH) / 2 : 6;
 
   // the page's size, the page read, full screen or not, the fold
   const W = useSharedValue(pageW);

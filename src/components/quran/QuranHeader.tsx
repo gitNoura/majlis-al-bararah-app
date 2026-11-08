@@ -1,6 +1,6 @@
 // The Quran page's header: a row of buttons, and under it the name of what is being read.
-//   row    at the start the back button (to Home) and the index (the fahras); at the end «My marks» and the drop-down of
-//          the page's modes (Read, Listen, Recite). Search and settings are two buttons at the page's bottom corners
+//   row    at the start the back button (to Home) and the index (the fahras); at the end search and the drop-down of
+//          the page's modes (Read, Listen, Recite). «My marks» and settings are two buttons at the page's bottom corners
 //          (ReadButtons.tsx); the page's bookmark is a ribbon on the page itself (PageCurl.tsx)
 //   name   the surah(s) and the juz, just above the page (the page's own number is printed on the page)
 // Dressed like Home (src/theme/home.ts): round paper buttons with a soft shadow.
@@ -9,7 +9,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { BackIcon, MarksIcon, MenuIcon } from '@/components/icons';
+import { BackIcon, MenuIcon, SearchIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { isEnglish, surahName, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
@@ -45,7 +45,7 @@ type Props = {
   onBack: () => void;
   onIndex: () => void;
   onMode: () => void;
-  onMarks: () => void; // «My marks»
+  onSearch: () => void;
 };
 
 // one of the round paper buttons (the header's, and the page's own at its bottom corners)
@@ -64,7 +64,7 @@ export function Tool({ label, onPress, children, size = 40 }: { label: string; o
   );
 }
 
-export function QuranHeader({ page, mode, onBack, onIndex, onMode, onMarks }: Props) {
+export function QuranHeader({ page, mode, onBack, onIndex, onMode, onSearch }: Props) {
   const { c } = useTheme();
   const h = useHome();
   const insets = useSafeAreaInsets();
@@ -81,8 +81,8 @@ export function QuranHeader({ page, mode, onBack, onIndex, onMode, onMarks }: Pr
           </Tool>
         </View>
         <View style={styles.group}>
-          <Tool label={QURAN.notes()} onPress={onMarks}>
-            <MarksIcon color={c.ink} size={22} />
+          <Tool label={QURAN.search()} onPress={onSearch}>
+            <SearchIcon color={c.ink} size={20} />
           </Tool>
           <Pressable onPress={onMode} accessibilityRole="button" accessibilityLabel={mode} hitSlop={6} style={[styles.pill, { backgroundColor: h.card, borderColor: h.cardLine, borderWidth: StyleSheet.hairlineWidth, boxShadow: `0px 4px 12px ${h.shadow}` }]}>
             <Txt size={14} weight={700} color={c.ink} numberOfLines={1}>

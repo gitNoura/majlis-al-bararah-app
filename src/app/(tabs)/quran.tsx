@@ -2,9 +2,9 @@
 // the drop-down at the header's end. Read is this file; Listen and Recite are src/components/quran/ListenMode.tsx and
 // ReciteMode.tsx: each adds a bar under the page and changes what a tap on an ayah does (Read: its menu; Listen: chooses
 // it; Recite: starts the cover again from it).
-//   header   the back button and the index (fahras) at the start; at the end «My marks» and the modes' drop-down; under them
+//   header   the back button and the index (fahras) at the start; at the end search and the modes' drop-down; under them
 //            the surah and juz
-//   bottom   Read: search and settings, two round buttons at the page's bottom corners (ReadButtons.tsx), no bar
+//   bottom   Read: My marks and settings, two round buttons at the page's bottom corners (ReadButtons.tsx), no bar
 //   bookmark   a slim ribbon hanging from the page's top edge, drawn on the page itself (PageCurl.tsx, so it turns with the
 //            page): on the left of odd pages, on the right of even ones; a tap puts it on or off
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
@@ -327,7 +327,7 @@ function Quran() {
             onBack={goBack}
             onIndex={() => setIndexOpen(true)}
             onMode={() => setModeOpen(true)}
-            onMarks={() => setMarksOpen(true)}
+            onSearch={() => setSearchOpen(true)}
           />
         </View>
       )}
@@ -370,9 +370,9 @@ function Quran() {
       </View>
 
       {/* under the page: the controls of Listen or Recite; Read has two round buttons at the bottom corners instead of a bar
-          (the page's room is what is left between the header and this) */}
+          (the page's room is what is left between the header and this; the page hangs from its top) */}
       {!hidden && mode !== 'read' && <View style={{ paddingBottom: insets.bottom }}>{mode === 'listen' ? listen.bar : recite.bar}</View>}
-      {!hidden && mode === 'read' && <ReadButtons onSearch={() => setSearchOpen(true)} />}
+      {!hidden && mode === 'read' && <ReadButtons onMarks={() => setMarksOpen(true)} />}
 
       {/* in full screen: exit and the day / night switch, at the top corner just under the clock and the wifi */}
       {hidden && (
