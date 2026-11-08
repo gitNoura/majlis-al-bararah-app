@@ -54,9 +54,6 @@ export function ReadingCard() {
   );
   const words = (
     <View style={{ flex: 1, gap: 2 }}>
-      <Txt size={12} weight={700} color={h.gold}>
-        {DASH.reading()}
-      </Txt>
       {r.started ? (
         <>
           <Txt size={18} weight={800} lineHeight={26} color={h.forestInk} numberOfLines={2}>
@@ -77,9 +74,13 @@ export function ReadingCard() {
     <View style={[styles.card, { backgroundColor: h.forest, boxShadow: `0px 14px 28px ${h.shadow}` }]}>
       {/* a thin inset frame, like a mushaf page */}
       <View pointerEvents="none" style={[styles.frame, { borderColor: h.goldLine }]} />
+      {/* «Reading»: its own line, apart from the row below */}
+      <Txt size={12} weight={700} color={h.gold}>
+        {DASH.reading()}
+      </Txt>
       <View style={styles.top}>
         {/* the ring is always at the right edge of the screen: first in Arabic (the line begins at the right), last otherwise */}
-        {LANG === 'ar' ? <>{ring}{button}{words}</> : <>{words}{button}{ring}</>}
+        {LANG === 'ar' ? <>{ring}{words}{button}</> : <>{button}{words}{ring}</>}
       </View>
       {/* the hadith of the reader («read and rise») and who told it: plain text on the card, same font as the rest */}
       <View style={{ gap: 2 }}>
