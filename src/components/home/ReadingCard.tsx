@@ -35,15 +35,13 @@ export function ReadingCard() {
       {/* a thin inset frame, like a mushaf page */}
       <View pointerEvents="none" style={[styles.frame, { borderColor: h.goldLine }]} />
       <View style={styles.top}>
-        <View style={{ flex: 1, gap: 4 }}>
-          <View style={[styles.chip, { backgroundColor: h.goldSoft }]}>
-            <Txt size={12} weight={700} color={h.gold}>
-              {DASH.reading()}
-            </Txt>
-          </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Txt size={12} weight={700} color={h.gold}>
+            {DASH.reading()}
+          </Txt>
           {r.started ? (
             <>
-              <Txt serif size={24} weight={700} lineHeight={34} color={h.forestInk} numberOfLines={2}>
+              <Txt size={20} weight={800} lineHeight={28} color={h.forestInk} numberOfLines={2}>
                 {HOME.surah(where.surahs)}
               </Txt>
               <Txt size={13} color={h.forestSoft} numberOfLines={1}>
@@ -51,7 +49,7 @@ export function ReadingCard() {
               </Txt>
             </>
           ) : (
-            <Txt size={18} weight={700} lineHeight={26} color={h.forestInk}>
+            <Txt size={20} weight={800} lineHeight={28} color={h.forestInk}>
               {DASH.beginKhatma()}
             </Txt>
           )}
@@ -62,13 +60,13 @@ export function ReadingCard() {
           </Txt>
         </Ring>
       </View>
-      {/* the hadith of the reader: «read and rise», and who told it */}
-      <View style={[styles.hadith, { backgroundColor: h.goldSoft, borderColor: h.goldLine }]}>
-        <Txt size={LANG === 'ar' ? 14 : 12.5} weight={500} lineHeight={LANG === 'ar' ? 23 : 18} color={h.forestInk} center>
+      {/* the hadith of the reader («read and rise») and who told it: plain text on the card, same font as the rest */}
+      <View style={[styles.rule, { backgroundColor: h.goldLine }]} />
+      <View style={{ gap: 2 }}>
+        <Txt size={13} weight={500} lineHeight={20} color={h.forestInk}>
           {HOME.hadith()}
         </Txt>
-        <View style={[styles.rule, { backgroundColor: h.goldLine }]} />
-        <Txt size={11} lineHeight={15} color={h.gold} center>
+        <Txt size={12} lineHeight={17} color={h.gold}>
           {HOME.heroSource()}
         </Txt>
       </View>
@@ -77,7 +75,7 @@ export function ReadingCard() {
         accessibilityRole="button"
         style={({ pressed }) => [styles.btn, { backgroundColor: h.lime }, pressed && { opacity: 0.88 }]}
       >
-        <Txt size={15} weight={800} color={h.limeInk}>
+        <Txt size={14} weight={800} color={h.limeInk}>
           {r.started ? DASH.continueReading() : DASH.startReading()}
         </Txt>
         <View style={[styles.go, { backgroundColor: h.limeInk }]}>
@@ -89,12 +87,10 @@ export function ReadingCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, padding: 12, gap: 8, overflow: 'hidden' },
+  card: { borderRadius: 24, paddingHorizontal: 16, paddingVertical: 14, gap: 10, overflow: 'hidden' },
   frame: { position: 'absolute', top: 6, bottom: 6, start: 6, end: 6, borderRadius: 19, borderWidth: 1 },
   top: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  hadith: { borderRadius: 14, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8, gap: 5, alignItems: 'center' },
-  rule: { width: 28, height: 1.5, borderRadius: 1 },
-  chip: { alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 2, borderRadius: 12 },
+  rule: { height: StyleSheet.hairlineWidth, alignSelf: 'stretch' },
   btn: { height: 40, borderRadius: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: 18, paddingEnd: 5 },
   go: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
 });
