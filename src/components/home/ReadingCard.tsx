@@ -32,7 +32,7 @@ export function ReadingCard() {
   const where = placeOf(r.page);
 
   const ring = (
-    <Ring key="ring" value={r.percent / 100} size={54} color={h.tile} track="rgba(244,246,236,0.14)" a11y={`${r.percent}%`}>
+    <Ring key="ring" value={r.percent / 100} size={54} color={h.ring} track="rgba(244,246,236,0.14)" a11y={`${r.percent}%`}>
       <Txt size={13} weight={800} color={h.forestInk}>
         {`${digits(r.percent)}%`}
       </Txt>

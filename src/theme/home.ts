@@ -18,6 +18,7 @@ export type HomePalette = {
   lime: string; // the cream button and ring on the hero
   gold: string; // the light yellow accent on the hero (chip words, frame, rule, the hadith's source, the ring)
   goldSoft: string; // its faint tint (the chip, the hadith's panel)
+  ring: string; // the khatma ring on the hero: a baby yellowish green
   goldLine: string; // its hairline (the inset frame, the rule)
   limeInk: string; // words on that button
   tile: string; // the streak tile and the done pills: a soft tint of the green
@@ -45,6 +46,7 @@ const light: HomePalette = {
   gold: '#f4e6a6',
   goldSoft: 'rgba(244, 230, 166, 0.14)',
   goldLine: 'rgba(244, 230, 166, 0.34)',
+  ring: '#d8eba6',
   tile: '#dce9df',
   tileInk: '#173f32',
   mint: '#eff4f2',
@@ -70,6 +72,7 @@ const dark: HomePalette = {
   gold: '#f1e29b',
   goldSoft: 'rgba(241, 226, 155, 0.13)',
   goldLine: 'rgba(241, 226, 155, 0.32)',
+  ring: '#d3e89f',
   tile: '#27382f',
   tileInk: '#d8eadf',
   mint: '#28362f',
