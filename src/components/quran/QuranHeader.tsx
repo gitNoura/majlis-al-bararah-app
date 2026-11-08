@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { BackIcon, MenuIcon } from '@/components/icons';
+import { BookmarkIcon } from '@/components/quran/MenuIcons';
 import { Txt } from '@/components/Txt';
 import { isEnglish, surahName, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
@@ -44,6 +45,8 @@ type Props = {
   onBack: () => void;
   onIndex: () => void;
   onMode: () => void;
+  marked: boolean; // the page carries a bookmark
+  onBookmark: () => void;
 };
 
 // one of the round buttons at the start of the row
@@ -62,7 +65,7 @@ function Tool({ label, onPress, children }: { label: string; onPress: () => void
   );
 }
 
-export function QuranHeader({ page, mode, onBack, onIndex, onMode }: Props) {
+export function QuranHeader({ page, mode, onBack, onIndex, onMode, marked, onBookmark }: Props) {
   const { c } = useTheme();
   const h = useHome();
   const insets = useSafeAreaInsets();
@@ -79,6 +82,9 @@ export function QuranHeader({ page, mode, onBack, onIndex, onMode }: Props) {
           </Tool>
         </View>
         <View style={styles.group}>
+          <Tool label={marked ? QURAN.unmarkPage() : QURAN.markPage()} onPress={onBookmark}>
+            <BookmarkIcon color={marked ? c.accent : c.ink} filled={marked} size={20} />
+          </Tool>
           <Pressable onPress={onMode} accessibilityRole="button" accessibilityLabel={mode} hitSlop={6} style={[styles.pill, { backgroundColor: h.card, borderColor: h.cardLine, borderWidth: StyleSheet.hairlineWidth, boxShadow: `0px 4px 12px ${h.shadow}` }]}>
             <Txt size={14} weight={700} color={c.ink} numberOfLines={1}>
               {mode}

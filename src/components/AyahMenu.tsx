@@ -7,7 +7,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { CloseIcon, CommentIcon, PenIcon, PinIcon, TafsirIcon } from '@/components/icons';
+import { CloseIcon } from '@/components/icons';
+import { BookIcon, BubbleIcon, FlagIcon, MarkerIcon } from '@/components/quran/MenuIcons';
 import { Txt } from '@/components/Txt';
 import { surahTitle, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
@@ -74,14 +75,14 @@ export function AyahMenu({ at, onClose, onTafsir, onNote, onMark, pinned }: { at
           {t('ayahTitle', name, at.a)}
         </Txt>
 
-        <Item icon={<TafsirIcon color={c.ink} size={20} />} label={READER.tafsirRow()} onPress={onTafsir} />
-        <Item icon={<CommentIcon color={c.ink} size={20} />} label={t(marked.noteOf(key) ? 'noteEdit' : 'noteAdd')} onPress={onNote} />
+        <Item icon={<BookIcon color={c.ink} />} label={READER.tafsirRow()} onPress={onTafsir} />
+        <Item icon={<BubbleIcon color={c.ink} />} label={t(marked.noteOf(key) ? 'noteEdit' : 'noteAdd')} onPress={onNote} />
 
-        {onMark && <Item icon={<PinIcon color={c.ink} size={20} />} label={pinned ? QURAN.unmark() : QURAN.markHere()} onPress={onMark} />}
+        {onMark && <Item icon={<FlagIcon color={c.ink} />} label={pinned ? QURAN.unmark() : QURAN.markHere()} onPress={onMark} />}
 
         {/* the highlight colours */}
         <View style={styles.row}>
-          <PenIcon color={c.ink} size={20} />
+          <MarkerIcon color={c.ink} />
           <View style={styles.dots}>
             {HL_COLORS.map((col) => {
               const on = lit?.color === col.id;

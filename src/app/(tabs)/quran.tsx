@@ -26,6 +26,7 @@ import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
 import { PageCurl, type Chosen, type Marked, type Pin as NotePin } from '@/components/PageCurl';
 import { DropMenu } from '@/components/quran/DropMenu';
 import { useListen } from '@/components/quran/ListenMode';
+import { MarksSheet } from '@/components/quran/MarksSheet';
 import { menuTop, QuranHeader } from '@/components/quran/QuranHeader';
 import { ReadBar } from '@/components/quran/ReadBar';
 import { useRecite } from '@/components/quran/ReciteMode';
@@ -38,7 +39,7 @@ import { READER } from '@/i18n/reader';
 import { markToday } from '@/lib/activity';
 import { ayatOn, pageOf, stepAyah } from '@/lib/boxes';
 import { FULL_SHAPE, PAGE_SHAPE } from '@/lib/crop';
-import { hlColor, noteColor, useMarks } from '@/lib/marks';
+import { hlColor, noteColor, togglePageMark, useMarks } from '@/lib/marks';
 import { clampPage, savedPage, savedPin, savePage } from '@/lib/position';
 import { TOTAL_PAGES } from '@/lib/quran';
 import { pageUrl } from '@/lib/remote';
@@ -95,6 +96,7 @@ function Quran() {
   const [hidden, setHidden] = useState(false); // full screen: header, tab bar and status bar gone; the page fills the screen
   const [room, setRoom] = useState<Room>({ width: 0, height: 0 });
   const [indexOpen, setIndexOpen] = useState(false);
+  const [marksOpen, setMarksOpen] = useState(false); // «My marks»
   const [searchOpen, setSearchOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false); // the drop-down of the modes
   const [mode, setMode] = useState<Mode>('read');
@@ -297,6 +299,8 @@ function Quran() {
             onBack={goBack}
             onIndex={() => setIndexOpen(true)}
             onMode={() => setModeOpen(true)}
+            marked={notes.pageMarked(page)}
+            onBookmark={() => say(togglePageMark(page) ? QURAN.pageMarked() : QURAN.pageUnmarked())}
           />
         </View>
       )}
@@ -342,7 +346,7 @@ function Quran() {
           {mode === 'read' ? (
             <ReadBar
               onSearch={() => setSearchOpen(true)}
-              onNotes={() => say(READER.soon())}
+              onNotes={() => setMarksOpen(true)}
               onSettings={() => router.push('/quran-settings')}
             />
           ) : mode === 'listen' ? (
@@ -408,6 +412,15 @@ function Quran() {
         pinned={!!menu && pinnedAt(menu.s, menu.a)}
       />
       <NoteSheet note={note} onClose={() => setNote(null)} />
+      <MarksSheet
+        open={marksOpen}
+        onClose={() => setMarksOpen(false)}
+        onGo={(p) => {
+          setMarksOpen(false);
+          jump(p);
+        }}
+        pin={pin}
+      />
     </View>
   );
 }

@@ -6,6 +6,7 @@
 import { useSyncExternalStore } from 'react';
 
 import { displayKeys, storedKeys } from './ayahmap';
+import { ayatOn, pageOf } from './boxes';
 import { fetchData } from './remote';
 import { HAFS } from './riwaya';
 import { readJSON, writeJSON } from './storage';
@@ -40,8 +41,8 @@ let notes: Record<string, Note> = readJSON('notes', {});
 
 // A screen reads the marks through useMarks(): a new snapshot each time they change, so whatever it
 // works out from them is worked out again (the React Compiler keeps results while their inputs stay)
-type Snapshot = { highlightOf: typeof highlightOf; noteOf: typeof noteOf };
-const snap = (): Snapshot => ({ highlightOf: (k) => highlightOf(k), noteOf: (k) => noteOf(k) });
+type Snapshot = { highlightOf: typeof highlightOf; noteOf: typeof noteOf; pageMarked: typeof pageMarked };
+const snap = (): Snapshot => ({ highlightOf: (k) => highlightOf(k), noteOf: (k) => noteOf(k), pageMarked: (p) => pageMarked(p) });
 let snapshot: Snapshot | null = null;
 const listeners = new Set<() => void>();
 function changed() {
@@ -151,3 +152,59 @@ export async function ayahWords(s: number, a: number) {
   const entry = surah.find((x) => x.ayah === a);
   return entry ? entry.text.replace(/[\s ]*[٠-٩]+$/, '') : '';
 }
+
+// ---------- page marks ----------
+
+// A bookmark on a whole page, as many as the reader likes. Each keeps the page's first ayah (under its Warsh key), so it
+// stays on the same page's place when the narration changes. Saved on the phone ('pageMarks').
+type PageMark = { key: string; added: number };
+let pageMarks: PageMark[] = readJSON('pageMarks', []);
+
+const pageOfMark = (m: PageMark) => {
+  const shown = displayKeys(m.key)[0];
+  if (!shown) return null;
+  const [s, a] = shown.split(':').map(Number);
+  return pageOf(s, a) as number | null;
+};
+
+export function pageMarked(p: number) {
+  return pageMarks.some((m) => pageOfMark(m) === p);
+}
+
+// Marks the page, or takes its mark off; true when it is marked now
+export function togglePageMark(p: number): boolean {
+  if (pageMarked(p)) {
+    pageMarks = pageMarks.filter((m) => pageOfMark(m) !== p);
+    writeJSON('pageMarks', pageMarks);
+    changed();
+    return false;
+  }
+  const first = ayatOn(p)[0] as { s: number; a: number } | undefined;
+  if (!first) return false;
+  const raw = `${first.s}:${first.a}`;
+  pageMarks.push({ key: storedKeys(raw)[0] ?? raw, added: Date.now() });
+  writeJSON('pageMarks', pageMarks);
+  changed();
+  return true;
+}
+
+// the marked pages, in mushaf order
+export const pageMarkList = (): number[] => [...new Set(pageMarks.map(pageOfMark).filter((p): p is number => p != null))].sort((a, b) => a - b);
+
+// ---------- the lists (for «My marks») ----------
+
+export type Listed = { s: number; a: number; page: number | null; text: string; color: string };
+
+function listed(key: string, text: string, color: string): Listed | null {
+  const shown = displayKeys(key)[0];
+  if (!shown) return null;
+  const [s, a] = shown.split(':').map(Number);
+  return { s, a, page: pageOf(s, a) as number | null, text, color };
+}
+const inOrder = (x: Listed, y: Listed) => x.s - y.s || x.a - y.a;
+
+export const highlightList = (): Listed[] =>
+  highlights.map((h) => listed(h.key, h.text, h.color)).filter((x): x is Listed => !!x).sort(inOrder);
+
+export const noteList = (): Listed[] =>
+  Object.entries(notes).map(([k, n]) => listed(k, noteText(n.html).trim(), n.color)).filter((x): x is Listed => !!x).sort(inOrder);
