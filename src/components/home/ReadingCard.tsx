@@ -43,10 +43,10 @@ export function ReadingCard() {
           </View>
           {r.started ? (
             <>
-              <Txt serif size={30} weight={700} lineHeight={44} color={h.forestInk} numberOfLines={2}>
-                {where.surahs}
+              <Txt serif size={24} weight={700} lineHeight={34} color={h.forestInk} numberOfLines={2}>
+                {HOME.surah(where.surahs)}
               </Txt>
-              <Txt size={14} color={h.forestSoft} numberOfLines={1}>
+              <Txt size={13} color={h.forestSoft} numberOfLines={1}>
                 {`${HOME.wirdPage(digits(r.page))} · ${where.extra}`}
               </Txt>
             </>
@@ -56,19 +56,19 @@ export function ReadingCard() {
             </Txt>
           )}
         </View>
-        <Ring value={r.percent / 100} size={66} color={h.gold} track="rgba(244,246,236,0.14)" a11y={`${r.percent}%`}>
-          <Txt size={15} weight={800} color={h.forestInk}>
+        <Ring value={r.percent / 100} size={54} color={h.gold} track="rgba(244,246,236,0.14)" a11y={`${r.percent}%`}>
+          <Txt size={13} weight={800} color={h.forestInk}>
             {`${digits(r.percent)}%`}
           </Txt>
         </Ring>
       </View>
       {/* the hadith of the reader: «read and rise», and who told it */}
       <View style={[styles.hadith, { backgroundColor: h.goldSoft, borderColor: h.goldLine }]}>
-        <Txt serif={LANG === 'ar'} size={LANG === 'ar' ? 17 : 14} lineHeight={LANG === 'ar' ? 30 : 21} color={h.forestInk} center>
+        <Txt size={LANG === 'ar' ? 14 : 12.5} weight={500} lineHeight={LANG === 'ar' ? 23 : 18} color={h.forestInk} center>
           {HOME.hadith()}
         </Txt>
         <View style={[styles.rule, { backgroundColor: h.goldLine }]} />
-        <Txt size={12} lineHeight={18} color={h.gold} center>
+        <Txt size={11} lineHeight={15} color={h.gold} center>
           {HOME.heroSource()}
         </Txt>
       </View>
@@ -89,12 +89,12 @@ export function ReadingCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 26, padding: 16, gap: 14, overflow: 'hidden' },
-  frame: { position: 'absolute', top: 6, bottom: 6, start: 6, end: 6, borderRadius: 21, borderWidth: 1 },
-  top: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  hadith: { borderRadius: 16, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 12, gap: 8, alignItems: 'center' },
-  rule: { width: 36, height: 1.5, borderRadius: 1 },
-  chip: { alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 3, borderRadius: 12 },
-  btn: { height: 46, borderRadius: 23, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: 20, paddingEnd: 6 },
-  go: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  card: { borderRadius: 24, padding: 12, gap: 8, overflow: 'hidden' },
+  frame: { position: 'absolute', top: 6, bottom: 6, start: 6, end: 6, borderRadius: 19, borderWidth: 1 },
+  top: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  hadith: { borderRadius: 14, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8, gap: 5, alignItems: 'center' },
+  rule: { width: 28, height: 1.5, borderRadius: 1 },
+  chip: { alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 2, borderRadius: 12 },
+  btn: { height: 40, borderRadius: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: 18, paddingEnd: 5 },
+  go: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
 });
