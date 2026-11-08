@@ -30,47 +30,56 @@ export function ReadingCard() {
   const h = useHome();
   const r = readingView();
   const where = placeOf(r.page);
+
+  const ring = (
+    <Ring key="ring" value={r.percent / 100} size={54} color={h.gold} track="rgba(244,246,236,0.14)" a11y={`${r.percent}%`}>
+      <Txt size={13} weight={800} color={h.forestInk}>
+        {`${digits(r.percent)}%`}
+      </Txt>
+    </Ring>
+  );
+  const button = (
+    <Pressable
+      onPress={() => router.navigate({ pathname: '/quran', params: r.started ? { resume: String(r.page), n: String(Date.now()) } : undefined })}
+      accessibilityRole="button"
+      style={({ pressed }) => [styles.btn, { backgroundColor: h.lime }, pressed && { opacity: 0.88 }]}
+    >
+      <Txt size={13} weight={800} color={h.limeInk}>
+        {r.started ? DASH.continueReading() : DASH.startReading()}
+      </Txt>
+      <View style={[styles.go, { backgroundColor: h.limeInk }]}>
+        <Arrow color={h.lime} />
+      </View>
+    </Pressable>
+  );
+  const words = (
+    <View style={{ flex: 1, gap: 2 }}>
+      <Txt size={12} weight={700} color={h.gold}>
+        {DASH.reading()}
+      </Txt>
+      {r.started ? (
+        <>
+          <Txt size={18} weight={800} lineHeight={26} color={h.forestInk} numberOfLines={2}>
+            {HOME.surah(where.surahs)}
+          </Txt>
+          <Txt size={13} color={h.forestSoft} numberOfLines={1}>
+            {`${HOME.wirdPage(digits(r.page))} · ${where.extra}`}
+          </Txt>
+        </>
+      ) : (
+        <Txt size={20} weight={800} lineHeight={28} color={h.forestInk}>
+          {DASH.beginKhatma()}
+        </Txt>
+      )}
+    </View>
+  );
   return (
     <View style={[styles.card, { backgroundColor: h.forest, boxShadow: `0px 14px 28px ${h.shadow}` }]}>
       {/* a thin inset frame, like a mushaf page */}
       <View pointerEvents="none" style={[styles.frame, { borderColor: h.goldLine }]} />
       <View style={styles.top}>
-        <View style={{ flex: 1, gap: 2 }}>
-          <Txt size={12} weight={700} color={h.gold}>
-            {DASH.reading()}
-          </Txt>
-          {r.started ? (
-            <>
-              <Txt size={18} weight={800} lineHeight={26} color={h.forestInk} numberOfLines={2}>
-                {HOME.surah(where.surahs)}
-              </Txt>
-              <Txt size={13} color={h.forestSoft} numberOfLines={1}>
-                {`${HOME.wirdPage(digits(r.page))} · ${where.extra}`}
-              </Txt>
-            </>
-          ) : (
-            <Txt size={20} weight={800} lineHeight={28} color={h.forestInk}>
-              {DASH.beginKhatma()}
-            </Txt>
-          )}
-        </View>
-        <Pressable
-          onPress={() => router.navigate({ pathname: '/quran', params: r.started ? { resume: String(r.page), n: String(Date.now()) } : undefined })}
-          accessibilityRole="button"
-          style={({ pressed }) => [styles.btn, { backgroundColor: h.lime }, pressed && { opacity: 0.88 }]}
-        >
-          <Txt size={13} weight={800} color={h.limeInk}>
-            {r.started ? DASH.continueReading() : DASH.startReading()}
-          </Txt>
-          <View style={[styles.go, { backgroundColor: h.limeInk }]}>
-            <Arrow color={h.lime} />
-          </View>
-        </Pressable>
-        <Ring value={r.percent / 100} size={54} color={h.gold} track="rgba(244,246,236,0.14)" a11y={`${r.percent}%`}>
-          <Txt size={13} weight={800} color={h.forestInk}>
-            {`${digits(r.percent)}%`}
-          </Txt>
-        </Ring>
+        {/* the ring is always at the right edge of the screen: first in Arabic (the line begins at the right), last otherwise */}
+        {LANG === 'ar' ? <>{ring}{button}{words}</> : <>{words}{button}{ring}</>}
       </View>
       {/* the hadith of the reader («read and rise») and who told it: plain text on the card, same font as the rest */}
       <View style={{ gap: 2 }}>
