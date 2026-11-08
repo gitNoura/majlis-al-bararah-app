@@ -8,10 +8,9 @@ import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-n
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { CloseIcon } from '@/components/icons';
-import { BookIcon, BubbleIcon, FlagIcon, MarkerIcon } from '@/components/quran/MenuIcons';
+import { BookIcon, BubbleIcon, MarkerIcon } from '@/components/quran/MenuIcons';
 import { Txt } from '@/components/Txt';
 import { surahTitle, t } from '@/i18n/i18n';
-import { QURAN } from '@/i18n/quran';
 import { READER } from '@/i18n/reader';
 import { HL_COLORS, removeHighlight, setHighlight, useMarks } from '@/lib/marks';
 import { SURAHS } from '@/lib/quran';
@@ -22,9 +21,7 @@ export type MenuAt = { s: number; a: number; x: number; y: number };
 
 const W = 268;
 
-// `onMark` (the Quran tab): adds «Mark here», which puts the exact pin on the ayah (or, when the ayah already carries it
-// - `pinned` - «Remove mark»)
-export function AyahMenu({ at, onClose, onTafsir, onNote, onMark, pinned }: { at: MenuAt | null; onClose: () => void; onTafsir: () => void; onNote: () => void; onMark?: () => void; pinned?: boolean }) {
+export function AyahMenu({ at, onClose, onTafsir, onNote }: { at: MenuAt | null; onClose: () => void; onTafsir: () => void; onNote: () => void }) {
   const { c, isDark } = useTheme();
   const { width, height } = useWindowDimensions();
   const [h, setH] = useState(0); // the box's height, once laid out
@@ -77,8 +74,6 @@ export function AyahMenu({ at, onClose, onTafsir, onNote, onMark, pinned }: { at
 
         <Item icon={<BookIcon color={c.ink} />} label={READER.tafsirRow()} onPress={onTafsir} />
         <Item icon={<BubbleIcon color={c.ink} />} label={t(marked.noteOf(key) ? 'noteEdit' : 'noteAdd')} onPress={onNote} />
-
-        {onMark && <Item icon={<FlagIcon color={c.ink} />} label={pinned ? QURAN.unmark() : QURAN.markHere()} onPress={onMark} />}
 
         {/* the highlight colours */}
         <View style={styles.row}>

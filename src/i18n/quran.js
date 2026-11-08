@@ -11,19 +11,15 @@ export const QURAN = {
   index: () => L('الفهرس', 'Index', 'Index'),
   search: () => L('بحث', 'Search', 'Rechercher'),
   notes: () => L('علاماتي', 'My marks', 'Mes repères'),
-  more: () => L('المزيد', 'More', 'Plus'),
   findField: () => L('اسم سورة، كلمة، أو رقم مثل 2:255', 'Surah, words, or a number like 2:255', 'Sourate, mots, ou numéro comme 2:255'),
   ayatFound: () => L('الآيات', 'Ayat', 'Versets'),
   noResults: () => L('لا نتائج', 'No results', 'Aucun résultat'),
   loadingSearch: () => L('جارٍ تحميل نص القرآن للبحث…', 'Loading the text for search…', 'Chargement du texte pour la recherche…'),
   searchOffline: () => L('البحث في النص يحتاج إلى الاتصال بالإنترنت.', 'Searching the text needs a connection.', 'La recherche dans le texte demande une connexion.'),
-  // the ayah menu
-  markHere: () => L('أكمل من هنا', 'Mark here', 'Repérer ici'),
+  // the mark a long press puts on an ayah
   pinned: () => L('سنكمل من هنا', 'Marked', 'Repère placé'),
-  unmark: () => L('إزالة موضع القراءة', 'Remove mark', 'Retirer le repère'),
   unmarked: () => L('أُزيل موضع القراءة', 'Mark removed', 'Repère retiré'),
-  // the page's bookmark (the button at the top of the page) and «My marks»
-  markPage: () => L('أضف علامة إلى هذه الصفحة', 'Bookmark this page', 'Marquer cette page'),
+  // the page's bookmark (the ribbon on the page) and «My marks»
   unmarkPage: () => L('إزالة علامة الصفحة', 'Remove the page bookmark', 'Retirer le signet'),
   pageMarked: () => L('وُضعت علامة في هذه الصفحة', 'Page bookmarked', 'Page marquée'),
   pageUnmarked: () => L('أُزيلت علامة الصفحة', 'Page bookmark removed', 'Signet retiré'),

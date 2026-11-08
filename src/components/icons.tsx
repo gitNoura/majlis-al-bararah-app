@@ -153,20 +153,14 @@ export const ZoomOutIcon = (p: IconProps) => (
     <Path d="M16.5 16.5L21 21M8 11h6" />
   </Line>
 );
-// the «more» button: three dots in a row
-export const MoreIcon = ({ size = 22, color }: IconProps) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-    <Circle cx={5.5} cy={12} r={1.8} />
-    <Circle cx={12} cy={12} r={1.8} />
-    <Circle cx={18.5} cy={12} r={1.8} />
-  </Svg>
-);
-// «My marks»: a sticky note with its corner folded and two lines of writing (the comments are drawn as sticky notes)
-export const NoteIcon = (p: IconProps) => (
+// «My marks»: a pad of sticky notes - the top one with its lines and a pushpin, two more peeking out behind it
+export const MarksIcon = (p: IconProps) => (
   <Line {...p}>
-    <Path d="M6 3.5h12A2.5 2.5 0 0 1 20.5 6v8.2L14.2 20.5H6A2.5 2.5 0 0 1 3.5 18V6A2.5 2.5 0 0 1 6 3.5z" />
-    <Path d="M20.5 14.2h-4.3a2 2 0 0 0-2 2v4.3" />
-    <Path d="M7.5 9h9M7.5 12.5h4.5" />
+    <Path d="M20.3 9.5v9.2a2.8 2.8 0 0 1-2.8 2.8H9.5" />
+    <Path d="M7 5.5h8.5a2.2 2.2 0 0 1 2.2 2.2v8.6a2.2 2.2 0 0 1-2.2 2.2H7a2.2 2.2 0 0 1-2.2-2.2V7.7A2.2 2.2 0 0 1 7 5.5z" />
+    <Path d="M8 11h7M8 14.5h4.4" />
+    <Circle cx={14.8} cy={5.2} r={2.1} />
+    <Path d="M13.3 6.7 11.6 8.4" />
   </Line>
 );
 export const ExpandIcon = (p: IconProps) => (

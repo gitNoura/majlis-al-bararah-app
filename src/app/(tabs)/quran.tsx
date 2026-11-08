@@ -2,18 +2,19 @@
 // the drop-down at the header's end. Read is this file; Listen and Recite are src/components/quran/ListenMode.tsx and
 // ReciteMode.tsx: each adds a bar under the page and changes what a tap on an ayah does (Read: its menu; Listen: chooses
 // it; Recite: starts the cover again from it).
-//   header   the back button and the index (fahras) at the start; at the end search, the modes' drop-down and «more» in the
-//            corner (My marks, Settings); under them the surah and juz. Read has no bottom bar
+//   header   the back button and the index (fahras) at the start; at the end «My marks» and the modes' drop-down; under them
+//            the surah and juz
+//   bottom   Read: search and settings, two round buttons at the page's bottom corners (ReadButtons.tsx), no bar
 //   bookmark   a slim ribbon hanging from the page's top edge, drawn on the page itself (PageCurl.tsx, so it turns with the
 //            page): on the left of odd pages, on the right of even ones; a tap puts it on or off
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
-//            («Mark here» in an ayah's menu, «Remove mark» on the marked ayah), shown as a slim tab on the paper's edge,
-//            as tall as that ayah
+//            (a long press on an ayah marks it; another long press on it takes it off), shown as a flag on the paper's edge,
+//            level with that ayah
 //   full screen   a tap on the page's empty paper (the margins around the text) toggles it: the header, the tab bar and the
 //            status bar go and the page grows to fill the screen, on a background of the page's own paper (cut to its
 //            text, as the website's full screen). Another tap on the empty paper brings them back, and so does the exit
 //            button at the top corner (under the clock), next to the day / night switch, and the phone's back button
-//   a long press on an ayah marks it (the same as «Mark here»); a tap on one opens its menu
+//   a long press on an ayah marks it (its flag; again takes it off); a tap on one opens its menu
 // The page itself is src/components/PageCurl.tsx.
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
@@ -25,13 +26,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AyahMenu, type MenuAt } from '@/components/AyahMenu';
 import { AyahSheet, type Ayah } from '@/components/AyahSheet';
-import { CollapseIcon, MoonIcon, NoteIcon, SettingsIcon, SunIcon } from '@/components/icons';
+import { CollapseIcon, MoonIcon, SunIcon } from '@/components/icons';
 import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
 import { PageCurl, type Chosen, type Marked, type PageMarks, type Pin as NotePin } from '@/components/PageCurl';
 import { DropMenu } from '@/components/quran/DropMenu';
 import { useListen } from '@/components/quran/ListenMode';
 import { MarksSheet } from '@/components/quran/MarksSheet';
-import { menuTop, MORE_INSET, QuranHeader } from '@/components/quran/QuranHeader';
+import { menuTop, QuranHeader } from '@/components/quran/QuranHeader';
+import { ReadButtons } from '@/components/quran/ReadButtons';
 import { useRecite } from '@/components/quran/ReciteMode';
 import { SearchPanel } from '@/components/quran/SearchPanel';
 import { QuranIndex } from '@/components/QuranIndex';
@@ -102,7 +104,6 @@ function Quran() {
   const [marksOpen, setMarksOpen] = useState(false); // «My marks»
   const [searchOpen, setSearchOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false); // the drop-down of the modes
-  const [moreOpen, setMoreOpen] = useState(false); // the menu of My marks and Settings
   const [mode, setMode] = useState<Mode>('read');
   const [ayah, setAyah] = useState<Ayah | null>(null); // its tafsir open
   const [menu, setMenu] = useState<MenuAt | null>(null); // its options open
@@ -326,8 +327,7 @@ function Quran() {
             onBack={goBack}
             onIndex={() => setIndexOpen(true)}
             onMode={() => setModeOpen(true)}
-            onSearch={() => setSearchOpen(true)}
-            onMore={() => setMoreOpen(true)}
+            onMarks={() => setMarksOpen(true)}
           />
         </View>
       )}
@@ -369,9 +369,10 @@ function Quran() {
         )}
       </View>
 
-      {/* under the page: the controls of Listen or Recite. Read has no bar: its tools are in the header, so the page has all
-          the room (the page's room is what is left between the header and this) */}
-      {!hidden && <View style={{ paddingBottom: insets.bottom + (mode === 'read' ? 6 : 0) }}>{mode === 'listen' ? listen.bar : mode === 'recite' ? recite.bar : null}</View>}
+      {/* under the page: the controls of Listen or Recite; Read has two round buttons at the bottom corners instead of a bar
+          (the page's room is what is left between the header and this) */}
+      {!hidden && mode !== 'read' && <View style={{ paddingBottom: insets.bottom }}>{mode === 'listen' ? listen.bar : recite.bar}</View>}
+      {!hidden && mode === 'read' && <ReadButtons onSearch={() => setSearchOpen(true)} />}
 
       {/* in full screen: exit and the day / night switch, at the top corner just under the clock and the wifi */}
       {hidden && (
@@ -396,19 +397,7 @@ function Quran() {
         onClose={() => setModeOpen(false)}
         top={menuTop(insets.top)}
         side={LANG === 'ar' ? 'left' : 'right'}
-        inset={MORE_INSET}
         items={modes.map((m) => ({ key: m.value, label: m.label, chosen: m.value === mode, onPress: () => setMode(m.value) }))}
-      />
-      {/* «more», in the header's end corner: the marks and the Quran's settings */}
-      <DropMenu
-        open={moreOpen}
-        onClose={() => setMoreOpen(false)}
-        top={menuTop(insets.top)}
-        side={LANG === 'ar' ? 'left' : 'right'}
-        items={[
-          { key: 'marks', label: QURAN.notes(), icon: <NoteIcon color={c.ink} size={20} />, onPress: () => setMarksOpen(true) },
-          { key: 'settings', label: READER.settingsTitle(), icon: <SettingsIcon color={c.ink} size={20} />, onPress: () => router.push('/quran-settings') },
-        ]}
       />
       {listen.sheet}
       <QuranIndex open={indexOpen} page={page} onClose={() => setIndexOpen(false)} onGo={jump} />
@@ -432,12 +421,6 @@ function Quran() {
           setMenu(null);
           if (menu) setNote({ s: menu.s, a: menu.a });
         }}
-        onMark={() => {
-          if (!menu) return;
-          setMenu(null);
-          markAyah(menu.s, menu.a);
-        }}
-        pinned={!!menu && pinnedAt(menu.s, menu.a)}
       />
       <NoteSheet note={note} onClose={() => setNote(null)} />
       <MarksSheet

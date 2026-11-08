@@ -12,13 +12,13 @@
 // (`unzoom`), or any change of page. In full screen the page is cut as on the website (src/lib/crop.ts).
 // On each page, as it is drawn (the page read and the pages either side, so a turn brings its marks with it): the
 // highlighted ayat in their colours, the chosen one in gold, the comments' badges in the margin (a tap on one opens its
-// comment), the pin's tab on the paper's edge, and the bookmark ribbon at the top corner (a tap on it puts it on or off).
+// comment), the pin's flag on the paper's edge, and the bookmark ribbon at the top corner (a tap on it puts it on or off).
 //
 // Where the fold is: the corner's position `px, py` (the page's own coordinates), which corner (top or
 // bottom: where the finger started) and which way (`mode`: 1 forward, -1 back, 0 at rest). The pictures
 // of the page before, the page read and the page after are in `prev`, `cur`, `next`; when a turn ends,
 // the page shown is already the new one before the app hears of it, so nothing flickers.
-import { Canvas, Group, LinearGradient, Morphology, Path, Rect, RoundedRect, Skia, Image as SkiaImage, type SkImage, type SkPath } from '@shopify/react-native-skia';
+import { Canvas, Group, LinearGradient, Morphology, Path, Rect, Skia, Image as SkiaImage, type SkImage, type SkPath } from '@shopify/react-native-skia';
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { View } from 'react-native';
 import {
@@ -53,10 +53,16 @@ const BUBBLE = 'M-17 -15h34a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4h-20l-9 9v-9h-5a4 4 0 
 const BUBBLE_LINES = 'M-10 -5h20M-10 2h13';
 // the page's bookmark: a slim ribbon hanging from the top edge, a swallow-tail notch at its foot. It is drawn on the page
 // (so it turns with it): on the left of odd pages, on the right of even ones
-export const RIBBON_W = 11;
-export const RIBBON_H = 28;
+const RIBBON_W = 11;
+const RIBBON_H = 28;
 const RIBBON_INSET = 16;
 const RIBBON = `M0 0H${RIBBON_W}V${RIBBON_H}L${RIBBON_W / 2} ${RIBBON_H - 5.5}L0 ${RIBBON_H}Z`;
+// the pin's flag (a long press on an ayah): a small flag standing out from the paper's edge, level with the ayah's first
+// line, on the side of the bookmark; its free end notched like the ribbon's
+const FLAG_W = 17;
+const FLAG_H = 24;
+const FLAG_LEFT = `M0 0H${FLAG_W}L${FLAG_W - 5} ${FLAG_H / 2}L${FLAG_W} ${FLAG_H}H0Z`;
+const FLAG_RIGHT = `M${FLAG_W} 0H0L5 ${FLAG_H / 2}L0 ${FLAG_H}H${FLAG_W}Z`;
 const ribbonX = (page: number, pageW: number) => (page % 2 ? RIBBON_INSET : pageW - RIBBON_INSET - RIBBON_W);
 
 type Props = {
@@ -76,7 +82,7 @@ type Props = {
   onEmptyTap: () => void; // a tap on the page outside its ayat and edges
   onZoomed: (zoomed: boolean) => void;
   // the wird: holding an ayah (longer than a tap) marks where the reader stopped; the stop's ayah on
-  // this page, marked by a slim tab on the paper's edge (null: none here)
+  // this page, marked by a flag on the paper's edge (null: none here)
   onHold?: (s: number, a: number) => void;
   ribbon?: Chosen | null;
   bookmarked?: boolean; // the page read carries a bookmark
@@ -602,9 +608,11 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
   }, [veils, full, pageW, pageH]);
   const bubble = useMemo(() => ({ body: Skia.Path.MakeFromSVGString(BUBBLE)!, lines: Skia.Path.MakeFromSVGString(BUBBLE_LINES)! }), []);
   const tab = useMemo(() => Skia.Path.MakeFromSVGString(RIBBON)!, []);
+  const flagLeft = useMemo(() => Skia.Path.MakeFromSVGString(FLAG_LEFT)!, []);
+  const flagRight = useMemo(() => Skia.Path.MakeFromSVGString(FLAG_RIGHT)!, []);
   const layers: Record<number, PageMarks> = { ...around, [page]: { marks, pins, ribbon: ribbon ?? null, bookmarked } };
   const near = [page - 1, page, page + 1].filter((p) => p >= 1 && p <= TOTAL_PAGES);
-  // everything drawn on page `p`: highlights, the chosen ayah (the page read only), comment badges, the pin's edge tab and
+  // everything drawn on page `p`: highlights, the chosen ayah (the page read only), comment badges, the pin's flag and
   // the bookmark ribbon
   const marksOn = (p: number) => {
     const d = layers[p];
@@ -612,15 +620,11 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
     const crop = cropOf(p, full);
     const lit = [...d.marks.flatMap((e) => place(e, e.color, crop)), ...(p === page ? chosen.flatMap((e) => place(e, 'rgba(196, 154, 69, 0.3)', crop)) : [])];
     const unit = pageW / crop.w / 1000; // the badge's thousandths of the page's width
-    // the pin (Mark here, where the reader will continue): a slim rounded tab of the accent colour flush against the edge
-    // of the paper, as tall as the marked ayah, on the side of the page's bookmark. It touches no word and cannot be taken
-    // for a highlight
-    let edge: { x: number; y: number; w: number; h: number } | null = null;
+    // the pin (a long press on an ayah, where the reader will continue): the flag, level with the middle of the ayah's first line
+    let flag: number | null = null;
     if (d.ribbon?.boxes.length) {
-      const Y = (fy: number) => ((fy - crop.y) / crop.h) * pageH;
-      const top = Y(Math.min(...d.ribbon.boxes.map((b) => b[1]))) - 1;
-      const bottom = Y(Math.max(...d.ribbon.boxes.map((b) => b[3]))) + 1;
-      edge = { x: p % 2 ? 1.5 : pageW - 3.5 - 1.5, y: top, w: 3.5, h: Math.max(16, bottom - top) };
+      const [, y0, , y1] = d.ribbon.boxes[0];
+      flag = (((y0 + y1) / 2 - crop.y) / crop.h) * pageH - FLAG_H / 2;
     }
     const ribbonColor = d.bookmarked ? c.accent : onBookmark && !full ? (isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(58, 51, 38, 0.13)') : null;
     return (
@@ -643,7 +647,11 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
             <Path path={bubble.lines} color="#fffaf0" style="stroke" strokeWidth={3} strokeCap="round" />
           </Group>
         ))}
-        {edge && <RoundedRect x={edge.x} y={edge.y} width={edge.w} height={edge.h} r={edge.w / 2} color={c.accent} opacity={0.95} />}
+        {flag !== null && (
+          <Group transform={[{ translateX: p % 2 ? 0 : pageW - FLAG_W }, { translateY: flag }]}>
+            <Path path={p % 2 ? flagLeft : flagRight} color={c.accent} />
+          </Group>
+        )}
         {ribbonColor && (
           <Group transform={[{ translateX: ribbonX(p, pageW) }]}>
             <Path path={tab} color={ribbonColor} />
