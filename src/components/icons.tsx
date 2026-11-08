@@ -153,12 +153,11 @@ export const ZoomOutIcon = (p: IconProps) => (
     <Path d="M16.5 16.5L21 21M8 11h6" />
   </Line>
 );
-export const NotebookIcon = (p: IconProps) => (
+// «My marks»: a bookmark ribbon with two lines of writing on it (the same ribbon as the page's own bookmark)
+export const MarksIcon = (p: IconProps) => (
   <Line {...p}>
-    <Path d="M6.5 3.5h11A1.5 1.5 0 0 1 19 5v14a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V5a1.5 1.5 0 0 1 1.5-1.5z" />
-    <Path d="M8.5 3.5v17" />
-    <Path d="M13 3.5v6l1.75-1.4 1.75 1.4v-6" />
-    <Path d="M11 13h5M11 16h4" />
+    <Path d="M7 3.5h10A1.5 1.5 0 0 1 18.5 5v15.5L12 16.6 5.5 20.5V5A1.5 1.5 0 0 1 7 3.5z" />
+    <Path d="M9.2 8h5.6M9.2 11.2h3.6" />
   </Line>
 );
 export const ExpandIcon = (p: IconProps) => (

@@ -1,10 +1,10 @@
-// The bottom bar of Read: search, notes and settings.
+// The bottom bar of Read: settings, search and «My marks».
 // It is the only bar on the Quran page (the app's tab bar is not shown there); Listen and Recite put their own
-// controls in this same place.
+// controls in this same place. Settings come first, so in Arabic (right to left) they sit at the right end of the bar.
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { NotebookIcon, SearchIcon, SettingsIcon } from '@/components/icons';
+import { MarksIcon, SearchIcon, SettingsIcon } from '@/components/icons';
 import { QURAN } from '@/i18n/quran';
 import { READER } from '@/i18n/reader';
 import { useTheme } from '@/theme/theme';
@@ -26,14 +26,14 @@ export function ReadBar({ onSearch, onNotes, onSettings }: Props) {
   return (
     <View style={styles.box}>
       <View style={[styles.row, { backgroundColor: c.card, borderColor: c.line }]}>
+        <Tool label={READER.settingsTitle()} onPress={onSettings}>
+          <SettingsIcon color={c.ink} size={25} />
+        </Tool>
         <Tool label={QURAN.search()} onPress={onSearch}>
           <SearchIcon color={c.ink} size={25} />
         </Tool>
         <Tool label={QURAN.notes()} onPress={onNotes}>
-          <NotebookIcon color={c.ink} size={25} />
-        </Tool>
-        <Tool label={READER.settingsTitle()} onPress={onSettings}>
-          <SettingsIcon color={c.ink} size={25} />
+          <MarksIcon color={c.ink} size={25} />
         </Tool>
       </View>
     </View>

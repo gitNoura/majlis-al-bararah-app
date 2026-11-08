@@ -2,9 +2,11 @@
 // the drop-down at the header's end. Read is this file; Listen and Recite are src/components/quran/ListenMode.tsx and
 // ReciteMode.tsx: each adds a bar under the page and changes what a tap on an ayah does (Read: its menu; Listen: chooses
 // it; Recite: starts the cover again from it).
-//   header   the index (fahras) and the search; the notes and the mode drop-down; under them the surah and juz
+//   header   the back button and the index (fahras); the mode drop-down; under them the surah and juz
+//   bottom bar   settings, search and «My marks» (settings first: at the right end in Arabic)
+//   bookmark   a ribbon hanging from the page's top edge, on the page itself (PageBookmark.tsx); a tap puts it on or off
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
-//            («Mark here» in an ayah's menu, «Remove mark» on the marked ayah), shown as a ribbon on its page
+//            («Mark here» in an ayah's menu, «Remove mark» on the marked ayah), shown as a soft wash behind its ayah
 //   full screen   a tap on the page's empty paper (the margins around the text) toggles it: the header, the tab bar and the
 //            status bar go and the page grows to fill the screen, on a background of the page's own paper (cut to its
 //            text, as the website's full screen). Another tap on the empty paper brings them back, and so does the exit
@@ -27,6 +29,7 @@ import { PageCurl, type Chosen, type Marked, type Pin as NotePin } from '@/compo
 import { DropMenu } from '@/components/quran/DropMenu';
 import { useListen } from '@/components/quran/ListenMode';
 import { MarksSheet } from '@/components/quran/MarksSheet';
+import { PageBookmark } from '@/components/quran/PageBookmark';
 import { menuTop, QuranHeader } from '@/components/quran/QuranHeader';
 import { ReadBar } from '@/components/quran/ReadBar';
 import { useRecite } from '@/components/quran/ReciteMode';
@@ -299,8 +302,6 @@ function Quran() {
             onBack={goBack}
             onIndex={() => setIndexOpen(true)}
             onMode={() => setModeOpen(true)}
-            marked={notes.pageMarked(page)}
-            onBookmark={() => say(togglePageMark(page) ? QURAN.pageMarked() : QURAN.pageUnmarked())}
           />
         </View>
       )}
@@ -327,6 +328,17 @@ function Quran() {
             onZoomed={() => {}}
             ribbon={ribbon}
             veils={mode === 'recite' ? recite.veils : undefined}
+          />
+        )}
+
+        {/* the page's bookmark: a ribbon hanging from the page's top edge at its start corner (right in Arabic); in full
+            screen it shows only when the page is bookmarked */}
+        {room.width > 0 && room.height > 0 && mode === 'read' && (!hidden || notes.pageMarked(page)) && (
+          <PageBookmark
+            marked={notes.pageMarked(page)}
+            label={notes.pageMarked(page) ? QURAN.unmarkPage() : QURAN.markPage()}
+            onPress={() => say(togglePageMark(page) ? QURAN.pageMarked() : QURAN.pageUnmarked())}
+            style={{ top: padTop + (room.height - pageH) / 2, start: (room.width - pageW) / 2 + 18 }}
           />
         )}
 
