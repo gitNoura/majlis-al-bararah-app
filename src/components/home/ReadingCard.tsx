@@ -85,10 +85,10 @@ export function ReadingCard() {
       {button}
       {/* the hadith of the reader («read and rise») and who told it, on a faint yellow panel */}
       <View style={[styles.hadith, { backgroundColor: h.goldSoft, borderColor: h.goldLine }]}>
-        <Txt size={12} lineHeight={17} color={h.gold}>
-          {HOME.hadithIntro()}
-        </Txt>
         <Txt size={13} weight={500} lineHeight={20} color={h.forestInk}>
+          <Txt size={13} weight={500} lineHeight={20} color={h.gold}>
+            {`${HOME.hadithIntro()} `}
+          </Txt>
           {HOME.hadith()}
         </Txt>
         <Txt size={12} lineHeight={17} color={h.gold}>
