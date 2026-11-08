@@ -64,7 +64,7 @@ type Props = {
   onEmptyTap: () => void; // a tap on the page outside its ayat and edges
   onZoomed: (zoomed: boolean) => void;
   // the wird: holding an ayah (longer than a tap) marks where the reader stopped; the stop's ayah on
-  // this page, tinted with a soft wash (null: none here)
+  // this page, marked by a slim tab on the paper's edge (null: none here)
   onHold?: (s: number, a: number) => void;
   ribbon?: Chosen | null;
   // Tasmee (Recite): parts of the page covered with the paper's own colour, so the words under them cannot be read.
@@ -576,15 +576,17 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
     return out;
   }, [veils, full, pageW, pageH]);
   const lit = [...marks.flatMap((e) => place(e, e.color)), ...chosen.flatMap((e) => place(e, 'rgba(196, 154, 69, 0.3)'))];
-  // the mark (Mark here, where the reader will continue): a soft wash of the accent colour behind the marked ayah, one
-  // rounded band per line, so it reads as «you are here» without a line, a dot or anything drawn over the words
+  // the mark (Mark here, where the reader will continue): a slim rounded tab of the accent colour flush against the edge of
+  // the paper, as tall as the marked ayah, on the same side as the page's bookmark (the left on odd pages, the right on
+  // even ones). It touches no word and cannot be taken for a highlight
   const ribbonDraw = useMemo(() => {
     if (!ribbon?.boxes.length) return null;
-    const X = (fx: number) => ((fx - shown.x) / shown.w) * pageW;
     const Y = (fy: number) => ((fy - shown.y) / shown.h) * pageH;
-    const lines = ribbon.boxes.map(([bx0, by0, bx1, by1], i) => ({ key: i, x: X(bx0) - 3, y: Y(by0) - 1, w: X(bx1) - X(bx0) + 6, h: Y(by1) - Y(by0) + 2 }));
-    return { lines };
-  }, [ribbon, shown.x, shown.y, shown.w, shown.h, pageW, pageH]);
+    const top = Y(Math.min(...ribbon.boxes.map((b) => b[1]))) - 1;
+    const bottom = Y(Math.max(...ribbon.boxes.map((b) => b[3]))) + 1;
+    const w = 3.5;
+    return { x: page % 2 ? 1.5 : pageW - w - 1.5, y: top, w, h: Math.max(16, bottom - top) };
+  }, [ribbon, page, shown.y, shown.h, pageW, pageH]);
   const unit = pageW / shown.w / 1000; // the badge's thousandths of the page's width
   const bubble = useMemo(() => ({ body: Skia.Path.MakeFromSVGString(BUBBLE)!, lines: Skia.Path.MakeFromSVGString(BUBBLE_LINES)! }), []);
 
@@ -656,9 +658,7 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
                       <Path path={bubble.lines} color="#fffaf0" style="stroke" strokeWidth={3} strokeCap="round" />
                     </Group>
                   ))}
-                  {ribbonDraw?.lines.map((l) => (
-                    <RoundedRect key={l.key} x={l.x} y={l.y} width={l.w} height={l.h} r={Math.min(7, l.h / 2)} color={c.accent} opacity={0.17} />
-                  ))}
+                  {ribbonDraw && <RoundedRect x={ribbonDraw.x} y={ribbonDraw.y} width={ribbonDraw.w} height={ribbonDraw.h} r={ribbonDraw.w / 2} color={c.accent} opacity={0.95} />}
                 </Overlay>
                 <Rect x={0} y={0} width={pageW} height={pageH}>
                   <LinearGradient start={foldAt} end={flatShadeEnd} colors={['rgba(0,0,0,0.16)', 'rgba(0,0,0,0)']} />

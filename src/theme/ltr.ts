@@ -15,3 +15,12 @@ export const ltr = () =>
 // the left in English, on every phone. (Text fields are not swapped: they take «left» / «right» as is.)
 export const textSide = (side: 'left' | 'right') =>
   Platform.OS === 'android' && !isEnglish ? (side === 'left' ? 'right' : 'left') : side;
+
+// A row's words, lined up at the start of the layout's line (the right in Arabic, whatever script the words are in).
+// On the iPhone a plain «right» in the Arabic layout is swapped to the left (the settings' rows came out scooted to
+// the left, away from their titles' side), so there the line's own direction decides: the words start where the
+// language's line starts. Elsewhere it is textSide as before.
+export const lineStart = () =>
+  Platform.OS === 'ios'
+    ? ({ textAlign: 'auto', writingDirection: isEnglish ? 'ltr' : 'rtl' } as const)
+    : ({ textAlign: textSide(isEnglish ? 'left' : 'right') } as const);

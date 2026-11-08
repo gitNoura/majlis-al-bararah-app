@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { MarksIcon, SearchIcon, SettingsIcon } from '@/components/icons';
+import { NoteIcon, SearchIcon, SettingsIcon } from '@/components/icons';
 import { QURAN } from '@/i18n/quran';
 import { READER } from '@/i18n/reader';
 import { useTheme } from '@/theme/theme';
@@ -33,7 +33,7 @@ export function ReadBar({ onSearch, onNotes, onSettings }: Props) {
           <SearchIcon color={c.ink} size={25} />
         </Tool>
         <Tool label={QURAN.notes()} onPress={onNotes}>
-          <MarksIcon color={c.ink} size={25} />
+          <NoteIcon color={c.ink} size={25} />
         </Tool>
       </View>
     </View>

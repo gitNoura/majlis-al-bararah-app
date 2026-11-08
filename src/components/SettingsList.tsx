@@ -5,13 +5,12 @@ import { type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Txt } from '@/components/Txt';
-import { isEnglish } from '@/i18n/i18n';
-import { textSide } from '@/theme/ltr';
+import { lineStart } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 
 // a row's words line up at the start of the layout's line, in whatever script («English» in the Arabic
 // layout too)
-const start = () => ({ textAlign: textSide(isEnglish ? 'left' : 'right') });
+const start = lineStart;
 
 // a group of rows under its name (and a short note under the group)
 export function Section({ title, note, children }: { title: string; note?: string; children: ReactNode }) {

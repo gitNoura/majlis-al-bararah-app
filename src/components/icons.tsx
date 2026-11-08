@@ -153,11 +153,12 @@ export const ZoomOutIcon = (p: IconProps) => (
     <Path d="M16.5 16.5L21 21M8 11h6" />
   </Line>
 );
-// «My marks»: a bookmark ribbon with two lines of writing on it (the same ribbon as the page's own bookmark)
-export const MarksIcon = (p: IconProps) => (
+// «My marks»: a sticky note with its corner folded and two lines of writing (the comments are drawn as sticky notes)
+export const NoteIcon = (p: IconProps) => (
   <Line {...p}>
-    <Path d="M7 3.5h10A1.5 1.5 0 0 1 18.5 5v15.5L12 16.6 5.5 20.5V5A1.5 1.5 0 0 1 7 3.5z" />
-    <Path d="M9.2 8h5.6M9.2 11.2h3.6" />
+    <Path d="M6 3.5h12A2.5 2.5 0 0 1 20.5 6v8.2L14.2 20.5H6A2.5 2.5 0 0 1 3.5 18V6A2.5 2.5 0 0 1 6 3.5z" />
+    <Path d="M20.5 14.2h-4.3a2 2 0 0 0-2 2v4.3" />
+    <Path d="M7.5 9h9M7.5 12.5h4.5" />
   </Line>
 );
 export const ExpandIcon = (p: IconProps) => (

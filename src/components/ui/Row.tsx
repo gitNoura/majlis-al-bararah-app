@@ -6,8 +6,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { Txt } from '@/components/Txt';
-import { isEnglish, LANG } from '@/i18n/i18n';
-import { textSide } from '@/theme/ltr';
+import { LANG } from '@/i18n/i18n';
+import { lineStart } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
@@ -35,7 +35,7 @@ type Props = {
 };
 
 // the words line up at the start of the layout's line, in whatever script («English» in the Arabic layout too)
-const start = () => ({ textAlign: textSide(isEnglish ? 'left' : 'right') });
+const start = lineStart;
 
 export function Row({ title, sub, icon, end, chevron, onPress, last, quiet }: Props) {
   const { c } = useTheme();
