@@ -80,10 +80,11 @@ export function ReadingCard() {
       </Txt>
       <View style={styles.top}>
         {/* the ring is always at the right edge of the screen: first in Arabic (the line begins at the right), last otherwise */}
-        {LANG === 'ar' ? <>{ring}{words}{button}</> : <>{button}{words}{ring}</>}
+        {LANG === 'ar' ? <>{ring}{words}</> : <>{words}{ring}</>}
       </View>
-      {/* the hadith of the reader («read and rise») and who told it: plain text on the card, same font as the rest */}
-      <View style={{ gap: 2 }}>
+      {button}
+      {/* the hadith of the reader («read and rise») and who told it, on a faint yellow panel */}
+      <View style={[styles.hadith, { backgroundColor: h.goldSoft, borderColor: h.goldLine }]}>
         <Txt size={13} weight={500} lineHeight={20} color={h.forestInk}>
           {HOME.hadith()}
         </Txt>
@@ -99,6 +100,7 @@ const styles = StyleSheet.create({
   card: { borderRadius: 24, paddingHorizontal: 16, paddingVertical: 14, gap: 10, overflow: 'hidden' },
   frame: { position: 'absolute', top: 6, bottom: 6, start: 6, end: 6, borderRadius: 19, borderWidth: 1 },
   top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  btn: { height: 34, borderRadius: 17, flexDirection: 'row', alignItems: 'center', gap: 8, paddingStart: 12, paddingEnd: 4 },
+  btn: { height: 34, borderRadius: 17, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: 16, paddingEnd: 4 },
+  hadith: { borderRadius: 14, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8, gap: 2 },
   go: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
 });
