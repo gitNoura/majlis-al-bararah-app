@@ -1,15 +1,14 @@
-// «My marks» (the notebook button of Read's bottom bar): everything the reader marked, in three tabs - the pages with a
-// bookmark (and, first, where the reader stopped), the highlighted ayat, and the ayat with a comment. A tap on a row goes
-// to its page. The ayat and pages are listed in mushaf order.
+// The reader's marks, one list per button of Read's bottom bar: the pages with a bookmark (and, first, where the reader
+// stopped), the highlighted ayat, or the ayat with a comment. A tap on a row goes to its page. The ayat and pages are
+// listed in mushaf order.
 'use no memo'; // reads saved marks (modules) when it draws, which the React Compiler cannot see change
-import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { CloseIcon } from '@/components/icons';
 import { FlagIcon } from '@/components/quran/MenuIcons';
 import { placeOf } from '@/components/quran/QuranHeader';
 import { Txt } from '@/components/Txt';
-import { SegmentedControl, Sheet } from '@/components/ui';
+import { Sheet } from '@/components/ui';
 import { L, surahTitle, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
 import { highlightList, hlColor, noteColor, noteList, pageMarkList, togglePageMark, useMarks, type Listed } from '@/lib/marks';
@@ -17,7 +16,7 @@ import { SURAHS } from '@/lib/quran';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
-type Tab = 'pages' | 'highlights' | 'comments';
+export type Tab = 'pages' | 'highlights' | 'comments';
 
 const digits = (n: number) => n.toLocaleString(L('ar', 'en', 'fr'));
 const ayahTitle = (s: number, a: number) => t('ayahTitle', surahTitle(SURAHS[s - 1]).replace(/^سورة /, ''), a);
@@ -42,9 +41,8 @@ function Item({ lead, title, sub, lines = 1, onPress, end }: { lead: React.React
   );
 }
 
-export function MarksSheet({ open, onClose, onGo, pin }: { open: boolean; onClose: () => void; onGo: (page: number) => void; pin: { page: number; shown: string } | null }) {
+export function MarksSheet({ open, tab, onClose, onGo, pin }: { open: boolean; tab: Tab; onClose: () => void; onGo: (page: number) => void; pin: { page: number; shown: string } | null }) {
   const { c } = useTheme();
-  const [tab, setTab] = useState<Tab>('pages');
   useMarks(); // draws again when a mark changes
 
   const go = (page: number | null) => page != null && onGo(page);
@@ -63,16 +61,7 @@ export function MarksSheet({ open, onClose, onGo, pin }: { open: boolean; onClos
   const comments = noteList();
 
   return (
-    <Sheet open={open} onClose={onClose} title={QURAN.notes()}>
-      <SegmentedControl<string>
-        value={tab}
-        onChange={(v) => setTab(v as Tab)}
-        options={[
-          { value: 'pages', label: QURAN.marksPages() },
-          { value: 'highlights', label: QURAN.marksHighlights() },
-          { value: 'comments', label: QURAN.marksComments() },
-        ]}
-      />
+    <Sheet open={open} onClose={onClose} title={{ pages: QURAN.marksPages(), highlights: QURAN.marksHighlights(), comments: QURAN.marksComments() }[tab]}>
       <View style={styles.list}>
         {tab === 'pages' && (
           <>

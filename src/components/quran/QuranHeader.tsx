@@ -1,6 +1,6 @@
 // The Quran page's header: a row of buttons, and under it the name of what is being read.
 //   row    at the start the back button (to Home) and the index (the fahras); at the end search and the drop-down of
-//          the page's modes (Read, Listen, Recite). «My marks» and settings are two buttons at the page's bottom corners
+//          the page's modes (Read, Listen, Recite). the marks and settings are in Read's bottom bar
 //          (ReadButtons.tsx); the page's bookmark is a ribbon on the page itself (PageCurl.tsx)
 //   name   the surah(s) and the juz, just above the page (the page's own number is printed on the page)
 // Dressed like Home (src/theme/home.ts): round paper buttons with a soft shadow.

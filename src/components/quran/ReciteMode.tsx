@@ -62,8 +62,8 @@ export function useRecite(active: boolean, page: number) {
   const [override, setOverride] = useState<'hide' | 'show' | null>(null); // the eye: for the whole Quran, kept across pages
   const [words, setWords] = useState<Map<string, string[]>>(new Map());
   const [failed, setFailed] = useState(false);
-  const [inkTick, setInkTick] = useState(0); // a page's picture is read (see `veils`)
-  const load: 'loading' | 'ready' | 'failed' = failed ? 'failed' : keys.every((k) => words.has(k)) ? 'ready' : 'loading';
+  const [inked, setInked] = useState<ReadonlySet<number>>(new Set()); // the pages whose picture has been read (see `veils`)
+  const load: 'loading' | 'ready' | 'failed' = failed ? 'failed' : keys.every((k) => words.has(k)) && inked.has(page) ? 'ready' : 'loading';
 
   // the text of this page and the pages beside it, ready before the page is turned to
   useEffect(() => {
@@ -77,12 +77,16 @@ export function useRecite(active: boolean, page: number) {
       live = false;
     };
   }, [active, page]);
-  // and their pictures, where the number circles and the words' real edges are read from
+  // and their pictures, where the number circles and the words' real edges are read from. The page on screen is read in
+  // every mode, so by the time Recite is chosen its picture is already known and its cover is drawn exactly, at once
+  // (before, the cover was first drawn from a guess and then redrawn when the picture was read).
   useEffect(() => {
-    if (!active) return;
     let live = true;
     (async () => {
-      for (const p of around(page)) if ((await loadInk(p)) && live) setInkTick((t) => t + 1);
+      for (const p of active ? around(page) : [page]) {
+        await loadInk(p); // a picture that cannot be read leaves the guess, which is all there is
+        if (live) setInked((prev) => (prev.has(p) ? prev : new Set(prev).add(p)));
+      }
     })();
     return () => {
       live = false;
@@ -122,10 +126,10 @@ export function useRecite(active: boolean, page: number) {
   const veils = useMemo(() => {
     if (!active || load === 'failed') return undefined;
     const covers: Record<number, ReturnType<typeof veilFor>> = {};
-    for (const p of around(page)) covers[p] = veilFor(p, p === page ? sess : begin(keysOfPage(p)), words, override);
+    // a page is covered only once its picture is read: never from the guess first
+    for (const p of around(page)) if (inked.has(p)) covers[p] = veilFor(p, p === page ? sess : begin(keysOfPage(p)), words, override);
     return covers;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, load, page, sess, words, override, inkTick]);
+  }, [active, load, page, sess, words, override, inked]);
 
   const shown = sess.finished ? n : Math.min(sess.i + 1, n);
   const bar = (

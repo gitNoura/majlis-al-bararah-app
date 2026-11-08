@@ -4,7 +4,8 @@
 // it; Recite: starts the cover again from it).
 //   header   the back button and the index (fahras) at the start; at the end search and the modes' drop-down; under them
 //            the surah and juz
-//   bottom   Read: My marks and settings, two round buttons at the page's bottom corners (ReadButtons.tsx), no bar
+//   bottom   Read: a bar like the other modes' (ReadButtons.tsx): pages, highlights and comments (each opens its own list) and
+//            settings
 //   bookmark   a slim ribbon hanging from the page's top edge, drawn on the page itself (PageCurl.tsx, so it turns with the
 //            page): on the left of odd pages, on the right of even ones; a tap puts it on or off
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
@@ -30,7 +31,7 @@ import { NoteSheet, type NoteFor } from '@/components/NoteSheet';
 import { PageCurl, type Chosen, type Marked, type PageMarks, type Pin as NotePin } from '@/components/PageCurl';
 import { DropMenu } from '@/components/quran/DropMenu';
 import { useListen } from '@/components/quran/ListenMode';
-import { MarksSheet } from '@/components/quran/MarksSheet';
+import { MarksSheet, type Tab as MarksTab } from '@/components/quran/MarksSheet';
 import { menuTop, QuranHeader } from '@/components/quran/QuranHeader';
 import { ReadButtons } from '@/components/quran/ReadButtons';
 import { useRecite } from '@/components/quran/ReciteMode';
@@ -100,7 +101,8 @@ function Quran() {
   const [hidden, setHidden] = useState(false); // full screen: header, tab bar and status bar gone; the page fills the screen
   const [room, setRoom] = useState<Room>({ width: 0, height: 0 });
   const [indexOpen, setIndexOpen] = useState(false);
-  const [marksOpen, setMarksOpen] = useState(false); // «My marks»
+  const [marksOpen, setMarksOpen] = useState(false); // the reader's marks
+  const [marksTab, setMarksTab] = useState<MarksTab>('pages'); // which list of them
   const [searchOpen, setSearchOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false); // the drop-down of the modes
   const [mode, setMode] = useState<Mode>('read');
@@ -368,10 +370,24 @@ function Quran() {
         )}
       </View>
 
-      {/* under the page: the controls of Listen or Recite; Read has two round buttons at the bottom corners instead of a bar
-          (the page's room is what is left between the header and this; the page hangs from its top) */}
-      {!hidden && mode !== 'read' && <View style={{ paddingBottom: insets.bottom }}>{mode === 'listen' ? listen.bar : recite.bar}</View>}
-      {!hidden && mode === 'read' && <ReadButtons onMarks={() => setMarksOpen(true)} />}
+      {/* under the page: the bar of the mode (the page's room is what is left between the header and this; the page hangs
+          from its top) */}
+      {!hidden && (
+        <View style={{ paddingBottom: insets.bottom }}>
+          {mode === 'listen' ? (
+            listen.bar
+          ) : mode === 'recite' ? (
+            recite.bar
+          ) : (
+            <ReadButtons
+              onMarks={(tab) => {
+                setMarksTab(tab);
+                setMarksOpen(true);
+              }}
+            />
+          )}
+        </View>
+      )}
 
       {/* in full screen: exit and the day / night switch, at the top corner just under the clock and the wifi */}
       {hidden && (
@@ -424,6 +440,7 @@ function Quran() {
       <NoteSheet note={note} onClose={() => setNote(null)} />
       <MarksSheet
         open={marksOpen}
+        tab={marksTab}
         onClose={() => setMarksOpen(false)}
         onGo={(p) => {
           setMarksOpen(false);

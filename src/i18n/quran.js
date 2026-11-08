@@ -5,7 +5,7 @@ import { L } from './i18n.js';
 export const QURAN = {
   modeRead: () => L('قراءة', 'Read', 'Lire'),
   modeListen: () => L('استماع', 'Listen', 'Écouter'),
-  modeRecite: () => L('تسميع', 'Recite', 'Réciter'),
+  modeRecite: () => L('استظهار', 'Recite', 'Réciter'),
   fullView: () => L('عرض كامل', 'Full view', 'Plein écran'),
   back: () => L('رجوع', 'Back', 'Retour'),
   index: () => L('الفهرس', 'Index', 'Index'),
