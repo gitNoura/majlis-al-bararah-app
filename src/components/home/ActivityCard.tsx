@@ -12,8 +12,8 @@ import { streak } from '@/lib/activity';
 import { activityGrid } from '@/lib/dashboard';
 import { useTheme } from '@/theme/theme';
 
-const CELL = 16;
-const GAP = 4;
+const CELL = 14;
+const GAP = 3;
 
 export function ActivityCard() {
   const { c } = useTheme();
@@ -22,7 +22,7 @@ export function ActivityCard() {
   // one colour (the accent) at three strengths; a day still to come is only an outline of the track
   const fill = [c.surface3, `${c.accent}59`, `${c.accent}99`, c.accent];
   return (
-    <Card>
+    <Card elevated style={{ padding: 14, gap: 8 }}>
       <Txt size={13} weight={700} color={c.meta}>
         {DASH.activity()}
       </Txt>
@@ -38,8 +38,8 @@ export function ActivityCard() {
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <FlameIcon size={22} color={c.accent} />
-            <Txt size={34} weight={800} lineHeight={42} color={c.ink}>
+            <FlameIcon size={20} color={c.accent} />
+            <Txt size={28} weight={800} lineHeight={34} color={c.ink}>
               {days.toLocaleString(L('ar', 'en', 'fr'))}
             </Txt>
           </View>

@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/Avatar';
 import { Field, MainButton } from '@/components/Form';
-import { FlameIcon, PersonIcon, SettingsIcon } from '@/components/icons';
+import { FlameIcon, PersonIcon } from '@/components/icons';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Row, Section, Segments } from '@/components/SettingsList';
 import { ScreenBackground } from '@/components/Stars';
@@ -86,7 +86,6 @@ function ProfileView() {
 
       <Section title={ACCOUNT.account()}>
         <Row icon={<PersonIcon color={c.ink} size={20} />} title={user?.email ?? ''} />
-        <Row icon={<SettingsIcon color={c.ink} size={20} />} title={ACCOUNT.settings()} onPress={() => router.push('/settings')} />
         <Row
           title={t('acSignOut')}
           onPress={async () => {

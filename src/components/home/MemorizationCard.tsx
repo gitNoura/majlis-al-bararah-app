@@ -24,7 +24,7 @@ export function MemorizationCard() {
     today.revise.total ? `${DASH.revisionLabel()} ${digits(today.revise.done)}/${digits(today.revise.total)}` : '',
   ].filter(Boolean);
   return (
-    <Card onPress={() => router.navigate('/hifdh')} accessibilityLabel={HOME.memorize()}>
+    <Card elevated style={{ padding: 14, gap: 8 }} onPress={() => router.navigate('/hifdh')} accessibilityLabel={HOME.memorize()}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Txt size={13} weight={700} color={c.meta}>
           {HOME.memorize()}
@@ -32,14 +32,14 @@ export function MemorizationCard() {
         <Chevron />
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-        <Txt size={34} weight={800} lineHeight={42} color={c.ink}>
+        <Txt size={26} weight={800} lineHeight={32} color={c.ink}>
           {digits(juz)}
         </Txt>
         <Txt size={14} color={c.meta}>
           {DASH.memorizedOf()}
         </Txt>
       </View>
-      <ProgressStrip cells={cells} height={8} label={DASH.memorizedOf()} />
+      <ProgressStrip cells={cells} height={6} label={DASH.memorizedOf()} />
       {today.hasPlan ? (
         <Txt size={14} weight={600} color={c.text}>
           {parts.length ? parts.join(' · ') : DASH.nothingToday()}

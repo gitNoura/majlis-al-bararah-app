@@ -1,24 +1,22 @@
 // HOME, card 1: the next prayer, the time left to it, the day's five times and a button to the qibla.
 // With no place chosen yet it asks for one (the phone's location, or a city from the settings).
 'use no memo'; // reads saved state (the place) when it draws, which the React Compiler cannot see change
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { SecondaryButton } from '@/components/hifdh/Section';
 import { PlaceSheet } from '@/components/PlaceSheet';
+import { PrayerSky } from '@/components/PrayerSky';
 import { Txt } from '@/components/Txt';
-import { Card } from '@/components/ui';
 import { DASH } from '@/i18n/dashboard';
 import { HOME } from '@/i18n/home';
 import { t } from '@/i18n/i18n';
-import { prayerView, type PrayerView } from '@/lib/dashboard';
+import { prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
 import { locate } from '@/lib/prayer';
-import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
 export function PrayerCard() {
-  const { c } = useTheme();
   const [view, setView] = useState<PrayerView>(prayerView);
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -51,50 +49,73 @@ export function PrayerCard() {
     router.navigate({ pathname: '/settings', params: { cities: '1' } });
   };
 
+  const phase = view?.phase ?? skyByClock();
+  const sky = SKIES[phase]; // the card wears the sky of the moment (as in the earlier version)
   return (
-    <Card>
-      <Txt size={13} weight={700} color={c.meta}>
-        {HOME.nextPrayer()}
-      </Txt>
+    <LinearGradient colors={sky.sky} style={styles.card}>
+      <PrayerSky phase={phase} sun={view?.sun ?? 0.5} />
       {view ? (
         <>
           <View style={styles.head}>
-            <Txt size={30} weight={800} lineHeight={40} color={c.ink}>
-              {view.next}
-            </Txt>
-            <Txt size={16} weight={600} color={c.accent}>
+            <View>
+              <Txt size={12} weight={700} color={sky.soft}>
+                {HOME.nextPrayer()}
+              </Txt>
+              <Txt size={24} weight={800} lineHeight={32} color={sky.ink}>
+                {view.next}
+              </Txt>
+            </View>
+            <Txt size={15} weight={700} color={sky.ink}>
               {DASH.left(view.h, view.m)}
             </Txt>
           </View>
           <View style={styles.strip}>
             {view.list.map((p) => (
-              <View key={p.key} style={[styles.time, p.next && { backgroundColor: c.accentSoft }]}>
-                <Txt size={12} weight={p.next ? 700 : 500} color={p.next ? c.accent : c.meta} center>
+              <View key={p.key} style={[styles.time, { backgroundColor: p.next ? sky.next : sky.circle }]}>
+                <Txt size={11} weight={p.next ? 700 : 500} color={p.next ? sky.nextIcon : sky.soft} center>
                   {p.name}
                 </Txt>
-                <Txt size={14} weight={p.next ? 700 : 500} color={p.next ? c.accent : p.past ? c.meta : c.ink} center>
+                <Txt size={13} weight={p.next ? 700 : 500} color={p.next ? sky.nextIcon : sky.ink} center style={p.past && !p.next ? { opacity: 0.62 } : undefined}>
                   {p.at}
                 </Txt>
               </View>
             ))}
           </View>
-          <SecondaryButton label={HOME.qibla()} onPress={() => router.push('/qibla')} />
+          <View style={styles.buttons}>
+            <Pressable onPress={() => router.push('/qibla')} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
+              <Txt size={14} weight={700} color={sky.ink}>
+                {HOME.qibla()}
+              </Txt>
+            </Pressable>
+            <Pressable onPress={() => router.push('/calendar')} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
+              <Txt size={14} weight={700} color={sky.ink}>
+                {DASH.calendar()}
+              </Txt>
+            </Pressable>
+          </View>
         </>
       ) : (
         <>
-          <Txt size={15} color={c.text}>
+          <Txt size={15} color={sky.ink}>
             {t('calPlaceAsk')}
           </Txt>
-          <SecondaryButton label={HOME.setPlace()} onPress={() => setAsking(true)} />
+          <Pressable onPress={() => setAsking(true)} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
+            <Txt size={15} weight={700} color={sky.ink}>
+              {HOME.setPlace()}
+            </Txt>
+          </Pressable>
         </>
       )}
       <PlaceSheet open={asking} busy={busy} failed={failed} onClose={() => setAsking(false)} onLocate={findPlace} onChooseCity={chooseCity} />
-    </Card>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  card: { borderRadius: 20, padding: space.md, gap: 10, overflow: 'hidden', boxShadow: '0px 8px 20px rgba(20, 50, 38, 0.16)' },
+  buttons: { flexDirection: 'row', gap: space.sm },
+  btn: { flex: 1, minHeight: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md },
   head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   strip: { flexDirection: 'row', gap: space.xs },
-  time: { flex: 1, borderRadius: 12, paddingVertical: space.sm, gap: 2 },
+  time: { flex: 1, borderRadius: 10, paddingVertical: 6, gap: 1 },
 });

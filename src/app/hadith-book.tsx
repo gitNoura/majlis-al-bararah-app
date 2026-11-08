@@ -1,5 +1,4 @@
-// A book's kitabs (كتاب الإيمان، كتاب الصلاة…) under the book's painting, as a table of contents in the
-// Adhkar pages' soft rows: the number in a round of the book's colour, the kitab's name (in English or French its name in that language, the Arabic
+// A book's kitabs (كتاب الإيمان، كتاب الصلاة…) as a table of contents: the number in a soft round, the kitab's name (in English or French its name in that language, the Arabic
 // under it), how many hadiths and their numbers. A kitab opens its hadiths (/hadith-kitab).
 import { useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -7,19 +6,15 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { tone, type Tone } from '@/components/AdhkarArt';
 import { Note, openHadith, useToTop } from '@/components/HadithParts';
 import { BackIcon } from '@/components/icons';
 import { ScreenHeader } from '@/components/ScreenHeader';
-import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
 import { isEnglish, t } from '@/i18n/i18n';
 import { bookName, kitabName, loadBooks, type Book, type BookId, type Kitab } from '@/lib/hadith';
 import { serif } from '@/theme/fonts';
 import { textSide } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
-
-const BOOK_TONE: Record<string, Tone> = { bukhari: 'green', muslim: 'rose', nawawi: 'indigo' };
 
 export default function HadithBook() {
   const { c, isDark } = useTheme();
@@ -28,8 +23,6 @@ export default function HadithBook() {
   const [book, setBook] = useState<Book | null>(null);
   const [failed, setFailed] = useState(false);
   const list = useRef<FlatList<Kitab>>(null);
-  // the book's colour: its leather's family
-  const { wash, ink } = tone(BOOK_TONE[b] ?? 'green', isDark);
   const [onScroll, toTopButton] = useToTop(() => list.current?.scrollToOffset({ offset: 0, animated: true }));
 
   useEffect(() => {
@@ -40,13 +33,12 @@ export default function HadithBook() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
-      <ScreenBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScreenHeader title={bookName(b)} />
       {failed ? (
         <Note text={t('ahOffline')} />
       ) : !book ? (
-        <ActivityIndicator color={c.gold} style={{ marginTop: 40 }} />
+        <ActivityIndicator color={c.accent} style={{ marginTop: 40 }} />
       ) : (
         <FlatList
           ref={list}
@@ -70,9 +62,9 @@ export default function HadithBook() {
                 // no box: on the page, a thin line between two chapters
                 style={({ pressed }) => [styles.row, index > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider }, pressed && { opacity: 0.6 }]}
               >
-                {/* its number in a soft round of the book's colour */}
-                <View style={[styles.num, { backgroundColor: wash }]}>
-                  <Txt size={13} weight={700} center color={ink}>
+                {/* its number in a soft round */}
+                <View style={[styles.num, { backgroundColor: c.accentSoft }]}>
+                  <Txt size={13} weight={700} center color={c.accent}>
                     {k.n || '—'}
                   </Txt>
                 </View>

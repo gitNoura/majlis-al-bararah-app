@@ -11,15 +11,16 @@ type Props = {
   children: ReactNode;
   onPress?: () => void;
   quiet?: boolean;
+  elevated?: boolean; // lifted off the screen: a soft shadow under it
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
 };
 
-export function Card({ children, onPress, quiet, style, accessibilityLabel }: Props) {
+export function Card({ children, onPress, quiet, elevated, style, accessibilityLabel }: Props) {
   const { c } = useTheme();
   const surface: ViewStyle = quiet
     ? { backgroundColor: c.surface2 }
-    : { backgroundColor: c.card, borderColor: c.line, borderWidth: StyleSheet.hairlineWidth };
+    : { backgroundColor: c.card, borderColor: c.line, borderWidth: StyleSheet.hairlineWidth, ...(elevated ? { boxShadow: `0px 10px 28px ${c.shadow}, 0px 2px 4px ${c.shadow}` } : null) };
   if (!onPress) return <View style={[styles.card, surface, style]}>{children}</View>;
   return (
     <Pressable

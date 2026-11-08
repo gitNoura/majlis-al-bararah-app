@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { openHadith, useToast } from '@/components/HadithParts';
 import { BookmarkIcon, CloseIcon } from '@/components/icons';
 import { ScreenHeader } from '@/components/ScreenHeader';
-import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
 import { t } from '@/i18n/i18n';
 import { bookName, loadBooks, toggleSaved, useSaved, type Book } from '@/lib/hadith';
@@ -33,7 +32,6 @@ export default function HadithSaved() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
-      <ScreenBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScreenHeader title={t('ahSaved')} />
       <FlatList
@@ -42,7 +40,7 @@ export default function HadithSaved() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 28, gap: 10, flexGrow: 1 }}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <BookmarkIcon color={c.gold} size={34} />
+            <BookmarkIcon color={c.accent} size={34} />
             <Txt size={14.5} center color={c.meta}>
               {t('ahNoSaved')}
             </Txt>

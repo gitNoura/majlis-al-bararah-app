@@ -1,7 +1,239 @@
-// «calendar» - to be built (the website's section, rebuilt for the phone).
-import { Coming } from '@/components/Coming';
-import { HOME } from '@/i18n/home';
+// CALENDAR (التقويم): a month at a time, in the Hijri calendar or the Gregorian, each day with the other date small
+// under it; today lit; the occasions and the fasts marked; and what is coming. The data is src/lib/hijri.js (Umm al-Qura
+// where the phone has it, the country's own start of the months, the ±1 day the reader sets in the Settings).
+'use no memo'; // reads the Hijri settings (a module) when it draws, which the React Compiler cannot see change
+import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function Calendar() {
-  return <Coming title={HOME.calendar()} />;
+import { BackIcon } from '@/components/icons';
+import { ScreenHeader } from '@/components/ScreenHeader';
+import { Txt } from '@/components/Txt';
+import { Card, Row, SegmentedControl } from '@/components/ui';
+import { DASH } from '@/i18n/dashboard';
+import { isEnglish, L, LANG, t } from '@/i18n/i18n';
+import * as hijri from '@/lib/hijri';
+import { useTheme } from '@/theme/theme';
+import { space } from '@/theme/tokens';
+
+type Kind = 'hijri' | 'gregorian';
+const num = (n: number) => n.toLocaleString(L('ar', 'en', 'fr'));
+const sameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+type Cell = { date: Date; big: number; small: number; h: { y: number; m: number; d: number } };
+
+// the days of the shown month, as cells (the big number is the shown calendar's, the small one the other's)
+function monthCells(kind: Kind, y: number, m: number): Cell[] {
+  if (kind === 'hijri') {
+    return (hijri.monthDays(y, m) as Date[]).map((date, i) => ({ date, big: i + 1, small: date.getDate(), h: { y, m, d: i + 1 } }));
+  }
+  const n = new Date(y, m + 1, 0).getDate();
+  return Array.from({ length: n }, (_, i) => {
+    const date = new Date(y, m, i + 1, 12);
+    const h = hijri.hijri(date);
+    return { date, big: i + 1, small: h.d, h };
+  });
+}
+
+export default function CalendarScreen() {
+  const { c, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
+  const now = new Date();
+  const todayH = hijri.hijri(hijri.noon(now));
+  const [kind, setKind] = useState<Kind>('hijri');
+  const [at, setAt] = useState({ y: todayH.y, m: todayH.m }); // Hijri: month 1-12; Gregorian: month 0-11
+  const [selected, setSelected] = useState<Cell | null>(null);
+
+  const switchKind = (k: Kind) => {
+    setKind(k);
+    setSelected(null);
+    setAt(k === 'hijri' ? { y: todayH.y, m: todayH.m } : { y: now.getFullYear(), m: now.getMonth() });
+  };
+  const step = (dir: 1 | -1) => {
+    setSelected(null);
+    setAt(({ y, m }) => {
+      const first = kind === 'hijri' ? 1 : 0;
+      const last = kind === 'hijri' ? 12 : 11;
+      const nm = m + dir;
+      return nm > last ? { y: y + 1, m: first } : nm < first ? { y: y - 1, m: last } : { y, m: nm };
+    });
+  };
+  const backToToday = () => switchKind(kind);
+
+  const cells = monthCells(kind, at.y, at.m);
+  const lead = cells.length ? cells[0].date.getDay() : 0; // Sunday first
+  const rows: (Cell | null)[][] = [];
+  const padded: (Cell | null)[] = [...Array<null>(lead).fill(null), ...cells];
+  while (padded.length % 7) padded.push(null);
+  for (let i = 0; i < padded.length; i += 7) rows.push(padded.slice(i, i + 7));
+
+  const title = kind === 'hijri' ? `${hijri.monthName(at.m)} ${num(at.y)}` : new Date(at.y, at.m, 1).toLocaleDateString(LANG, { month: 'long', year: 'numeric' });
+  // the other calendar's months over this one (e.g. «Oct – Nov 2026»)
+  const other = (() => {
+    if (!cells.length) return '';
+    const a = cells[0].date;
+    const b = cells[cells.length - 1].date;
+    if (kind === 'hijri') {
+      const fa = a.toLocaleDateString(LANG, { month: 'short' });
+      const fb = b.toLocaleDateString(LANG, { month: 'short', year: 'numeric' });
+      return fa === b.toLocaleDateString(LANG, { month: 'short' }) ? fb : `${fa} – ${fb}`;
+    }
+    const ha = hijri.hijri(a);
+    const hb = hijri.hijri(b);
+    return ha.m === hb.m ? `${hijri.monthName(ha.m)} ${num(ha.y)}` : `${hijri.monthName(ha.m)} – ${hijri.monthName(hb.m)} ${num(hb.y)}`;
+  })();
+
+  const days = DASH.weekdays() as unknown as string[];
+  type Event = { key: string; h: { y: number; m: number; d: number }; date: Date; days: number };
+  type Fast = { date: Date; fast: { key: string }; days: number };
+  const events = (hijri.upcoming() as Event[]).slice(0, 4);
+  const fasts = (hijri.upcomingFasts(45) as Fast[]).slice(0, 4);
+  const shownDay = selected
+    ? [`${num(selected.h.d)} ${hijri.monthName(selected.h.m)} ${num(selected.h.y)}`, selected.date.toLocaleDateString(LANG, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })]
+    : null;
+  const shownNote = selected
+    ? [hijri.occasionOn(selected.h) ? t(hijri.occasionOn(selected.h) as string) : '', (() => { const f = hijri.fastOn(selected.h, selected.date); return f ? t(f.key) : ''; })()].filter(Boolean)
+    : [];
+
+  const when = (d: Date, n: number) => (n === 0 ? t('calIsToday') : t('calInDays', n)) + ` · ${d.toLocaleDateString(LANG, { day: 'numeric', month: 'short' })}`;
+
+  return (
+    <View style={{ flex: 1, backgroundColor: c.screen }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <ScreenHeader title={DASH.calendar()} />
+      <ScrollView contentContainerStyle={{ padding: space.md, paddingBottom: insets.bottom + 28, gap: space.md }}>
+        <SegmentedControl<Kind>
+          value={kind}
+          onChange={switchKind}
+          options={[
+            { value: 'hijri', label: t('calHijri') },
+            { value: 'gregorian', label: t('calGregorian') },
+          ]}
+        />
+
+        <Card elevated>
+          {/* the month, with arrows */}
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Pressable onPress={() => step(-1)} hitSlop={10} accessibilityLabel={t('calPrev')} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+              <BackIcon color={c.ink} size={20} rtl={isEnglish} />
+            </Pressable>
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <Txt size={20} weight={800} lineHeight={28} color={c.ink} center>
+                {title}
+              </Txt>
+              <Txt size={12.5} color={c.meta} center>
+                {other}
+              </Txt>
+            </View>
+            <Pressable onPress={() => step(1)} hitSlop={10} accessibilityLabel={t('calNext')} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', transform: [{ scaleX: -1 }] }}>
+              <BackIcon color={c.ink} size={20} rtl={isEnglish} />
+            </Pressable>
+          </View>
+
+          <View style={{ flexDirection: 'row' }}>
+            {days.map((d) => (
+              <Txt key={d} size={12} weight={700} color={c.meta} center style={{ flex: 1 }}>
+                {d}
+              </Txt>
+            ))}
+          </View>
+          <View style={{ gap: 4 }}>
+            {rows.map((row, i) => (
+              <View key={i} style={{ flexDirection: 'row', gap: 4 }}>
+                {row.map((cell, j) => {
+                  if (!cell) return <View key={j} style={{ flex: 1, aspectRatio: 1 }} />;
+                  const isToday = sameDay(cell.date, now);
+                  const isSel = !!selected && sameDay(cell.date, selected.date);
+                  const occasion = !!hijri.occasionOn(cell.h);
+                  const fast = hijri.fastOn(cell.h, cell.date);
+                  const mark = occasion ? c.accent : fast ? (fast.fard ? c.accent : c.meta) : null;
+                  return (
+                    <Pressable
+                      key={j}
+                      onPress={() => setSelected(isSel ? null : cell)}
+                      accessibilityLabel={`${cell.big}`}
+                      style={[
+                        { flex: 1, aspectRatio: 1, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+                        isToday && { backgroundColor: c.accent },
+                        !isToday && isSel && { backgroundColor: c.accentSoft, borderWidth: 1.5, borderColor: c.accent },
+                      ]}
+                    >
+                      <Txt size={16} weight={isToday ? 800 : 600} color={isToday ? c.onInk : c.ink} center>
+                        {num(cell.big)}
+                      </Txt>
+                      <Txt size={9.5} color={isToday ? c.onInk : c.meta} center style={{ opacity: 0.85 }}>
+                        {num(cell.small)}
+                      </Txt>
+                      {!!mark && <View style={{ position: 'absolute', bottom: 3, width: 5, height: 5, borderRadius: 3, backgroundColor: isToday ? c.onInk : mark }} />}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+
+          {/* the key */}
+          <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
+            {[
+              [c.accent, `${t('calLegendOccasion')} · ${t('calLegendRamadan')}`],
+              [c.meta, t('calLegendSunnah')],
+            ].map(([col, label]) => (
+              <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: col }} />
+                <Txt size={12} color={c.meta}>
+                  {label}
+                </Txt>
+              </View>
+            ))}
+          </View>
+          <Pressable onPress={backToToday} hitSlop={8} style={{ alignSelf: 'flex-start' }}>
+            <Txt size={13.5} weight={700} color={c.accent}>
+              {t('calBackToday')}
+            </Txt>
+          </Pressable>
+        </Card>
+
+        {shownDay && (
+          <Card quiet>
+            <Txt size={17} weight={800} color={c.ink}>
+              {shownDay[0]}
+            </Txt>
+            <Txt size={13.5} color={c.meta}>
+              {shownDay[1]}
+            </Txt>
+            {shownNote.map((n) => (
+              <Txt key={n} size={14} weight={600} color={c.text}>
+                {n}
+              </Txt>
+            ))}
+          </Card>
+        )}
+
+        <View style={{ gap: space.sm }}>
+          <Txt size={13} weight={700} color={c.meta}>
+            {t('calEvents')}
+          </Txt>
+          <Card style={{ paddingVertical: space.xs, gap: 0 }}>
+            {events.map((e, i) => (
+              <Row key={e.key} title={t(e.key)} sub={`${when(e.date, e.days)} · ${num(e.h.d)} ${hijri.monthName(e.h.m)}`} last={i === events.length - 1} />
+            ))}
+          </Card>
+        </View>
+
+        {fasts.length > 0 && (
+          <View style={{ gap: space.sm }}>
+            <Txt size={13} weight={700} color={c.meta}>
+              {t('calFasting')}
+            </Txt>
+            <Card style={{ paddingVertical: space.xs, gap: 0 }}>
+              {fasts.map((f, i) => (
+                <Row key={`${f.fast.key}${f.days}`} title={t(f.fast.key)} sub={when(f.date, f.days)} last={i === fasts.length - 1} />
+              ))}
+            </Card>
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  );
 }

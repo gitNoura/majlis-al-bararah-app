@@ -9,9 +9,6 @@ export const SETTINGS = {
   dark: () => L('ليلي', 'Night', 'Nuit'),
   auto: () => L('تلقائي', 'Auto', 'Auto'),
   // night from al-Maghrib until al-Fajr
-  byTime: () => L('حسب الصلاة', 'By prayer', 'Selon la prière'),
-  byTimeNote: () =>
-    L('«حسب الصلاة»: ليلي من المغرب إلى الفجر، ونهاري بقية اليوم.', '«By prayer»: night from Maghrib until Fajr, light the rest of the day.', '« Selon la prière » : nuit du Maghrib au Fajr, clair le reste de la journée.'),
   language: () => L('اللغة', 'Language', 'Langue'),
   place: () => L('مكان مواقيت الصلاة', 'Location for prayer times', 'Lieu des horaires de prière'),
   myLocation: () => L('موقعي', 'My location', 'Ma position'),
@@ -25,10 +22,12 @@ export const SETTINGS = {
       'Si votre pays a annoncé le mois avec un jour d’écart, ajustez la date ici.',
     ),
   today: () => L('اليوم', 'Today', 'Aujourd’hui'),
-  quranGroup: () => L('القرآن الكريم', 'The Quran', 'Le Coran'),
-  quran: () => L('إعدادات المصحف', 'Quran settings', 'Paramètres du Coran'),
-  quranSub: () => L('الرواية، التفاسير والترجمات، التحميل', 'Narration, tafsirs and translations, downloads', 'Lecture, tafsirs et traductions, téléchargements'),
-  feedback: () => L('ملاحظاتك', 'Feedback', 'Votre avis'),
-  sendFeedback: () => L('أرسل ملاحظة', 'Send feedback', 'Envoyer un avis'),
   soon: () => L('قريباً', 'Soon', 'Bientôt'),
+  // the one Settings screen
+  account: () => L('الحساب', 'Account', 'Compte'),
+  signIn: () => L('تسجيل الدخول', 'Log in', 'Se connecter'),
+  signInSub: () => L('لحفظ وِردك وتقدّمك', 'To keep your wird and progress', 'Pour garder votre wird et votre progression'),
+  general: () => L('عام', 'General', 'Général'),
+  prayer: () => L('الصلاة والموقع', 'Prayer and location', 'Prière et lieu'),
+  quranSection: () => L('المصحف', 'Quran', 'Coran'),
 };

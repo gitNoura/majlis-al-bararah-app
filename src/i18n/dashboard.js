@@ -9,7 +9,6 @@ export const DASH = {
       : m > 0
         ? L(`${m} د`, `${m}m`, `${m} min`)
         : L('أقل من دقيقة', 'under a minute', 'moins d’une minute'),
-  prayerIn: (name, left) => L(`${name} بعد ${left}`, `${name} in ${left}`, `${name} dans ${left}`),
   // reading
   reading: () => L('القراءة', 'Reading', 'Lecture'),
   continueReading: () => L('أكمل القراءة', 'Continue reading', 'Continuer la lecture'),
@@ -41,4 +40,10 @@ export const DASH = {
   libAdhkarSub: () => L('الأذكار حسب الأبواب، مع العدّاد', 'Adhkar by category, with a counter', 'Adhkar par catégorie, avec compteur'),
   libAhadith: () => L('مكتبة الأحاديث', 'Hadith library', 'Bibliothèque de hadiths'),
   libAhadithSub: () => L('البخاري ومسلم والأربعون النووية', 'Bukhari, Muslim and Nawawi’s Forty', 'Boukhari, Mouslim et les Quarante de Nawawi'),
+  // library tab and calendar
+  tabLibrary: () => L('المكتبة', 'Library', 'Bibliothèque'),
+  libraryTitle: () => L('المكتبة', 'Library', 'Bibliothèque'),
+  calendar: () => L('التقويم', 'Calendar', 'Calendrier'),
+  weekdays: () => L(['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'], ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'], ['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa']),
+  upcomingEvents: () => L('المناسبات القادمة', 'Coming up', 'À venir'),
 };

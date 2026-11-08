@@ -335,3 +335,14 @@ export function CollapseIcon({ size = 22, color, strokeWidth = 1.8 }: IconProps)
     </Svg>
   );
 }
+
+// the library (books on a shelf)
+export function LibraryIcon({ size = 22, color }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.7} strokeLinejoin="round" strokeLinecap="round">
+      <Path d="M5 4h4v16H5z" />
+      <Path d="M10 4h4v16h-4z" />
+      <Path d="M15.2 5.4l3.8-1 3 14.6-3.8 1z" transform="translate(-1.5 0)" />
+    </Svg>
+  );
+}

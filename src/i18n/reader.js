@@ -3,14 +3,9 @@
 import { L } from './i18n.js';
 
 export const READER = {
-  fullscreen: () => L('ملء الشاشة', 'Full screen', 'Plein écran'),
   surahs: () => L('السور', 'Surahs', 'Sommaire'),
   search: () => L('بحث', 'Search', 'Recherche'),
-  notebook: () => L('دفتري', 'Notebook', 'Carnet'),
   settings: () => L('الإعدادات', 'Settings', 'Paramètres'),
-  wirdHint: () => L('اضغط مطوّلاً على الآية التي توقفت عندها', 'Hold the ayah where you stop', 'Appuyez longuement sur le verset où vous vous arrêtez'),
-  wird: () => L('الورد', 'Wird', 'Wird'),
-  home: () => L('الرئيسية', 'Home', 'Accueil'),
   index: () => L('فهرس المصحف', 'Index of the mushaf', 'Sommaire du mushaf'),
   close: () => L('إغلاق', 'Close', 'Fermer'),
   tabSurahs: () => L('السور', 'Surahs', 'Sourates'),
@@ -20,7 +15,6 @@ export const READER = {
   soon: () => L('قريباً إن شاء الله', 'Coming soon, in sha Allah', 'Bientôt, in sha Allah'),
   // full screen's round buttons (the website's), and the button back to the whole page while zoomed
   exitFull: () => L('الخروج من ملء الشاشة', 'Exit full screen', 'Quitter le plein écran'),
-  pageLight: () => L('خلفية داكنة / خافتة', 'Dark / dimmed screen', 'Écran sombre / atténué'),
   theme: () => L('الوضع الليلي / النهاري', 'Night / day', 'Nuit / jour'),
   wholePage: () => L('الصفحة كاملة', 'Whole page', 'Page entière'),
   back: () => L('رجوع', 'Back', 'Retour'),
@@ -37,9 +31,7 @@ export const READER = {
   // at night, in full screen: the screen around the (dimmed) page dark, or the same dimmed paper
   nightPage: () => L('حول الصفحة في ملء الشاشة', 'Around the page in full screen', 'Autour de la page en plein écran'),
   normalPage: () => L('خلفية داكنة', 'Dark screen', 'Écran sombre'),
-  normalPageSub: () => L('الصفحة خافتة على خلفية داكنة', 'The dimmed page on a dark screen', 'La page atténuée sur un écran sombre'),
   dimPage: () => L('خلفية خافتة', 'Dimmed screen', 'Écran atténué'),
-  dimPageSub: () => L('الشاشة كلها بلون الصفحة الخافتة', 'The whole screen the colour of the dimmed page', 'Tout l’écran de la couleur de la page atténuée'),
   riwaya: () => L('الرواية', 'Narration', 'Lecture (riwaya)'),
   warsh: () => L('ورش عن نافع', 'Warsh from Nafi', 'Warsh d’après Nâfi'),
   hafs: () => L('حفص عن عاصم', 'Hafs from Asim', 'Hafs d’après Âsim'),
@@ -60,6 +52,4 @@ export const READER = {
   noteSave: () => L('حفظ', 'Save', 'Enregistrer'),
   noteDelete: () => L('حذف التعليق', 'Delete comment', 'Supprimer le commentaire'),
   // search (a page of its own)
-  searchTitle: () => L('البحث في المصحف', 'Search the Quran', 'Rechercher dans le Coran'),
-  searchField: () => L('كلمة، جزء من آية، أو 48:11', 'A word, part of an ayah, or 48:11', 'Un mot, une partie de verset, ou 48:11'),
 };

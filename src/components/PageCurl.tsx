@@ -148,7 +148,6 @@ function Cover({ page, path, role, at, mode, image, rect, pageW, pageH, paper }:
     </Group>
   );
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // The marks on one page (highlights, the chosen ayah, comment badges, the pin). Each page's marks are their own copy,
 // made for that page and drawn only while that page is the one on screen. Skia and the page picture are updated on the

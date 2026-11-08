@@ -333,7 +333,7 @@ function Quran() {
               onSearch={() => setSearchOpen(true)}
               onNotes={() => say(READER.soon())}
               onZoom={() => (zoomed ? setUnzoom((n) => n + 1) : setHidden(true))}
-              onSettings={() => router.push('/quran-settings')}
+              onSettings={() => router.navigate('/settings')}
             />
           ) : mode === 'listen' ? (
             listen.bar

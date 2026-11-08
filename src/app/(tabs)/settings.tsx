@@ -1,40 +1,77 @@
-// The app's settings, a page of its own (the website's #settings): day, night or the phone's own; the
-// language; where the prayer times are for (the phone's location, or a city chosen from the list); the
-// Hijri date a day earlier or later when one's country announced the month apart; the way to the
-// Quran's own settings; and - coming - sending feedback.
+// SETTINGS tab: the one place for every setting, one screen of cards:
+//   Account     the profile (or log in)
+//   General     language, theme (light / night / auto), the Hijri date's adjustment
+//   Prayer      where the prayer times are for (the phone's location or a city from the list)
+//   Quran       night mode and the night page, narration (Warsh / Hafs), the tafsirs and translations shown on an ayah
+// It replaces the old settings page, the Quran's settings page and the place sheet's second home. The data and logic are
+// unchanged (theme, language, hijri, prayer, riwaya, sources, nightPage). Saved items stay in their own features.
+'use no memo'; // reads saved state (modules) when it draws, which the React Compiler cannot see change
 import { router, useLocalSearchParams } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BackIcon, BookOpenIcon, CheckIcon, ClockIcon, CommentIcon } from '@/components/icons';
-import { ScreenBackground } from '@/components/Stars';
-import { Row, Section, Segments, Tag } from '@/components/SettingsList';
+import { Avatar } from '@/components/Avatar';
+import { CheckIcon } from '@/components/icons';
+import { Toggle } from '@/components/Toggle';
 import { Txt } from '@/components/Txt';
-import { isEnglish, LANG, t } from '@/i18n/i18n';
+import { Card, Row, SegmentedControl } from '@/components/ui';
+import { ACCOUNT } from '@/i18n/account';
+import { LANG, isEnglish, isFrench, t } from '@/i18n/i18n';
+import { READER } from '@/i18n/reader';
 import { SETTINGS } from '@/i18n/settings';
+import { useAccount } from '@/lib/account';
 import * as hijri from '@/lib/hijri';
 import { changeLanguage } from '@/lib/language';
+import { setNightPage, useNightPage } from '@/lib/nightPage';
 import { chooseCity, cityChoices, locate, place, placeName } from '@/lib/prayer';
+import { HAFS, setRiwaya } from '@/lib/riwaya';
+import { setSource, SOURCES, tafsirSources } from '@/lib/sources';
 import { useTheme, type ThemeMode } from '@/theme/theme';
+import { space } from '@/theme/tokens';
 
 type City = { i: number; name: string; country: string | number };
+type Source = { id: string; name: string; nameEn: string; nameFr?: string; about: string; aboutEn: string; aboutFr?: string; kind?: string };
 
-export default function Settings() {
-  const { c, isDark, mode, setMode } = useTheme();
+const label = (s: Source) => (isEnglish ? (isFrench && s.nameFr) || s.nameEn : s.name);
+const about = (s: Source) => (isEnglish ? (isFrench && s.aboutFr) || s.aboutEn : s.about);
+const chosenIds = () => new Set((tafsirSources() as Source[]).map((s) => s.id));
+
+function Group({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
+  const { c } = useTheme();
+  return (
+    <View style={{ gap: space.sm }}>
+      <Txt size={13} weight={700} color={c.meta}>
+        {title}
+      </Txt>
+      <Card style={{ paddingVertical: space.xs, gap: 0 }}>{children}</Card>
+      {!!note && (
+        <Txt size={12.5} color={c.meta}>
+          {note}
+        </Txt>
+      )}
+    </View>
+  );
+}
+
+export default function SettingsTab() {
+  const { c, isDark, mode, setMode, quranMode, setQuranMode } = useTheme();
   const insets = useSafeAreaInsets();
+  const account = useAccount();
+  const member = account.profile ?? account.cached;
+  const signedIn = !!(account.user || member);
+
   const [here, setHere] = useState(place);
-  // the list of cities open (at once when the home screen asks to choose a city)
-  const asked = useLocalSearchParams<{ cities?: string }>().cities === '1';
+  const asked = useLocalSearchParams<{ cities?: string }>().cities === '1'; // Home / qibla ask to choose a city
   const [cities, setCities] = useState(asked);
   const [locating, setLocating] = useState(false);
   const [failed, setFailed] = useState(false);
   const [shift, setShift] = useState(hijri.adjustment);
+  const [chosen, setChosen] = useState(chosenIds);
+  const nightPage = useNightPage();
+  const sources = SOURCES as Source[];
 
-  const where = here
-    ? t('stPlaceNow', placeName(here) ?? t('calMyLocation'), hijri.countryName(here.country || hijri.calendarCountry()))
-    : SETTINGS.noPlace();
+  const where = here ? t('stPlaceNow', placeName(here) ?? t('calMyLocation'), hijri.countryName(here.country || hijri.calendarCountry())) : SETTINGS.noPlace();
   const useLocation = () => {
     setLocating(true);
     setFailed(false);
@@ -46,10 +83,9 @@ export default function Settings() {
       })
       .finally(() => setLocating(false));
   };
-  // the member's country's cities first (cityChoices), the others after
-  const country = hijri.calendarCountry();
+  // the member's country's cities first, the others if that country has none
   const list: City[] = cityChoices();
-  const near = list.filter((x) => x.country === country);
+  const near = list.filter((x) => x.country === hijri.calendarCountry());
   const shown = near.length ? near : list;
   const today = (() => {
     try {
@@ -59,48 +95,102 @@ export default function Settings() {
       return '';
     }
   })();
-  const arrow = <BackIcon color={c.meta} size={18} rtl={isEnglish} />;
+  const toggleSource = (id: string, on: boolean) => {
+    setSource(id, on);
+    setChosen(chosenIds());
+  };
+  const nightOn = quranMode ? quranMode === 'dark' : isDark;
+  const sourceRows = (kind: string) =>
+    sources
+      .filter((s) => (s.kind ?? 'tafsir') === kind)
+      .map((s, i, all) => <Row key={s.id} title={label(s)} sub={about(s)} end={<Toggle value={chosen.has(s.id)} onChange={(on) => toggleSource(s.id, on)} />} last={i === all.length - 1} />);
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
-      <ScreenBackground />
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: insets.top + 24, paddingBottom: 28 }}>
-        <Txt size={32} weight={800} color={c.ink} style={{ marginHorizontal: 6 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.lg, gap: space.lg }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Txt size={30} weight={800} lineHeight={40} color={c.ink}>
           {SETTINGS.title()}
         </Txt>
-        <Section title={SETTINGS.appearance()}>
-          <Segments<ThemeMode>
-            value={mode}
-            onChange={setMode}
-            options={[
-              ['light', SETTINGS.light()],
-              ['dark', SETTINGS.dark()],
-              ['auto', SETTINGS.auto()],
-            ]}
+
+        <Group title={SETTINGS.account()}>
+          <Row
+            icon={<Avatar name={member?.display_name} size={36} />}
+            title={signedIn ? (member?.display_name ?? account.user?.email ?? ACCOUNT.title()) : SETTINGS.signIn()}
+            sub={signedIn ? (account.user?.email ?? undefined) : SETTINGS.signInSub()}
+            chevron
+            onPress={() => router.push(signedIn ? '/profile' : '/login')}
+            last
           />
-        </Section>
+        </Group>
 
-        <Section title={SETTINGS.language()}>
-          {(
-            [
-              ['ar', 'العربية'],
-              ['en', 'English'],
-              ['fr', 'Français'],
-            ] as const
-          ).map(([lang, name], i) => (
-            <Row key={lang} title={name} end={LANG === lang && <CheckIcon color={c.on} />} onPress={LANG === lang ? undefined : () => changeLanguage(lang)} last={i === 2} />
-          ))}
-        </Section>
+        <Group title={SETTINGS.general()}>
+          <View style={styles.block}>
+            <Txt size={13} color={c.meta}>
+              {SETTINGS.language()}
+            </Txt>
+            <SegmentedControl<string>
+              value={LANG}
+              onChange={(l) => l !== LANG && changeLanguage(l as 'ar' | 'en' | 'fr')}
+              options={[
+                { value: 'ar', label: 'العربية' },
+                { value: 'en', label: 'English' },
+                { value: 'fr', label: 'Français' },
+              ]}
+            />
+          </View>
+          <View style={styles.block}>
+            <Txt size={13} color={c.meta}>
+              {SETTINGS.appearance()}
+            </Txt>
+            <SegmentedControl<ThemeMode>
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: 'light', label: SETTINGS.light() },
+                { value: 'dark', label: SETTINGS.dark() },
+                { value: 'auto', label: SETTINGS.auto() },
+              ]}
+            />
+          </View>
+          <View style={styles.block}>
+            <View style={styles.between}>
+              <Txt size={13} color={c.meta}>
+                {SETTINGS.hijri()}
+              </Txt>
+              <Txt size={14} weight={700} color={c.ink}>
+                {today}
+              </Txt>
+            </View>
+            <SegmentedControl<number>
+              value={shift}
+              onChange={(n) => {
+                hijri.setAdjustment(n);
+                setShift(n);
+              }}
+              options={[
+                { value: -1, label: '−1' },
+                { value: 0, label: '0' },
+                { value: 1, label: '+1' },
+              ]}
+            />
+            <Txt size={12.5} color={c.meta}>
+              {SETTINGS.hijriNote()}
+            </Txt>
+          </View>
+        </Group>
 
-        <Section title={SETTINGS.place()} note={failed ? t('calLocateFailed') : undefined}>
-          <Row icon={<ClockIcon color={c.ink} size={20} />} title={where} />
+        <Group title={SETTINGS.prayer()} note={failed ? t('calLocateFailed') : undefined}>
+          <Row title={where} />
           <Row
             title={SETTINGS.myLocation()}
-            end={locating ? <ActivityIndicator color={c.gold} /> : here?.source === 'gps' ? <CheckIcon color={c.on} /> : arrow}
+            end={locating ? <ActivityIndicator color={c.accent} /> : here?.source === 'gps' ? <CheckIcon color={c.accent} /> : undefined}
+            chevron={!locating && here?.source !== 'gps'}
             onPress={locating ? undefined : useLocation}
           />
-          <Row title={SETTINGS.chooseCity()} end={arrow} onPress={() => setCities((v) => !v)} last={!cities} />
+          <Row title={SETTINGS.chooseCity()} chevron onPress={() => setCities((v) => !v)} last={!cities} />
           {cities &&
             shown.map((x, k) => (
               <Pressable
@@ -110,56 +200,51 @@ export default function Settings() {
                   setHere(place());
                   setCities(false);
                 }}
-                style={({ pressed }) => [
-                  styles.city,
-                  k < shown.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.divider },
-                  pressed && { opacity: 0.6 },
-                ]}
+                style={({ pressed }) => [styles.city, k < shown.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.divider }, pressed && { opacity: 0.6 }]}
               >
                 <Txt size={15} color={c.text} style={{ flex: 1 }}>
                   {x.name}
                 </Txt>
-                {here?.source === 'city' && here.city === x.i && <CheckIcon color={c.on} size={18} />}
+                {here?.source === 'city' && here.city === x.i && <CheckIcon color={c.accent} size={18} />}
               </Pressable>
             ))}
-        </Section>
+        </Group>
 
-        <Section title={SETTINGS.hijri()} note={SETTINGS.hijriNote()}>
-          <View style={styles.hijri}>
-            <Txt size={14} color={c.meta}>
-              {SETTINGS.today()}
-            </Txt>
-            <Txt size={16} weight={700} color={c.ink}>
-              {today}
-            </Txt>
-          </View>
-          <Segments<number>
-            value={shift}
-            onChange={(n) => {
-              hijri.setAdjustment(n);
-              setShift(n);
-            }}
-            options={[
-              [-1, '−1'],
-              [0, '0'],
-              [1, '+1'],
-            ]}
-          />
-        </Section>
+        <Group title={SETTINGS.quranSection()}>
+          <Row title={READER.night()} sub={READER.nightSub()} end={<Toggle value={nightOn} onChange={(on) => setQuranMode(on ? 'dark' : 'light')} />} last={!nightOn} />
+          {nightOn && (
+            <View style={styles.block}>
+              <Txt size={13} color={c.meta}>
+                {READER.nightPage()}
+              </Txt>
+              <SegmentedControl<string>
+                value={nightPage}
+                onChange={(v) => setNightPage(v as 'normal' | 'dim')}
+                options={[
+                  { value: 'normal', label: READER.normalPage() },
+                  { value: 'dim', label: READER.dimPage() },
+                ]}
+              />
+            </View>
+          )}
+        </Group>
 
-        <Section title={SETTINGS.quranGroup()}>
-          <Row icon={<BookOpenIcon color={c.ink} size={20} />} title={SETTINGS.quran()} sub={SETTINGS.quranSub()} end={arrow} onPress={() => router.push('/quran-settings')} last />
-        </Section>
+        <Group title={READER.riwaya()} note={READER.riwayaSub()}>
+          <Row title={READER.warsh()} end={!HAFS && <CheckIcon color={c.accent} />} onPress={HAFS ? () => setRiwaya('warsh') : undefined} />
+          <Row title={READER.hafs()} end={HAFS && <CheckIcon color={c.accent} />} onPress={HAFS ? undefined : () => setRiwaya('hafs')} last />
+        </Group>
 
-        <Section title={SETTINGS.feedback()}>
-          <Row icon={<CommentIcon color={c.meta} size={20} />} title={SETTINGS.sendFeedback()} end={<Tag label={SETTINGS.soon()} />} quiet last />
-        </Section>
+        <Group title={READER.tafsirs()} note={READER.sourcesSub()}>
+          {sourceRows('tafsir')}
+        </Group>
+        <Group title={READER.translations()}>{sourceRows('translation')}</Group>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  city: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 12 },
-  hijri: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14 },
+  block: { gap: space.sm, paddingVertical: space.sm + 4 },
+  between: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  city: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 4 },
 });

@@ -1,6 +1,6 @@
-// «الأحاديث» (the website's section), in the look of the Home and Adhkar pages: the search in the three
+// «الأحاديث» (the website's section), in the app's plain look (cards and rows, no covers): the search in the three
 // books at the top (in Arabic, without tashkeel), «continue reading» under it, then the three books -
-// Sahih al-Bukhari, Sahih Muslim, an-Nawawi's Forty - as cards with their painting. A book opens its kitabs (/hadith-book); an-Nawawi has one, opened at
+// Sahih al-Bukhari, Sahih Muslim, an-Nawawi's Forty - as rows. A book opens its kitabs (/hadith-book); an-Nawawi has one, opened at
 // once (/hadith-kitab). The bookmark at the top opens the saved hadiths (/hadith-saved).
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -8,12 +8,12 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BookCover } from '@/components/BookCover';
-import { BackIcon, BookmarkIcon, SearchIcon } from '@/components/icons';
+import { BookmarkIcon, SearchIcon } from '@/components/icons';
 import { Note, openBook, openHadith, ReadLangButton } from '@/components/HadithParts';
 import { ScreenHeader } from '@/components/ScreenHeader';
-import { ScreenBackground } from '@/components/Stars';
+import { PrimaryButton } from '@/components/hifdh/Section';
 import { Txt } from '@/components/Txt';
+import { Card, Row } from '@/components/ui';
 import { isEnglish, t } from '@/i18n/i18n';
 import { bookName, lastRead, loadBooks, searchHadiths, type Book, type Found } from '@/lib/hadith';
 import { serif, ui } from '@/theme/fonts';
@@ -56,7 +56,6 @@ export default function Ahadith() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
-      <ScreenBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {/* at the end of the top bar: the hadiths' language, then the saved hadiths */}
       <ScreenHeader
@@ -88,53 +87,20 @@ export default function Ahadith() {
         ) : failed ? (
           <Note text={t('ahOffline')} />
         ) : !books ? (
-          <ActivityIndicator color={c.gold} style={{ marginTop: 30 }} />
+          <ActivityIndicator color={c.accent} style={{ marginTop: 30 }} />
         ) : (
           <View style={{ gap: 12 }}>
-            {/* where the reader was: the green button, as under the painted heads */}
-            {last && (
-              <Pressable onPress={() => openHadith(last.b, last.k, last.n)} style={({ pressed }) => [styles.continue, { backgroundColor: c.on }, pressed && { opacity: 0.8 }]}>
-                <Txt size={15} weight={700} center color={c.onInk} numberOfLines={1}>
-                  {`${t('ahContinue')} · ${bookName(last.b)} ${t('ahNumber', last.n)}`}
-                </Txt>
-              </Pressable>
-            )}
-            {books.map((b) => (
-              <BookCard key={b.id} book={b} />
-            ))}
+            {/* where the reader was: the one filled button */}
+            {last && <PrimaryButton label={`${t('ahContinue')} · ${bookName(last.b)} ${t('ahNumber', last.n)}`} onPress={() => openHadith(last.b, last.k, last.n)} />}
+            <Card style={{ paddingVertical: 4, gap: 0 }}>
+              {books.map((b, i) => (
+                <Row key={b.id} title={t(`ah_${b.id}`)} sub={`${t(`ah_${b.id}_by`)} · ${t('ahHadithCount', b.count)}`} chevron onPress={() => openBook(b.id)} last={i === books.length - 1} />
+              ))}
+            </Card>
           </View>
         )}
       </ScrollView>
     </View>
-  );
-}
-
-// a book as a card (as the Adhkar page's): its vintage leather cover in its colour, its name, the imam,
-// how many hadiths
-function BookCard({ book }: { book: Book }) {
-  const { c } = useTheme();
-  return (
-    <Pressable
-      onPress={() => openBook(book.id)}
-      style={({ pressed }) => [styles.book, { backgroundColor: c.card, boxShadow: `0px 6px 18px ${c.shadow}` }, pressed && { opacity: 0.8 }]}
-    >
-      {/* its old leather cover */}
-      <View style={styles.cover}>
-        <BookCover book={book.id} width={52} />
-      </View>
-      <View style={{ flex: 1, gap: 1 }}>
-        <Txt size={17} weight={700} serif color={c.ink} lineHeight={28}>
-          {t(`ah_${book.id}`)}
-        </Txt>
-        <Txt size={12.5} color={c.meta} numberOfLines={1}>
-          {t(`ah_${book.id}_by`)}
-        </Txt>
-        <Txt size={12} weight={600} color={c.gold}>
-          {t('ahHadithCount', book.count)}
-        </Txt>
-      </View>
-      <BackIcon color={c.meta} size={17} rtl={isEnglish} />
-    </Pressable>
   );
 }
 
@@ -150,9 +116,9 @@ function Results({ results }: { results: { found: Found[]; many: boolean } | 'bu
         <Pressable
           key={`${r.b}-${r.n}`}
           onPress={() => openHadith(r.b, r.k, r.n)}
-          style={({ pressed }) => [styles.result, { backgroundColor: c.card, boxShadow: `0px 4px 14px ${c.shadow}` }, pressed && { opacity: 0.7 }]}
+          style={({ pressed }) => [styles.result, { backgroundColor: c.card, borderColor: c.line }, pressed && { opacity: 0.7 }]}
         >
-          <Txt size={13} weight={700} color={c.gold}>
+          <Txt size={13} weight={700} color={c.accent}>
             {`${bookName(r.b)} · ${t('ahNumber', r.n)}`}
           </Txt>
           <Txt size={15} color={c.text} style={{ fontFamily: serif(400), writingDirection: 'rtl', textAlign: textSide('right') }} lineHeight={28}>
@@ -168,8 +134,5 @@ const styles = StyleSheet.create({
   savedBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 50, borderRadius: 25, borderWidth: 1, paddingHorizontal: 16 },
   input: { flex: 1, fontSize: 15.5, height: '100%' },
-  continue: { height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
-  book: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 22, padding: 12 },
-  cover: {},
-  result: { borderRadius: 18, paddingVertical: 12, paddingHorizontal: 14, gap: 4 },
+  result: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, paddingVertical: 12, paddingHorizontal: 14, gap: 4 },
 });
