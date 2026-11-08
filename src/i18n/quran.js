@@ -27,7 +27,7 @@ export const QURAN = {
   marksComments: () => L('التعليقات', 'Comments', 'Commentaires'),
   stopRow: () => L('موضع القراءة', 'Where I stopped', 'Où je me suis arrêté'),
   // how to put the stop mark (a long press): said once on the page, and always in the Bookmarks list while there is none
-  stopHint: () => L('اضغط مطولاً على آية لتضع تحتها خطاً عند موضع توقفك.', 'Press and hold an ayah to underline where you stopped.', 'Maintenez un verset pour le souligner là où vous vous êtes arrêté.'),
+  stopHint: () => L('اضغط مطولاً على آية لتضع علامة وردك.', 'Press and hold an ayah to mark your wird.', 'Maintenez un verset pour marquer votre wird.'),
   noPages: () => L('اضغط على رمز العلامة أعلى الصفحة لتحفظ مكانها هنا.', 'Tap the bookmark at the top of a page to keep its place here.', 'Touchez le signet en haut d’une page pour garder sa place ici.'),
   noHighlights: () => L('اضغط على آية ثم اختر لوناً لتظليلها.', 'Tap an ayah, then pick a colour to highlight it.', 'Touchez un verset, puis choisissez une couleur pour le surligner.'),
   noComments: () => L('اضغط على آية ثم «أضف تعليقاً».', 'Tap an ayah, then «Add a comment».', 'Touchez un verset, puis « Ajouter un commentaire ».'),
