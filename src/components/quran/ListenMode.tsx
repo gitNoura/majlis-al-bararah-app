@@ -144,8 +144,6 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
     setOpen(false);
     begin(sel ?? { from: base, to: base });
   };
-  // from the ayah's menu: that ayah, alone
-  const playAyah = (su: number, a: number) => begin({ from: `${su}:${a}`, to: `${su}:${a}` });
 
   let title = sel ? labelOf(sel.from, sel.to) : HIF.lsNothingChosen();
   let sub = sel ? (anchor ? `${HIF.lsAyatCount(keys.length)} · ${HIF.lsPickMore()}` : HIF.lsAyatCount(keys.length)) : HIF.lsPickShort();
@@ -253,7 +251,7 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
     </Sheet>
   );
 
-  return { bar, sheet, marks, tap, playAyah, playSurahNo, clear, choose: setRange };
+  return { bar, sheet, marks, tap, playSurahNo, clear, choose: setRange };
 }
 
 // ---------- small parts ----------
@@ -263,7 +261,7 @@ function Pill({ children }: { children: ReactNode }) {
   return <View style={[styles.pill, { backgroundColor: c.card, borderColor: c.line }]}>{children}</View>;
 }
 
-function Btn({ label, onPress, children, disabled, main, wide }: { label: string; onPress: () => void; children: ReactNode; disabled?: boolean; main?: boolean; wide?: boolean }) {
+function Btn({ label, onPress, children, disabled, main }: { label: string; onPress: () => void; children: ReactNode; disabled?: boolean; main?: boolean }) {
   const { c } = useTheme();
   const size = main ? 50 : 38;
   return (
@@ -273,7 +271,7 @@ function Btn({ label, onPress, children, disabled, main, wide }: { label: string
       accessibilityRole="button"
       accessibilityLabel={label}
       style={[
-        wide ? styles.wideBtn : { width: size, height: size, borderRadius: size / 2 },
+        { width: size, height: size, borderRadius: size / 2 },
         styles.btn,
         { backgroundColor: main ? c.on : c.surface2, opacity: disabled ? 0.35 : 1 },
       ]}
@@ -462,7 +460,6 @@ const styles = StyleSheet.create({
   pill: { alignSelf: 'stretch', maxWidth: 520, height: LISTEN_BAR_H, borderRadius: LISTEN_BAR_H / 2, borderWidth: StyleSheet.hairlineWidth, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: space.sm, boxShadow: '0px 8px 22px rgba(20, 50, 38, 0.14)' },
   summary: { flex: 1, minWidth: 0, paddingVertical: 6, paddingHorizontal: 10, gap: 1 },
   btn: { alignItems: 'center', justifyContent: 'center' },
-  wideBtn: { height: 38, paddingHorizontal: 12, borderRadius: 19, flexDirection: 'row', gap: 6 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, alignItems: 'center' },
   chip: { minHeight: 40, minWidth: 44, paddingHorizontal: 14, borderRadius: radius.chip, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   other: { minWidth: 96, height: 40, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 12, textAlign: 'center', fontSize: 14, fontFamily: ui(600) },

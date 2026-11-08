@@ -1,6 +1,6 @@
 // The icons of the ayah menu and of the page's bookmark: one family, 24 px, a 1.8 line with round ends, so they read
-// as one set (tafsir: an open book; comment: a speech bubble with lines; continue from here: a flag; highlight: a marker
-// over its colour; bookmark: a ribbon, filled when the page carries one).
+// as one set (tafsir: an open book; comment: a speech bubble with lines; where I stopped: an underlined letter; highlight:
+// a marker over its colour; bookmark: a ribbon, filled when the page carries one).
 import type { ReactNode } from 'react';
 import Svg, { Path } from 'react-native-svg';
 
@@ -26,9 +26,9 @@ export const BubbleIcon = ({ color, size }: Props) => (
   </Base>
 );
 
-export const FlagIcon = ({ color, size }: Props) => (
+export const UnderlineIcon = ({ color, size }: Props) => (
   <Base color={color} size={size}>
-    <Path d="M6 21V4.5M6 5h11.5l-2.4 3.8 2.4 3.8H6" />
+    <Path d="M7 4.5v6.5a5 5 0 0010 0V4.5M5 20h14" />
   </Base>
 );
 

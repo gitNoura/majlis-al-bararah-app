@@ -137,7 +137,6 @@ const STRINGS = {
   // The daily wird (src/wird.js)
   wirdDone: ['تقبّل الله وردك اليوم', 'May Allah accept your wird today'],
   wirdKhatmas: [(n) => `${n} ختمة`, (n) => `${n} khatma${n > 1 ? 's' : ''}`],
-  wirdNextStep: [(s, a) => `خطوتك التالية غداً: ${s} · الآية ${a}`, (s, a) => `Your next step tomorrow: ${s} · ayah ${a}`],
   wirdKhatmaCongrats: [
     (n) => (n > 1 ? `مبارك! أتممت ختمتك رقم ${n}` : 'مبارك! أتممت ختم القرآن الكريم'),
     (n) => (n > 1 ? `Mabrook! You completed khatma number ${n}` : 'Mabrook! You have completed the whole Quran'),

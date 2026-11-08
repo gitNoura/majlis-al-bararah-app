@@ -179,7 +179,10 @@ export function togglePageMark(p: number): boolean {
     changed();
     return false;
   }
-  const first = ayatOn(p)[0] as { s: number; a: number } | undefined;
+  // the page's first ayah that BEGINS on it: one that runs over from the page before belongs to that page, and a mark
+  // kept under it would show on the page before
+  const list = ayatOn(p) as { s: number; a: number }[];
+  const first = list.find((e) => pageOf(e.s, e.a) === p) ?? list[0];
   if (!first) return false;
   const raw = `${first.s}:${first.a}`;
   pageMarks.push({ key: storedKeys(raw)[0] ?? raw, added: Date.now() });
@@ -191,7 +194,7 @@ export function togglePageMark(p: number): boolean {
 // the marked pages, in mushaf order
 export const pageMarkList = (): number[] => [...new Set(pageMarks.map(pageOfMark).filter((p): p is number => p != null))].sort((a, b) => a - b);
 
-// ---------- the lists (for «My marks») ----------
+// ---------- the lists (the bar's Bookmarks, Highlights and Comments) ----------
 
 export type Listed = { s: number; a: number; page: number | null; text: string; color: string };
 

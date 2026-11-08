@@ -10,11 +10,12 @@
 //            page): on the left of odd pages, on the right of even ones; a tap puts it on or off
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
 //            (a long press on an ayah marks it; another long press on it takes it off), shown as a fine line under that ayah
-//   full screen   a tap on the page's empty paper (the margins around the text) toggles it: the header, the tab bar and the
+//   full screen   (Read only) a tap on the page's empty paper (the margins around the text) toggles it: the header, the tab bar and the
 //            status bar go and the page grows to fill the screen, on a background of the page's own paper (cut to its
 //            text, as the website's full screen). Another tap on the empty paper brings them back, and so does the exit
 //            button at the top corner (under the clock), next to the day / night switch, and the phone's back button
-//   a long press on an ayah marks it (its underline; again takes it off); a tap on one opens its menu
+//   a long press on an ayah marks it (its underline; again takes it off); a tap on one opens its menu. The long press is
+//            said once on the page the first time, and always in the Bookmarks list while there is no mark
 // The page itself is src/components/PageCurl.tsx.
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
@@ -45,7 +46,7 @@ import { markToday } from '@/lib/activity';
 import { ayatOn, pageOf, stepAyah } from '@/lib/boxes';
 import { FULL_SHAPE, PAGE_SHAPE } from '@/lib/crop';
 import { hlColor, noteColor, togglePageMark, useMarks } from '@/lib/marks';
-import { clampPage, savedPage, savedPin, savePage } from '@/lib/position';
+import { clampPage, markStopHintSeen, savedPage, savedPin, savePage, stopHintSeen } from '@/lib/position';
 import { TOTAL_PAGES } from '@/lib/quran';
 import { pageUrl } from '@/lib/remote';
 import { trackPlace } from '@/lib/riwaya';
@@ -163,12 +164,25 @@ function Quran() {
   );
 
   // a short message over the page; it clears itself
-  const say = (text: string) => setToast(text);
+  const toastMs = useRef(1800);
+  const say = (text: string, ms = 1800) => {
+    toastMs.current = ms;
+    setToast(text);
+  };
   useEffect(() => {
     if (!toast) return;
-    const id = setTimeout(() => setToast(''), 1800);
+    const id = setTimeout(() => setToast(''), toastMs.current);
     return () => clearTimeout(id);
   }, [toast]);
+  // the first time the Quran is opened, and while no stop mark has been put: how to put one (once)
+  useEffect(() => {
+    if (stopHintSeen() || savedPin()) return;
+    const id = setTimeout(() => {
+      say(QURAN.stopHint(), 5000);
+      markStopHintSeen();
+    }, 1200);
+    return () => clearTimeout(id);
+  }, []);
 
   // The marker moves: kept at once. A turn forward by one page counts the page left behind as read today; a jump
   // (Find, the tafsir sheet's next ayah) never does.
@@ -351,7 +365,9 @@ function Quran() {
             onAyah={(s, a, x, y) => (mode === 'listen' ? listen.tap(s, a) : mode === 'recite' ? recite.tap(s, a) : setMenu({ s, a, x, y: y + top }))}
             onPin={(s, a) => setNote({ s, a })}
             onHold={mode === 'read' ? markAyah : undefined}
-            onEmptyTap={() => setHidden((h) => !h)}
+            onEmptyTap={() => {
+              if (mode === 'read') setHidden((h) => !h); // Listen and Recite keep their bar: no full screen there
+            }}
             onZoomed={() => {}}
             ribbon={ribbon}
             bookmarked={here.bookmarked}

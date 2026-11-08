@@ -66,7 +66,6 @@ export const FR = {
   // The daily wird
   wirdDone: 'Qu’Allah accepte votre wird d’aujourd’hui',
   wirdKhatmas: (n) => `${n} khatma${n > 1 ? 's' : ''}`,
-  wirdNextStep: (s, a) => `Votre prochaine étape demain : ${s} · verset ${a}`,
   wirdKhatmaCongrats: (n) =>
     n > 1 ? `Mabrouk ! Vous avez terminé votre khatma numéro ${n}` : 'Mabrouk ! Vous avez terminé le Coran en entier',
   wirdKhatmaAgain:

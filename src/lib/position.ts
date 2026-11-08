@@ -18,5 +18,9 @@ export function savedPage(): number {
 
 export const savePage = (page: number) => writeJSON(KEY, clampPage(page));
 
+// the hint on how to put the stop mark (a long press) is said on the page once, the first time the Quran is opened
+export const stopHintSeen = (): boolean => readJSON('stopHintSeen', false) === true;
+export const markStopHintSeen = () => writeJSON('stopHintSeen', true);
+
 // the pin: { page, shown } (shown: the ayah as numbered in the narration read, "2:255"), or null
 export const savedPin = wirdStop;

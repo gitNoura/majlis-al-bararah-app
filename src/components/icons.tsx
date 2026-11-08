@@ -153,14 +153,6 @@ export const ZoomOutIcon = (p: IconProps) => (
     <Path d="M16.5 16.5L21 21M8 11h6" />
   </Line>
 );
-// «My marks»: a pad of sticky notes - the top one with its lines, another peeking out behind it
-export const MarksIcon = (p: IconProps) => (
-  <Line {...p}>
-    <Path d="M20.3 9.5v9.2a2.8 2.8 0 0 1-2.8 2.8H9.5" />
-    <Path d="M7 5.5h8.5a2.2 2.2 0 0 1 2.2 2.2v8.6a2.2 2.2 0 0 1-2.2 2.2H7a2.2 2.2 0 0 1-2.2-2.2V7.7A2.2 2.2 0 0 1 7 5.5z" />
-    <Path d="M8 11h7M8 14.5h4.4" />
-  </Line>
-);
 export const ExpandIcon = (p: IconProps) => (
   <Line {...p}>
     <Path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />

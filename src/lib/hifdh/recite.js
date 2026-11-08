@@ -1,6 +1,6 @@
 // «Recite» (تسميع): the page is covered and shows itself back one ayah at a time (play) or one word at a time
 // (the bulb), as the reader says it from memory (the way Murajaa's Tasmee does); the eye hides or shows
-// everything. This file is the logic; the screen is components/hifdh/ReciteScreen.tsx.
+// everything. This file is the logic; the screen is components/quran/ReciteMode.tsx.
 //
 // The mushaf is a picture, and the app only knows where each ayah is (src/lib/boxes.js: one box per line the
 // ayah touches). A hidden ayah is covered whole, except its number circle, so no word can be missed. Only

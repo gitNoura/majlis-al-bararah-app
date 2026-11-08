@@ -5,7 +5,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { CloseIcon } from '@/components/icons';
-import { FlagIcon } from '@/components/quran/MenuIcons';
+import { UnderlineIcon } from '@/components/quran/MenuIcons';
 import { placeOf } from '@/components/quran/QuranHeader';
 import { Txt } from '@/components/Txt';
 import { Sheet } from '@/components/ui';
@@ -65,7 +65,17 @@ export function MarksSheet({ open, tab, onClose, onGo, pin }: { open: boolean; t
       <View style={styles.list}>
         {tab === 'pages' && (
           <>
-            {pin && ps > 0 && <Item lead={<FlagIcon color={c.accent} size={22} />} title={QURAN.stopRow()} sub={ayahTitle(ps, pa)} onPress={() => go(pin.page)} />}
+            {pin && ps > 0 ? (
+              <Item lead={<UnderlineIcon color={c.accent} size={22} />} title={QURAN.stopRow()} sub={ayahTitle(ps, pa)} onPress={() => go(pin.page)} />
+            ) : (
+              // no stop mark yet: how to put one
+              <View style={[styles.hint, { backgroundColor: c.surface2 }]}>
+                <UnderlineIcon color={c.accent} size={22} />
+                <Txt size={13.5} color={c.meta} style={{ flex: 1 }}>
+                  {QURAN.stopHint()}
+                </Txt>
+              </View>
+            )}
             {pages.map((p) => (
               <Item
                 key={p}
@@ -84,7 +94,7 @@ export function MarksSheet({ open, tab, onClose, onGo, pin }: { open: boolean; t
                 }
               />
             ))}
-            {!pin && !pages.length && empty(QURAN.noPages())}
+            {!pages.length && empty(QURAN.noPages())}
           </>
         )}
         {tab === 'highlights' && (highlights.length ? ayat(highlights, (id) => hlColor(id).dot, 1) : empty(QURAN.noHighlights()))}
@@ -100,5 +110,6 @@ const styles = StyleSheet.create({
   lead: { width: 28, alignItems: 'center', justifyContent: 'center' },
   text: { flex: 1, gap: 2 },
   dot: { width: 16, height: 16, borderRadius: 8 },
+  hint: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: space.md - 2, borderRadius: 16 },
   remove: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
 });
