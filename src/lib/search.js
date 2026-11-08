@@ -11,7 +11,7 @@
 //   3. the same without alif: the dagger alif of العَٰلَمِينَ and a written alif compare equal
 //   4. consonants only (no alif, waw, ya), when 4+ remain and nothing else was found:
 //      الصلاة finds اَ۬لصَّلَوٰةَ
-// Typing "48:11" goes straight to an ayah, and «آية الكرسي» to Ayat al-Kursi.
+// Typing "48:11" goes straight to an ayah.
 import { HAFS } from './riwaya.js';
 import { fetchData } from './remote.js';
 
@@ -108,10 +108,6 @@ export function search(query) {
     const entry = entries.find((e) => e.s === +numbers[1] && e.a === +numbers[2]);
     return { kind: 'ayah', matches: entry ? [{ entry, ranges: [] }] : [], missing: !entry };
   }
-  // Ayat al-Kursi by name
-  const kursi = HAFS ? '2:255' : '2:254'; // Hafs numbering is one ahead here
-  const named = { 'اية الكرسي': kursi, 'ايه الكرسي': kursi }[reduce(query, 0).text.replace(/^ال/, '')];
-  if (named) return { kind: 'text', matches: [{ entry: entries.find((e) => `${e.s}:${e.a}` === named), ranges: [] }] };
   return { kind: 'text', matches: find(query) };
 }
 
@@ -174,4 +170,4 @@ export function pieces(entry, ranges) {
   return out;
 }
 
-export const EXAMPLES = ['الرحمن الرحيم', 'يومنون بالغيب', 'آية الكرسي', '48:11', '112:1'];
+export const EXAMPLES = ['الرحمن الرحيم', 'يومنون بالغيب', '48:11', '112:1'];

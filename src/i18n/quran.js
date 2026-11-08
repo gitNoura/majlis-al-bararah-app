@@ -12,11 +12,12 @@ export const QURAN = {
   search: () => L('بحث', 'Search', 'Rechercher'),
   findField: () => L('اسم سورة، كلمة، أو رقم مثل 2:255', 'Surah, words, or a number like 2:255', 'Sourate, mots, ou numéro comme 2:255'),
   ayatFound: () => L('الآيات', 'Ayat', 'Versets'),
+  seeMore: () => L('عرض المزيد', 'See more', 'Voir plus'),
   noResults: () => L('لا نتائج', 'No results', 'Aucun résultat'),
   loadingSearch: () => L('جارٍ تحميل نص القرآن للبحث…', 'Loading the text for search…', 'Chargement du texte pour la recherche…'),
   searchOffline: () => L('البحث في النص يحتاج إلى الاتصال بالإنترنت.', 'Searching the text needs a connection.', 'La recherche dans le texte demande une connexion.'),
   // the mark a long press puts on an ayah
-  pinned: () => L('سنكمل من هنا', 'Marked', 'Repère placé'),
+pinned: () => L('سنكمل من هنا', 'We’ll continue from here', 'Nous reprendrons d’ici'),
   unmarked: () => L('أُزيل موضع القراءة', 'Mark removed', 'Repère retiré'),
   // the page's bookmark (the ribbon on the page) and «My marks»
   unmarkPage: () => L('إزالة علامة الصفحة', 'Remove the page bookmark', 'Retirer le signet'),

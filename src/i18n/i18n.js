@@ -78,8 +78,8 @@ const STRINGS = {
   ayahTitle: [(name, a) => `سورة ${name} • الآية ${a}`, (name, a) => `${name} • Ayah ${a}`],
   tafsir: ['التفسير', 'Tafsir'],
   source: [(name) => `المصدر: ${name}`, (name) => `Source: ${name}`],
-  noTafsir: ['لم يُختر أي تفسير. اختر من زر «التفاسير» في الأعلى.', 'No tafsir chosen. Choose one with «Tafsirs» above.'],
-  noTranslation: ['لم تُختر أي ترجمة. اختر من زر «الترجمات» في الأعلى.', 'No translation chosen. Choose one with «Translations» above.'],
+  noTafsir: ['اختر تفسيراً من الإعدادات.', 'Choose a tafsir from settings.'],
+  noTranslation: ['اختر ترجمة من الإعدادات.', 'Choose a translation from settings.'],
   tafsirsBtn: ['التفاسير', 'Tafsirs'],
   translationsBtn: ['الترجمات', 'Translations'],
   mushafWarsh: ['مصحف ورش عن نافع', 'Mushaf of Warsh from Nafi'],
@@ -532,7 +532,6 @@ const STRINGS = {
     'اكتب كلمة أو جزءاً من آية، بدون تشكيل. أو رقم السورة والآية مثل <b dir="ltr">48:11</b>.',
     'Type a word or part of an ayah in Arabic, without tashkeel. Or a surah and ayah number like <b>48:11</b>.',
   ],
-  noSuchAyah: ['لا توجد آية بهذا الرقم في رواية ورش', 'There is no ayah with this number in the Warsh narration'],
   firstShown: [
     (n) => ` — تُعرض أول ${n}، أضف كلمة لتضييق البحث`,
     (n) => ` — showing the first ${n}; add a word to narrow the search`,

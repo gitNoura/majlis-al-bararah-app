@@ -18,8 +18,8 @@ export const FR = {
   ayahTitle: (name, a) => `${name} • Verset ${a}`,
   tafsir: 'Tafsir',
   source: (name) => `Source : ${name}`,
-  noTafsir: 'Aucun tafsir choisi. Choisissez-en un avec « Tafsirs » ci-dessus.',
-  noTranslation: 'Aucune traduction choisie. Choisissez-en une avec « Traductions » ci-dessus.',
+  noTafsir: 'Choisissez un tafsir dans les réglages.',
+  noTranslation: 'Choisissez une traduction dans les réglages.',
   tafsirsBtn: 'Tafsirs',
   translationsBtn: 'Traductions',
   mushafWarsh: 'Mushaf Warsh d’après Nafi',
@@ -410,7 +410,6 @@ export const FR = {
   ayahN: (a) => `Verset ${a}`,
   searchHelp:
     'Tapez un mot ou une partie d’un verset en arabe, sans tashkil. Ou un numéro de sourate et de verset comme <b>48:11</b>.',
-  noSuchAyah: 'Aucun verset ne porte ce numéro dans la lecture de Warsh',
   firstShown: (n) => ` — les ${n} premiers sont affichés ; ajoutez un mot pour affiner`,
   searchNone: 'Aucun résultat. Essayez un mot plus court, ou sans « ال ».',
   resultCount: (n) => (n === 1 ? '1 résultat' : `${n} résultats`),

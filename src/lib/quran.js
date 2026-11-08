@@ -2,7 +2,6 @@
 // Surah pages and Meccan/Medinan come from the mushaf's own index (PDF page 609).
 // Hizb pages were read from the "حزب N" label at the top of each page.
 
-import { HAFS } from './riwaya.js';
 import { isFrench } from '../i18n/i18n.js';
 import { SURAH_MEANINGS_FR } from '../i18n/i18n-fr.js';
 
@@ -165,7 +164,7 @@ export const SURAHS = [
   meaning: isFrench ? SURAH_MEANINGS_FR[i] : ENGLISH_NAMES[i][1], // The Opening / L’Ouverture
 }));
 
-// Page on which each of the 60 ahzab starts. Hizb 8 is on page 72 in this Warsh mushaf (71 in Hafs).
+// Page on which each of the 60 ahzab starts (the same in the Warsh and Hafs mushafs).
 const HIZB_PAGES = [
   1, 11, 22, 32, 42, 51, 62, 72, 82, 92, 102, 111, 121, 132, 142, 151, 162, 173, 182, 192,
   201, 212, 222, 231, 242, 252, 262, 272, 282, 292, 302, 312, 322, 332, 342, 352, 362, 371, 382, 392,
@@ -183,8 +182,6 @@ const HIZB_STARTS = [
   [29, 46], [31, 21], [33, 31], [34, 24], [36, 27], [37, 145], [39, 31], [40, 41], [41, 46], [43, 23],
   [46, 1], [48, 18], [51, 31], [55, 1], [58, 1], [62, 1], [67, 1], [72, 1], [78, 1], [87, 1],
 ];
-
-if (HAFS) HIZB_PAGES[7] = 71; // hizb 8 starts one page earlier in Hafs
 
 export const AHZAB = HIZB_PAGES.map((page, i) => ({
   number: i + 1,

@@ -25,7 +25,7 @@ type Entry = { s: number; a: number; text: string };
 type Match = { entry: Entry; ranges: number[][] };
 type Piece = { text: string; mark: boolean };
 
-const SHOWN = 30; // the most ayat listed (the panel draws them all at once)
+const SHOWN = 30; // the ayat listed at first, and each time «See more» is pressed (the panel draws them all at once)
 
 type Props = { open: boolean; onClose: () => void; onGo: (page: number, ayah: { s: number; a: number } | null) => void };
 
@@ -33,6 +33,7 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
   const { c, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
+  const [limit, setLimit] = useState(SHOWN); // how many ayat are listed now
   const [state, setState] = useState<'loading' | 'ready' | 'failed'>('loading');
   const [keyboard, setKeyboard] = useState(0); // the keyboard's height
   const [slide] = useState(() => new Animated.Value(0));
@@ -56,7 +57,8 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
   const q = query.trim();
   const rows = q ? filterItems('surahs', q) : [];
   const found = q && state === 'ready' ? search(q) : null;
-  const matches: Match[] = found && found.kind !== 'help' ? found.matches.slice(0, SHOWN) : [];
+  const all: Match[] = found && found.kind !== 'help' ? found.matches : [];
+  const matches = all.slice(0, limit);
 
   const go = (target: number, ayah: { s: number; a: number } | null) => {
     onClose();
@@ -85,7 +87,10 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
               <SearchIcon color={c.meta} size={20} />
               <TextInput
                 value={query}
-                onChangeText={setQuery}
+                onChangeText={(text) => {
+                  setQuery(text);
+                  setLimit(SHOWN);
+                }}
                 placeholder={QURAN.findField()}
                 placeholderTextColor={c.meta}
                 autoFocus
@@ -95,7 +100,14 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
                 style={[styles.input, { color: c.ink, fontFamily: ui(500), textAlign: isEnglish && !/[؀-ۿ]/.test(query) ? 'left' : 'right' }]}
               />
               {!!query && (
-                <Pressable onPress={() => setQuery('')} hitSlop={10} accessibilityLabel={QURAN.search()}>
+                <Pressable
+                  onPress={() => {
+                    setQuery('');
+                    setLimit(SHOWN);
+                  }}
+                  hitSlop={10}
+                  accessibilityLabel={QURAN.search()}
+                >
                   <CloseIcon color={c.meta} size={18} />
                 </Pressable>
               )}
@@ -138,11 +150,6 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
                   {QURAN.searchOffline()}
                 </Txt>
               )}
-              {found?.kind === 'ayah' && found.missing && (
-                <Txt size={13} color={c.meta}>
-                  {t('noSuchAyah')}
-                </Txt>
-              )}
               {!!matches.length && (
                 <Txt size={13} weight={700} color={c.meta} style={{ marginTop: space.sm }}>
                   {QURAN.ayatFound()}
@@ -151,7 +158,18 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
               {matches.map((m) => (
                 <AyahResult key={`${m.entry.s}:${m.entry.a}`} match={m} dark={isDark} onPress={() => goAyah(m)} />
               ))}
-              {state === 'ready' && !rows.length && !matches.length && !(found?.kind === 'ayah' && found.missing) && (
+              {all.length > matches.length && (
+                <Pressable
+                  onPress={() => setLimit((n) => n + SHOWN)}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.more, { backgroundColor: c.surface2, borderColor: c.line }, pressed && { opacity: 0.7 }]}
+                >
+                  <Txt size={14} weight={700} color={c.ink}>
+                    {QURAN.seeMore()}
+                  </Txt>
+                </Pressable>
+              )}
+              {state === 'ready' && !rows.length && !matches.length && (
                 <Txt size={14} center color={c.meta}>
                   {QURAN.noResults()}
                 </Txt>
@@ -206,6 +224,7 @@ const styles = StyleSheet.create({
   round: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   list: { gap: space.sm, paddingBottom: space.sm },
   middle: { alignItems: 'center', gap: space.sm, marginVertical: space.md },
+  more: { alignSelf: 'center', paddingHorizontal: space.lg, paddingVertical: 12, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth },
   result: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: space.sm },
   resultHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   ayah: { fontSize: 20, lineHeight: 36, writingDirection: 'rtl' },

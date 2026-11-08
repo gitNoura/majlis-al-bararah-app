@@ -2,7 +2,7 @@
 //   row    at the start the back button (to Home) and the index (the fahras); at the end search and the drop-down of
 //          the page's modes (Read, Listen, Recite). the marks and settings are in Read's bottom bar
 //          (ReadButtons.tsx); the page's bookmark is a ribbon on the page itself (PageCurl.tsx)
-//   name   the surah(s) and the juz, just above the page (the page's own number is printed on the page)
+//   name   the surah(s), the hizb and the juz, just above the page (the page's own number is printed on the page)
 // Dressed like Home (src/theme/home.ts): round paper buttons with a soft shadow.
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -14,7 +14,7 @@ import { Txt } from '@/components/Txt';
 import { isEnglish, surahName, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
 import { surahsOn } from '@/lib/boxes';
-import { juzForPage, SURAHS } from '@/lib/quran';
+import { hizbForPage, juzForPage, SURAHS } from '@/lib/quran';
 import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
@@ -28,7 +28,7 @@ export function placeOf(page: number) {
   const on: number[] = surahsOn(page).length ? surahsOn(page) : [1];
   const names = on.map((n) => surahName(SURAHS[n - 1]));
   const surahs = names.length > 2 ? `${names[0]} – ${names[names.length - 1]}` : names.join(' – ');
-  return { surahs, extra: t('juz', juzForPage(page).number) };
+  return { surahs, extra: t('hizbJuz', hizbForPage(page).number, juzForPage(page).number) };
 }
 
 function ChevronDown({ color }: { color: string }) {
