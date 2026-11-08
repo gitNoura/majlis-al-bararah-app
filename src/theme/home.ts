@@ -16,6 +16,9 @@ export type HomePalette = {
   forestSoft: string; // quiet words on the hero
   forestLine: string; // the hero's inset frame
   lime: string; // the cream button and ring on the hero
+  gold: string; // the light yellow accent on the hero (chip words, frame, rule, the hadith's source, the ring)
+  goldSoft: string; // its faint tint (the chip, the hadith's panel)
+  goldLine: string; // its hairline (the inset frame, the rule)
   limeInk: string; // words on that button
   tile: string; // the streak tile and the done pills: a soft tint of the green
   tileInk: string; // words on it
@@ -39,6 +42,9 @@ const light: HomePalette = {
   forestLine: 'rgba(255, 253, 245, 0.22)',
   lime: '#fffdf5',
   limeInk: '#173f32',
+  gold: '#f4e6a6',
+  goldSoft: 'rgba(244, 230, 166, 0.14)',
+  goldLine: 'rgba(244, 230, 166, 0.34)',
   tile: '#dce9df',
   tileInk: '#173f32',
   mint: '#eff4f2',
@@ -61,6 +67,9 @@ const dark: HomePalette = {
   forestLine: 'rgba(255, 253, 245, 0.16)',
   lime: '#fffdf5',
   limeInk: '#173f32',
+  gold: '#f1e29b',
+  goldSoft: 'rgba(241, 226, 155, 0.13)',
+  goldLine: 'rgba(241, 226, 155, 0.32)',
   tile: '#27382f',
   tileInk: '#d8eadf',
   mint: '#28362f',

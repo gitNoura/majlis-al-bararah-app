@@ -11,7 +11,7 @@ import { Txt } from '@/components/Txt';
 import { Sheet } from '@/components/ui';
 import { L, surahTitle, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
-import { highlightList, hlColor, noteColor, noteList, pageMarkList, togglePageMark, useMarks, type Listed } from '@/lib/marks';
+import { deleteNote, highlightList, hlColor, noteColor, noteList, pageMarkList, removeHighlight, togglePageMark, useMarks, type Listed } from '@/lib/marks';
 import { SURAHS } from '@/lib/quran';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
@@ -47,8 +47,23 @@ export function MarksSheet({ open, tab, onClose, onGo, pin }: { open: boolean; t
 
   const go = (page: number | null) => page != null && onGo(page);
   const dot = (color: string) => <View style={[styles.dot, { backgroundColor: color }]} />;
-  const ayat = (list: Listed[], colorOf: (id: string) => string, lines: number) =>
-    list.map((x) => <Item key={`${x.s}:${x.a}`} lead={dot(colorOf(x.color))} title={ayahTitle(x.s, x.a)} sub={x.text} lines={lines} onPress={() => go(x.page)} />);
+  // an ayah's row (a highlight or a comment): a tap goes to its page, the ✕ at its end removes the mark
+  const ayat = (list: Listed[], colorOf: (id: string) => string, lines: number, remove: (key: string) => void, removeLabel: string) =>
+    list.map((x) => (
+      <Item
+        key={`${x.s}:${x.a}`}
+        lead={dot(colorOf(x.color))}
+        title={ayahTitle(x.s, x.a)}
+        sub={x.text}
+        lines={lines}
+        onPress={() => go(x.page)}
+        end={
+          <Pressable onPress={() => remove(`${x.s}:${x.a}`)} hitSlop={10} accessibilityRole="button" accessibilityLabel={removeLabel} style={styles.remove}>
+            <CloseIcon color={c.meta} size={16} />
+          </Pressable>
+        }
+      />
+    ));
   const empty = (text: string) => (
     <Txt size={14} center color={c.meta} style={{ paddingVertical: space.lg }}>
       {text}
@@ -97,8 +112,8 @@ export function MarksSheet({ open, tab, onClose, onGo, pin }: { open: boolean; t
             {!pages.length && empty(QURAN.noPages())}
           </>
         )}
-        {tab === 'highlights' && (highlights.length ? ayat(highlights, (id) => hlColor(id).dot, 1) : empty(QURAN.noHighlights()))}
-        {tab === 'comments' && (comments.length ? ayat(comments, (id) => noteColor(id).dot, 2) : empty(QURAN.noComments()))}
+        {tab === 'highlights' && (highlights.length ? ayat(highlights, (id) => hlColor(id).dot, 1, removeHighlight, QURAN.removeHighlight()) : empty(QURAN.noHighlights()))}
+        {tab === 'comments' && (comments.length ? ayat(comments, (id) => noteColor(id).dot, 2, deleteNote, QURAN.removeComment()) : empty(QURAN.noComments()))}
       </View>
     </Sheet>
   );

@@ -31,6 +31,12 @@ export const HOME = {
   back: () => L('رجوع', 'Back', 'Retour'),
   // the wird card's hadith («read and rise»: HOME.hadith) and its short chain, on two lines: who told it,
   // and where it is recorded
+  heroSource: () =>
+    L(
+      'عن عبد الله بن عمرو رضي الله عنهما\nرواه أبو داود والترمذي',
+      'Narrated by Abdullah ibn Amr\nAbu Dawud and al-Tirmidhi',
+      'Rapporté par Abdallah ibn Amr\nAbou Daoud et at-Tirmidhi',
+    ),
   // today's five prayers (the green box)
   // the bar along the bottom
   tabHome: () => L('الرئيسية', 'Home', 'Accueil'),

@@ -16,6 +16,8 @@ import { prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard'
 import { locate } from '@/lib/prayer';
 import { space } from '@/theme/tokens';
 
+const RADIUS = 22;
+
 export function PrayerCard() {
   const [view, setView] = useState<PrayerView>(prayerView);
   const [asking, setAsking] = useState(false);
@@ -52,8 +54,13 @@ export function PrayerCard() {
   const phase = view?.phase ?? skyByClock();
   const sky = SKIES[phase]; // the card wears the sky of the moment (as in the earlier version)
   return (
-    <LinearGradient colors={sky.sky} style={styles.card}>
-      <PrayerSky phase={phase} sun={view?.sun ?? 0.5} />
+    // the rounded clip is on the OUTER view and on the sky's own layer: the animated stars and clouds (moving layers)
+    // are not cut by the gradient view's own corners on every phone, which showed the card square
+    <View style={styles.card}>
+      <LinearGradient colors={sky.sky} style={StyleSheet.absoluteFill} />
+      <View style={styles.skyClip} pointerEvents="none">
+        <PrayerSky phase={phase} sun={view?.sun ?? 0.5} />
+      </View>
       {view ? (
         <>
           <View style={styles.head}>
@@ -107,12 +114,13 @@ export function PrayerCard() {
         </>
       )}
       <PlaceSheet open={asking} busy={busy} failed={failed} onClose={() => setAsking(false)} onLocate={findPlace} onChooseCity={chooseCity} />
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 20, padding: space.md, gap: 10, overflow: 'hidden', boxShadow: '0px 8px 20px rgba(20, 50, 38, 0.16)' },
+  card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: space.md, gap: 10, overflow: 'hidden', boxShadow: '0px 8px 20px rgba(20, 50, 38, 0.16)' },
+  skyClip: { ...StyleSheet.absoluteFillObject, borderRadius: RADIUS, borderCurve: 'continuous', overflow: 'hidden' },
   buttons: { flexDirection: 'row', gap: space.sm },
   btn: { flex: 1, minHeight: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md },
   head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },

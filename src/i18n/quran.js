@@ -20,6 +20,8 @@ export const QURAN = {
   unmarked: () => L('أُزيل موضع القراءة', 'Mark removed', 'Repère retiré'),
   // the page's bookmark (the ribbon on the page) and «My marks»
   unmarkPage: () => L('إزالة علامة الصفحة', 'Remove the page bookmark', 'Retirer le signet'),
+  removeHighlight: () => L('إزالة التظليل', 'Remove the highlight', 'Retirer le surlignage'),
+  removeComment: () => L('حذف التعليق', 'Delete the comment', 'Supprimer le commentaire'),
   pageMarked: () => L('وُضعت علامة في هذه الصفحة', 'Page bookmarked', 'Page marquée'),
   pageUnmarked: () => L('أُزيلت علامة الصفحة', 'Page bookmark removed', 'Signet retiré'),
   marksPages: () => L('العلامات', 'Bookmarks', 'Signets'),

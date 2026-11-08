@@ -33,11 +33,11 @@ export function ReadingCard() {
   return (
     <View style={[styles.card, { backgroundColor: h.forest, boxShadow: `0px 14px 28px ${h.shadow}` }]}>
       {/* a thin inset frame, like a mushaf page */}
-      <View pointerEvents="none" style={[styles.frame, { borderColor: h.forestLine }]} />
+      <View pointerEvents="none" style={[styles.frame, { borderColor: h.goldLine }]} />
       <View style={styles.top}>
         <View style={{ flex: 1, gap: 4 }}>
-          <View style={[styles.chip, { backgroundColor: 'rgba(244,246,236,0.12)' }]}>
-            <Txt size={12} weight={700} color={h.forestInk}>
+          <View style={[styles.chip, { backgroundColor: h.goldSoft }]}>
+            <Txt size={12} weight={700} color={h.gold}>
               {DASH.reading()}
             </Txt>
           </View>
@@ -56,11 +56,21 @@ export function ReadingCard() {
             </Txt>
           )}
         </View>
-        <Ring value={r.percent / 100} size={66} color={h.lime} track="rgba(244,246,236,0.14)" a11y={`${r.percent}%`}>
+        <Ring value={r.percent / 100} size={66} color={h.gold} track="rgba(244,246,236,0.14)" a11y={`${r.percent}%`}>
           <Txt size={15} weight={800} color={h.forestInk}>
             {`${digits(r.percent)}%`}
           </Txt>
         </Ring>
+      </View>
+      {/* the hadith of the reader: «read and rise», and who told it */}
+      <View style={[styles.hadith, { backgroundColor: h.goldSoft, borderColor: h.goldLine }]}>
+        <Txt serif={LANG === 'ar'} size={LANG === 'ar' ? 17 : 14} lineHeight={LANG === 'ar' ? 30 : 21} color={h.forestInk} center>
+          {HOME.hadith()}
+        </Txt>
+        <View style={[styles.rule, { backgroundColor: h.goldLine }]} />
+        <Txt size={12} lineHeight={18} color={h.gold} center>
+          {HOME.heroSource()}
+        </Txt>
       </View>
       <Pressable
         onPress={() => router.navigate({ pathname: '/quran', params: r.started ? { resume: String(r.page), n: String(Date.now()) } : undefined })}
@@ -82,6 +92,8 @@ const styles = StyleSheet.create({
   card: { borderRadius: 26, padding: 16, gap: 14, overflow: 'hidden' },
   frame: { position: 'absolute', top: 6, bottom: 6, start: 6, end: 6, borderRadius: 21, borderWidth: 1 },
   top: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  hadith: { borderRadius: 16, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 12, gap: 8, alignItems: 'center' },
+  rule: { width: 36, height: 1.5, borderRadius: 1 },
   chip: { alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 3, borderRadius: 12 },
   btn: { height: 46, borderRadius: 23, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: 20, paddingEnd: 6 },
   go: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },

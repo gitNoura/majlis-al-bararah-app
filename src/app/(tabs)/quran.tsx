@@ -300,14 +300,15 @@ function Quran() {
   const here = marksOf(page);
   // the page read in Listen shows the ayat being listened to as its highlights; in Recite nothing is marked
   const marks: Marked[] = mode === 'listen' ? listen.marks : mode === 'read' ? here.marks : [];
-  const pins: NotePin[] = here.pins;
+  // comments' badges and the bookmark belong to Read only: Listen and Recite show the bare page
+  const pins: NotePin[] = mode === 'read' ? here.pins : [];
   const ribbon: Chosen | null = mode === 'read' ? here.ribbon : null;
-  // the pages either side, made the same way as the page read (Listen and Recite mark none of their ayat there)
+  // the pages either side, made the same way as the page read (Listen and Recite show no marks, comments or bookmark there)
   const around: Record<number, PageMarks> = {};
   for (const p of [page - 1, page + 1]) {
     if (p < 1 || p > TOTAL_PAGES) continue;
     const m = marksOf(p);
-    around[p] = mode === 'read' ? m : { ...m, marks: [], ribbon: null };
+    around[p] = mode === 'read' ? m : { ...m, marks: [], pins: [], ribbon: null, bookmarked: false };
   }
 
   // the page's size: as big as the room allows, its own shape kept. In full screen the header and the tab bar are gone, so
@@ -370,7 +371,7 @@ function Quran() {
             }}
             onZoomed={() => {}}
             ribbon={ribbon}
-            bookmarked={here.bookmarked}
+            bookmarked={mode === 'read' && here.bookmarked}
             onBookmark={mode === 'read' ? toggleBookmark : undefined}
             around={around}
             veils={mode === 'recite' ? recite.veils : undefined}
