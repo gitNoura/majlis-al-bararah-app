@@ -12,7 +12,7 @@
 // (`unzoom`), or any change of page. In full screen the page is cut as on the website (src/lib/crop.ts).
 // On each page, as it is drawn (the page read and the pages either side, so a turn brings its marks with it): the
 // highlighted ayat in their colours, the chosen one in gold, the comments' badges in the margin (a tap on one opens its
-// comment), the pin's flag on the paper's edge, and the bookmark ribbon at the top corner (a tap on it puts it on or off).
+// comment), the stop mark's underline, and the bookmark ribbon at the top corner (a tap on it puts it on or off).
 //
 // Where the fold is: the corner's position `px, py` (the page's own coordinates), which corner (top or
 // bottom: where the finger started) and which way (`mode`: 1 forward, -1 back, 0 at rest). The pictures
@@ -57,12 +57,8 @@ const RIBBON_W = 11;
 const RIBBON_H = 28;
 const RIBBON_INSET = 16;
 const RIBBON = `M0 0H${RIBBON_W}V${RIBBON_H}L${RIBBON_W / 2} ${RIBBON_H - 5.5}L0 ${RIBBON_H}Z`;
-// the pin's flag (a long press on an ayah): a small flag standing out from the paper's edge, level with the ayah's first
-// line, on the side of the bookmark; its free end notched like the ribbon's
-const FLAG_W = 17;
-const FLAG_H = 24;
-const FLAG_LEFT = `M0 0H${FLAG_W}L${FLAG_W - 5} ${FLAG_H / 2}L${FLAG_W} ${FLAG_H}H0Z`;
-const FLAG_RIGHT = `M${FLAG_W} 0H0L5 ${FLAG_H / 2}L0 ${FLAG_H}H${FLAG_W}Z`;
+// the stop mark (a long press on an ayah): a fine line under every line of the ayah where the reader stopped
+const STOP_LINE = 1.5; // its thickness, in points
 const ribbonX = (page: number, pageW: number) => (page % 2 ? RIBBON_INSET : pageW - RIBBON_INSET - RIBBON_W);
 
 type Props = {
@@ -82,7 +78,7 @@ type Props = {
   onEmptyTap: () => void; // a tap on the page outside its ayat and edges
   onZoomed: (zoomed: boolean) => void;
   // the wird: holding an ayah (longer than a tap) marks where the reader stopped; the stop's ayah on
-  // this page, marked by a flag on the paper's edge (null: none here)
+  // this page, underlined with a fine line (null: none here)
   onHold?: (s: number, a: number) => void;
   ribbon?: Chosen | null;
   bookmarked?: boolean; // the page read carries a bookmark
@@ -610,11 +606,9 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
   }, [veils, full, pageW, pageH]);
   const bubble = useMemo(() => ({ body: Skia.Path.MakeFromSVGString(BUBBLE)!, lines: Skia.Path.MakeFromSVGString(BUBBLE_LINES)! }), []);
   const tab = useMemo(() => Skia.Path.MakeFromSVGString(RIBBON)!, []);
-  const flagLeft = useMemo(() => Skia.Path.MakeFromSVGString(FLAG_LEFT)!, []);
-  const flagRight = useMemo(() => Skia.Path.MakeFromSVGString(FLAG_RIGHT)!, []);
   const layers: Record<number, PageMarks> = { ...around, [page]: { marks, pins, ribbon: ribbon ?? null, bookmarked } };
   const near = [page - 1, page, page + 1].filter((p) => p >= 1 && p <= TOTAL_PAGES);
-  // everything drawn on page `p`: highlights, the chosen ayah (the page read only), comment badges, the pin's flag and
+  // everything drawn on page `p`: highlights, the chosen ayah (the page read only), comment badges, the stop mark's underline and
   // the bookmark ribbon
   const marksOn = (p: number) => {
     const d = layers[p];
@@ -622,12 +616,8 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
     const crop = cropOf(p, full);
     const lit = [...d.marks.flatMap((e) => place(e, e.color, crop)), ...(p === page ? chosen.flatMap((e) => place(e, 'rgba(196, 154, 69, 0.3)', crop)) : [])];
     const unit = pageW / crop.w / 1000; // the badge's thousandths of the page's width
-    // the pin (a long press on an ayah, where the reader will continue): the flag, level with the middle of the ayah's first line
-    let flag: number | null = null;
-    if (d.ribbon?.boxes.length) {
-      const [, y0, , y1] = d.ribbon.boxes[0];
-      flag = (((y0 + y1) / 2 - crop.y) / crop.h) * pageH - FLAG_H / 2;
-    }
+    // the stop mark (a long press on an ayah, where the reader will continue): a fine line along the foot of each of the ayah's lines
+    const stop = d.ribbon ? place(d.ribbon, c.accent, crop) : [];
     const ribbonColor = d.bookmarked ? c.accent : onBookmark && !full ? (isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(58, 51, 38, 0.13)') : null;
     return (
       <>
@@ -649,11 +639,9 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
             <Path path={bubble.lines} color="#fffaf0" style="stroke" strokeWidth={3} strokeCap="round" />
           </Group>
         ))}
-        {flag !== null && (
-          <Group transform={[{ translateX: p % 2 ? 0 : pageW - FLAG_W }, { translateY: flag }]}>
-            <Path path={p % 2 ? flagLeft : flagRight} color={c.accent} />
-          </Group>
-        )}
+        {stop.map((r) => (
+          <Rect key={`stop:${r.key}`} x={r.x} y={r.y + r.height - STOP_LINE} width={r.width} height={STOP_LINE} color={r.color} />
+        ))}
         {ribbonColor && (
           <Group transform={[{ translateX: ribbonX(p, pageW) }]}>
             <Path path={tab} color={ribbonColor} />

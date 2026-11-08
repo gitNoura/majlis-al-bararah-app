@@ -8,13 +8,12 @@
 //   bookmark   a slim ribbon hanging from the page's top edge, drawn on the page itself (PageCurl.tsx, so it turns with the
 //            page): on the left of odd pages, on the right of even ones; a tap puts it on or off
 //   marker   ONE: the page being read ('lastPage', src/lib/position.ts), which follows every turn; plus an exact pin
-//            (a long press on an ayah marks it; another long press on it takes it off), shown as a flag on the paper's edge,
-//            level with that ayah
+//            (a long press on an ayah marks it; another long press on it takes it off), shown as a fine line under that ayah
 //   full screen   a tap on the page's empty paper (the margins around the text) toggles it: the header, the tab bar and the
 //            status bar go and the page grows to fill the screen, on a background of the page's own paper (cut to its
 //            text, as the website's full screen). Another tap on the empty paper brings them back, and so does the exit
 //            button at the top corner (under the clock), next to the day / night switch, and the phone's back button
-//   a long press on an ayah marks it (its flag; again takes it off); a tap on one opens its menu
+//   a long press on an ayah marks it (its underline; again takes it off); a tap on one opens its menu
 // The page itself is src/components/PageCurl.tsx.
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
