@@ -1,5 +1,5 @@
 // Read's bottom bar, in the same pill as Listen's and Recite's: the reader's marks one by one (the pages with a bookmark,
-// the highlights, the comments) and the Quran's settings. A mark button opens its own list (MarksSheet.tsx). The row
+// the highlights, the comments) and the Quran's settings (a long label such as «Quran settings» takes two lines). A mark button opens its own list (MarksSheet.tsx). The row
 // follows the layout's direction, so in Arabic it begins at the right.
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
@@ -21,7 +21,7 @@ export function ReadButtons({ onMarks }: { onMarks: (tab: Tab) => void }) {
   const item = (label: string, onPress: () => void, icon: ReactNode) => (
     <Pressable key={label} onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={({ pressed }) => [styles.item, pressed && { opacity: 0.6 }]}>
       {icon}
-      <Txt size={11.5} weight={600} color={c.meta} center numberOfLines={1}>
+      <Txt size={11.5} weight={600} color={c.meta} center numberOfLines={2}>
         {label}
       </Txt>
     </Pressable>
