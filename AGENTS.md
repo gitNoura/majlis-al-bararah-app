@@ -42,4 +42,4 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ## Quran units: how a thumun is shown
 
-- Never show a thumun by its number in the whole Quran (33, 77...). Show 1-8 with its hizb: the 9th thumun is «Thumun 1, Hizb 2». Use `thumunName()` in `src/lib/hifdh/labels.js` (or `thumunParts()` in `core.js`); the internal index and the stored plans stay as they are.
+- Never show a thumun by its number in the whole Quran (33, 77...). Show its hizb first, then its place 1-8 in it: the 9th thumun is «Hizb 2» and, on the line under it, «Thumun 1» (never «Thumun 1 from Hizb 2»). Cards use `portionLines()` (two lines), sentences `portionName()` / `thumunName()` («Hizb 2 · Thumun 1») in `src/lib/hifdh/labels.js`; `thumunParts()` is in `core.js`. The internal index and the stored plans stay as they are. The same order (the bigger unit first, the smaller under it) goes for any other «X of Y» wording.

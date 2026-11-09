@@ -23,7 +23,7 @@ export function DateStepper({ value, min, onChange, label }: { value: string; mi
       accessibilityLabel={`${n > 0 ? '+' : '−'}${Math.abs(n)}`}
       style={[styles.btn, { borderColor: c.chosenLine, backgroundColor: c.soft }]}
     >
-      <Txt size={14} weight={700} color={c.ink}>
+      <Txt size={13} weight={700} color={c.ink}>
         {n > 0 ? '+' : '−'}
         {num(Math.abs(n))}
       </Txt>
@@ -31,7 +31,7 @@ export function DateStepper({ value, min, onChange, label }: { value: string; mi
   );
   return (
     <View style={styles.wrap} accessible accessibilityRole="adjustable" accessibilityLabel={`${label}: ${fmtDate(value)}`}>
-      <Txt size={22} weight={700} center color={c.ink}>
+      <Txt size={22} weight={800} center color={c.ink}>
         {fmtDate(value)}
       </Txt>
       <View style={styles.row}>{STEPS.map((n) => btn(-n)).reverse()}</View>
@@ -41,7 +41,7 @@ export function DateStepper({ value, min, onChange, label }: { value: string; mi
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 10 },
+  wrap: { gap: 12 },
   row: { flexDirection: 'row', gap: 8, justifyContent: 'center' },
   btn: { flex: 1, minHeight: 44, borderRadius: 14, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
 });

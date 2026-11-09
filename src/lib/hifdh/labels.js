@@ -33,41 +33,61 @@ export const UNIT_ONE = {
 };
 export const unitCount = (unit, n) => `${num(n)} ${n === 1 ? UNIT_ONE[unit]() : UNIT_PLURAL[unit]()}`;
 
-// «Thumun 1, Hizb 2», «Thumun 3–5, Hizb 1», «Thumun 7, Hizb 1 – Thumun 2, Hizb 2»: a thumun is told by its place in
-// its hizb (1-8), never by its number in the whole Quran. ua and ub are the first and last thumun (from 0).
-export function thumunName(ua, ub = ua) {
+// A thumun is told by its hizb first, then its place in it (1-8), never by its number in the whole Quran:
+// { title: 'Hizb 2', sub: 'Thumun 1' }, { title: 'Hizb 1', sub: 'Thumun 3–5' }, and across hizb
+// { title: 'Hizb 1 – Hizb 2', sub: 'Thumun 7 – Thumun 2' }. ua and ub are the first and last thumun (from 0).
+// A card shows the two lines one under the other; a sentence joins them with « · » (thumunName).
+export function thumunLines(ua, ub = ua) {
   const a = core.thumunParts(ua);
   const b = core.thumunParts(ub);
-  const one = (t) => s(`الثمن ${t.n} من الحزب ${t.hizb}`, `Thumun ${t.n}, Hizb ${t.hizb}`, `Thumun ${t.n}, Hizb ${t.hizb}`);
-  if (ua === ub) return one(a);
-  if (a.hizb === b.hizb) return s(`الأثمان ${a.n}–${b.n} من الحزب ${a.hizb}`, `Thumun ${a.n}–${b.n}, Hizb ${a.hizb}`, `Thumun ${a.n}–${b.n}, Hizb ${a.hizb}`);
-  return `${one(a)} – ${one(b)}`;
+  const hz = (n) => s(`الحزب ${n}`, `Hizb ${n}`, `Hizb ${n}`);
+  const th = (n) => s(`الثمن ${n}`, `Thumun ${n}`, `Thumun ${n}`);
+  if (ua === ub) return { title: hz(a.hizb), sub: th(a.n) };
+  if (a.hizb === b.hizb) return { title: hz(a.hizb), sub: s(`الأثمان ${a.n}–${b.n}`, `Thumun ${a.n}–${b.n}`, `Thumun ${a.n}–${b.n}`) };
+  return { title: `${hz(a.hizb)} – ${hz(b.hizb)}`, sub: `${th(a.n)} – ${th(b.n)}` };
+}
+export function thumunName(ua, ub = ua) {
+  const { title, sub } = thumunLines(ua, ub);
+  return `${title} · ${sub}`;
 }
 
-// «Thumun 213», «Hizb 5–6», «Al-Baqarah 213–215»: the portion's name, in the unit it was planned in
-export function portionName(segs, unit) {
+// The portion's name in the unit it was planned in, as two lines for a card: «Hizb 2» then «Thumun 1» (sub is null
+// for the other units): «Pages 22–31», «Al-Baqarah 213–215», «Hizb 5–6», «Juz 3».
+export function portionLines(segs, unit) {
   const U = plan.units();
   const ids = core.idsOf(segs);
-  if (!ids.length) return '';
+  if (!ids.length) return { title: '', sub: null };
   const a = ids[0];
   const b = ids[ids.length - 1];
   if (unit === 'ayah') {
-    if (ids.length === 1) return ayahLabel(a);
-    if (U.surahOf[a] === U.surahOf[b]) return `${ayahLabel(a)}–${U.ayahNumber(b)}`;
-    return `${ayahLabel(a)} – ${ayahLabel(b)}`;
+    if (ids.length === 1) return { title: ayahLabel(a), sub: null };
+    if (U.surahOf[a] === U.surahOf[b]) return { title: `${ayahLabel(a)}–${U.ayahNumber(b)}`, sub: null };
+    return { title: `${ayahLabel(a)} – ${ayahLabel(b)}`, sub: null };
   }
   const info = U.unit[unit];
-  if (unit === 'thumun') return thumunName(info.uid[a], info.uid[b]);
+  if (unit === 'thumun') return thumunLines(info.uid[a], info.uid[b]);
   const from = info.label(info.uid[a]);
   const to = info.label(info.uid[b]);
-  const one = { page: s('صفحة', 'Page'), thumun: s('الثمن', 'Thumun'), hizb: s('الحزب', 'Hizb') }[unit];
-  const many = { page: s('الصفحات', 'Pages'), thumun: s('الأثمان', 'Thumun'), hizb: s('الأحزاب', 'Hizb') }[unit];
-  return from === to ? `${one} ${from}` : `${many} ${from}–${to}`;
+  const one = { page: s('صفحة', 'Page'), hizb: s('الحزب', 'Hizb'), juz: s('الجزء', 'Juz') }[unit];
+  const many = { page: s('الصفحات', 'Pages'), hizb: s('الأحزاب', 'Hizb'), juz: s('الأجزاء', 'Juz') }[unit];
+  return { title: from === to ? `${one} ${from}` : `${many} ${from}–${to}`, sub: null };
 }
 
+// The same on one line, for sentences and lists: «Hizb 2 · Thumun 1».
+export function portionName(segs, unit) {
+  const { title, sub } = portionLines(segs, unit);
+  return sub ? `${title} · ${sub}` : title;
+}
+
+// «Starts at Al-Baqarah 142 · p. 22–31»: the exact pages the portion touches, worked out from its own ayat (the first
+// and the last), not an average.
 export const startsAt = (segs) => {
   const g = segs[0][0];
-  return s(`يبدأ من ${ayahLabel(g)}`, `Starts at ${ayahLabel(g)}`, `Commence à ${ayahLabel(g)}`) + ` · ${s('ص', 'p.', 'p.')} ${plan.units().pageOf[g]}`;
+  const U = plan.units();
+  const last = core.idsOf(segs).pop();
+  const from = U.pageOf[g];
+  const to = U.pageOf[last];
+  return s(`يبدأ من ${ayahLabel(g)}`, `Starts at ${ayahLabel(g)}`, `Commence à ${ayahLabel(g)}`) + ` · ${s('ص', 'p.', 'p.')} ${from === to ? from : `${from}–${to}`}`;
 };
 
 export function rangeLabel(ranges, type) {
@@ -89,7 +109,7 @@ export function rangeLabel(ranges, type) {
 
 export const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0]; // the week starts on Monday
 export const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
-export const PLAN_UNITS = ['ayah', 'thumun', 'page', 'hizb', 'juz'];
+export const PLAN_UNITS = ['ayah', 'page', 'thumun', 'hizb', 'juz']; // smallest to biggest (the order of core.UNITS)
 export const weekdayName = (d, style = 'short') => new Date(2024, 0, 7 + d).toLocaleDateString(LOCALE, { weekday: style }); // 7 Jan 2024 is a Sunday
 export const dayText = (day) => core.parseDay(day).toLocaleDateString(LOCALE, { weekday: 'long', day: 'numeric', month: 'long' });
 export const fmtDate = (day) => core.parseDay(day).toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' });

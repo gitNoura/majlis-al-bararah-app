@@ -10,6 +10,7 @@ import type { Row } from '@/components/hifdh/StopSheet';
 import { BookOpenIcon, CheckIcon, RepeatIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
+import * as core from '@/lib/hifdh/core';
 import { findRow, portionName } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { useTheme } from '@/theme/theme';
@@ -18,7 +19,7 @@ export function DoneCard({ rows, revise }: { rows: Row[]; revise?: boolean }) {
   const { c } = useTheme();
   const g = useGreen();
   const { refresh } = useHif();
-  const names = rows.map((r) => (r.week != null ? HIF.weekComplete() : portionName(r.segs, r.version.unit))).join(' · ');
+  const names = rows.map((r) => (r.week != null ? HIF.weekComplete() : portionName(r.segs, core.shownUnit(r.version)))).join(' · ');
   const partial = rows.some((r) => r.status === 'partial');
   const canUndo = rows.every((r) => r.week == null); // a weekly plan adds up through the week: nothing to take back at once
   const undo = () => {

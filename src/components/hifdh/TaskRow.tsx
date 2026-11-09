@@ -9,7 +9,8 @@ import type { Row } from '@/components/hifdh/StopSheet';
 import { CheckIcon, MicIcon, PlayIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
-import { STATUS, dayText, findRow, isDone, portionName, startsAt, weekLine } from '@/lib/hifdh/labels';
+import * as core from '@/lib/hifdh/core';
+import { STATUS, dayText, findRow, isDone, portionLines, startsAt, weekLine } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
@@ -68,12 +69,19 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
     }
   };
 
+  const lines = portionLines(row.segs, core.shownUnit(row.version));
+
   return (
     <View style={rule}>
       <View style={styles.main}>
         <Txt size={17} weight={700} color={c.ink}>
-          {portionName(row.segs, row.version.unit)}
+          {lines.title}
         </Txt>
+        {!!lines.sub && (
+          <Txt size={15} weight={600} color={c.text}>
+            {lines.sub}
+          </Txt>
+        )}
         <Txt size={13} color={c.meta}>
           {startsAt(row.segs)}
         </Txt>

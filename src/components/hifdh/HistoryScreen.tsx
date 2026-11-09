@@ -76,7 +76,7 @@ function StatusSheet({ row, onClose }: { row: Row | null; onClose: () => void })
   const { refresh, openStop } = useHif();
   if (!row) return null;
   const weekly = row.week != null || row.weekly;
-  const unit = row.version?.unit ?? core.versionAt(row.plan, row.day).unit;
+  const unit = core.shownUnit(row.version ?? core.versionAt(row.plan, row.day));
 
   const set = (v: 'done' | 'notdone' | 'untouched') => {
     plan.mark(row, v);
@@ -153,7 +153,7 @@ export function HistoryScreen() {
       {shown.map((d) => (
         <Section key={d.day} title={dayText(d.day)}>
           {d.rows.map((r) => {
-            const name = r.weekly ? portionName(r.segs, core.versionAt(r.plan, r.day).unit) : portionName(r.segs, r.version.unit);
+            const name = r.weekly ? portionName(r.segs, core.shownUnit(core.versionAt(r.plan, r.day))) : portionName(r.segs, core.shownUnit(r.version));
             return (
               <Pressable
                 key={`${r.plan.id}|${r.day}|${r.entry?.id ?? ''}`}

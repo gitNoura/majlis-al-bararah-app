@@ -4,7 +4,7 @@
 //
 // PROGRESS IS BY AYAH. The ledger is the set of memorized ayat (ayah 0..6213, in reading order, Warsh
 // numbering). Ayah, page, thumun and hizb are only ways of looking at it: the units (makeUnits) cut
-// the same 6,214 ayat into portions of that size. Hizb = 8 thumun (60 and 480, the Maghrebi division).
+// the same 6,214 ayat into portions of that size. Hizb = 8 thumun (60 and 480, the Maghrebi division); juz = 2 hizb (30).
 //
 // THE SCHEDULE is a function of the calendar, not of what was ticked:
 //   - a plan has planned days (its days of the week, or the week for a weekly plan);
@@ -17,7 +17,7 @@
 //     next planned day.
 // Past days are read from the log (what was really done is kept as it was); the rest is computed.
 
-export const UNITS = ['ayah', 'page', 'thumun', 'hizb'];
+export const UNITS = ['ayah', 'page', 'thumun', 'hizb', 'juz']; // smallest to biggest
 const EPS = 1e-9;
 export const WEEK_START = 1; // a weekly plan's week begins on this day (0 Sunday ... 1 Monday)
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Monday first
@@ -51,12 +51,14 @@ export function makeUnits(raw) {
   };
   const pageBounds = [...new Set(raw.pg.slice(0, 604))].filter((g) => g < N).concat(N);
   const hizbBounds = raw.thumun.filter((_, i) => i % 8 === 0); // every 8th thumun starts a hizb (60, then the total)
+  const juzBounds = raw.thumun.filter((_, i) => i % 16 === 0); // every 16th starts a juz (30, then the total)
 
   const unit = {
     ayah: cut(Array.from({ length: N + 1 }, (_, g) => g), (u) => u + 1),
     page: cut(pageBounds, (u) => pageOf[pageBounds[u]]),
     thumun: cut(raw.thumun, (u) => u + 1),
     hizb: cut(hizbBounds, (u) => u + 1),
+    juz: cut(juzBounds, (u) => u + 1),
   };
   return {
     N,
@@ -141,8 +143,9 @@ export const sessionDay = (now = new Date(), dayStart = 0) => dayOf(new Date(now
 //   id, type: 'memorize' | 'revise', period: 'day' | 'week',
 //   range: [[from, to), ...] | null     null: the whole Quran (memorize) or all that is memorized (revise)
 //   start: day the plan begins,
-//   versions: [{ from: day, unit, amount, days: [0-6], perDay?: { [weekday]: amount } }]    the pace, each
-//             effective from its day; `amount` is what each day gives, unless `perDay` sets a day's own
+//   versions: [{ from: day, unit, amount, days: [0-6], perDay?: { [weekday]: amount }, divide?: unit }]    the pace,
+//             each effective from its day; `amount` is what each day gives, unless `perDay` sets a day's own; with
+//             `divide` (a smaller unit) it is what each WEEK gives, cut into the planned days at that unit's edges
 //   target: null | { kind: 'days', n } | { kind: 'date', date }   what the amount was derived from
 //   pauses: [{ from, to }]   (to: null while paused)
 // }
@@ -161,8 +164,16 @@ export const versionAt = (plan, day) => {
 // two the next), or the even `amount` the other days share.
 export const amountOn = (v, weekday) => (v.perDay && v.perDay[weekday] > 0 ? v.perDay[weekday] : v.amount);
 
-// What a version gives in a week: the sum of its planned days' amounts.
-export const weeklyTotal = (v) => Math.round(v.days.reduce((n, d) => n + amountOn(v, d), 0) * 10000) / 10000;
+// A version can be a BLOCK pace: `amount` units of `unit` a WEEK (1 juz a week), cut each week into the planned days
+// at `divide` edges (pages, say). Without `divide` (or with one that is not smaller than `unit`) `amount` is what
+// each day gives, as before. A block pace may also carry `perDay`: how many `divide` units each weekday takes.
+export const isBlock = (v) => Boolean(v.divide) && UNITS.indexOf(v.divide) >= 0 && UNITS.indexOf(v.divide) < UNITS.indexOf(v.unit);
+
+// The unit a day's portion is told in: the divide-by unit for a block pace, else the unit itself.
+export const shownUnit = (v) => (isBlock(v) ? v.divide : v.unit);
+
+// What a version gives in a week: the sum of its planned days' amounts (a block pace: its weekly amount).
+export const weeklyTotal = (v) => (isBlock(v) ? v.amount : Math.round(v.days.reduce((n, d) => n + amountOn(v, d), 0) * 10000) / 10000);
 
 export const isPaused = (plan, day) => (plan.pauses || []).some((p) => p.from <= day && (!p.to || day < p.to));
 export const pausedNow = (plan) => (plan.pauses || []).some((p) => !p.to);
@@ -206,6 +217,7 @@ function cursor(R, N, cycles) {
     cycleDay: 0,
     cycle: 0,
     left: () => left,
+    unused: (ids) => ids.filter((g) => !used[g]),
     // The next portion, at `amount` units. The pool is cut into slots of `amount` units on a fixed grid
     // that starts at the unit of its first ayah; an ayah belongs to the slot its middle falls in
     // (so a half-thumun cuts at the ayah nearest the middle, with no drift from one slot to the next).
@@ -264,6 +276,49 @@ function cursor(R, N, cycles) {
   };
 }
 
+// Today's share of what is left of a week's block: the block's remaining ayat are grouped by `info` (the divide-by
+// unit; a page the block only touches counts as one), and shared over the k planned days that remain this week, the
+// first days taking the extra when it does not divide (20 pages over 7 days: 3,3,3,3,3,3,2). With fewer groups than
+// days the first days get one each and the rest nothing. The last day takes whatever is left, so the week ends
+// where the block ends.
+function groupsOf(ids, info) {
+  const groups = [];
+  let last = -1;
+  for (const g of ids) {
+    const u = info.uid[g];
+    if (u !== last) {
+      groups.push([]);
+      last = u;
+    }
+    groups[groups.length - 1].push(g);
+  }
+  return groups;
+}
+
+function firstShare(ids, k, info) {
+  const groups = groupsOf(ids, info);
+  const m = groups.length;
+  if (!m) return [];
+  const take = Math.floor(m / Math.max(1, k)) + (m % Math.max(1, k) > 0 ? 1 : 0);
+  return groups.slice(0, take).flat();
+}
+
+// The same when the reader set how many `info` units each weekday takes (`perDay`): the first `n` groups of what is
+// left. The week's last planned day takes everything left (so the week still ends where the block ends); a day set
+// to more than is left just takes what there is.
+function firstGroups(ids, n, info) {
+  const groups = groupsOf(ids, info);
+  const whole = Math.floor(Math.max(0, n) + EPS);
+  const frac = n - whole;
+  const out = groups.slice(0, whole).flat();
+  // a half (or any fraction) takes that share of the next group's ayat, at least one
+  if (frac > EPS && groups[whole]) out.push(...groups[whole].slice(0, Math.max(1, Math.round(frac * groups[whole].length))));
+  return out;
+}
+
+// The size of a pool in units of `info` (fractions for a unit it only partly covers).
+const poolUnitsOf = (R, info) => R.reduce((w, g) => w + 1 / info.size[info.uid[g]], 0);
+
 // How many portions one pass over the pool takes at this amount (the «7» of «Day 2 of 7»).
 function cycleLength(R, N, amount, info) {
   const c = cursor(R, N, false);
@@ -305,6 +360,7 @@ export function* walkDaily(plan, ctx, limit = 4000) {
   const byDay = new Map();
   for (const e of entriesOf(plan, ctx)) byDay.set(e.day, e);
   const lens = new Map();
+  let week = null; // the block being shared out this week (block paces only)
   for (let i = 0, day = plan.start; i < limit; i++, day = addDays(day, 1)) {
     const v = plannedOn(plan, day);
     const entry = byDay.get(day);
@@ -314,14 +370,30 @@ export function* walkDaily(plan, ctx, limit = 4000) {
       continue;
     }
     const info = U.unit[v.unit];
-    const uneven = Boolean(v.perDay) && v.days.some((d) => amountOn(v, d) !== v.amount);
+    const block = isBlock(v);
+    const uneven = !block && Boolean(v.perDay) && v.days.some((d) => amountOn(v, d) !== v.amount);
     const amount = amountOn(v, weekdayOf(day));
-    let ids = uneven ? cur.peekFrom(amount, info) : cur.peek(amount, info);
-    if (!ids.length) return;
-    const key = uneven ? `${v.unit}/${v.days.map((d) => amountOn(v, d)).join(',')}` : `${v.unit}/${v.amount}`;
+    let ids;
+    if (block) {
+      // the week's block is the next `amount` units of the pool (or what is left of the last one); it is shared over the
+      // planned days of this week that are still to come
+      const ws = weekStartOf(day);
+      if (!week || week.ws !== ws || week.v !== v || week.cycle !== cur.cycle) week = { ws, v, cycle: cur.cycle, ids: cur.peek(v.amount, info) };
+      if (!week.ids.length) return;
+      let left = 0;
+      for (let d = day, end = addDays(ws, 6); d <= end; d = addDays(d, 1)) if (plannedOn(plan, d) === v) left++;
+      const rest = cur.unused(week.ids);
+      ids = v.perDay ? (left === 1 ? rest : firstGroups(rest, v.perDay[weekdayOf(day)] ?? 0, U.unit[v.divide])) : firstShare(rest, left, U.unit[v.divide]);
+      if (!ids.length) continue; // the block is used up before the week's last day: nothing today
+    } else {
+      ids = uneven ? cur.peekFrom(amount, info) : cur.peek(amount, info);
+      if (!ids.length) return;
+    }
+    const key = block ? `block/${v.unit}/${v.amount}/${v.divide}` : uneven ? `${v.unit}/${v.days.map((d) => amountOn(v, d)).join(',')}` : `${v.unit}/${v.amount}`;
     if (revise && !lens.has(key)) {
       const order = WEEKDAY_ORDER.filter((d) => v.days.includes(d)).map((d) => amountOn(v, d));
-      lens.set(key, uneven ? cycleLengthSeq(R, U.N, order, info) : cycleLength(R, U.N, v.amount, info));
+      // a block pace: the weeks one pass takes, times the days a week (an estimate, as for uneven days)
+      lens.set(key, block ? Math.max(1, Math.ceil(poolUnitsOf(R, info) / v.amount)) * v.days.length : uneven ? cycleLengthSeq(R, U.N, order, info) : cycleLength(R, U.N, v.amount, info));
     }
     const row = { day, plan, version: v, segs: segsOf(ids), ayat: ids.length, status: 'untouched', entry: null, k: cur.cycleDay + 1, n: lens.get(key) || 0, cycle: cur.cycle };
     if (entry) {
@@ -532,17 +604,20 @@ export function wholeSplit(total, days) {
   return out;
 }
 
-// The weekly figures of a plan version as a daily pace of whole thumun: a hizb is 8 thumun and a juz 16. Returns
-// { unit: 'thumun', amount, days, perDay? } or null when the version is already in whole numbers.
-export function wholeVersion(v) {
-  if (v.unit !== 'hizb') return null;
-  const total = Math.max(1, Math.round(weeklyTotal(v) * 8));
-  const split = wholeSplit(total, [1, 2, 3, 4, 5, 6, 0].filter((d) => v.days.includes(d)));
-  const days = Object.keys(split).map(Number).sort((a, b) => a - b);
-  const vals = days.map((d) => split[d]);
-  const even = vals.every((x) => x === vals[0]);
-  const { perDay: _old, ...rest } = v;
-  return { ...rest, unit: 'thumun', amount: even ? vals[0] : Math.round(total / days.length), days, ...(even ? {} : { perDay: split }) };
+// The same in steps of `step` (0.5: half a hizb, half a page): the week's total shared over the days in the order given,
+// the first days taking the extra step when it does not divide.
+export function evenSplit(total, days, step = 1) {
+  const n = days.length;
+  const out = {};
+  if (!n || !(total > 0)) return out;
+  const units = Math.max(1, Math.round(total / step));
+  const base = Math.floor(units / n);
+  const extra = units - base * n;
+  days.forEach((d, i) => {
+    const a = (base + (i < extra ? 1 : 0)) * step;
+    if (a > 0) out[d] = Math.round(a * 10000) / 10000;
+  });
+  return out;
 }
 
 // The amount that finishes the pool by the target, for a draft { type, range, period, unit, days, target }.
@@ -563,7 +638,7 @@ export function draftPlan(d, today) {
     period: d.period,
     range: d.range || null,
     start: today,
-    versions: [{ from: today, unit: d.unit, amount: d.amount, days: d.days, ...(d.perDay ? { perDay: d.perDay } : {}) }],
+    versions: [{ from: today, unit: d.unit, amount: d.amount, days: d.days, ...(d.divide ? { divide: d.divide } : {}), ...(d.perDay ? { perDay: d.perDay } : {}) }],
     pauses: [],
   };
 }

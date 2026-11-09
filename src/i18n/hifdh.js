@@ -176,12 +176,49 @@ export const HIF = {
   splitGoal: (goal) => L(`هدفك ${goal}`, `Your goal was ${goal}`, `Votre objectif était ${goal}`),
   splitEven: () => L('تقسيم متساوٍ', 'Split evenly', 'Répartir à parts égales'),
   splitRest: () => L('راحة', 'Day off', 'Repos'),
-  inThumun: () =>
+  divideTitle: (unit) => L(`كيف يُقسَّم ${unit} على الأيام؟`, `How should each ${unit} be split across the days?`, `Comment répartir chaque ${unit} sur les jours ?`),
+  selectAll: () => L('تحديد الكل', 'Select all', 'Tout sélectionner'),
+  clearAll: () => L('إلغاء التحديد', 'Clear', 'Tout effacer'),
+  splitQuestionAbout: (unit) => L(`كم ${unit} تقريباً في كل يوم؟`, `About how many ${unit} each day?`, `Environ combien de ${unit} par jour ?`),
+  splitQuestionExact: (unit) => L(`كم ${unit} في كل يوم؟`, `How many ${unit} each day?`, `Combien de ${unit} par jour ?`),
+  splitSubExact: () =>
     L(
-      'الحزب والجزء يُعرضان بالأثمان: الحزب 8 أثمان والجزء 16 ثمنًا.',
-      'Hizb and juz are shown in thumun: a hizb is 8 thumun, a juz 16.',
-      'Hizb et juz sont comptés en thumun : un hizb fait 8 thumun, un juz 16.',
+      'الأيام التي حدّدتها دقيقة. آخر يوم في كل أسبوع هو الذي يتغيّر قليلاً لأنه يأخذ ما بقي.',
+      'The days you set are exact. Only the last day of each week can vary, because it takes what is left.',
+      'Les jours que vous fixez sont exacts. Seul le dernier jour de la semaine peut varier : il prend le reste.',
     ),
+  splitLastDay: (unit) =>
+    L(
+      `آخر يوم يأخذ ما بقي، فينتهي الأسبوع مع نهاية ${unit}.`,
+      `The last day takes what is left, so each week ends with the ${unit}.`,
+      `Le dernier jour prend le reste : chaque semaine finit avec le ${unit}.`,
+    ),
+  splitSubAbout: () =>
+    L(
+      'هذه أرقام تقريبية، فالأجزاء والأحزاب تختلف قليلاً في الطول. تُقسَّم كل أسبوع بدقة، وتستطيع تعديل أي يوم، حتى بالنصف.',
+      'These are approximate: juz and hizb differ a little in length. Each real week is cut exactly, and you can change any day, even by half.',
+      'Ces chiffres sont approximatifs : juz et hizb diffèrent un peu en longueur. Chaque semaine réelle est découpée exactement ; modifiez un jour à votre guise, même d’un demi.',
+    ),
+  divideSub: () =>
+    L(
+      'يبقى الأسبوع مرتبطاً بنهاية الوحدة، ويُقسَّم ورد كل أسبوع على أيامك عند حدود الوحدة الأصغر.',
+      'Each week still ends where the unit ends. Its portion is cut into your days at the edges of the smaller unit.',
+      'Chaque semaine finit là où finit l’unité. Sa portion est découpée sur vos jours aux limites de la plus petite unité.',
+    ),
+  splitGoalAbout: (goal, unit) =>
+    L(
+      `نحو ${goal} في الأسبوع (${unit}). آخر يوم يأخذ ما بقي فينتهي الأسبوع مع الوحدة.`,
+      `About ${goal} a week (${unit}). The last day takes what is left, so the week ends with the unit.`,
+      `Environ ${goal} par semaine (${unit}). Le dernier jour prend le reste : la semaine finit avec l’unité.`,
+    ),
+  divideSplitBy: () => L('يُقسَّم حسب', 'Split by', 'Découpé par'),
+  dateTooBig: (unit) =>
+    L(
+      `${unit} كامل كل يوم أكبر مما يحتاجه هذا التاريخ.`,
+      `A whole ${unit} a day is more than this date needs.`,
+      `1 ${unit} entier par jour dépasse ce qu’il faut pour cette date.`,
+    ),
+  dateUseSmaller: (unit) => L(`استخدم ${unit} بدلاً من ذلك`, `Use ${unit} instead`, `Utiliser ${unit} à la place`),
   splitMore: () => L('زِد', 'More', 'Plus'),
   splitLess: () => L('أنقِص', 'Less', 'Moins'),
   perDay: () => L('في كل يوم', 'Each day', 'Chaque jour'),
