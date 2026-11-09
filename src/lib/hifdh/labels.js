@@ -31,7 +31,18 @@ export const UNIT_ONE = {
   hizb: () => s('حزب', 'hizb', 'hizb'),
   juz: () => s('جزء', 'juz', 'juz'),
 };
-export const unitCount = (unit, n) => `${num(n)} ${n === 1 ? UNIT_ONE[unit]() : UNIT_PLURAL[unit]()}`;
+// Arabic counts read as Arabic does: «حزب واحد», «حزبان», «٣ أحزاب», «١٢ حزبًا»-style singular after ten, «نصف حزب»
+const AR_ONE = { ayah: 'آية واحدة', page: 'صفحة واحدة', thumun: 'ثمن واحد', hizb: 'حزب واحد', juz: 'جزء واحد' };
+const AR_TWO = { ayah: 'آيتان', page: 'صفحتان', thumun: 'ثمنان', hizb: 'حزبان', juz: 'جزءان' };
+export const unitCount = (unit, n) => {
+  if (LOCALE.startsWith('ar')) {
+    if (n === 1) return AR_ONE[unit];
+    if (n === 2) return AR_TWO[unit];
+    if (n === 0.5) return `نصف ${UNIT_ONE[unit]()}`;
+    if (n > 10 && Number.isInteger(n)) return `${num(n)} ${UNIT_ONE[unit]()}`;
+  }
+  return `${num(n)} ${n === 1 ? UNIT_ONE[unit]() : UNIT_PLURAL[unit]()}`;
+};
 
 // A thumun is told by its hizb first, then its place in it (1-8), never by its number in the whole Quran:
 // { title: 'Hizb 2', sub: 'Thumun 1' }, { title: 'Hizb 1', sub: 'Thumun 3–5' }, and across hizb
@@ -134,7 +145,7 @@ export const dayText = (day) => core.parseDay(day).toLocaleDateString(LOCALE, { 
 export const fmtDate = (day) => core.parseDay(day).toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' });
 export const monthName = (m) => new Date(2024, m, 1).toLocaleDateString(LOCALE, { month: 'long' });
 
-export const perWord = (period) => (period === 'week' ? s('في الأسبوع', 'a week', 'par semaine') : s('في اليوم', 'a day', 'par jour'));
+export const perWord = (period) => (period === 'week' ? s('أسبوعيًا', 'a week', 'par semaine') : s('يوميًا', 'a day', 'par jour'));
 
 export const paceText = (p) => {
   const v = core.versionAt(p, plan.today());

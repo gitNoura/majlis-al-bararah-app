@@ -29,6 +29,13 @@ export const DASH = {
   revisionLabel: () => L('مراجعة', 'Revision', 'Révision'),
   noPlan: () => L('لا توجد خطة حفظ بعد', 'No memorization plan yet', 'Pas encore de plan de mémorisation'),
   noPlanSub: () => L('أنشئ خطتك من تبويب الحفظ', 'Set one up in the Memorize tab', 'Créez-en un dans l’onglet Mémoriser'),
+  memorizePlan: () => L('خطة الحفظ', 'Memorization plan', 'Plan de mémorisation'),
+  revisionPlan: () => L('خطة المراجعة', 'Revision plan', 'Plan de révision'),
+  noMemorizePlan: () => L('لم تضع خطة حفظ بعد', 'No plan yet', 'Pas encore de plan'),
+  noRevisionPlan: () => L('لم تضع خطة مراجعة بعد', 'No plan yet', 'Pas encore de plan'),
+  addPlan: () => L('أنشئ خطة', 'Create one', 'Créer un plan'),
+  portionsDone: () => L('من مقرر اليوم', 'of today’s portions', 'des portions du jour'),
+  allDone: () => L('أتممت ورد اليوم', 'Done for today', 'Terminé pour aujourd’hui'),
   nothingToday: () => L('لا شيء مقرر اليوم', 'Nothing planned today', 'Rien de prévu aujourd’hui'),
   // activity
   activity: () => L('النشاط', 'Activity', 'Activité'),

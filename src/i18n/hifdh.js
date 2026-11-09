@@ -144,8 +144,8 @@ export const HIF = {
     L('قليلٌ دائم خيرٌ من كثيرٍ منقطع.', 'Small, consistent amounts add up powerfully over time.', 'Un peu, régulièrement, mène loin.'),
   pickDate: () => L('أفضّل اختيار تاريخ الانتهاء', 'I’d rather pick a finish date', 'Je préfère choisir une date de fin'),
   pickAmount: () => L('أفضّل تحديد المقدار', 'I’d rather set an amount', 'Je préfère fixer une quantité'),
-  paceByAmount: () => L('بالمقدار', 'By amount', 'Par quantité'),
-  paceByDate: () => L('بتاريخ الانتهاء', 'By finish date', 'Par date de fin'),
+  paceByAmount: () => L('كمية أسبوعية', 'By amount', 'Par quantité'),
+  paceByDate: () => L('تاريخ إتمام محدد', 'By finish date', 'Par date de fin'),
   whenQuestion: () => L('متى تريد أن تنتهي؟', 'When do you want to finish?', 'Quand voulez-vous finir ?'),
   unitLabel: () => L('الوحدة', 'Unit', 'Unité'),
   finishDate: () => L('تاريخ الانتهاء', 'Finish date', 'Date de fin'),
@@ -162,7 +162,7 @@ export const HIF = {
   splitTotal: () => L('المجموع', 'Total', 'Total'),
   splitMatches: () => L('مطابق لهدفك', 'Matches your weekly goal', 'Correspond à votre objectif'),
   splitGoal: (goal) => L(`المطلوب ${goal}`, `Your goal was ${goal}`, `Votre objectif était ${goal}`),
-  splitEven: () => L('توزيع متساوٍ', 'Split evenly', 'Répartir à parts égales'),
+  splitEven: () => L('بالتساوي', 'Split evenly', 'Répartir à parts égales'),
   splitRest: () => L('راحة', 'Day off', 'Repos'),
   divideTitle: (unit) => L(`قسّم ${unit} على الأيام بحسب:`, `How should each ${unit} be split across the days?`, `Comment répartir chaque ${unit} sur les jours ?`),
   selectAll: () => L('تحديد الكل', 'Select all', 'Tout sélectionner'),
@@ -197,25 +197,25 @@ export const HIF = {
   dateUseSmaller: (unit) => L(`استخدم ${unit} بدل ذلك`, `Use ${unit} instead`, `Utiliser ${unit} à la place`),
   splitMore: () => L('زِد', 'More', 'Plus'),
   splitLess: () => L('أنقِص', 'Less', 'Moins'),
-  perDay: () => L('في كل يوم', 'Each day', 'Chaque jour'),
+  perDay: () => L('توزيع الكمية', 'Each day', 'Chaque jour'),
   done: () => L('تم', 'Done', 'OK'),
   untilDate: (d) => L(`حتى ${d}`, `Until ${d}`, `Jusqu’au ${d}`),
-  splitCustom: () => L('مخصّص', 'Custom', 'Personnalisé'),
+  splitCustom: () => L('حسب اختيارك', 'Custom', 'Personnalisé'),
   ayatShort: () => L('آيات', 'Ayat', 'Versets'),
   planSaved: () => L('تم حفظ الخطة.', 'Plan saved.', 'Plan enregistré.'),
 
   // editing a plan (one page)
-  covers: () => L('ما تشمله الخطة', 'What it covers', 'Ce que ça couvre'),
-  pace: () => L('الوتيرة', 'Pace', 'Rythme'),
+  covers: () => L('نطاق الخطة', 'What it covers', 'Ce que ça couvre'),
+  pace: () => L('المقدار', 'Pace', 'Rythme'),
   days: () => L('الأيام', 'Days', 'Jours'),
-  newPaceFrom: () => L('التعديل يبدأ من', 'New pace from', 'Nouveau rythme dès le'),
+  newPaceFrom: () => L('يسري التعديل من', 'New pace from', 'Nouveau rythme dès le'),
   pastDaysKept: () => L('الأيام الماضية تبقى كما كانت.', 'Past days keep their old plan.', 'Les jours passés gardent leur ancien plan.'),
   finishLine: (revise) =>
     revise
-      ? L('تنتهي من المراجعة في', 'You’ll finish a full revision on', 'Vous aurez tout révisé le')
+      ? L('تُتمّ دورة المراجعة في', 'You’ll finish a full revision on', 'Vous aurez tout révisé le')
       : L('تنتهي بإذن الله في', 'You’ll finish on', 'Vous finirez le'),
   resumePlan: () => L('استئناف الخطة', 'Resume plan', 'Reprendre le plan'),
-  pausePlan: () => L('إيقاف مؤقت', 'Pause plan', 'Mettre en pause'),
+  pausePlan: () => L('إيقاف الخطة مؤقتًا', 'Pause plan', 'Mettre en pause'),
   deletePlan: () => L('حذف الخطة', 'Delete plan', 'Supprimer le plan'),
   saveChanges: () => L('حفظ التعديلات', 'Save changes', 'Enregistrer'),
   confirmDelete: () =>

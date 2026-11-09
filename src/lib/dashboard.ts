@@ -160,7 +160,8 @@ export function hifdhToday() {
     const mine = rows.filter((r) => r.plan.type === type);
     return { total: mine.length, done: mine.filter(isDone).length };
   };
-  return { hasPlan, memorize: count('memorize'), revise: count('revise') };
+  const plans = (plan.get()?.plans ?? []) as { type: string }[];
+  return { hasPlan, hasMemorize: plans.some((x) => x.type === 'memorize'), hasRevise: plans.some((x) => x.type === 'revise'), memorize: count('memorize'), revise: count('revise') };
 }
 
 // ---------- activity ----------

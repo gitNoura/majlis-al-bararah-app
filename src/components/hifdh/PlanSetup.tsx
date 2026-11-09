@@ -13,7 +13,7 @@ import { DateCalendar } from '@/components/hifdh/DateCalendar';
 import { HifHeader } from '@/components/hifdh/HifHeader';
 import { useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { MemorizedPicker } from '@/components/hifdh/MemorizedPicker';
-import { Hint, PrimaryButton, SecondaryButton, Section } from '@/components/hifdh/Section';
+import { Hint, PrimaryButton, SecondaryButton } from '@/components/hifdh/Section';
 import { Sheet } from '@/components/ui/Sheet';
 import { BackIcon, CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
@@ -44,6 +44,7 @@ type Pace = {
   first: number;
 };
 
+const DASH_EMPTY = '—';
 const emptyBits = () => new Array<number>(plan.units().N).fill(0);
 
 function initPace(type: PlanType | null, id: string | null): Pace {
@@ -175,22 +176,18 @@ function Card({ children }: { children: ReactNode; flush?: boolean }) {
   return <View style={styles.card}>{children}</View>;
 }
 
-// A row of the edit page: the setting's value (a long one wraps), the setting's name small above it when the box's own
-// title does not already say it, and an arrow; a tap opens a sheet for it
-function EditRow({ label, value, onPress }: { label?: string; value: string; onPress: () => void }) {
+// A row of the edit page: the setting's name on one side, its value on the other, then an arrow; a tap opens a sheet for it.
+// Rows are separated by hairlines (no boxes).
+function EditRow({ label, value, onPress }: { label: string; value: string; onPress: () => void }) {
   const { c } = useTheme();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={styles.editRow}>
-      <View style={{ flex: 1, gap: 2 }}>
-        {!!label && (
-          <Txt size={13} color={c.meta}>
-            {label}
-          </Txt>
-        )}
-        <Txt size={16.5} weight={700} color={c.ink}>
-          {value}
-        </Txt>
-      </View>
+    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.editRow, { borderBottomColor: c.divider }]}>
+      <Txt size={16} weight={500} color={c.ink} style={{ flex: 1 }}>
+        {label}
+      </Txt>
+      <Txt size={15} weight={700} color={c.ink} style={{ flexShrink: 1, maxWidth: '55%' }} numberOfLines={2}>
+        {value}
+      </Txt>
       <BackIcon color={c.meta} size={18} rtl={isEnglish} />
     </Pressable>
   );
@@ -382,7 +379,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   const insets = useSafeAreaInsets();
   const { refresh, toast } = useHif();
   const [pace, setPace] = useState<Pace>(() => initPace(type, id));
-  const [sheet, setSheet] = useState<'scope' | 'split' | 'date' | 'from' | null>(null); // the edit page's open sheet
+  const [sheet, setSheet] = useState<'scope' | 'pace' | 'days' | 'split' | 'from' | null>(null); // the edit page's open sheet
   // a new amount, unit or set of days starts the split over: the even share is the default
   const patch = (next: Partial<Pace>) => setPace((p) => ({ ...p, ...(('amtText' in next || 'unit' in next || 'divide' in next || 'days' in next || 'mode' in next) && !('perDay' in next) ? { perDay: null } : {}), ...next }));
 
@@ -632,42 +629,34 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
         <PrimaryButton label={HIF.done()} onPress={close} />
       </Sheet>
     );
+    const paceValue = pace.mode === 'date' ? fmtDate(pace.date) : amountOf(pace) > 0 ? `${unitCount(pace.unit, weekTotal(pace))} ${perWord('week')}` : DASH_EMPTY;
+    const daysValue = !pace.days.length ? DASH_EMPTY : pace.days.length === 7 ? HIF.everyDay() : WEEK_ORDER.filter((d: number) => pace.days.includes(d)).map((d: number) => weekdayName(d)).join(isEnglish ? ', ' : '، ');
     const toggleDays = () => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] });
     return {
       body: (
         <View style={{ gap: 28 }}>
-          <Section plain first compact title={HIF.covers()} titleColor={c.ink}>
-            <EditRow label={kindOf(pace.type)} value={rangeLabel(pace.range, pace.type)} onPress={() => setSheet('scope')} />
-          </Section>
+          <Txt size={16} weight={700} color={c.meta}>
+            {kindOf(pace.type)}
+          </Txt>
 
-          <Section plain first compact title={HIF.pace()} titleColor={c.ink}>
-            <View style={styles.modeRow}>
-              <View style={{ flex: 1 }}>
-                <Chip on={pace.mode === 'amount'} text={HIF.paceByAmount()} onPress={() => pace.mode !== 'amount' && patch({ mode: 'amount', period: 'day' })} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Chip on={pace.mode === 'date'} text={HIF.paceByDate()} onPress={() => pace.mode !== 'date' && patch({ mode: 'date', period: 'day' })} />
-              </View>
-            </View>
-            {pace.mode === 'date' ? (
-              <>
-                {dateUnits()}
-                <EditRow label={HIF.finishDate()} value={fmtDate(pace.date)} onPress={() => setSheet('date')} />
-              </>
-            ) : (
-              amountBlock()
-            )}
-          </Section>
-
-          <Section plain first compact title={HIF.days()} titleColor={c.ink} action={<Chip on={pace.days.length === 7} text={pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll()} onPress={toggleDays} />}>
-            <DayChips days={pace.days} onToggle={(d) => patch({ days: pace.days.includes(d) ? pace.days.filter((x) => x !== d) : [...pace.days, d].sort() })} />
-            {aboutLine()}
+          <View>
+            <EditRow label={HIF.covers()} value={rangeLabel(pace.range, pace.type)} onPress={() => setSheet('scope')} />
+            <EditRow label={HIF.pace()} value={paceValue} onPress={() => setSheet('pace')} />
+            <EditRow label={HIF.days()} value={daysValue} onPress={() => setSheet('days')} />
             {showSplit && <EditRow label={HIF.perDay()} value={pace.perDay ? HIF.splitCustom() : HIF.splitEven()} onPress={() => setSheet('split')} />}
-          </Section>
+            <EditRow label={HIF.newPaceFrom()} value={fmtDate(pace.from)} onPress={() => setSheet('from')} />
+          </View>
 
-          <Section plain first compact title={HIF.newPaceFrom()} titleColor={c.ink}>
-            <EditRow value={fmtDate(pace.from)} onPress={() => setSheet('from')} />
-          </Section>
+          {finish && (
+            <View style={{ gap: 2 }}>
+              <Txt size={14.5} color={c.meta}>
+                {HIF.finishLine(revise)}
+              </Txt>
+              <Txt size={26} weight={800} color={c.ink}>
+                {fmtDate(finish)}
+              </Txt>
+            </View>
+          )}
 
           <View style={styles.quietRow}>
             <Pressable
@@ -710,7 +699,42 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
           </View>
 
           {sheetOf('scope', HIF.covers(), scopeBlock())}
-          {sheetOf('date', HIF.finishDate(), dateCalendar())}
+          {sheetOf(
+            'pace',
+            HIF.pace(),
+            <>
+              <View style={styles.modeRow}>
+                <View style={{ flex: 1 }}>
+                  <Chip on={pace.mode === 'amount'} text={HIF.paceByAmount()} onPress={() => pace.mode !== 'amount' && patch({ mode: 'amount', period: 'day' })} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Chip on={pace.mode === 'date'} text={HIF.paceByDate()} onPress={() => pace.mode !== 'date' && patch({ mode: 'date', period: 'day' })} />
+                </View>
+              </View>
+              {pace.mode === 'date' ? (
+                <>
+                  {dateUnits()}
+                  {dateCalendar()}
+                </>
+              ) : (
+                amountBlock()
+              )}
+            </>,
+          )}
+          {sheetOf(
+            'days',
+            HIF.days(),
+            <>
+              <View style={styles.daysHead}>
+                <Txt size={14} color={c.meta}>
+                  {HIF.selectedDays(pace.days.length)}
+                </Txt>
+                <Chip on={pace.days.length === 7} text={pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll()} onPress={toggleDays} />
+              </View>
+              <DayChips days={pace.days} onToggle={(d) => patch({ days: pace.days.includes(d) ? pace.days.filter((x) => x !== d) : [...pace.days, d].sort() })} />
+              {aboutLine()}
+            </>,
+          )}
           {sheetOf('split', HIF.perDay(), showSplit ? splitBlock() : null)}
           {sheetOf(
             'from',
@@ -722,21 +746,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
           )}
         </View>
       ),
-      foot: (
-        <View style={{ gap: 10 }}>
-          {finish && (
-            <View style={styles.finishRow}>
-              <Txt size={13.5} color={c.meta} style={{ flexShrink: 1 }}>
-                {HIF.finishLine(revise)}
-              </Txt>
-              <Txt size={16} weight={700} color={c.ink}>
-                {fmtDate(finish)}
-              </Txt>
-            </View>
-          )}
-          <PrimaryButton label={HIF.saveChanges()} onPress={save} disabled={!ready} />
-        </View>
-      ),
+      foot: <PrimaryButton label={HIF.saveChanges()} onPress={save} disabled={!ready} />,
     };
   };
 
@@ -923,8 +933,7 @@ const styles = StyleSheet.create({
   quietRow: { flexDirection: 'row', justifyContent: 'center', gap: 32 },
   quietBtn: { minHeight: 44, justifyContent: 'center' },
   dangerBtn: { minHeight: 48, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: '#b3402f', paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
-  finishRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, paddingHorizontal: 2 },
-  editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
+  editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 58, borderBottomWidth: StyleSheet.hairlineWidth },
   sumRow: { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 12, gap: 2 },
   foot: { paddingHorizontal: 16, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth },
 });
