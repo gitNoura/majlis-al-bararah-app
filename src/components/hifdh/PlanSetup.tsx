@@ -261,6 +261,52 @@ function DayList({ days, onToggle }: { days: number[]; onToggle: (d: number) => 
   );
 }
 
+// The seven days in one row (Monday first), each a small toggle: the edit page shows every day at a glance
+function DayChips({ days, onToggle }: { days: number[]; onToggle: (d: number) => void }) {
+  const h = useHome();
+  const { c } = useTheme();
+  return (
+    <View style={styles.dayChips}>
+      {WEEK_ORDER.map((d: number) => {
+        const on = days.includes(d);
+        return (
+          <Pressable
+            key={d}
+            onPress={() => onToggle(d)}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: on }}
+            accessibilityLabel={weekdayName(d, 'long')}
+            style={[styles.dayChip, on ? { backgroundColor: h.forest, borderColor: h.forest } : { borderColor: c.chosenLine }]}
+          >
+            <Txt size={13} weight={on ? 700 : 500} center color={on ? h.forestInk : c.text} numberOfLines={1}>
+              {weekdayName(d)}
+            </Txt>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+// A small label above a block of the edit page
+function Label({ text, action }: { text: string; action?: { text: string; onPress: () => void } }) {
+  const { c } = useTheme();
+  return (
+    <View style={styles.labelRow}>
+      <Txt size={14} weight={700} color={c.meta} style={{ flex: 1 }}>
+        {text}
+      </Txt>
+      {action && (
+        <Pressable onPress={action.onPress} hitSlop={10} accessibilityRole="button">
+          <Txt size={14} weight={700} color={c.ink}>
+            {action.text}
+          </Txt>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
 // A round − / + button
 function Stepper({ sign, label, onPress, disabled, size = 40 }: { sign: string; label: string; onPress: () => void; disabled?: boolean; size?: number }) {
   const h = useHome();
@@ -354,7 +400,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   const insets = useSafeAreaInsets();
   const { refresh, toast } = useHif();
   const [pace, setPace] = useState<Pace>(() => initPace(type, id));
-  const [sheet, setSheet] = useState<'scope' | 'pace' | 'days' | 'split' | 'from' | null>(null); // the edit page's open sheet
+  const [sheet, setSheet] = useState<'scope' | 'split' | 'from' | null>(null); // the edit page's open sheet
   // a new amount, unit or set of days starts the split over: the even share is the default
   const patch = (next: Partial<Pace>) => setPace((p) => ({ ...p, ...(('amtText' in next || 'unit' in next || 'divide' in next || 'days' in next || 'mode' in next) && !('perDay' in next) ? { perDay: null } : {}), ...next }));
 
@@ -592,8 +638,6 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     const p = plan.planById(pace.id);
     const ready = scopeReady && amount > 0 && days.length > 0 && Boolean(finish) && !tooBig;
     const paused = core.pausedNow(p);
-    const dayWords = pace.days.length === 7 ? HIF.everyDay() : WEEK_ORDER.filter((d: number) => pace.days.includes(d)).map((d: number) => weekdayName(d)).join(' ') || '—';
-    const paceWords = pace.mode === 'date' ? HIF.untilDate(fmtDate(pace.date)) : amountOf(pace) > 0 ? `${unitCount(pace.unit, weekTotal(pace))} ${perWord('week')}` : '—';
     const showSplit = pace.mode === 'amount' && pace.days.length > 0 && amountOf(pace) > 0;
     const close = () => setSheet(null);
     const sheetOf = (k: NonNullable<typeof sheet>, title: string, inner: ReactNode) => (
@@ -604,25 +648,43 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     );
     return {
       body: (
-        <View style={{ gap: 20 }}>
+        <View style={{ gap: 30 }}>
           <AccentPill text={kindOf(pace.type)} size={14} />
+
+          <View style={{ gap: 10 }}>
+            <Label text={HIF.covers()} action={{ text: HIF.modify(), onPress: () => setSheet('scope') }} />
+            <Txt size={20} weight={700} color={c.ink} lineHeight={28}>
+              {rangeLabel(pace.range, pace.type)}
+            </Txt>
+          </View>
+
+          <View style={{ gap: 12 }}>
+            <Label text={HIF.pace()} action={{ text: pace.mode === 'date' ? HIF.pickAmount() : HIF.pickDate(), onPress: () => patch(pace.mode === 'date' ? { mode: 'amount', period: 'day' } : { mode: 'date', period: 'day' }) }} />
+            {pace.mode === 'date' ? dateBlock() : amountBlock()}
+          </View>
+
+          <View style={{ gap: 12 }}>
+            <Label text={HIF.days()} action={{ text: pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll(), onPress: () => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] }) }} />
+            <DayChips days={pace.days} onToggle={(d) => patch({ days: pace.days.includes(d) ? pace.days.filter((x) => x !== d) : [...pace.days, d].sort() })} />
+            {aboutLine()}
+          </View>
+
           <View>
-            <EditRow label={HIF.covers()} value={rangeLabel(pace.range, pace.type)} onPress={() => setSheet('scope')} />
-            <EditRow label={HIF.pace()} value={paceWords} onPress={() => setSheet('pace')} />
-            <EditRow label={HIF.days()} value={dayWords} onPress={() => setSheet('days')} />
             {showSplit && <EditRow label={HIF.perDay()} value={pace.perDay ? HIF.splitCustom() : HIF.splitEven()} onPress={() => setSheet('split')} />}
             <EditRow label={HIF.newPaceFrom()} value={fmtDate(pace.from)} onPress={() => setSheet('from')} last />
           </View>
+
           {finish && (
             <View style={{ gap: 2 }}>
               <Txt size={14} color={c.meta}>
                 {HIF.finishLine(revise)}
               </Txt>
-              <Txt size={24} weight={800} color={c.ink}>
+              <Txt size={24} weight={700} color={c.ink}>
                 {fmtDate(finish)}
               </Txt>
             </View>
           )}
+
           <View style={styles.textActions}>
             <Pressable
               onPress={() => {
@@ -664,36 +726,12 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
           </View>
 
           {sheetOf('scope', HIF.covers(), scopeBlock())}
-          {sheetOf(
-            'pace',
-            HIF.pace(),
-            pace.mode === 'date' ? (
-              <>
-                {dateBlock()}
-                {aboutLine()}
-                {toAmount()}
-              </>
-            ) : (
-              <>
-                {amountBlock()}
-                {toDate()}
-              </>
-            ),
-          )}
-          {sheetOf(
-            'days',
-            HIF.days(),
-            <>
-              {daysBlock()}
-              {aboutLine()}
-            </>,
-          )}
           {sheetOf('split', HIF.perDay(), showSplit ? splitBlock() : null)}
           {sheetOf(
             'from',
             HIF.newPaceFrom(),
             <>
-              <DateCalendar value={pace.from} min={p?.start ?? plan.today()} onChange={(from) => patch({ from })} label={HIF.newPaceFrom()} />
+              <DateCalendar value={pace.from} min={p?.start ?? plan.today()} onChange={(from: string) => patch({ from })} label={HIF.newPaceFrom()} />
               <Hint>{HIF.pastDaysKept()}</Hint>
             </>,
           )}
@@ -886,6 +924,9 @@ const styles = StyleSheet.create({
   splitVal: { width: 78, alignItems: 'center' },
   stepper: { alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth * 2 },
   totalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 4 },
+  dayChips: { flexDirection: 'row', gap: 6 },
+  dayChip: { flex: 1, minHeight: 44, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
+  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   textActions: { flexDirection: 'row', alignItems: 'center', gap: 28 },
   textBtn: { minHeight: 44, justifyContent: 'center' },
   editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 62, paddingVertical: 10 },
