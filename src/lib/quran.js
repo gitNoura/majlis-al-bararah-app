@@ -4,6 +4,7 @@
 
 import { isFrench } from '../i18n/i18n.js';
 import { SURAH_MEANINGS_FR } from '../i18n/i18n-fr.js';
+import { HAFS } from './riwaya.js';
 
 export const TOTAL_PAGES = 604;
 
@@ -164,12 +165,15 @@ export const SURAHS = [
   meaning: isFrench ? SURAH_MEANINGS_FR[i] : ENGLISH_NAMES[i][1], // The Opening / L’Ouverture
 }));
 
-// Page on which each of the 60 ahzab starts (the same in the Warsh and Hafs mushafs).
-const HIZB_PAGES = [
+// Page on which each of the 60 ahzab starts. The same in the Warsh and Hafs mushafs except hizb 12:
+// Warsh starts it on page 111 («قَالَ رَجُلَانِ», 5:23 in Hafs numbering), Hafs on page 112 (5:27).
+// Checked against quran-meta's Hafs data: the other 59 ahzab and all 30 ajza match.
+const HIZB_PAGES_WARSH = [
   1, 11, 22, 32, 42, 51, 62, 72, 82, 92, 102, 111, 121, 132, 142, 151, 162, 173, 182, 192,
   201, 212, 222, 231, 242, 252, 262, 272, 282, 292, 302, 312, 322, 332, 342, 352, 362, 371, 382, 392,
   402, 413, 422, 431, 442, 451, 462, 472, 482, 491, 502, 513, 522, 531, 542, 553, 562, 572, 582, 591,
 ];
+const HIZB_PAGES = HIZB_PAGES_WARSH.map((page, i) => (HAFS && i === 11 ? 112 : page));
 
 // The ayah each hizb starts with [surah, ayah], Warsh numbering. From the ۞ marks in the
 // KFGQPC Warsh text, checked against the pages above (scripts/find_hizb_starts.py).

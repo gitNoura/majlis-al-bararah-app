@@ -54,7 +54,8 @@
     "ios": "expo start --ios",
     "web": "npm run skia-web && expo start --web",
     "skia-web": "node -e \"require('fs').mkdirSync('public',{recursive:true});require('fs').copyFileSync('node_modules/canvaskit-wasm/bin/full/canvaskit.wasm','public/canvaskit.wasm')\"",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "check:boundaries": "node scripts/check-boundaries.mjs"
   },
   "private": true
 }
