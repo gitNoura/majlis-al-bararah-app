@@ -224,7 +224,7 @@ function JuzList({ bits, onSet }: Omit<Props, 'quick'>) {
                           style={[styles.cell, { backgroundColor: cellColor(st[u]), borderColor: st[u] ? c.goldStrong : c.chosenLine }]}
                         >
                           <Txt size={13} weight={700} color={st[u] === 2 ? c.onInk : c.ink}>
-                            {num(u + 1)}
+                            {num((u % 8) + 1)}
                           </Txt>
                         </Pressable>
                       ))}

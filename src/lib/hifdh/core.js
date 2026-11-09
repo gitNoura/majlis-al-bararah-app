@@ -70,6 +70,10 @@ export function makeUnits(raw) {
   };
 }
 
+// A thumun is never shown by its number in the whole Quran (33, 77...): only 1-8 inside its hizb, with the hizb
+// beside it. u is the thumun's index from 0 (the 9th thumun, u = 8, is «thumun 1, hizb 2»).
+export const thumunParts = (u) => ({ n: (u % 8) + 1, hizb: Math.floor(u / 8) + 1 });
+
 // ---------- Sets of ayat: lists of [from, to) ranges, and the same as a flag per ayah ----------
 
 export function rangesToBits(ranges, N) {

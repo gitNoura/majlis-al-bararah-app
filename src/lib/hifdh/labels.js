@@ -33,6 +33,17 @@ export const UNIT_ONE = {
 };
 export const unitCount = (unit, n) => `${num(n)} ${n === 1 ? UNIT_ONE[unit]() : UNIT_PLURAL[unit]()}`;
 
+// «Thumun 1, Hizb 2», «Thumun 3–5, Hizb 1», «Thumun 7, Hizb 1 – Thumun 2, Hizb 2»: a thumun is told by its place in
+// its hizb (1-8), never by its number in the whole Quran. ua and ub are the first and last thumun (from 0).
+export function thumunName(ua, ub = ua) {
+  const a = core.thumunParts(ua);
+  const b = core.thumunParts(ub);
+  const one = (t) => s(`الثمن ${t.n} من الحزب ${t.hizb}`, `Thumun ${t.n}, Hizb ${t.hizb}`, `Thumun ${t.n}, Hizb ${t.hizb}`);
+  if (ua === ub) return one(a);
+  if (a.hizb === b.hizb) return s(`الأثمان ${a.n}–${b.n} من الحزب ${a.hizb}`, `Thumun ${a.n}–${b.n}, Hizb ${a.hizb}`, `Thumun ${a.n}–${b.n}, Hizb ${a.hizb}`);
+  return `${one(a)} – ${one(b)}`;
+}
+
 // «Thumun 213», «Hizb 5–6», «Al-Baqarah 213–215»: the portion's name, in the unit it was planned in
 export function portionName(segs, unit) {
   const U = plan.units();
@@ -46,6 +57,7 @@ export function portionName(segs, unit) {
     return `${ayahLabel(a)} – ${ayahLabel(b)}`;
   }
   const info = U.unit[unit];
+  if (unit === 'thumun') return thumunName(info.uid[a], info.uid[b]);
   const from = info.label(info.uid[a]);
   const to = info.label(info.uid[b]);
   const one = { page: s('صفحة', 'Page'), thumun: s('الثمن', 'Thumun'), hizb: s('الحزب', 'Hizb') }[unit];
