@@ -28,7 +28,7 @@ export function RevisionCard() {
           {HIF.noRevPlan()}
         </Txt>
         <Hint>{HIF.noRevPlanSub()}</Hint>
-        <PrimaryButton label={HIF.startRevision()} onPress={() => startPlan('revise')} />
+        <PrimaryButton square label={HIF.startRevision()} onPress={() => startPlan('revise')} />
       </Section>
     );
   }

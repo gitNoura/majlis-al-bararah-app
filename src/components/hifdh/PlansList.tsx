@@ -105,17 +105,17 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
       })}
 
       <View style={{ paddingTop: 6 }}>
-        <SecondaryButton label={`+ ${HIF.addPlan()}`} onPress={onAdd} />
+        <SecondaryButton square label={`+ ${HIF.addPlan()}`} onPress={onAdd} />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  link: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 68, padding: 18, borderRadius: 22 },
-  plan: { gap: 16, padding: 18, borderRadius: 22 },
+  link: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 68, padding: 18, borderRadius: 14 },
+  plan: { gap: 16, padding: 18, borderRadius: 14 },
   kindRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 18 },
-  modify: { minHeight: 42, paddingHorizontal: 22, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
+  modify: { minHeight: 42, paddingHorizontal: 22, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   text: { minHeight: 42, justifyContent: 'center' },
 });

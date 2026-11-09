@@ -72,10 +72,10 @@ export function WeekCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, overflow: 'hidden' },
+  card: { borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, overflow: 'hidden' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { alignItems: 'flex-end' },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 6 },
   day: { flex: 1, alignItems: 'center', gap: 6 },
-  pill: { width: '100%', maxWidth: 38, height: 44, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  pill: { width: '100%', maxWidth: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
 });

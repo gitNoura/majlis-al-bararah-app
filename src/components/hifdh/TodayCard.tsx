@@ -28,7 +28,7 @@ export function TodayCard() {
           {HIF.noHifdhPlan()}
         </Txt>
         <Hint>{HIF.noHifdhPlanSub()}</Hint>
-        <PrimaryButton label={HIF.setUpPlan()} onPress={() => startPlan('memorize')} />
+        <PrimaryButton square label={HIF.setUpPlan()} onPress={() => startPlan('memorize')} />
       </Section>
     );
   }

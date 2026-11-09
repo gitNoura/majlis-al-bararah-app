@@ -63,8 +63,8 @@ export function Section({ title, titleColor, tone, children, style, first, plain
         plain
           ? !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider, paddingTop: 20 }
           : tone === 'done'
-            ? { backgroundColor: h.mint, borderRadius: 22, padding: 18, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: h.mintLine } // finished: the card turns green
-            : { backgroundColor: h.card, borderRadius: 22, padding: 18, borderWidth: StyleSheet.hairlineWidth, borderColor: h.cardLine },
+            ? { backgroundColor: h.mint, borderRadius: 14, padding: 18, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: h.mintLine } // finished: the card turns green
+            : { backgroundColor: h.card, borderRadius: 14, padding: 18, borderWidth: StyleSheet.hairlineWidth, borderColor: h.cardLine },
         style,
       ]}
     >
@@ -106,7 +106,7 @@ export function Hint({ children }: { children: ReactNode }) {
   );
 }
 
-export function PrimaryButton({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
+export function PrimaryButton({ label, onPress, disabled, square }: { label: string; onPress: () => void; disabled?: boolean; square?: boolean }) {
   const h = useHome();
   return (
     <Pressable
@@ -114,16 +114,16 @@ export function PrimaryButton({ label, onPress, disabled }: { label: string; onP
       disabled={disabled}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
-      style={[styles.btn, { backgroundColor: h.forest, opacity: disabled ? 0.45 : 1 }]}
+      style={[styles.btn, square && styles.square, { backgroundColor: h.forest, opacity: disabled ? 0.45 : 1 }]}
     >
-      <Txt size={16} weight={700} color={h.forestInk}>
+      <Txt size={square ? 15.5 : 16} weight={700} color={h.forestInk}>
         {label}
       </Txt>
     </Pressable>
   );
 }
 
-export function SecondaryButton({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
+export function SecondaryButton({ label, onPress, disabled, square }: { label: string; onPress: () => void; disabled?: boolean; square?: boolean }) {
   const h = useHome();
   const { c } = useTheme();
   return (
@@ -132,9 +132,9 @@ export function SecondaryButton({ label, onPress, disabled }: { label: string; o
       disabled={disabled}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
-      style={[styles.btn, { backgroundColor: 'transparent', borderWidth: StyleSheet.hairlineWidth * 2, borderColor: c.chosenLine, opacity: disabled ? 0.4 : 1 }]}
+      style={[styles.btn, square && styles.square, { backgroundColor: 'transparent', borderWidth: StyleSheet.hairlineWidth * 2, borderColor: c.chosenLine, opacity: disabled ? 0.4 : 1 }]}
     >
-      <Txt size={16} weight={700} color={h.ink}>
+      <Txt size={square ? 15.5 : 16} weight={700} color={h.ink}>
         {label}
       </Txt>
     </Pressable>
@@ -145,5 +145,6 @@ const styles = StyleSheet.create({
   section: { gap: 14 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
+  square: { minHeight: 48, borderRadius: 12 },
   btn: { minHeight: 50, borderRadius: 25, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
 });

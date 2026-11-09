@@ -154,6 +154,6 @@ const styles = StyleSheet.create({
   task: { gap: 14, paddingVertical: 14 },
   main: { gap: 3 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  icon: { width: 44, height: 44, borderRadius: 22, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center' },
-  complete: { flex: 1, minHeight: 44, paddingHorizontal: 18, borderRadius: 22, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
+  icon: { width: 44, height: 44, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center' },
+  complete: { flex: 1, minHeight: 44, paddingHorizontal: 18, borderRadius: 12, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
 });

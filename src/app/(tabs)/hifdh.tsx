@@ -8,7 +8,7 @@
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, BackHandler, ScrollView, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HifHeader } from '@/components/hifdh/HifHeader';
@@ -22,7 +22,6 @@ import { RevisionCard } from '@/components/hifdh/RevisionCard';
 import type { Row } from '@/components/hifdh/StopSheet';
 import { TodayCard } from '@/components/hifdh/TodayCard';
 import { Txt } from '@/components/Txt';
-import { SegmentedControl } from '@/components/ui';
 import { HIF } from '@/i18n/hifdh';
 import { markToday } from '@/lib/activity';
 import { displayKeys } from '@/lib/ayahmap';
@@ -51,6 +50,7 @@ function openQuran(mode: 'listen' | 'recite', row: Row | null) {
 function Content({ screen, setScreen, seg, setSeg, setup, open, exit }: { screen: Screen; setScreen: (s: Screen) => void; seg: Seg; setSeg: (s: Seg) => void; setup: Setup; open: (s: Setup) => void; exit: () => void }) {
   const insets = useSafeAreaInsets();
   const home = useHome();
+  const { c } = useTheme();
   useHif(); // subscribing here redraws the whole screen when `rev` changes
 
   // the phone's back button steps out of «What I've memorized» (the plan setup has its own: it steps back through its questions)
@@ -77,19 +77,24 @@ function Content({ screen, setScreen, seg, setSeg, setup, open, exit }: { screen
   return (
     <View style={{ flex: 1 }}>
       <View style={{ paddingHorizontal: space.md, paddingTop: insets.top + space.sm, paddingBottom: space.sm, gap: space.md }}>
-        <Txt size={28} weight={800} lineHeight={36} color={home.ink} numberOfLines={1}>
+        <Txt size={26} weight={700} lineHeight={34} color={home.ink} numberOfLines={1}>
           {HIF.title()}
         </Txt>
-        <SegmentedControl
-          pill
-          value={seg}
-          onChange={setSeg}
-          options={[
-            { value: 'today', label: HIF.segToday() },
-            { value: 'plan', label: HIF.segPlan() },
-            { value: 'progress', label: HIF.progress() },
-          ]}
-        />
+        <View style={[styles.tabs, { borderBottomColor: c.divider }]} accessibilityRole="tablist">
+          {(
+            [
+              ['today', HIF.segToday()],
+              ['plan', HIF.segPlan()],
+              ['progress', HIF.progress()],
+            ] as [Seg, string][]
+          ).map(([v, label]) => (
+            <Pressable key={v} onPress={() => setSeg(v)} accessibilityRole="tab" accessibilityState={{ selected: seg === v }} style={[styles.tab, { borderBottomColor: seg === v ? home.leaf : 'transparent' }]}>
+              <Txt size={15} weight={seg === v ? 700 : 500} color={seg === v ? c.ink : c.meta}>
+                {label}
+              </Txt>
+            </Pressable>
+          ))}
+        </View>
       </View>
       <ScrollView contentContainerStyle={pad} keyboardShouldPersistTaps="handled">
         {seg === 'today' && (
@@ -161,3 +166,8 @@ export default function HifdhTab() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  tabs: { flexDirection: 'row', borderBottomWidth: StyleSheet.hairlineWidth },
+  tab: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2 },
+});
