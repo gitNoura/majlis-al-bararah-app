@@ -1,81 +1,64 @@
-// HOME, card 4: activity. This week as seven pairs of capsules, Monday first: the left one (hatched-pale) is the same
-// weekday last week, the right one is this week, each filled by how many kinds of activity the day had (the mushaf,
-// adhkar, ahadith). Today's letter sits on a dark pill; days still to come stay empty.
+// HOME, card 4: activity. Three plain numbers instead of a chart: the days this week the reader was active (out of 7, with
+// seven slim segments under it, Monday first, today's the last one lit so far), the same count for last week, and for the
+// last four weeks (out of 28). A day counts when the reader opened the mushaf or Hifdh, or logged the wird (src/lib/activity.js).
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
 import { StyleSheet, View } from 'react-native';
 
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
-import { LANG, LOCALE } from '@/i18n/i18n';
+import { L } from '@/i18n/i18n';
 import { activityGrid } from '@/lib/dashboard';
 import { useHome } from '@/theme/home';
 
-const BAR_H = 48;
-const FILL = [0, 0.34, 0.67, 1]; // level 0 to 3 as a share of the capsule
-
-// Monday to Sunday, written by the phone in the language of the moment (2024-01-01 was a Monday)
-const weekdays = () =>
-  Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 1 + i).toLocaleDateString(LANG === 'ar' ? LOCALE : LANG, { weekday: LANG === 'ar' ? 'short' : 'narrow' }));
-
-function Capsule({ share, color, track }: { share: number; color: string; track: string }) {
-  return (
-    <View style={[styles.cap, { backgroundColor: track }]}>
-      <View style={{ height: share * BAR_H, backgroundColor: color, borderRadius: 6 }} />
-    </View>
-  );
-}
+const digits = (n: number) => n.toLocaleString(L('ar', 'en', 'fr'));
+const active = (cells: { level: number; future: boolean }[]) => cells.filter((d) => !d.future && d.level > 0).length;
 
 export function ActivityCard() {
   const h = useHome();
   const grid = activityGrid();
   const thisWeek = grid.slice(21, 28);
   const lastWeek = grid.slice(14, 21);
-  const todayIndex = thisWeek.reduce((at, d, i) => (d.future ? at : i), 0);
-  const names = weekdays();
+  const now = active(thisWeek);
+  const stat = (value: string, label: string) => (
+    <View style={{ flex: 1, gap: 2 }}>
+      <Txt size={17} weight={800} color={h.ink}>
+        {value}
+      </Txt>
+      <Txt size={12} color={h.meta} numberOfLines={2}>
+        {label}
+      </Txt>
+    </View>
+  );
   return (
     <View style={[styles.card, { backgroundColor: h.card, borderColor: h.cardLine, boxShadow: `0px 8px 20px ${h.shadow}` }]}>
-      <View style={styles.head}>
-        <Txt size={15} weight={700} color={h.ink}>
-          {DASH.activity()}
+      <Txt size={15} weight={700} color={h.ink}>
+        {DASH.activity()}
+      </Txt>
+      <View style={styles.big}>
+        <Txt size={38} weight={800} lineHeight={44} color={h.ink}>
+          {digits(now)}
         </Txt>
-        <View style={styles.legend}>
-          <View style={[styles.swatch, { backgroundColor: h.ghost }]} />
-          <Txt size={12} color={h.meta}>
-            {DASH.lastWeek()}
-          </Txt>
-          <View style={[styles.swatch, { backgroundColor: h.leaf, marginStart: 8 }]} />
-          <Txt size={12} color={h.meta}>
-            {DASH.thisWeek()}
-          </Txt>
-        </View>
+        <Txt size={15} weight={500} color={h.meta}>
+          {`/ ${digits(7)}  ${DASH.activeDaysWeek()}`}
+        </Txt>
       </View>
-      <View style={styles.week} accessible accessibilityLabel={DASH.thisWeek()}>
-        {thisWeek.map((d, i) => (
-          <View key={d.day} style={styles.day}>
-            <View style={styles.pair}>
-              <Capsule share={FILL[lastWeek[i].level]} color={h.ghost} track={h.well} />
-              <Capsule share={d.future ? 0 : FILL[d.level]} color={h.leaf} track={h.well} />
-            </View>
-            <View style={[styles.name, i === todayIndex && { backgroundColor: h.forest }]}>
-              <Txt size={12} weight={i === todayIndex ? 800 : 500} color={i === todayIndex ? h.forestInk : h.meta} center numberOfLines={1}>
-                {names[i]}
-              </Txt>
-            </View>
-          </View>
+      <View style={styles.segments} accessible accessibilityLabel={`${now}/7`}>
+        {thisWeek.map((d) => (
+          <View key={d.day} style={[styles.segment, { backgroundColor: !d.future && d.level > 0 ? h.leaf : h.well }]} />
         ))}
+      </View>
+      <View style={[styles.foot, { borderTopColor: h.cardLine }]}>
+        {stat(`${digits(active(lastWeek))} / ${digits(7)}`, DASH.lastWeek())}
+        {stat(`${digits(active(grid))} / ${digits(28)}`, DASH.last4())}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 10, overflow: 'hidden' },
-  head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 },
-  legend: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  swatch: { width: 10, height: 10, borderRadius: 5 },
-  week: { flexDirection: 'row', justifyContent: 'space-between' },
-  day: { flex: 1, alignItems: 'center', gap: 6 },
-  pair: { flexDirection: 'row', gap: 3, alignItems: 'flex-end' },
-  cap: { width: 10, height: BAR_H, borderRadius: 6, overflow: 'hidden', justifyContent: 'flex-end' },
-  name: { minWidth: 30, height: 22, paddingHorizontal: 6, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 10, overflow: 'hidden' },
+  big: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
+  segments: { flexDirection: 'row', gap: 5 },
+  segment: { flex: 1, height: 6, borderRadius: 3 },
+  foot: { flexDirection: 'row', gap: 12, paddingTop: 12, marginTop: 2, borderTopWidth: StyleSheet.hairlineWidth },
 });

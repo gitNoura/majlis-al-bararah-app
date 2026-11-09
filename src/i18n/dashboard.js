@@ -32,8 +32,8 @@ export const DASH = {
   addPlan: () => L('أنشئ خطة', 'Create one', 'Créer un plan'),
   // activity
   activity: () => L('النشاط', 'Activity', 'Activité'),
+  activeDaysWeek: () => L('أيام نشطة هذا الأسبوع', 'active days this week', 'jours actifs cette semaine'),
   last4: () => L('آخر 4 أسابيع', 'Last 4 weeks', '4 dernières semaines'),
-  thisWeek: () => L('هذا الأسبوع', 'This week', 'Cette semaine'),
   lastWeek: () => L('الأسبوع الماضي', 'Last week', 'Semaine dernière'),
   // additional resources
   resources: () => L('مصادر إضافية', 'Additional resources', 'Ressources complémentaires'),
