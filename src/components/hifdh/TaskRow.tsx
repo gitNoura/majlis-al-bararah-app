@@ -74,7 +74,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
   return (
     <View style={rule}>
       <View style={styles.main}>
-        <Txt serif size={19} weight={400} color={c.meta} lineHeight={30}>
+        <Txt size={17} weight={700} color={c.meta}>
           {lines.title}
         </Txt>
         {!!lines.sub && (
