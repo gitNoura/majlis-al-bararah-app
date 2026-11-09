@@ -47,7 +47,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
       {plans.map((p) => {
         const paused = core.pausedNow(p);
         return (
-          <View key={p.id} style={[styles.plan, { backgroundColor: h.card }, paused && { opacity: 0.75 }]}>
+          <View key={p.id} style={[styles.plan, { backgroundColor: h.card, borderColor: h.leaf }, paused && { opacity: 0.75 }]}>
             <View style={styles.kindRow}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Txt size={13.5} weight={700} color={heading}>
@@ -98,7 +98,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
 }
 
 const styles = StyleSheet.create({
-  plan: { gap: 16, padding: 18, borderRadius: 14 },
+  plan: { gap: 16, padding: 18, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth * 2 },
   kindRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 18 },
   modify: { minHeight: 42, paddingHorizontal: 22, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },

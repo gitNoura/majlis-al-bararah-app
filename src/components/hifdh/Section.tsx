@@ -3,7 +3,8 @@
 //
 // Look of the page (redesign v2): calm and flat. A section is its title on the page, and under it its content in one box
 // outlined thinly in green (no boxes inside boxes: rows inside a box are separated by hairlines, not drawn as cards).
-// One colour, forest green (no yellow anywhere): icons, the chosen state, the ring, the buttons.
+// Forest green is the main colour (icons, the chosen state, the ring, the buttons, the box outlines); one warm gold, `amber`,
+// breaks it up: the headings and the week card.
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { ReactNode } from 'react';
 
@@ -33,10 +34,9 @@ export function useAccent() {
   return { fill: alpha(h.leaf, isDark ? 0.18 : 0.1), ink: isDark ? h.tileInk : h.forest, line: alpha(h.leaf, isDark ? 0.4 : 0.3), mark: h.leaf };
 }
 
-// The colour of headings and dates: the deep forest green of the app, not a second colour
+// The colour of headings and dates: the warm gold that sets them apart from the green boxes and buttons
 export function useHeading() {
-  const { isDark } = useTheme();
-  return isDark ? '#8fd0b2' : '#173f32';
+  return useHome().amber;
 }
 
 // A value or a kind of plan (no pill, no box: the words in the accent colour)
@@ -52,16 +52,17 @@ export function AccentPill({ text, size = 13.5 }: { text: string; size?: number 
 // A section: its title, then its content. The title sits outside, above the box; the box is the page's one kind of
 // surface, outlined thinly in green (a finished card: the paler green wash). `plain` drops the box and separates sections
 // with a hairline instead, the title staying on top of its content (the long history list). Nothing is ever written
-// under the title.
-export function Section({ title, titleColor, tone, children, style, first, plain }: { title: string; titleColor?: string; tone?: Tone; first?: boolean; plain?: boolean; children: ReactNode; style?: StyleProp<ViewStyle> }) {
+// under the title. `compact` is the smaller size of the edit page; `action` is a small control at the end of the title row.
+export function Section({ title, titleColor, tone, children, style, first, plain, compact, action }: { title: string; titleColor?: string; tone?: Tone; first?: boolean; plain?: boolean; compact?: boolean; action?: ReactNode; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const h = useHome();
   const { c } = useTheme();
   const heading = useHeading();
   const head = (
     <View style={styles.head}>
-      <Txt size={19} weight={700} color={titleColor ?? heading} style={{ flex: 1 }}>
+      <Txt size={compact ? 16 : 19} weight={700} color={titleColor ?? heading} style={{ flex: 1 }}>
         {title}
       </Txt>
+      {action}
     </View>
   );
   if (plain) {
@@ -73,9 +74,9 @@ export function Section({ title, titleColor, tone, children, style, first, plain
     );
   }
   return (
-    <View style={[styles.outer, style]}>
+    <View style={[styles.outer, compact && styles.outerCompact, style]}>
       {head}
-      <View style={[styles.box, { backgroundColor: tone === 'done' ? h.mint : h.card, borderColor: h.leaf }]}>{children}</View>
+      <View style={[styles.box, compact && styles.boxCompact, { backgroundColor: tone === 'done' ? h.mint : h.card, borderColor: h.leaf }]}>{children}</View>
     </View>
   );
 }
@@ -146,7 +147,9 @@ export function SecondaryButton({ label, onPress, disabled, square }: { label: s
 const styles = StyleSheet.create({
   section: { gap: 14 },
   outer: { gap: 10 },
+  outerCompact: { gap: 6 },
   box: { gap: 14, padding: 18, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth * 2 },
+  boxCompact: { gap: 10, padding: 12 },
   head:{ flexDirection: 'row', alignItems: 'center', gap: 12 },
   heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
   square: { minHeight: 48, borderRadius: 12 },

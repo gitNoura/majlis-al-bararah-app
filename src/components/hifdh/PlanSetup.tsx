@@ -382,7 +382,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   const insets = useSafeAreaInsets();
   const { refresh, toast } = useHif();
   const [pace, setPace] = useState<Pace>(() => initPace(type, id));
-  const [sheet, setSheet] = useState<'scope' | 'split' | 'from' | null>(null); // the edit page's open sheet
+  const [sheet, setSheet] = useState<'scope' | 'split' | 'date' | 'from' | null>(null); // the edit page's open sheet
   // a new amount, unit or set of days starts the split over: the even share is the default
   const patch = (next: Partial<Pace>) => setPace((p) => ({ ...p, ...(('amtText' in next || 'unit' in next || 'divide' in next || 'days' in next || 'mode' in next) && !('perDay' in next) ? { perDay: null } : {}), ...next }));
 
@@ -495,19 +495,23 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   );
 
   // the unit and the calendar; the «about N a day» line needs the days, so the questions show it under the days
+  const dateUnits = () => (
+    <View style={{ gap: 10 }}>
+      <Txt size={14} weight={700} color={c.meta}>
+        {HIF.unitLabel()}
+      </Txt>
+      <View style={styles.chips}>
+        {PLAN_UNITS.map((u: string) => (
+          <Chip key={u} on={pace.unit === u} text={UNIT_NAME[u as keyof typeof UNIT_NAME]()} onPress={() => patch({ unit: u })} />
+        ))}
+      </View>
+    </View>
+  );
+  const dateCalendar = () => <DateCalendar value={pace.date} min={core.addDays(plan.today(), 1)} onChange={(date) => patch({ date })} label={HIF.finishDate()} />;
   const dateBlock = () => (
     <Card>
-      <View style={{ gap: 10 }}>
-        <Txt size={14} weight={700} color={c.meta}>
-          {HIF.unitLabel()}
-        </Txt>
-        <View style={styles.chips}>
-          {PLAN_UNITS.map((u: string) => (
-            <Chip key={u} on={pace.unit === u} text={UNIT_NAME[u as keyof typeof UNIT_NAME]()} onPress={() => patch({ unit: u })} />
-          ))}
-        </View>
-      </View>
-      <DateCalendar value={pace.date} min={core.addDays(plan.today(), 1)} onChange={(date) => patch({ date })} label={HIF.finishDate()} />
+      {dateUnits()}
+      {dateCalendar()}
     </Card>
   );
 
@@ -614,7 +618,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   const toDate = () => <Link text={HIF.pickDate()} onPress={() => patch({ mode: 'date', period: 'day' })} />;
   const toAmount = () => <Link text={HIF.pickAmount()} onPress={() => patch({ mode: 'amount', period: 'day', step: pace.step - 1 })} />; // from the date question back to the amount question
 
-  // ----- the edit page: titled boxes (covers, pace, days, finish, start); a row shows its value and opens a small sheet; pause and delete under them -----
+  // ----- the edit page: compact titled boxes (covers, pace with its start date, days); a row shows its value and opens a small sheet; pause and delete under them; the finish date sits by Save -----
 
   const edit = () => {
     const p = plan.planById(pace.id);
@@ -630,12 +634,12 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     );
     return {
       body: (
-        <View style={{ gap: 22 }}>
-          <Section title={HIF.covers()}>
+        <View style={{ gap: 12 }}>
+          <Section compact title={HIF.covers()}>
             <EditRow label={kindOf(pace.type)} value={rangeLabel(pace.range, pace.type)} onPress={() => setSheet('scope')} />
           </Section>
 
-          <Section title={HIF.pace()}>
+          <Section compact title={HIF.pace()}>
             <View style={styles.modeRow}>
               <View style={{ flex: 1 }}>
                 <Chip on={pace.mode === 'amount'} text={HIF.paceByAmount()} onPress={() => pace.mode !== 'amount' && patch({ mode: 'amount', period: 'day' })} />
@@ -644,16 +648,23 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
                 <Chip on={pace.mode === 'date'} text={HIF.paceByDate()} onPress={() => pace.mode !== 'date' && patch({ mode: 'date', period: 'day' })} />
               </View>
             </View>
-            {pace.mode === 'date' ? dateBlock() : amountBlock()}
+            {pace.mode === 'date' ? (
+              <>
+                {dateUnits()}
+                <EditRow label={HIF.finishDate()} value={fmtDate(pace.date)} onPress={() => setSheet('date')} />
+              </>
+            ) : (
+              amountBlock()
+            )}
+            <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: c.divider }} />
+            <EditRow label={HIF.newPaceFrom()} value={fmtDate(pace.from)} onPress={() => setSheet('from')} />
           </Section>
 
-          <Section title={HIF.days()}>
-            <View style={styles.daysHead}>
-              <Txt size={14} color={c.meta}>
-                {HIF.selectedDays(pace.days.length)}
-              </Txt>
-              <Chip on={pace.days.length === 7} text={pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll()} onPress={() => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] })} />
-            </View>
+          <Section
+            compact
+            title={HIF.days()}
+            action={<Chip on={pace.days.length === 7} text={pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll()} onPress={() => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] })} />}
+          >
             <DayChips days={pace.days} onToggle={(d) => patch({ days: pace.days.includes(d) ? pace.days.filter((x) => x !== d) : [...pace.days, d].sort() })} />
             {aboutLine()}
             {showSplit && (
@@ -664,54 +675,46 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
             )}
           </Section>
 
-          {finish && (
-            <Section title={HIF.finishLine(revise)}>
-              <Txt size={24} weight={700} color={c.ink}>
-                {fmtDate(finish)}
-              </Txt>
-            </Section>
-          )}
-
-          <Section title={HIF.newPaceFrom()}>
-            <EditRow value={fmtDate(pace.from)} onPress={() => setSheet('from')} />
-          </Section>
-
-          <View style={{ gap: 4 }}>
-            <SecondaryButton
-              square
-              label={paused ? HIF.resumePlan() : HIF.pausePlan()}
-              onPress={() => {
-                plan.setPaused(pace.id, !paused);
-                refresh();
-                onExit();
-              }}
-            />
-            <Pressable
-              onPress={() =>
-                Alert.alert(HIF.confirmDelete(), undefined, [
-                  { text: HIF.close(), style: 'cancel' },
-                  {
-                    text: HIF.deletePlan(),
-                    style: 'destructive',
-                    onPress: () => {
-                      plan.deletePlan(pace.id);
-                      refresh();
-                      onExit();
+          <View style={styles.two}>
+            <View style={{ flex: 1 }}>
+              <SecondaryButton
+                square
+                label={paused ? HIF.resumePlan() : HIF.pausePlan()}
+                onPress={() => {
+                  plan.setPaused(pace.id, !paused);
+                  refresh();
+                  onExit();
+                }}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Pressable
+                onPress={() =>
+                  Alert.alert(HIF.confirmDelete(), undefined, [
+                    { text: HIF.close(), style: 'cancel' },
+                    {
+                      text: HIF.deletePlan(),
+                      style: 'destructive',
+                      onPress: () => {
+                        plan.deletePlan(pace.id);
+                        refresh();
+                        onExit();
+                      },
                     },
-                  },
-                ])
-              }
-              hitSlop={8}
-              accessibilityRole="button"
-              style={styles.deleteBtn}
-            >
-              <Txt size={16} weight={700} center color="#b3402f">
-                {HIF.deletePlan()}
-              </Txt>
-            </Pressable>
+                  ])
+                }
+                accessibilityRole="button"
+                style={styles.dangerBtn}
+              >
+                <Txt size={15.5} weight={700} center color="#b3402f">
+                  {HIF.deletePlan()}
+                </Txt>
+              </Pressable>
+            </View>
           </View>
 
           {sheetOf('scope', HIF.covers(), scopeBlock())}
+          {sheetOf('date', HIF.finishDate(), dateCalendar())}
           {sheetOf('split', HIF.perDay(), showSplit ? splitBlock() : null)}
           {sheetOf(
             'from',
@@ -723,7 +726,21 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
           )}
         </View>
       ),
-      foot: <PrimaryButton label={HIF.saveChanges()} onPress={save} disabled={!ready} />,
+      foot: (
+        <View style={{ gap: 10 }}>
+          {finish && (
+            <View style={styles.finishRow}>
+              <Txt size={13.5} color={c.meta} style={{ flexShrink: 1 }}>
+                {HIF.finishLine(revise)}
+              </Txt>
+              <Txt size={16} weight={700} color={c.ink}>
+                {fmtDate(finish)}
+              </Txt>
+            </View>
+          )}
+          <PrimaryButton label={HIF.saveChanges()} onPress={save} disabled={!ready} />
+        </View>
+      ),
     };
   };
 
@@ -905,10 +922,11 @@ const styles = StyleSheet.create({
   stepper: { alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth * 2 },
   totalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 4 },
   dayChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  dayChip: { flexGrow: 1, flexBasis: '22%', minHeight: 44, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
+  dayChip: { flexGrow: 1, flexBasis: '22%', minHeight: 40, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
   modeRow: { flexDirection: 'row', gap: 8 },
-  deleteBtn: { minHeight: 48, justifyContent: 'center' },
-  editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48 },
+  dangerBtn: { minHeight: 48, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: '#b3402f', paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
+  finishRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, paddingHorizontal: 2 },
+  editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
   sumRow: { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 12, gap: 2 },
   foot: { paddingHorizontal: 16, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth },
 });

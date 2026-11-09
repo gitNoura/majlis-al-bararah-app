@@ -26,6 +26,9 @@ export type HomePalette = {
   mint: string; // the paler green a completed Hifdh card turns (its wash on the paper, as one solid colour)
   mintLine: string; // that card's border
   leaf: string; // fills on a paper card
+  amber: string; // the warm gold that breaks the green on the Hifdh page: headings, the week card's today ring and idle days
+  sand: string; // a soft warm surface (the week card)
+  sandLine: string; // its border
   ghost: string; // last week's capsule
   shadow: string;
 };
@@ -52,6 +55,9 @@ const light: HomePalette = {
   mint: '#eff4f2',
   mintLine: 'rgba(31, 90, 69, 0.22)',
   leaf: '#1f5a45',
+  amber: '#9a6a14',
+  sand: '#f8f1df',
+  sandLine: 'rgba(154, 106, 20, 0.28)',
   ghost: 'rgba(20, 50, 38, 0.14)',
   shadow: 'rgba(20, 50, 38, 0.08)',
 };
@@ -78,6 +84,9 @@ const dark: HomePalette = {
   mint: '#28362f',
   mintLine: 'rgba(111, 181, 151, 0.4)',
   leaf: '#6fb597',
+  amber: '#e4c46d',
+  sand: '#2a2519',
+  sandLine: 'rgba(228, 196, 109, 0.3)',
   ghost: 'rgba(255, 255, 255, 0.14)',
   shadow: 'rgba(0, 0, 0, 0.3)',
 };

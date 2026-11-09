@@ -8,7 +8,7 @@ import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import * as core from '@/lib/hifdh/core';
-import { alpha, useAccent } from '@/components/hifdh/Section';
+import { alpha } from '@/components/hifdh/Section';
 import { num, weekdayName, weekInfo } from '@/lib/hifdh/labels';
 import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
@@ -26,21 +26,20 @@ function CloseMark({ color }: { color: string }) {
 export function WeekCard() {
   const { c, isDark } = useTheme();
   const h = useHome();
-  const a = useAccent();
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
-    <View style={[styles.card, { backgroundColor: h.tile, borderColor: h.cardLine }]}>
+    <View style={[styles.card, { backgroundColor: h.sand, borderColor: h.sandLine }]}>
       <View style={styles.top}>
-        <Txt size={18} weight={700} color={h.tileInk}>
+        <Txt size={18} weight={700} color={h.amber}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
-          <Txt size={26} weight={800} color={h.tileInk} lineHeight={30}>
+          <Txt size={26} weight={800} color={h.ink} lineHeight={30}>
             {num(n)}
           </Txt>
-          <Txt size={12} color={h.tileInk} style={{ opacity: 0.7 }}>
+          <Txt size={12} color={h.meta}>
             {HIF.ofSevenDays()}
           </Txt>
         </View>
@@ -50,14 +49,14 @@ export function WeekCard() {
           const state: DayState = kept.has(d) ? 'on' : d === today ? 'now' : started && d >= started && d < today ? 'miss' : 'idle';
           return (
             <View key={d} style={styles.day}>
-              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={h.tileInk}>
+              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={h.ink}>
                 {weekdayName(core.weekdayOf(d))}
               </Txt>
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? h.forest : state === 'now' ? a.fill : alpha(h.leaf, isDark ? 0.22 : 0.18) },
-                  state === 'now' && { borderWidth: 2, borderColor: a.mark },
+                  { backgroundColor: state === 'on' ? h.forest : alpha(h.amber, state === 'now' ? 0.3 : isDark ? 0.2 : 0.16) },
+                  state === 'now' && { borderWidth: 2, borderColor: h.amber },
                 ]}
               >
                 {state === 'on' && <CheckIcon color={h.forestInk} size={16} strokeWidth={2.4} />}
