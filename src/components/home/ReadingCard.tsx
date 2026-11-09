@@ -1,6 +1,6 @@
 // HOME, card 2: reading, the hero. A deep forest card framed like a mushaf page, the surah in Amiri (the Quran's own face), the surah and page where the reader stopped,
 // the khatma as one cream ring, and the one filled button of the screen (a cream pill that opens the Quran tab at the
-// marker). The juz read, the pages today and the streak are the tiles under it (StatTiles).
+// marker).
 'use no memo'; // reads saved state (the marker) when it draws, which the React Compiler cannot see change
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';

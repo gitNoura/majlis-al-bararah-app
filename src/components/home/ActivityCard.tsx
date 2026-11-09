@@ -1,6 +1,6 @@
 // HOME, card 4: activity. This week as seven pairs of capsules, Monday first: the left one (hatched-pale) is the same
 // weekday last week, the right one is this week, each filled by how many kinds of activity the day had (the mushaf,
-// adhkar, ahadith). Today's letter sits on a dark pill; days still to come stay empty. The streak is the soft-green tile above.
+// adhkar, ahadith). Today's letter sits on a dark pill; days still to come stay empty.
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
 import { StyleSheet, View } from 'react-native';
 

@@ -1,17 +1,15 @@
 // What the Home dashboard shows, worked out from the data the app already keeps (nothing new is stored):
 //   prayerView()      the next prayer and the day's five times   (src/lib/prayer.js)
-//   readingView()     where the reader is in the mushaf, its khatma and today's pages  ('lastPage', src/lib/wird.ts)
+//   readingView()     where the reader is in the mushaf and its khatma  ('lastPage', src/lib/wird.ts)
 //   memorizedCells()  the share of each juz memorized, from the Hifdh ledger  (src/lib/hifdh/plan.js)
-//   hifdhToday()      how many of today's new / revision portions are done
+//   hifdhOverview()   how far the memorization plan and the revision plan are through their whole run
 //   activityGrid()    the last four weeks, one cell a day, by how many kinds of activity (src/lib/activity.js)
 // Every function reads the saved state when it is called, so the screen calls them again whenever it comes into view.
-import type { Row } from '@/components/hifdh/StopSheet';
 import type { Phase } from '@/components/PrayerSky';
 import { LANG, t } from '@/i18n/i18n';
 import { activeDays } from '@/lib/activity';
 import * as hijri from '@/lib/hijri';
 import { juzRange } from '@/lib/hifdh';
-import { isDone } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { clockTime, nextPrayer, place, skyNow, skyTimes, times } from '@/lib/prayer';
 import { pageOf } from '@/lib/boxes';
@@ -132,8 +130,6 @@ export function readingView() {
     page,
     cells,
     percent: started ? Math.round(clamp((page - 1) / TOTAL_PAGES) * 100) : 0,
-    juzFull: cells.filter((n) => n >= 1).length,
-    pagesToday: wird.pages?.[dayKey()]?.length ?? 0,
     khatmas: wird.khatmas || 0,
   };
 }
@@ -152,16 +148,14 @@ export function memorizedCells(): number[] {
   });
 }
 
-export function hifdhToday() {
+// How far each kind of plan is through its whole run (not today's portions): `progress` is 0..1 (null while no plan of that
+// kind is running: none made, paused, or not started), `days` the days done out of all its days (null for a weekly plan),
+// `has` whether a plan of that kind exists at all.
+export function hifdhOverview() {
   plan.ready();
-  const hasPlan = (plan.get()?.plans?.length ?? 0) > 0;
-  const rows = plan.todayRows() as Row[];
-  const count = (type: string) => {
-    const mine = rows.filter((r) => r.plan.type === type);
-    return { total: mine.length, done: mine.filter(isDone).length };
-  };
   const plans = (plan.get()?.plans ?? []) as { type: string }[];
-  return { hasPlan, hasMemorize: plans.some((x) => x.type === 'memorize'), hasRevise: plans.some((x) => x.type === 'revise'), memorize: count('memorize'), revise: count('revise') };
+  const kind = (type: 'memorize' | 'revise') => ({ has: plans.some((x) => x.type === type), progress: plan.planProgress(type) as number | null, days: plan.planDays(type) as { done: number; total: number } | null });
+  return { memorize: kind('memorize'), revise: kind('revise') };
 }
 
 // ---------- activity ----------

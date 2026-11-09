@@ -1,5 +1,5 @@
 // The Home screen's palette: the app's own page and card colours (src/theme/tokens.ts), plus the prayer card's own
-// deep forest green and cream (its chosen-prayer pill is #173f32 with cream words), so the hero, the tiles and the
+// deep forest green and cream (its chosen-prayer pill is #173f32 with cream words), so the hero, the plan boxes and the
 // prayer card belong together under every sky (night, dawn, midday, afternoon, sunset). The key names `forest`,
 // `lime` and `limeInk` are kept from the first draft: `lime` is now the cream of the button and ring on the hero.
 import { useTheme } from './theme';
@@ -21,7 +21,7 @@ export type HomePalette = {
   ring: string; // the khatma ring on the hero: a baby yellowish green
   goldLine: string; // its hairline (the inset frame, the rule)
   limeInk: string; // words on that button
-  tile: string; // the streak tile and the done pills: a soft tint of the green
+  tile: string; // the done pills and the chips on the plan boxes: a soft tint of the green
   tileInk: string; // words on it
   mint: string; // the paler green a completed Hifdh card turns (its wash on the paper, as one solid colour)
   mintLine: string; // that card's border

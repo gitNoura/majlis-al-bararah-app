@@ -47,42 +47,63 @@ export const memorizedCount = () => state.ledger.reduce((n, [a, b]) => n + b - a
 // What the ring shows: memorized ayat out of all ayat. The one place that decides how it is counted.
 export const ringPercent = () => Math.round(core.ringFraction(memorizedCount(), U?.N ?? TOTAL_AYAT) * 100);
 
-// How far the reader is through their plans, 0..1 (null with no plan): a weekly plan counts this week's units,
-// a memorizing plan its days done out of all its days, a revision plan the current round. Averaged over the
-// plans running today.
-export function planProgress() {
+// How far one plan is through its own run, as { done, total, daily } (null when it has nothing to count: not started yet,
+// paused, or nothing to walk). A weekly plan counts this week's units; a memorizing plan its days done out of all its
+// days; a revision plan the current round.
+function progressOf(p, day, cx) {
+  if (day < p.start || core.isPaused(p, day)) return null;
+  if (p.period === 'week') {
+    const r = core.weekRow(p, cx, day);
+    return r && r.quota ? { done: Math.min(r.quota, r.done), total: r.quota, daily: false } : null;
+  }
+  let total = 0;
+  let done = 0;
+  if (p.type === 'revise') {
+    let cycle = null;
+    for (const row of core.walkDaily(p, cx)) {
+      if (row.day <= day && row.cycle !== cycle) {
+        cycle = row.cycle; // a new round began on or before today: count from its first day
+        total = 0;
+        done = 0;
+      } else if (row.cycle !== cycle) break; // the next round starts after today
+      total++;
+      if (row.status === 'done' || row.status === 'partial') done++;
+    }
+  } else {
+    for (const row of core.walkDaily(p, cx)) {
+      total++;
+      if (row.status === 'done' || row.status === 'partial') done++;
+    }
+  }
+  return total ? { done, total, daily: true } : null;
+}
+
+// The plans running today (all of them, or only those of one `type`: 'memorize' or 'revise'), each with its progress.
+function running(type) {
   const day = today();
   const cx = core.ctxOf(state, U);
   const parts = [];
   for (const p of state.plans) {
-    if (day < p.start || core.isPaused(p, day)) continue;
-    if (p.period === 'week') {
-      const r = core.weekRow(p, cx, day);
-      if (r && r.quota) parts.push(Math.min(1, r.done / r.quota));
-      continue;
-    }
-    let total = 0;
-    let done = 0;
-    if (p.type === 'revise') {
-      let cycle = null;
-      for (const row of core.walkDaily(p, cx)) {
-        if (row.day <= day && row.cycle !== cycle) {
-          cycle = row.cycle; // a new round began on or before today: count from its first day
-          total = 0;
-          done = 0;
-        } else if (row.cycle !== cycle) break; // the next round starts after today
-        total++;
-        if (row.status === 'done' || row.status === 'partial') done++;
-      }
-    } else {
-      for (const row of core.walkDaily(p, cx)) {
-        total++;
-        if (row.status === 'done' || row.status === 'partial') done++;
-      }
-    }
-    if (total) parts.push(done / total);
+    if (type && p.type !== type) continue;
+    const x = progressOf(p, day, cx);
+    if (x) parts.push(x);
   }
-  return parts.length ? parts.reduce((a, b) => a + b, 0) / parts.length : null;
+  return parts;
+}
+
+// How far the reader is through their plans, 0..1 (null with no plan running), averaged over the plans running today.
+// Give a `type` ('memorize' or 'revise') to count only the plans of that kind.
+export function planProgress(type) {
+  const parts = running(type);
+  return parts.length ? parts.reduce((a, x) => a + x.done / x.total, 0) / parts.length : null;
+}
+
+// The days done out of all the days, for the plans of one `type` (null unless every one of them is a daily plan: a
+// weekly plan counts units, which do not add up to days).
+export function planDays(type) {
+  const parts = running(type);
+  if (!parts.length || parts.some((x) => !x.daily)) return null;
+  return { done: parts.reduce((a, x) => a + x.done, 0), total: parts.reduce((a, x) => a + x.total, 0) };
 }
 
 // For the profile page, without loading the ayah table: the same figure as a fraction.

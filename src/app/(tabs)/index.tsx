@@ -1,6 +1,6 @@
 // HOME tab: the dashboard, an overview of where the reader is, not a launcher and not a to-do list. Top to bottom:
-//   1 the next prayer      2 reading (the hero: the khatma, the marker)      3 the tiles (streak, pages today, juz read)
-//   4 memorization (numbers; the tasks are in Hifdh)      5 activity (this week against last week)
+//   1 the next prayer      2 reading (the hero: the khatma, the marker)
+//   3 memorization and revision (how far each plan is through its whole run; the tasks are in Hifdh)      4 activity (this week against last week)
 //   (the adhkar and ahadith libraries are the Library tab)
 // The look is Home's own (src/theme/home.ts: the app's own page and greens, the prayer card's forest and cream); the prayer
 // card keeps wearing the sky. Only the Reading card has a filled button. Each card reads the saved state when it draws, so Home redraws every time it
@@ -16,7 +16,6 @@ import { ActivityCard } from '@/components/home/ActivityCard';
 import { MemorizationCard } from '@/components/home/MemorizationCard';
 import { PrayerCard } from '@/components/home/PrayerCard';
 import { ReadingCard } from '@/components/home/ReadingCard';
-import { StatTiles } from '@/components/home/StatTiles';
 import { Avatar } from '@/components/Avatar';
 import { Txt } from '@/components/Txt';
 import { HOME } from '@/i18n/home';
@@ -64,7 +63,6 @@ export default function HomeTab() {
         </View>
         <PrayerCard />
         <ReadingCard />
-        <StatTiles />
         <MemorizationCard />
         <ActivityCard />
       </ScrollView>

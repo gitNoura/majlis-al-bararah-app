@@ -15,15 +15,11 @@ export const DASH = {
   startReading: () => L('ابدأ القراءة', 'Start reading', 'Commencer la lecture'),
   beginKhatma: () => L('ابدأ ختمتك من الفاتحة', 'Begin your khatma from al-Fatiha', 'Commencez votre khatma par al-Fatiha'),
   juzRead: (n) => L(`${n} من 30 جزءاً مقروءاً`, `${n} of 30 juz read`, `${n} juz lus sur 30`),
-  pagesNone: () => L('لم تقرأ اليوم بعد', 'Nothing read yet today', 'Rien lu aujourd’hui'),
-  pagesToday: (n) =>
-    L(
-      n === 1 ? 'صفحة واحدة اليوم' : n === 2 ? 'صفحتان اليوم' : `${n} ${n <= 10 ? 'صفحات' : 'صفحة'} اليوم`,
-      `${n} ${n === 1 ? 'page' : 'pages'} today`,
-      `${n} ${n === 1 ? 'page' : 'pages'} aujourd’hui`,
-    ),
   khatmas: (n) => L(`ختمات مكتملة: ${n}`, `Khatmas completed: ${n}`, `Khatmas terminées : ${n}`),
   // memorization
+  planOverall: () => L('من الخطة', 'of the plan', 'du plan'),
+  planDays: (done, total) => L(`${done} من ${total} يوماً`, `${done} of ${total} days`, `${done} jours sur ${total}`),
+  planIdle: () => L('متوقفة أو لم تبدأ بعد', 'Paused or not started yet', 'En pause ou pas encore commencé'),
   memorizedOf: () => L('من 30 جزءاً محفوظاً', 'of 30 juz memorized', 'sur 30 juz mémorisés'),
   newLabel: () => L('جديد', 'New', 'Nouveau'),
   revisionLabel: () => L('مراجعة', 'Revision', 'Révision'),
@@ -34,18 +30,11 @@ export const DASH = {
   noMemorizePlan: () => L('لم تضع خطة حفظ بعد', 'No plan yet', 'Pas encore de plan'),
   noRevisionPlan: () => L('لم تضع خطة مراجعة بعد', 'No plan yet', 'Pas encore de plan'),
   addPlan: () => L('أنشئ خطة', 'Create one', 'Créer un plan'),
-  portionsDone: () => L('من مقرر اليوم', 'of today’s portions', 'des portions du jour'),
-  allDone: () => L('أتممت ورد اليوم', 'Done for today', 'Terminé pour aujourd’hui'),
-  nothingToday: () => L('لا شيء مقرر اليوم', 'Nothing planned today', 'Rien de prévu aujourd’hui'),
   // activity
   activity: () => L('النشاط', 'Activity', 'Activité'),
-  streakLabel: () => L('أيام متتالية', 'days in a row', 'jours d’affilée'),
   last4: () => L('آخر 4 أسابيع', 'Last 4 weeks', '4 dernières semaines'),
   thisWeek: () => L('هذا الأسبوع', 'This week', 'Cette semaine'),
   lastWeek: () => L('الأسبوع الماضي', 'Last week', 'Semaine dernière'),
-  pagesLabel: () => L('صفحات اليوم', 'Pages today', 'Pages aujourd’hui'),
-  juzLabel: () => L('أجزاء مقروءة', 'Juz read', 'Juz lus'),
-  daysLabel: () => L('أيام متتالية', 'day streak', 'jours d’affilée'),
   // additional resources
   resources: () => L('مصادر إضافية', 'Additional resources', 'Ressources complémentaires'),
   libAdhkar: () => L('مكتبة الأذكار', 'Adhkar library', 'Bibliothèque d’adhkar'),
