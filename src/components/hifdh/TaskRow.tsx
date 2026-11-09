@@ -10,7 +10,7 @@ import { CheckIcon, MicIcon, PlayIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import * as core from '@/lib/hifdh/core';
-import { STATUS, dayText, findRow, isDone, portionLines, startsAt, weekLine } from '@/lib/hifdh/labels';
+import { STATUS, dayText, findRow, isDone, rangeLines, weekLine } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
@@ -69,7 +69,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
     }
   };
 
-  const lines = portionLines(row.segs, core.shownUnit(row.version));
+  const lines = rangeLines(row.segs, core.shownUnit(row.version));
 
   return (
     <View style={rule}>
@@ -82,9 +82,6 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
             {lines.sub}
           </Txt>
         )}
-        <Txt size={13} color={c.meta}>
-          {startsAt(row.segs)}
-        </Txt>
         {!!when && (
           <Txt size={13} color={c.meta}>
             {when}
@@ -154,9 +151,9 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
 }
 
 const styles = StyleSheet.create({
-  task: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10, paddingVertical: 12 },
-  main: { flexGrow: 1, flexShrink: 1, flexBasis: 150, minWidth: 0, gap: 2 },
+  task: { gap: 14, paddingVertical: 14 },
+  main: { gap: 3 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   icon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  complete: { minWidth: 96, minHeight: 44, paddingHorizontal: 18, borderRadius: 22, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
+  complete: { flex: 1, minHeight: 44, paddingHorizontal: 18, borderRadius: 22, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
 });

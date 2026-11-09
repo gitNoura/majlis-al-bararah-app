@@ -70,7 +70,26 @@ export function portionLines(segs, unit) {
   const to = info.label(info.uid[b]);
   const one = { page: s('صفحة', 'Page'), hizb: s('الحزب', 'Hizb'), juz: s('الجزء', 'Juz') }[unit];
   const many = { page: s('الصفحات', 'Pages'), hizb: s('الأحزاب', 'Hizb'), juz: s('الأجزاء', 'Juz') }[unit];
-  return { title: from === to ? `${one} ${from}` : `${many} ${from}–${to}`, sub: null };
+  return { title: from === to ? `${one} ${from}` : s(`${many} من ${from} إلى ${to}`, `${many} ${from}–${to}`), sub: null };
+}
+
+// The day's range for a card, on two lines: the surah and the ayat («Surah Al-Baqarah, ayah 142 to 150»), and under it the
+// portion in the unit the reader planned in (pages 22 to 31, hizb 2 · thumun 1, juz 3); the ayah unit has no second line.
+export function rangeLines(segs, unit) {
+  const U = plan.units();
+  const ids = core.idsOf(segs);
+  if (!ids.length) return { title: '', sub: null };
+  const a = ids[0];
+  const b = ids[ids.length - 1];
+  const sa = surahName(surahOfAyah(a));
+  const sb = surahName(surahOfAyah(b));
+  const na = U.ayahNumber(a);
+  const nb = U.ayahNumber(b);
+  let title;
+  if (a === b) title = s(`سورة ${sa}، الآية ${na}`, `${sa}, ayah ${na}`, `${sa}, verset ${na}`);
+  else if (U.surahOf[a] === U.surahOf[b]) title = s(`سورة ${sa}، من الآية ${na} إلى ${nb}`, `${sa}, ayah ${na} to ${nb}`, `${sa}, versets ${na} à ${nb}`);
+  else title = s(`من سورة ${sa}، الآية ${na}\nإلى سورة ${sb}، الآية ${nb}`, `${sa} ${na}\nto ${sb} ${nb}`, `${sa} ${na}\nà ${sb} ${nb}`);
+  return { title, sub: unit === 'ayah' ? null : portionName(segs, unit) };
 }
 
 // The same on one line, for sentences and lists: «Hizb 2 · Thumun 1».

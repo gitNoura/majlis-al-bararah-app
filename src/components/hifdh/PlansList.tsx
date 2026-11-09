@@ -4,7 +4,8 @@
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { PrimaryButton, SecondaryButton } from '@/components/hifdh/Section';
+import { AccentPill, PrimaryButton, SecondaryButton } from '@/components/hifdh/Section';
+import { BackIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish } from '@/i18n/i18n';
@@ -45,9 +46,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
             {HIF.editMemorized()}
           </Txt>
         </View>
-        <Txt size={22} color={h.tileInk} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>
-          ›
-        </Txt>
+        <BackIcon color={h.tileInk} size={22} rtl={isEnglish} />
       </Pressable>
       {plans.length === 0 && (
         <Txt size={14.5} center color={c.meta} style={{ paddingVertical: 12 }}>
@@ -58,10 +57,8 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
         const paused = core.pausedNow(p);
         return (
           <View key={p.id} style={[styles.card, { backgroundColor: h.card, borderColor: h.cardLine, boxShadow: `0px 8px 20px ${h.shadow}` }, paused && { opacity: 0.8 }]}>
-            <View style={{ gap: 2 }}>
-              <Txt size={13} color={c.meta}>
-                {kindOf(p.type)}
-              </Txt>
+            <View style={{ gap: 4 }}>
+              <AccentPill text={kindOf(p.type)} />
               <Txt size={17} weight={700} color={c.ink}>
                 {rangeLabel(p.range, p.type)}
               </Txt>

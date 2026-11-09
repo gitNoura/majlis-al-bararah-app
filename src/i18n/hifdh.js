@@ -109,95 +109,71 @@ export const HIF = {
   whatToDo: () => L('بماذا تريد أن تبدأ؟', 'What would you like to do?', 'Que souhaitez-vous faire ?'),
   whatToDoSub: () =>
     L(
-      'ويمكنك إضافة الآخر في أي وقت.',
+      'يمكنك إضافة الآخر لاحقًا.',
       'Pick where to start; you can add the other later.',
       'Choisissez par où commencer ; vous pourrez ajouter l’autre plus tard.',
     ),
   memorizeOpt: () => L('حفظ جديد', 'Memorize something new', 'Mémoriser du nouveau'),
-  memorizeOptSub: () => L('آيات لم تحفظها بعد', 'Ayat you don’t know yet', 'Des versets que vous ne connaissez pas encore'),
+  memorizeOptSub: () => L('ما لم تحفظه بعد', 'Ayat you don’t know yet', 'Des versets que vous ne connaissez pas encore'),
   reviseOpt: () => L('مراجعة', 'Revise', 'Réviser'),
-  reviseOptSub: () => L('تثبيت ما حفظتَه من قبل', 'Keep what you know fresh', 'Consolider ce que vous savez'),
+  reviseOptSub: () => L('ما حفظتَه من قبل', 'Keep what you know fresh', 'Consolider ce que vous savez'),
   reviseOptLocked: () =>
-    L('أضف محفوظك أولاً لتفعيل المراجعة.', 'Add what you’ve memorized first to unlock this.', 'Ajoutez d’abord ce que vous avez mémorisé.'),
+    L('سجّل ما حفظتَه أولًا.', 'Add what you’ve memorized first to unlock this.', 'Ajoutez d’abord ce que vous avez mémorisé.'),
   scopeQuestion: (revise) =>
     revise
       ? L('ماذا تريد أن تراجع؟', 'What will you revise?', 'Que voulez-vous réviser ?')
-      : L('ماذا تريد أن تحفظ الآن؟', 'What are you memorizing now?', 'Que mémorisez-vous maintenant ?'),
+      : L('ماذا تريد أن تحفظ؟', 'What are you memorizing now?', 'Que mémorisez-vous maintenant ?'),
   scopeSub: () =>
-    L('القرآن كله، أو أثمان تختارها.', 'The whole Quran, or only the thumun you choose.', 'Tout le Coran, ou seulement les thumun choisis.'),
-  scopeSpecific: () => L('سور محددة', 'Specific surahs', 'Des sourates précises'),
+    L('القرآن كله أو سور تختارها.', 'The whole Quran, or only the thumun you choose.', 'Tout le Coran, ou seulement les thumun choisis.'),
+  scopeSpecific: () => L('جزء من القرآن', 'Specific surahs', 'Des sourates précises'),
   scopeSpecificSub: () => L('اختر السور أو الأجزاء', 'Choose surahs or juz', 'Choisissez sourates ou juz'),
-  nothingToRevise: () => L('ليس في هذا الاختيار ما تراجعه.', 'Nothing to revise in this selection.', 'Rien à réviser dans cette sélection.'),
+  nothingToRevise: () => L('لا يوجد ما تراجعه هنا.', 'Nothing to revise in this selection.', 'Rien à réviser dans cette sélection.'),
   nothingToReviseSub: () =>
     L(
-      'كل ما اخترتَه محفوظ لديك بالفعل. ارجع واختر سوراً أخرى.',
+      'حفظتَ كل ما اخترتَه. ارجع واختر غيره.',
       'Everything you picked is already memorized. Go back and choose other surahs.',
       'Tout ce que vous avez choisi est déjà mémorisé. Revenez choisir d’autres sourates.',
     ),
   amountQuestion: (revise, weekly) =>
     revise
       ? weekly
-        ? L('كم تراجع أسبوعياً؟', 'How much do you revise weekly?', 'Combien révisez-vous par semaine ?')
-        : L('كم تراجع يومياً؟', 'How much do you revise daily?', 'Combien révisez-vous par jour ?')
+        ? L('كم تراجع في الأسبوع؟', 'How much do you revise weekly?', 'Combien révisez-vous par semaine ?')
+        : L('كم تراجع في اليوم؟', 'How much do you revise daily?', 'Combien révisez-vous par jour ?')
       : weekly
-        ? L('كم تحفظ أسبوعياً؟', 'How much do you memorize weekly?', 'Combien mémorisez-vous par semaine ?')
-        : L('كم تحفظ يومياً؟', 'How much do you memorize daily?', 'Combien mémorisez-vous par jour ?'),
+        ? L('كم تحفظ في الأسبوع؟', 'How much do you memorize weekly?', 'Combien mémorisez-vous par semaine ?')
+        : L('كم تحفظ في اليوم؟', 'How much do you memorize daily?', 'Combien mémorisez-vous par jour ?'),
   amountSub: () =>
-    L('القليل مع المداومة يبلغ بك بعيداً.', 'Small, consistent amounts add up powerfully over time.', 'Un peu, régulièrement, mène loin.'),
-  encouragement: () =>
-    L(
-      'كل آية تحفظها تقرّبك من ختم القرآن، والمداومة على أي وتيرة توصلك.',
-      'Every ayah memorized is one ayah closer to your goal. Any pace, done consistently, will get you there.',
-      'Chaque verset est un pas vers votre but. Tout rythme, tenu avec constance, y mène.',
-    ),
-  pickDate: () => L('أريد تحديد تاريخ أنتهي فيه', 'I’d rather pick a finish date', 'Je préfère choisir une date de fin'),
-  pickAmount: () => L('أريد تحديد المقدار بنفسي', 'I’d rather set an amount', 'Je préfère fixer une quantité'),
+    L('قليلٌ دائم خيرٌ من كثيرٍ منقطع.', 'Small, consistent amounts add up powerfully over time.', 'Un peu, régulièrement, mène loin.'),
+  pickDate: () => L('أفضّل اختيار تاريخ الانتهاء', 'I’d rather pick a finish date', 'Je préfère choisir une date de fin'),
+  pickAmount: () => L('أفضّل تحديد المقدار', 'I’d rather set an amount', 'Je préfère fixer une quantité'),
   whenQuestion: () => L('متى تريد أن تنتهي؟', 'When do you want to finish?', 'Quand voulez-vous finir ?'),
+  unitLabel: () => L('الوحدة', 'Unit', 'Unité'),
   finishDate: () => L('تاريخ الانتهاء', 'Finish date', 'Date de fin'),
-  thatsAbout: () => L('أي ما يقارب', 'That’s about', 'Soit environ'),
+  thatsAbout: () => L('يعني تقريبًا', 'That’s about', 'Soit environ'),
   daysQuestion: (revise) =>
     revise
-      ? L('في أي أيام تريد أن تراجع؟', 'Which days do you want to revise?', 'Quels jours voulez-vous réviser ?')
-      : L('في أي أيام تريد أن تحفظ؟', 'Which days do you want to memorize?', 'Quels jours voulez-vous mémoriser ?'),
-  daysSub: () => L('اختر الأيام التي تريد أن يظهر فيها وِردك.', 'Your plan will appear on the days you pick.', 'Votre plan apparaîtra les jours choisis.'),
+      ? L('ما أيام المراجعة؟', 'Which days do you want to revise?', 'Quels jours voulez-vous réviser ?')
+      : L('ما أيام الحفظ؟', 'Which days do you want to memorize?', 'Quels jours voulez-vous mémoriser ?'),
   everyDay: () => L('كل يوم', 'Every day', 'Tous les jours'),
-  pickADay: () => L('اختر يوماً واحداً على الأقل.', 'Choose at least one day.', 'Choisissez au moins un jour.'),
+  pickADay: () => L('اختر يومًا واحدًا على الأقل.', 'Choose at least one day.', 'Choisissez au moins un jour.'),
   everyDaySub: () => L('تحديد كل أيام الأسبوع', 'Select all seven days', 'Sélectionner les sept jours'),
   selectedDays: (n) => L(`${n} من 7`, `${n} of 7`, `${n} sur 7`),
-  splitQuestion: () => L('كم تحفظ في كل يوم؟', 'How much on each day?', 'Combien chaque jour ?'),
-  splitSub: () =>
-    L(
-      'قسّمنا المقدار بالتساوي. عدّل أي يوم كما تشاء، نصفاً في يوم وأكثر في آخر.',
-      'We split your week evenly. Change any day you like: half one day, more the next.',
-      'Nous avons réparti la semaine à parts égales. Modifiez un jour à votre guise : la moitié un jour, davantage le suivant.',
-    ),
+  splitQuestion: () => L('كم في كل يوم؟', 'How much on each day?', 'Combien chaque jour ?'),
   splitTotal: () => L('المجموع', 'Total', 'Total'),
-  splitMatches: () => L('يطابق هدفك الأسبوعي', 'Matches your weekly goal', 'Correspond à votre objectif'),
-  splitGoal: (goal) => L(`هدفك ${goal}`, `Your goal was ${goal}`, `Votre objectif était ${goal}`),
-  splitEven: () => L('تقسيم متساوٍ', 'Split evenly', 'Répartir à parts égales'),
+  splitMatches: () => L('مطابق لهدفك', 'Matches your weekly goal', 'Correspond à votre objectif'),
+  splitGoal: (goal) => L(`المطلوب ${goal}`, `Your goal was ${goal}`, `Votre objectif était ${goal}`),
+  splitEven: () => L('توزيع متساوٍ', 'Split evenly', 'Répartir à parts égales'),
   splitRest: () => L('راحة', 'Day off', 'Repos'),
-  divideTitle: (unit) => L(`كيف يُقسَّم ${unit} على الأيام؟`, `How should each ${unit} be split across the days?`, `Comment répartir chaque ${unit} sur les jours ?`),
+  divideTitle: (unit) => L(`قسّم ${unit} على الأيام بحسب:`, `How should each ${unit} be split across the days?`, `Comment répartir chaque ${unit} sur les jours ?`),
   selectAll: () => L('تحديد الكل', 'Select all', 'Tout sélectionner'),
-  clearAll: () => L('إلغاء التحديد', 'Clear', 'Tout effacer'),
-  splitQuestionAbout: (unit) => L(`كم ${unit} تقريباً في كل يوم؟`, `About how many ${unit} each day?`, `Environ combien de ${unit} par jour ?`),
-  splitQuestionExact: (unit) => L(`كم ${unit} في كل يوم؟`, `How many ${unit} each day?`, `Combien de ${unit} par jour ?`),
-  splitSubExact: () =>
-    L(
-      'الأيام التي حدّدتها دقيقة. آخر يوم في كل أسبوع هو الذي يتغيّر قليلاً لأنه يأخذ ما بقي.',
-      'The days you set are exact. Only the last day of each week can vary, because it takes what is left.',
-      'Les jours que vous fixez sont exacts. Seul le dernier jour de la semaine peut varier : il prend le reste.',
-    ),
+  clearAll: () => L('إلغاء الكل', 'Clear', 'Tout effacer'),
+  splitQuestionAbout: (unit, one = unit) => L(`كم ${one} في اليوم تقريبًا؟`, `About how many ${unit} each day?`, `Environ combien de ${unit} par jour ?`),
+  splitQuestionExact: (unit, one = unit) => L(`كم ${one} في كل يوم؟`, `How many ${unit} each day?`, `Combien de ${unit} par jour ?`),
   splitLastDay: (unit) =>
     L(
-      `آخر يوم يأخذ ما بقي، فينتهي الأسبوع مع نهاية ${unit}.`,
+      `آخر يوم يأخذ الباقي ليكتمل ${unit}.`,
       `The last day takes what is left, so each week ends with the ${unit}.`,
       `Le dernier jour prend le reste : chaque semaine finit avec le ${unit}.`,
-    ),
-  splitSubAbout: () =>
-    L(
-      'هذه أرقام تقريبية، فالأجزاء والأحزاب تختلف قليلاً في الطول. تُقسَّم كل أسبوع بدقة، وتستطيع تعديل أي يوم، حتى بالنصف.',
-      'These are approximate: juz and hizb differ a little in length. Each real week is cut exactly, and you can change any day, even by half.',
-      'Ces chiffres sont approximatifs : juz et hizb diffèrent un peu en longueur. Chaque semaine réelle est découpée exactement ; modifiez un jour à votre guise, même d’un demi.',
     ),
   divideSub: () =>
     L(
@@ -207,40 +183,44 @@ export const HIF = {
     ),
   splitGoalAbout: (goal, unit) =>
     L(
-      `نحو ${goal} في الأسبوع (${unit}). آخر يوم يأخذ ما بقي فينتهي الأسبوع مع الوحدة.`,
+      `نحو ${goal} في الأسبوع (${unit}). آخر يوم يأخذ الباقي.`,
       `About ${goal} a week (${unit}). The last day takes what is left, so the week ends with the unit.`,
       `Environ ${goal} par semaine (${unit}). Le dernier jour prend le reste : la semaine finit avec l’unité.`,
     ),
-  divideSplitBy: () => L('يُقسَّم حسب', 'Split by', 'Découpé par'),
+  divideSplitBy: () => L('التقسيم حسب', 'Split by', 'Découpé par'),
   dateTooBig: (unit) =>
     L(
-      `${unit} كامل كل يوم أكبر مما يحتاجه هذا التاريخ.`,
+      `${unit} كامل في اليوم أكثر مما يلزم لهذا التاريخ.`,
       `A whole ${unit} a day is more than this date needs.`,
       `1 ${unit} entier par jour dépasse ce qu’il faut pour cette date.`,
     ),
-  dateUseSmaller: (unit) => L(`استخدم ${unit} بدلاً من ذلك`, `Use ${unit} instead`, `Utiliser ${unit} à la place`),
+  dateUseSmaller: (unit) => L(`استخدم ${unit} بدل ذلك`, `Use ${unit} instead`, `Utiliser ${unit} à la place`),
   splitMore: () => L('زِد', 'More', 'Plus'),
   splitLess: () => L('أنقِص', 'Less', 'Moins'),
   perDay: () => L('في كل يوم', 'Each day', 'Chaque jour'),
-  planSaved: () => L('سُجّلت خطتك.', 'Plan saved.', 'Plan enregistré.'),
+  done: () => L('تم', 'Done', 'OK'),
+  untilDate: (d) => L(`حتى ${d}`, `Until ${d}`, `Jusqu’au ${d}`),
+  splitCustom: () => L('مخصّص', 'Custom', 'Personnalisé'),
+  ayatShort: () => L('آيات', 'Ayat', 'Versets'),
+  planSaved: () => L('تم حفظ الخطة.', 'Plan saved.', 'Plan enregistré.'),
 
   // editing a plan (one page)
   covers: () => L('ما تشمله الخطة', 'What it covers', 'Ce que ça couvre'),
   pace: () => L('الوتيرة', 'Pace', 'Rythme'),
   days: () => L('الأيام', 'Days', 'Jours'),
-  newPaceFrom: () => L('يبدأ التعديل من', 'New pace from', 'Nouveau rythme dès le'),
+  newPaceFrom: () => L('التعديل يبدأ من', 'New pace from', 'Nouveau rythme dès le'),
   pastDaysKept: () => L('الأيام الماضية تبقى كما كانت.', 'Past days keep their old plan.', 'Les jours passés gardent leur ancien plan.'),
   finishLine: (revise) =>
     revise
-      ? L('تنتهي دورة المراجعة في', 'You’ll finish a full revision on', 'Vous aurez tout révisé le')
-      : L('تختم بإذن الله في', 'You’ll finish on', 'Vous finirez le'),
+      ? L('تنتهي من المراجعة في', 'You’ll finish a full revision on', 'Vous aurez tout révisé le')
+      : L('تنتهي بإذن الله في', 'You’ll finish on', 'Vous finirez le'),
   resumePlan: () => L('استئناف الخطة', 'Resume plan', 'Reprendre le plan'),
-  pausePlan: () => L('إيقاف الخطة مؤقتاً', 'Pause plan', 'Mettre en pause'),
+  pausePlan: () => L('إيقاف مؤقت', 'Pause plan', 'Mettre en pause'),
   deletePlan: () => L('حذف الخطة', 'Delete plan', 'Supprimer le plan'),
-  saveChanges: () => L('تأكيد التعديلات', 'Save changes', 'Enregistrer'),
+  saveChanges: () => L('حفظ التعديلات', 'Save changes', 'Enregistrer'),
   confirmDelete: () =>
     L(
-      'هل تريد حذف هذه الخطة وسجلّها؟ ما حفظتَه لن يُحذف.',
+      'حذف هذه الخطة وسجلّها؟ لن يُحذف ما حفظتَه.',
       'Delete this plan and its session history? (What you memorized stays.)',
       'Supprimer ce plan et son historique ? (Ce que vous avez mémorisé reste.)',
     ),
@@ -267,17 +247,17 @@ export const HIF = {
 
   // what I’ve memorized
   memorizedQuestion: () => L('ما الذي حفظتَه؟', 'What have you memorized?', 'Qu’avez-vous mémorisé ?'),
-  memorizedSub: () => L('حدّد ما حفظتَه بالسورة أو بالجزء.', 'Mark it by surah or by juz.', 'Indiquez-le par sourate ou par juz.'),
+  memorizedSub: () => L('حدّد السور أو الأجزاء التي حفظتَها.', 'Mark it by surah or by juz.', 'Indiquez-le par sourate ou par juz.'),
   ofQuran: () => L('من القرآن', 'of the Quran', 'du Coran'),
   surahs: () => L('السور', 'Surahs', 'Sourates'),
   juzPlural: () => L('الأجزاء', 'Juz', 'Juz'),
   autoSaved: () =>
     L(
-      'يُسجَّل ما تختاره تلقائيًا، وما تُتمّه من وِردك يُضاف هنا.',
+      'يُحفظ اختيارك تلقائيًا، وما تُنهيه من وِردك يُضاف هنا.',
       'Saved as you go. Whatever you complete in your plan is added here.',
       'Enregistré automatiquement. Ce que vous terminez dans votre plan s’ajoute ici.',
     ),
-  wholeQuran: () => L('حفظتُ القرآن كاملاً', 'I know the whole Quran', 'Je connais tout le Coran'),
+  wholeQuran: () => L('حفظتُ القرآن كله', 'I know the whole Quran', 'Je connais tout le Coran'),
   nothingYet: () => L('لم أحفظ شيئاً بعد', 'Nothing yet', 'Rien encore'),
   searchSurah: () => L('ابحث عن سورة', 'Search a surah', 'Chercher une sourate'),
   fromAyah: () => L('من آية', 'From ayah', 'Du verset'),

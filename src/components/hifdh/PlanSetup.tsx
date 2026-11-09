@@ -1,22 +1,24 @@
 // Plan setup and edit (paceHTML / editHTML / savePace of the website's hifz.js). A new plan is a short run of
 // questions (what to do, what you know the first time, scope, how much a week, which days - or the finish date
-// and then the days), then the summary, which is not a question; editing is one page with every choice, pause
+// first, then the days), then the summary, which is not a question; editing is one page with every choice, pause
 // and delete under Save. Previous / Next at the bottom move between the questions only (the arrow at the top
 // leaves the setup); the plan is kept per day: the week's amount is shared over the days chosen.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
-import { useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Alert, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DateStepper } from '@/components/hifdh/DateStepper';
+import { DateCalendar } from '@/components/hifdh/DateCalendar';
 import { HifHeader } from '@/components/hifdh/HifHeader';
 import { useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { MemorizedPicker } from '@/components/hifdh/MemorizedPicker';
 import { MemorizedScreen } from '@/components/hifdh/MemorizedScreen';
-import { Hint, PrimaryButton, SecondaryButton, alpha } from '@/components/hifdh/Section';
-import { CheckIcon } from '@/components/icons';
+import { AccentPill, Hint, PrimaryButton, SecondaryButton, alpha, useAccent } from '@/components/hifdh/Section';
+import { Sheet } from '@/components/ui/Sheet';
+import { BackIcon, CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
+import { isEnglish } from '@/i18n/i18n';
 import * as core from '@/lib/hifdh/core';
 import { ALL_DAYS, PLAN_UNITS, UNIT_NAME, UNIT_ONE, UNIT_PLURAL, WEEK_ORDER, fmtDate, kindOf, num, perWord, rangeLabel, unitCount, weekdayName } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
@@ -168,14 +170,34 @@ function calc(p: Pace): Calc {
 const nudge = (v: number, up: boolean, step: number) => (up ? (Math.floor(v / step + 1e-9) + 1) * step : Math.max(0, (Math.ceil(v / step - 1e-9) - 1) * step));
 const clean = (x: number) => Math.round(x * 100) / 100;
 
-// how much a week, then which days; for «finish by a date» the days come first (the date needs them)
+// how much a week, then which days; for «finish by a date» the date comes first, then the days
 const stepKeys = (p: Pace) => ['type', ...(p.askMem && p.type === 'memorize' ? ['memorized'] : []), // revising asks what to revise, not what is memorized
-   'scope', ...(p.mode === 'date' ? ['days', 'date'] : ['amount', 'days', 'split']), 'summary'];
+   'scope', ...(p.mode === 'date' ? ['date', 'days'] : ['amount', 'days', 'split']), 'summary'];
 
 // A paper card like the Home page's: hairline border, soft shadow, generous corners; the questions' content sits in one
+const FlatCtx = createContext(false); // inside a sheet the cards are flat tints, not paper
 function Card({ children, flush }: { children: ReactNode; flush?: boolean }) {
   const h = useHome();
-  return <View style={[styles.card, flush && { padding: 0, overflow: 'hidden' }, { backgroundColor: h.card, borderColor: h.cardLine, boxShadow: `0px 8px 20px ${h.shadow}` }]}>{children}</View>;
+  const flat = useContext(FlatCtx);
+  return (
+    <View style={[styles.card, flush && { padding: 0, overflow: 'hidden' }, flat ? { backgroundColor: h.well, borderWidth: 0 } : { backgroundColor: h.card, borderColor: h.cardLine, boxShadow: `0px 8px 20px ${h.shadow}` }]}>{children}</View>
+  );
+}
+
+// A row of the edit page: the setting's name, its value in the page's yellow, and an arrow; a tap opens a sheet for it
+function EditRow({ label, value, onPress, last }: { label: string; value: string; onPress: () => void; last?: boolean }) {
+  const { c } = useTheme();
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.editRow, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.divider }]}>
+      <Txt size={15.5} weight={600} color={c.ink}>
+        {label}
+      </Txt>
+      <View style={{ flex: 1, alignItems: 'flex-end' }}>
+        <AccentPill text={value} size={14} />
+      </View>
+      <BackIcon color={c.meta} size={18} rtl={isEnglish} />
+    </Pressable>
+  );
 }
 
 function Opt({ on, text, sub, disabled, onPress }: { on: boolean; text: string; sub?: string; disabled?: boolean; onPress: () => void }) {
@@ -334,6 +356,8 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   const insets = useSafeAreaInsets();
   const { refresh, toast } = useHif();
   const [pace, setPace] = useState<Pace>(() => initPace(type, id));
+  const [sheet, setSheet] = useState<'scope' | 'pace' | 'days' | 'split' | 'from' | null>(null); // the edit page's open sheet
+  const accent = useAccent();
   // a new amount, unit or set of days starts the split over: the even share is the default
   const patch = (next: Partial<Pace>) => setPace((p) => ({ ...p, ...(('amtText' in next || 'unit' in next || 'divide' in next || 'days' in next || 'mode' in next) && !('perDay' in next) ? { perDay: null } : {}), ...next }));
 
@@ -437,34 +461,42 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     </Card>
   );
 
-  const dateBlock = () => {
-    const smaller = smallerThan(pace.unit).slice(-1)[0];
-    return (
-      <Card>
+  // the unit and the calendar; the «about N a day» line needs the days, so the questions show it under the days
+  const dateBlock = () => (
+    <Card>
+      <View style={{ gap: 10 }}>
+        <Txt size={14} weight={700} color={c.meta}>
+          {HIF.unitLabel()}
+        </Txt>
         <View style={styles.chips}>
           {PLAN_UNITS.map((u: string) => (
             <Chip key={u} on={pace.unit === u} text={UNIT_NAME[u as keyof typeof UNIT_NAME]()} onPress={() => patch({ unit: u })} />
           ))}
         </View>
-        <DateStepper value={pace.date} min={core.addDays(plan.today(), 1)} onChange={(date) => patch({ date })} label={HIF.finishDate()} />
-        {tooBig && smaller ? (
-          <View style={{ gap: 2 }}>
-            <Txt size={15} center color={c.ink}>
-              {HIF.dateTooBig(UNIT_ONE[pace.unit as keyof typeof UNIT_ONE]())}
-            </Txt>
-            <View style={{ alignItems: 'center' }}>
-              <Link text={HIF.dateUseSmaller(UNIT_ONE[smaller as keyof typeof UNIT_ONE]())} onPress={() => patch({ unit: smaller })} />
-            </View>
-          </View>
-        ) : (
-          <Txt size={15} center color={c.text}>
-            {HIF.thatsAbout()}{' '}
-            <Txt size={15} weight={700} color={c.ink}>
-              {unitCount(unit, amount)} {perWord('day')}
-            </Txt>
-          </Txt>
-        )}
-      </Card>
+      </View>
+      <DateCalendar value={pace.date} min={core.addDays(plan.today(), 1)} onChange={(date) => patch({ date })} label={HIF.finishDate()} />
+    </Card>
+  );
+
+  const aboutLine = () => {
+    if (pace.mode !== 'date' || !days.length) return null;
+    const smaller = smallerThan(pace.unit).slice(-1)[0];
+    return tooBig && smaller ? (
+      <View style={{ gap: 2 }}>
+        <Txt size={15} center color={c.ink}>
+          {HIF.dateTooBig(UNIT_ONE[pace.unit as keyof typeof UNIT_ONE]())}
+        </Txt>
+        <View style={{ alignItems: 'center' }}>
+          <Link text={HIF.dateUseSmaller(UNIT_ONE[smaller as keyof typeof UNIT_ONE]())} onPress={() => patch({ unit: smaller })} />
+        </View>
+      </View>
+    ) : (
+      <Txt size={15} center color={c.text}>
+        {HIF.thatsAbout()}{' '}
+        <Txt size={15} weight={700} color={c.ink}>
+          {unitCount(unit, amount)} {perWord('day')}
+        </Txt>
+      </Txt>
     );
   };
 
@@ -548,60 +580,44 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
 
   const toDate = () => <Link text={HIF.pickDate()} onPress={() => patch({ mode: 'date', period: 'day' })} />;
   const toAmount = () => <Link text={HIF.pickAmount()} onPress={() => patch(editing ? { mode: 'amount', period: 'day' } : { mode: 'amount', period: 'day', step: pace.step - 1 })} />; // from the date question back to the amount question
-  const finishLine = () =>
-    finish ? (
-      <Txt size={15} color={c.text}>
-        {HIF.finishLine(revise)}{' '}
-        <Txt size={15} weight={800} color={c.ink}>
-          {fmtDate(finish)}
-        </Txt>
-      </Txt>
-    ) : null;
 
-  // ----- the edit page: every choice on one page, pause and delete under Save -----
+  // ----- the edit page: one list, each row shows its value and opens a small sheet; pause and delete under it -----
 
   const edit = () => {
     const p = plan.planById(pace.id);
     const ready = scopeReady && amount > 0 && days.length > 0 && Boolean(finish) && !tooBig;
-    const sec = (title: string, inner: ReactNode) => (
-      <View style={{ gap: 10 }}>
-        <Txt size={15} weight={700} color={c.meta}>
-          {title}
-        </Txt>
-        {inner}
-      </View>
-    );
     const paused = core.pausedNow(p);
+    const dayWords = pace.days.length === 7 ? HIF.everyDay() : WEEK_ORDER.filter((d: number) => pace.days.includes(d)).map((d: number) => weekdayName(d)).join(' ') || '—';
+    const paceWords = pace.mode === 'date' ? HIF.untilDate(fmtDate(pace.date)) : amountOf(pace) > 0 ? `${unitCount(pace.unit, weekTotal(pace))} ${perWord('week')}` : '—';
+    const showSplit = pace.mode === 'amount' && pace.days.length > 0 && amountOf(pace) > 0;
+    const close = () => setSheet(null);
+    const sheetOf = (k: NonNullable<typeof sheet>, title: string, inner: ReactNode) => (
+      <Sheet open={sheet === k} onClose={close} title={title}>
+        <FlatCtx.Provider value>{inner}</FlatCtx.Provider>
+        <PrimaryButton label={HIF.done()} onPress={close} />
+      </Sheet>
+    );
     return {
       body: (
-        <View style={{ gap: 20 }}>
-          <Question title={HIF.editPlan()} sub={kindOf(pace.type)} />
-          {sec(HIF.covers(), scopeBlock())}
-          {sec(
-            HIF.pace(),
-            pace.mode === 'date' ? (
-              <>
-                {dateBlock()}
-                {toAmount()}
-              </>
-            ) : (
-              <>
-                {amountBlock()}
-                <Hint>{HIF.encouragement()}</Hint>
-                {toDate()}
-              </>
-            ),
+        <View style={{ gap: 16 }}>
+          <AccentPill text={kindOf(pace.type)} size={14} />
+          <Card flush>
+            <EditRow label={HIF.covers()} value={rangeLabel(pace.range, pace.type)} onPress={() => setSheet('scope')} />
+            <EditRow label={HIF.pace()} value={paceWords} onPress={() => setSheet('pace')} />
+            <EditRow label={HIF.days()} value={dayWords} onPress={() => setSheet('days')} />
+            {showSplit && <EditRow label={HIF.perDay()} value={pace.perDay ? HIF.splitCustom() : HIF.splitEven()} onPress={() => setSheet('split')} />}
+            <EditRow label={HIF.newPaceFrom()} value={fmtDate(pace.from)} onPress={() => setSheet('from')} last />
+          </Card>
+          {finish && (
+            <View style={[styles.finishCard, { backgroundColor: accent.fill, borderColor: accent.line }]}>
+              <Txt size={14} color={accent.ink}>
+                {HIF.finishLine(revise)}
+              </Txt>
+              <Txt size={22} weight={800} color={accent.ink}>
+                {fmtDate(finish)}
+              </Txt>
+            </View>
           )}
-          {sec(HIF.days(), daysBlock())}
-          {pace.mode === 'amount' && days.length > 0 && amountOf(pace) > 0 && sec(HIF.perDay(), splitBlock())}
-          {sec(
-            HIF.newPaceFrom(),
-            <>
-              <DateStepper value={pace.from} min={p?.start ?? plan.today()} onChange={(from) => patch({ from })} label={HIF.newPaceFrom()} />
-              <Hint>{HIF.pastDaysKept()}</Hint>
-            </>,
-          )}
-          {finishLine()}
           <View style={styles.two}>
             <View style={{ flex: 1 }}>
               <SecondaryButton
@@ -638,6 +654,41 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
               </Pressable>
             </View>
           </View>
+
+          {sheetOf('scope', HIF.covers(), scopeBlock())}
+          {sheetOf(
+            'pace',
+            HIF.pace(),
+            pace.mode === 'date' ? (
+              <>
+                {dateBlock()}
+                {aboutLine()}
+                {toAmount()}
+              </>
+            ) : (
+              <>
+                {amountBlock()}
+                {toDate()}
+              </>
+            ),
+          )}
+          {sheetOf(
+            'days',
+            HIF.days(),
+            <>
+              {daysBlock()}
+              {aboutLine()}
+            </>,
+          )}
+          {sheetOf('split', HIF.perDay(), showSplit ? splitBlock() : null)}
+          {sheetOf(
+            'from',
+            HIF.newPaceFrom(),
+            <>
+              <DateCalendar value={pace.from} min={p?.start ?? plan.today()} onChange={(from) => patch({ from })} label={HIF.newPaceFrom()} />
+              <Hint>{HIF.pastDaysKept()}</Hint>
+            </>,
+          )}
         </View>
       ),
       foot: <PrimaryButton label={HIF.saveChanges()} onPress={save} disabled={!ready} />,
@@ -688,7 +739,6 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
           <View style={{ gap: 14 }}>
             <Question title={amountTitle} sub={HIF.amountSub()} />
             {amountBlock()}
-            <Hint>{HIF.encouragement()}</Hint>
             {toDate()}
           </View>
         ),
@@ -704,18 +754,19 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
             {toAmount()}
           </View>
         ),
-        foot: next(undefined, Boolean(tooBig)),
+        foot: next(),
       };
     }
     if (key === 'days') {
       return {
         body: (
           <View style={{ gap: 14 }}>
-            <Question title={HIF.daysQuestion(revise)} sub={HIF.daysSub()} />
+            <Question title={HIF.daysQuestion(revise)} />
             {daysBlock()}
+            {aboutLine()}
           </View>
         ),
-        foot: next(undefined, !pace.days.length),
+        foot: next(undefined, !pace.days.length || Boolean(tooBig)),
       };
     }
     if (key === 'split') {
@@ -723,8 +774,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
         body: (
           <View style={{ gap: 14 }}>
             <Question
-              title={cutOk(pace) ? (pace.perDay ? HIF.splitQuestionExact : HIF.splitQuestionAbout)(UNIT_PLURAL[pace.divide as keyof typeof UNIT_PLURAL]()) : HIF.splitQuestion()}
-              sub={cutOk(pace) ? (pace.perDay ? HIF.splitSubExact() : HIF.splitSubAbout()) : HIF.splitSub()}
+              title={cutOk(pace) ? (pace.perDay ? HIF.splitQuestionExact : HIF.splitQuestionAbout)(UNIT_PLURAL[pace.divide as keyof typeof UNIT_PLURAL](), UNIT_ONE[pace.divide as keyof typeof UNIT_ONE]()) : HIF.splitQuestion()}
             />
             {splitBlock()}
           </View>
@@ -829,6 +879,8 @@ const styles = StyleSheet.create({
   stepper: { alignItems: 'center', justifyContent: 'center' },
   totalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 4 },
   danger: { minHeight: 50, borderRadius: 25, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 },
+  editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 60, paddingHorizontal: 18, paddingVertical: 10 },
+  finishCard: { borderRadius: 22, borderWidth: 1, padding: 16, gap: 2 },
   sumRow: { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 12, gap: 2 },
   foot: { paddingHorizontal: 16, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth },
 });

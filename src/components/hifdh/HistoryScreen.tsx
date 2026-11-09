@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHif } from '@/components/hifdh/HifProvider';
 import { Heading, Hint, Section } from '@/components/hifdh/Section';
 import { ProgressRing } from '@/components/hifdh/ProgressRing';
-import { CloseIcon } from '@/components/icons';
+import { CloseIcon, BackIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish } from '@/i18n/i18n';
@@ -30,7 +30,7 @@ export function ProgressSection({ onPress, plain }: { onPress: () => void; plain
   const h = useHome();
   const p = plan.planProgress();
   const pct = p == null ? null : Math.round(p * 100);
-  const arrow = <Txt size={20} color={c.meta} style={isEnglish ? undefined : { transform: [{ scaleX: -1 }] }}>›</Txt>;
+  const arrow = <BackIcon color={c.meta} size={20} rtl={isEnglish} />;
   return (
     <View style={{ gap: 12 }}>
       {!plain && <Heading title={HIF.progress()} link={HIF.history()} onLink={onPress} />}

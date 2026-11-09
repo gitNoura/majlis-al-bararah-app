@@ -8,6 +8,7 @@ import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import * as core from '@/lib/hifdh/core';
+import { alpha, useAccent } from '@/components/hifdh/Section';
 import { num, weekdayName, weekInfo } from '@/lib/hifdh/labels';
 import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
@@ -25,6 +26,7 @@ function CloseMark({ color }: { color: string }) {
 export function WeekCard() {
   const { c, isDark } = useTheme();
   const h = useHome();
+  const a = useAccent();
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
 
@@ -54,8 +56,8 @@ export function WeekCard() {
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? h.forest : isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(255, 255, 255, 0.78)' },
-                  state === 'now' && { borderWidth: 1.5, borderColor: h.forest },
+                  { backgroundColor: state === 'on' ? h.forest : state === 'now' ? a.fill : alpha(h.leaf, isDark ? 0.22 : 0.18) },
+                  state === 'now' && { borderWidth: 2, borderColor: a.mark },
                 ]}
               >
                 {state === 'on' && <CheckIcon color={h.forestInk} size={16} strokeWidth={2.4} />}
