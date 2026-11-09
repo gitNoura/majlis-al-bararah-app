@@ -36,7 +36,7 @@ export function useAccent() {
 // A quiet gold for dates (the one second colour, used sparingly): readable on the page and on a card
 export function useGold() {
   const { isDark } = useTheme();
-  return isDark ? '#e0c76a' : '#9a7b1c';
+  return isDark ? '#e0c76a' : '#8f7219';
 }
 
 // A value or a kind of plan (no pill, no box: the words in the accent colour)
@@ -52,9 +52,10 @@ export function AccentPill({ text, size = 13.5 }: { text: string; size?: number 
 // A section: its heading (an icon and a title) and its content. By default it is the page's one kind of box: a quiet
 // white surface (no border, no shadow) so each part of the page reads as its own thing. `plain` drops the surface and
 // separates sections with a hairline instead (the long history list). Nothing is ever written under the title.
-export function Section({ title, titleColor, icon, tone, children, style, first, plain }: { title: string; titleColor?: string; icon?: (color: string) => ReactNode; tone?: Tone; first?: boolean; plain?: boolean; children: ReactNode; style?: StyleProp<ViewStyle> }) {
+export function Section({ title, titleColor, tone, children, style, first, plain }: { title: string; titleColor?: string; tone?: Tone; first?: boolean; plain?: boolean; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const h = useHome();
   const { c } = useTheme();
+  const gold = useGold();
   return (
     <View
       style={[
@@ -68,8 +69,7 @@ export function Section({ title, titleColor, icon, tone, children, style, first,
       ]}
     >
       <View style={styles.head}>
-        {icon ? <View style={[styles.chip, { backgroundColor: h.tile }]}>{icon(h.tileInk)}</View> : null}
-        <Txt size={19} weight={700} color={titleColor ?? h.ink} style={{ flex: 1 }}>
+        <Txt size={19} weight={700} color={titleColor ?? gold} style={{ flex: 1 }}>
           {title}
         </Txt>
       </View>
@@ -144,7 +144,6 @@ export function SecondaryButton({ label, onPress, disabled }: { label: string; o
 const styles = StyleSheet.create({
   section: { gap: 14 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  chip: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
   btn: { minHeight: 50, borderRadius: 25, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
 });

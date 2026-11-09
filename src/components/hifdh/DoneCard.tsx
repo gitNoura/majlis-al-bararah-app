@@ -7,7 +7,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useHif } from '@/components/hifdh/HifProvider';
 import { Hint, Section, useGreen } from '@/components/hifdh/Section';
 import type { Row } from '@/components/hifdh/StopSheet';
-import { BookOpenIcon, CheckIcon, RepeatIcon } from '@/components/icons';
+import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import * as core from '@/lib/hifdh/core';
@@ -26,9 +26,8 @@ export function DoneCard({ rows, revise, first }: { rows: Row[]; revise?: boolea
     for (const r of rows) plan.mark(findRow(`${r.plan.id}|${r.week ?? r.day}`) ?? r, 'untouched');
     refresh();
   };
-  const Icon = revise ? RepeatIcon : BookOpenIcon;
   return (
-    <Section first={first} title={revise ? HIF.cardMurajaa() : HIF.cardHifdh()} tone="done" icon={(color) => <Icon color={color} size={22} />}>
+    <Section first={first} title={revise ? HIF.cardMurajaa() : HIF.cardHifdh()} tone="done">
       <View style={{ gap: 2 }}>
         <Txt size={16} weight={700} color={c.ink}>
           {revise ? HIF.reviseDoneTitle() : HIF.congratsTitle()}

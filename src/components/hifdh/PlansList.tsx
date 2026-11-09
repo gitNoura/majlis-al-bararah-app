@@ -5,8 +5,8 @@
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { SecondaryButton } from '@/components/hifdh/Section';
-import { BackIcon, BookOpenIcon, RepeatIcon } from '@/components/icons';
+import { SecondaryButton, useGold } from '@/components/hifdh/Section';
+import { BackIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish } from '@/i18n/i18n';
@@ -21,6 +21,7 @@ const DANGER = '#b3402f';
 export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onAdd: () => void }) {
   const { c } = useTheme();
   const h = useHome();
+  const gold = useGold();
   const { refresh, openMemorized } = useHif(); // also redraws the list whenever `rev` changes
   const plans = plan.get().plans as { id: string; type: string; range: number[][] | null }[];
 
@@ -40,9 +41,6 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
   return (
     <View style={{ gap: 14 }}>
       <Pressable onPress={openMemorized} accessibilityRole="button" style={[styles.link, { backgroundColor: h.card }]}>
-        <View style={[styles.chip, { backgroundColor: h.tile }]}>
-          <BookOpenIcon color={h.tileInk} size={22} />
-        </View>
         <View style={{ flex: 1, gap: 2 }}>
           <Txt size={17} weight={700} color={c.ink}>
             {HIF.memorizedTitle()}
@@ -65,9 +63,8 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
         return (
           <View key={p.id} style={[styles.plan, { backgroundColor: h.card }, paused && { opacity: 0.75 }]}>
             <View style={styles.kindRow}>
-              <View style={[styles.chip, { backgroundColor: h.tile }]}>{p.type === 'revise' ? <RepeatIcon color={h.tileInk} size={22} /> : <BookOpenIcon color={h.tileInk} size={22} />}</View>
               <View style={{ flex: 1, gap: 2 }}>
-                <Txt size={13.5} weight={700} color={h.leaf}>
+                <Txt size={13.5} weight={700} color={gold}>
                   {paused ? `${kindOf(p.type)} · ${HIF.paused()}` : kindOf(p.type)}
                 </Txt>
                 <Txt size={19} weight={800} color={c.ink}>
@@ -78,7 +75,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
             <Txt size={14} color={c.meta}>
               {paceText(p)}
             </Txt>
-            <View style={[styles.actions, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider, paddingTop: 14 }]}>
+            <View style={styles.actions}>
               <Pressable onPress={() => onEdit(p.id)} accessibilityRole="button" style={[styles.modify, { backgroundColor: h.forest }]}>
                 <Txt size={15} weight={700} color={h.forestInk}>
                   {HIF.modify()}
@@ -118,7 +115,6 @@ const styles = StyleSheet.create({
   link: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 68, padding: 18, borderRadius: 22 },
   plan: { gap: 16, padding: 18, borderRadius: 22 },
   kindRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  chip: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 18 },
   modify: { minHeight: 42, paddingHorizontal: 22, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
   text: { minHeight: 42, justifyContent: 'center' },

@@ -71,7 +71,7 @@ function Tabs({ tab, onTab }: { tab: 'surah' | 'juz'; onTab: (t: 'surah' | 'juz'
 
 // One end of the range: a small field the number is typed in
 function NumField({ value, max, onChange, label }: { value: number; max: number; onChange: (v: number) => void; label: string }) {
-  const h = useHome();
+  const { c } = useTheme();
   const [text, setText] = useState<string | null>(null); // what is being typed, until the field is left
   return (
     <TextInput
@@ -86,7 +86,7 @@ function NumField({ value, max, onChange, label }: { value: number; max: number;
       keyboardType="number-pad"
       selectTextOnFocus
       accessibilityLabel={label}
-      style={[styles.numInput, { color: h.tileInk, backgroundColor: h.tile }]}
+      style={[styles.numInput, { color: c.ink, borderBottomColor: c.chosenLine }]}
     />
   );
 }
@@ -320,8 +320,8 @@ const styles = StyleSheet.create({
   rowMain: { flex: 1, minHeight: 36, justifyContent: 'center' },
   step: { width: 36, height: 36, borderRadius: 18, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center' },
   act: { minHeight: 40, paddingHorizontal: 20, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  range: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 14 },
-  numInput: { width: 58, minHeight: 40, borderRadius: 12, padding: 0, textAlign: 'center', fontSize: 16, fontWeight: '800' },
+  range: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingBottom: 14 },
+  numInput: { width: 48, minHeight: 36, padding: 0, textAlign: 'center', fontSize: 17, fontWeight: '700', borderBottomWidth: 1.5 },
   stripWrap: { height: 14, justifyContent: 'center' },
   stripRow: { flexDirection: 'row', gap: 2, height: 10 },
   stripBar: { flex: 1, borderRadius: 3 },
