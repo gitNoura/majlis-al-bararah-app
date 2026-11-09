@@ -62,7 +62,7 @@ function Content({ screen, setScreen, seg, setSeg, setup, open, exit }: { screen
 
   if (screen === 'pace') return <PlanSetup type={setup.type} id={setup.id} onExit={exit} />;
 
-  const pad = { padding: space.md, paddingBottom: space.lg + space.md, gap: 12 };
+  const pad = { padding: space.md, paddingBottom: space.lg + space.md, gap: 16 };
   if (screen === 'memorized') {
     return (
       <View style={{ flex: 1 }}>

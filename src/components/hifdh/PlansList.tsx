@@ -38,8 +38,8 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
     ]);
 
   return (
-    <View>
-      <Pressable onPress={openMemorized} accessibilityRole="button" style={[styles.link, { borderBottomColor: c.divider }]}>
+    <View style={{ gap: 14 }}>
+      <Pressable onPress={openMemorized} accessibilityRole="button" style={[styles.link, { backgroundColor: h.card }]}>
         <View style={{ flex: 1, gap: 2 }}>
           <Txt size={17} weight={700} color={c.ink}>
             {HIF.memorizedTitle()}
@@ -52,7 +52,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
       </Pressable>
 
       {plans.length === 0 && (
-        <Txt size={14.5} center color={c.meta} style={{ paddingVertical: 24 }}>
+        <Txt size={14.5} center color={c.meta} style={{ paddingVertical: 12 }}>
           {HIF.noPlans()}
         </Txt>
       )}
@@ -60,7 +60,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
       {plans.map((p) => {
         const paused = core.pausedNow(p);
         return (
-          <View key={p.id} style={[styles.plan, { borderBottomColor: c.divider }, paused && { opacity: 0.75 }]}>
+          <View key={p.id} style={[styles.plan, { backgroundColor: h.card }, paused && { opacity: 0.75 }]}>
             <View style={{ gap: 3 }}>
               <AccentPill text={paused ? `${kindOf(p.type)} · ${HIF.paused()}` : kindOf(p.type)} />
               <Txt size={18} weight={700} color={c.ink}>
@@ -99,7 +99,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
         );
       })}
 
-      <View style={{ paddingTop: 20 }}>
+      <View style={{ paddingTop: 6 }}>
         <SecondaryButton label={`+ ${HIF.addPlan()}`} onPress={onAdd} />
       </View>
     </View>
@@ -107,8 +107,8 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
 }
 
 const styles = StyleSheet.create({
-  link: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth },
-  plan: { gap: 14, paddingVertical: 18, borderBottomWidth: StyleSheet.hairlineWidth },
+  link: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 68, padding: 18, borderRadius: 22 },
+  plan: { gap: 16, padding: 18, borderRadius: 22 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 18 },
   modify: { minHeight: 42, paddingHorizontal: 22, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
   text: { minHeight: 42, justifyContent: 'center' },

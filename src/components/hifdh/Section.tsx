@@ -43,13 +43,20 @@ export function AccentPill({ text, size = 13.5 }: { text: string; size?: number 
   );
 }
 
-// A section: its heading (an icon and a title) and its content, straight on the page. A hairline sets it apart from the one
-// above (`first` leaves it off). Nothing is ever written under the title: the content goes below the head.
-export function Section({ title, icon, children, style, first }: { title: string; icon?: (color: string) => ReactNode; tone?: Tone; first?: boolean; children: ReactNode; style?: StyleProp<ViewStyle> }) {
+// A section: its heading (an icon and a title) and its content. By default it is the page's one kind of box: a quiet
+// white surface (no border, no shadow) so each part of the page reads as its own thing. `plain` drops the surface and
+// separates sections with a hairline instead (the long history list). Nothing is ever written under the title.
+export function Section({ title, icon, children, style, first, plain }: { title: string; icon?: (color: string) => ReactNode; tone?: Tone; first?: boolean; plain?: boolean; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const h = useHome();
   const { c } = useTheme();
   return (
-    <View style={[styles.section, !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider, paddingTop: 20 }, style]}>
+    <View
+      style={[
+        styles.section,
+        plain ? !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider, paddingTop: 20 } : { backgroundColor: h.card, borderRadius: 22, padding: 18 },
+        style,
+      ]}
+    >
       <View style={styles.head}>
         {icon ? icon(h.leaf) : null}
         <Txt size={18} weight={700} color={h.ink} style={{ flex: 1 }}>
@@ -125,7 +132,7 @@ export function SecondaryButton({ label, onPress, disabled }: { label: string; o
 }
 
 const styles = StyleSheet.create({
-  section: { gap: 12 },
+  section: { gap: 14 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
   btn: { minHeight: 50, borderRadius: 25, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },

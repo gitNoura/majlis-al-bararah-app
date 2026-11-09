@@ -28,6 +28,6 @@ export function PlanSummary() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 14 },
-  todayHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 6 },
+  wrap: { gap: 28 },
+  todayHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
 });

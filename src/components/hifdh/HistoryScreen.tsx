@@ -130,7 +130,7 @@ export function HistoryScreen() {
   return (
     <View>
       {shown.map((d, di) => (
-        <Section key={d.day} first={di === 0} title={dayText(d.day)} style={{ paddingBottom: 18 }}>
+        <Section plain key={d.day} first={di === 0} title={dayText(d.day)} style={{ paddingBottom: 18 }}>
           {d.rows.map((r) => {
             const name = r.weekly ? portionName(r.segs, core.shownUnit(core.versionAt(r.plan, r.day))) : portionName(r.segs, core.shownUnit(r.version));
             return (

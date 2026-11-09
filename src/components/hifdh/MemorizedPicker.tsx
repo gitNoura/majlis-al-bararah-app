@@ -69,102 +69,72 @@ function Tabs({ tab, onTab }: { tab: 'surah' | 'juz'; onTab: (t: 'surah' | 'juz'
   );
 }
 
-// − / + button of the ayah range
-function Step({ label, onPress, wide }: { label: string; onPress: () => void; wide?: boolean }) {
-  const h = useHome();
-  const { c } = useTheme();
-  return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={4} style={[styles.step, wide && styles.stepWide, { borderColor: c.chosenLine }]}>
-      <Txt size={wide ? 13.5 : 20} weight={700} color={h.tileInk} style={wide ? undefined : { marginTop: -1 }}>
-        {label}
-      </Txt>
-    </Pressable>
-  );
-}
-
-// One end of the range: its name, − / + (and ±10 for the long surahs) around a number that can also be typed
+// One end of the range on one line: its name at the start, then − a number + (the number can also be typed)
 function NumField({ label, value, max, onChange }: { label: string; value: number; max: number; onChange: (v: number) => void }) {
   const { c } = useTheme();
   const [text, setText] = useState<string | null>(null); // what is being typed, until the field is left
   const go = (v: number) => (setText(null), onChange(Math.min(Math.max(v, 1), max)));
+  const btn = (sign: string, to: number) => (
+    <Pressable onPress={() => go(to)} accessibilityRole="button" accessibilityLabel={sign} hitSlop={6} style={[styles.step, { borderColor: c.chosenLine }]}>
+      <Txt size={20} weight={600} color={c.ink} style={{ marginTop: -1 }}>
+        {sign}
+      </Txt>
+    </Pressable>
+  );
   return (
-    <View style={styles.numCard}>
-      <Txt size={13} weight={700} color={c.meta}>
+    <View style={styles.numRow}>
+      <Txt size={15} weight={600} color={c.meta} style={{ flex: 1 }}>
         {label}
       </Txt>
-      <View style={styles.numRow}>
-        {max > 30 && <Step wide label="−10" onPress={() => go(value - 10)} />}
-        <Step label="−" onPress={() => go(value - 1)} />
-        <TextInput
-          value={text ?? String(value)}
-          onChangeText={(t) => {
-            const d = t.replace(/\D/g, '');
-            setText(d);
-            if (d) onChange(Math.min(Math.max(Number(d), 1), max));
-          }}
-          onBlur={() => setText(null)}
-          keyboardType="number-pad"
-          selectTextOnFocus
-          accessibilityLabel={label}
-          style={[styles.numInput, { color: c.ink }]}
-        />
-        <Step label="+" onPress={() => go(value + 1)} />
-        {max > 30 && <Step wide label="+10" onPress={() => go(value + 10)} />}
-      </View>
+      {btn('−', value - 1)}
+      <TextInput
+        value={text ?? String(value)}
+        onChangeText={(t) => {
+          const d = t.replace(/\D/g, '');
+          setText(d);
+          if (d) onChange(Math.min(Math.max(Number(d), 1), max));
+        }}
+        onBlur={() => setText(null)}
+        keyboardType="number-pad"
+        selectTextOnFocus
+        accessibilityLabel={label}
+        style={[styles.numInput, { color: c.ink }]}
+      />
+      {btn('+', value + 1)}
     </View>
   );
 }
 
 // The ayat of one surah, chosen inline under its row (no sheet): «from ayah» and «to» as two steppers (a number can also be
 // typed), a strip of the surah showing what is already picked (green) and the span being set (outlined), then Add / Remove.
-function RangeEditor({ n, a, bits, onSet }: { n: number; a: number; bits: Bits; onSet: Props['onSet'] }) {
+function RangeEditor({ n, a, onSet }: { n: number; a: number; bits: Bits; onSet: Props['onSet'] }) {
   const { c } = useTheme();
   const h = useHome();
-  const acc = useAccent();
   const [from, setFrom] = useState(1);
   const [to, setTo] = useState(n);
   const setF = (v: number) => (setFrom(v), v > to && setTo(v));
   const setT = (v: number) => (setTo(v), v < from && setFrom(v));
   const apply = (on: boolean) => onSet(a + from - 1, a + to, on);
-  const BUCKETS = 36;
-  const strip = Array.from({ length: BUCKETS }, (_, k) => {
-    const lo = Math.floor((k * n) / BUCKETS);
-    const hi = Math.max(lo + 1, Math.floor(((k + 1) * n) / BUCKETS));
-    return count(bits, a + lo, a + hi) / (hi - lo);
-  });
   return (
     <View style={styles.range}>
-      <View style={styles.stripWrap}>
-        <View style={styles.stripRow}>
-          {strip.map((f, k) => (
-            <View key={k} style={[styles.stripBar, { backgroundColor: f >= 0.5 ? h.leaf : alpha(h.leaf, 0.16) }]} />
-          ))}
-        </View>
-        <View pointerEvents="none" style={styles.stripSel}>
-          <View style={{ flex: from - 1 }} />
-          <View style={[styles.stripMark, { flex: to - from + 1, borderColor: acc.mark }]} />
-          <View style={{ flex: n - to }} />
-        </View>
-      </View>
       <NumField label={HIF.fromAyah()} value={from} max={n} onChange={setF} />
       <NumField label={HIF.toAyah()} value={to} max={n} onChange={setT} />
-      <View style={styles.sumRow}>
-        <Txt size={14} weight={700} color={acc.ink}>
-          {num(from)} – {num(to)} · {unitCount('ayah', to - from + 1)}
-        </Txt>
-        <Pressable onPress={() => (setFrom(1), setTo(n))} accessibilityRole="button" hitSlop={6} style={{ minHeight: 36, justifyContent: 'center' }}>
-          <Txt size={14} weight={700} color={c.ink}>
+      <View style={styles.actions}>
+        <Pressable onPress={() => apply(true)} accessibilityRole="button" style={[styles.act, { backgroundColor: h.forest }]}>
+          <Txt size={15} weight={700} color={h.forestInk}>
+            {HIF.add()}
+          </Txt>
+        </Pressable>
+        <Pressable onPress={() => apply(false)} accessibilityRole="button" style={[styles.act, { borderWidth: StyleSheet.hairlineWidth * 2, borderColor: c.chosenLine }]}>
+          <Txt size={15} weight={700} color={c.ink}>
+            {HIF.remove()}
+          </Txt>
+        </Pressable>
+        <Pressable onPress={() => (setFrom(1), setTo(n))} accessibilityRole="button" hitSlop={6} style={{ minHeight: 40, justifyContent: 'center', marginStart: 'auto' }}>
+          <Txt size={14} weight={700} color={c.meta}>
             {HIF.lsQuickSurah()}
           </Txt>
         </Pressable>
-      </View>
-      <View style={styles.actions}>
-        <View style={{ flex: 1 }}>
-          <SecondaryButton label={HIF.remove()} onPress={() => apply(false)} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <PrimaryButton label={HIF.add()} onPress={() => apply(true)} />
-        </View>
       </View>
     </View>
   );
@@ -363,19 +333,18 @@ const styles = StyleSheet.create({
   row: { paddingVertical: 12, gap: 10, borderBottomWidth: StyleSheet.hairlineWidth },
   rowHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   rowMain: { flex: 1, minHeight: 36, justifyContent: 'center' },
-  step: { minWidth: 40, height: 40, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center' },
-  stepWide: { minWidth: 46, borderRadius: 14, paddingHorizontal: 6 },
-  range: { gap: 14, paddingTop: 4, paddingBottom: 18 },
-  numCard: { gap: 4 },
-  numRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6 },
-  numInput: { flex: 1, minWidth: 56, padding: 0, textAlign: 'center', fontSize: 26, fontWeight: '800', minHeight: 44 },
+  step: { width: 36, height: 36, borderRadius: 18, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center' },
+  act: { minHeight: 40, paddingHorizontal: 20, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  range: { gap: 6, paddingBottom: 14 },
+  numRow: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 },
+  numInput: { width: 60, padding: 0, textAlign: 'center', fontSize: 20, fontWeight: '800', minHeight: 40 },
   stripWrap: { height: 14, justifyContent: 'center' },
   stripRow: { flexDirection: 'row', gap: 2, height: 10 },
   stripBar: { flex: 1, borderRadius: 3 },
   stripSel: { ...StyleSheet.absoluteFill as object, flexDirection: 'row' },
   stripMark: { borderWidth: 2, borderRadius: 6 },
   sumRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  actions: { flexDirection: 'row', gap: 10 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 6 },
   strip: { flex: 1, flexDirection: 'row', gap: 2, height: 8 },
   stripCell: { flex: 1, borderRadius: 2 },
   hizb: { gap: 8, paddingTop: 4 },

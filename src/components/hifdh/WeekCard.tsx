@@ -72,7 +72,7 @@ export function WeekCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { gap: 14 },
+  card: { gap: 16, paddingTop: 4 },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { alignItems: 'flex-end' },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 6 },
