@@ -7,9 +7,8 @@
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-import { CheckIcon } from '@/components/icons';
+import { BackIcon, CheckIcon } from '@/components/icons';
 import { PrimaryButton, SecondaryButton, alpha, useAccent } from '@/components/hifdh/Section';
-import { Sheet } from '@/components/ui/Sheet';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish, surahName } from '@/i18n/i18n';
@@ -38,7 +37,7 @@ const hizbShare = (bits: Bits): number => {
 };
 const ARABIC = /[\u0600-\u06FF]/;
 
-// A round mark: empty, part-picked (the page's yellow) or all picked (forest green with a tick)
+// A round mark: empty, part-picked (a green dash) or all picked (forest green with a tick)
 function Check({ st }: { st: St }) {
   const h = useHome();
   const { c } = useTheme();
@@ -55,20 +54,17 @@ function Tabs({ tab, onTab }: { tab: 'surah' | 'juz'; onTab: (t: 'surah' | 'juz'
   const { c } = useTheme();
   const h = useHome();
   return (
-    <View style={[styles.tabs, { backgroundColor: h.well }]}>
-      {(['surah', 'juz'] as const).map((t) => (
-        <Pressable
-          key={t}
-          onPress={() => onTab(t)}
-          accessibilityRole="button"
-          accessibilityState={{ selected: tab === t }}
-          style={[styles.tab, tab === t && { backgroundColor: h.card, boxShadow: `0px 2px 8px ${h.shadow}` }]}
-        >
-          <Txt size={14.5} weight={700} color={tab === t ? c.ink : c.meta}>
-            {t === 'surah' ? HIF.surahs() : HIF.juzPlural()}
-          </Txt>
-        </Pressable>
-      ))}
+    <View style={[styles.tabs, { borderBottomColor: c.divider }]}>
+      {(['surah', 'juz'] as const).map((t) => {
+        const on = tab === t;
+        return (
+          <Pressable key={t} onPress={() => onTab(t)} accessibilityRole="button" accessibilityState={{ selected: on }} style={[styles.tab, { borderBottomColor: on ? h.leaf : 'transparent' }]}>
+            <Txt size={15} weight={700} color={on ? c.ink : c.meta}>
+              {t === 'surah' ? HIF.surahs() : HIF.juzPlural()}
+            </Txt>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -76,8 +72,9 @@ function Tabs({ tab, onTab }: { tab: 'surah' | 'juz'; onTab: (t: 'surah' | 'juz'
 // − / + button of the ayah range
 function Step({ label, onPress, wide }: { label: string; onPress: () => void; wide?: boolean }) {
   const h = useHome();
+  const { c } = useTheme();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={4} style={[styles.step, wide && styles.stepWide, { backgroundColor: h.card }]}>
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={4} style={[styles.step, wide && styles.stepWide, { borderColor: c.chosenLine }]}>
       <Txt size={wide ? 13.5 : 20} weight={700} color={h.tileInk} style={wide ? undefined : { marginTop: -1 }}>
         {label}
       </Txt>
@@ -88,11 +85,10 @@ function Step({ label, onPress, wide }: { label: string; onPress: () => void; wi
 // One end of the range: its name, − / + (and ±10 for the long surahs) around a number that can also be typed
 function NumField({ label, value, max, onChange }: { label: string; value: number; max: number; onChange: (v: number) => void }) {
   const { c } = useTheme();
-  const h = useHome();
   const [text, setText] = useState<string | null>(null); // what is being typed, until the field is left
   const go = (v: number) => (setText(null), onChange(Math.min(Math.max(v, 1), max)));
   return (
-    <View style={[styles.numCard, { backgroundColor: h.well }]}>
+    <View style={styles.numCard}>
       <Txt size={13} weight={700} color={c.meta}>
         {label}
       </Txt>
@@ -119,9 +115,9 @@ function NumField({ label, value, max, onChange }: { label: string; value: numbe
   );
 }
 
-// A sheet to put some ayat of a surah in or out: the range as two steppers, and a strip of the surah that shows what is
-// already picked (green) and the range being set (yellow).
-function RangeSheet({ title, n, a, bits, onSet, onClose }: { title: string; n: number; a: number; bits: Bits; onSet: Props['onSet']; onClose: () => void }) {
+// The ayat of one surah, chosen inline under its row (no sheet): «from ayah» and «to» as two steppers (a number can also be
+// typed), a strip of the surah showing what is already picked (green) and the span being set (outlined), then Add / Remove.
+function RangeEditor({ n, a, bits, onSet }: { n: number; a: number; bits: Bits; onSet: Props['onSet'] }) {
   const { c } = useTheme();
   const h = useHome();
   const acc = useAccent();
@@ -129,7 +125,7 @@ function RangeSheet({ title, n, a, bits, onSet, onClose }: { title: string; n: n
   const [to, setTo] = useState(n);
   const setF = (v: number) => (setFrom(v), v > to && setTo(v));
   const setT = (v: number) => (setTo(v), v < from && setFrom(v));
-  const apply = (on: boolean) => (onSet(a + from - 1, a + to, on), onClose());
+  const apply = (on: boolean) => onSet(a + from - 1, a + to, on);
   const BUCKETS = 36;
   const strip = Array.from({ length: BUCKETS }, (_, k) => {
     const lo = Math.floor((k * n) / BUCKETS);
@@ -137,10 +133,7 @@ function RangeSheet({ title, n, a, bits, onSet, onClose }: { title: string; n: n
     return count(bits, a + lo, a + hi) / (hi - lo);
   });
   return (
-    <Sheet open onClose={onClose} title={title}>
-      <Txt size={14} color={c.meta}>
-        {unitCount('ayah', n)}
-      </Txt>
+    <View style={styles.range}>
       <View style={styles.stripWrap}>
         <View style={styles.stripRow}>
           {strip.map((f, k) => (
@@ -149,26 +142,18 @@ function RangeSheet({ title, n, a, bits, onSet, onClose }: { title: string; n: n
         </View>
         <View pointerEvents="none" style={styles.stripSel}>
           <View style={{ flex: from - 1 }} />
-          <View style={[styles.stripMark, { flex: to - from + 1, backgroundColor: alpha(acc.mark, 0.35), borderColor: acc.mark }]} />
+          <View style={[styles.stripMark, { flex: to - from + 1, borderColor: acc.mark }]} />
           <View style={{ flex: n - to }} />
         </View>
       </View>
-      <View style={styles.numPair}>
-        <NumField label={HIF.fromAyah()} value={from} max={n} onChange={setF} />
-        <NumField label={HIF.toAyah()} value={to} max={n} onChange={setT} />
-      </View>
+      <NumField label={HIF.fromAyah()} value={from} max={n} onChange={setF} />
+      <NumField label={HIF.toAyah()} value={to} max={n} onChange={setT} />
       <View style={styles.sumRow}>
-        <View style={[styles.sumPill, { backgroundColor: acc.fill }]}>
-          <Txt size={14} weight={700} color={acc.ink}>
-            {num(from)} – {num(to)} · {unitCount('ayah', to - from + 1)}
-          </Txt>
-        </View>
-        <Pressable
-          onPress={() => (setFrom(1), setTo(n))}
-          accessibilityRole="button"
-          style={{ minHeight: 36, justifyContent: 'center' }}
-        >
-          <Txt size={14} weight={700} color={c.goldStrong}>
+        <Txt size={14} weight={700} color={acc.ink}>
+          {num(from)} – {num(to)} · {unitCount('ayah', to - from + 1)}
+        </Txt>
+        <Pressable onPress={() => (setFrom(1), setTo(n))} accessibilityRole="button" hitSlop={6} style={{ minHeight: 36, justifyContent: 'center' }}>
+          <Txt size={14} weight={700} color={c.ink}>
             {HIF.lsQuickSurah()}
           </Txt>
         </Pressable>
@@ -181,10 +166,12 @@ function RangeSheet({ title, n, a, bits, onSet, onClose }: { title: string; n: n
           <PrimaryButton label={HIF.add()} onPress={() => apply(true)} />
         </View>
       </View>
-    </Sheet>
+    </View>
   );
 }
 
+// The surahs: a search field and a plain list. The round mark puts the whole surah in or out; a tap on the name opens the
+// choice of ayat (from … to …) right under it.
 function SurahList({ bits, onSet }: Omit<Props, 'quick'>) {
   const { c } = useTheme();
   const h = useHome();
@@ -199,7 +186,7 @@ function SurahList({ bits, onSet }: Omit<Props, 'quick'>) {
   const list = SURAHS.map((sr, i) => ({ sr, i })).filter(({ sr, i }) => !query || String(i + 1) === query || String(sr.name).includes(query) || (sr.latin || '').toLowerCase().includes(query));
 
   return (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 6 }}>
       <TextInput
         value={q}
         onChangeText={setQ}
@@ -210,47 +197,38 @@ function SurahList({ bits, onSet }: Omit<Props, 'quick'>) {
         clearButtonMode="while-editing"
         style={[styles.search, { backgroundColor: h.well, color: c.ink }, rtl && styles.searchRtl]}
       />
-      <View style={[styles.group, { backgroundColor: h.card, borderColor: h.cardLine }]}>
-        {list.map(({ sr, i }, k) => {
+      <View>
+        {list.map(({ sr, i }) => {
           const a: number = U.surahStart[i];
           const n: number = U.surahStart[i + 1] - a;
           const have = count(bits, a, a + n);
           const st = stateOf(have, n);
+          const isOpen = open === i;
           return (
-            <Pressable
-              key={i}
-              onPress={() => onSet(a, a + n, have !== n)}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: st === 2 }}
-              style={[styles.srow, k < list.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.divider }]}
-            >
-              <Check st={st} />
-              <View style={{ flex: 1, gap: 3 }}>
-                <Txt size={16} weight={700} color={c.ink}>
-                  {i + 1}. {surahName(sr)}
-                </Txt>
-                <Txt size={13} color={c.meta}>
-                  {st === 1 ? `${num(have)}/${num(n)}` : unitCount('ayah', n)}
-                </Txt>
-                {st === 1 && (
-                  <View style={[styles.prog, { backgroundColor: alpha(acc.mark, 0.25) }]}>
-                    <View style={{ flex: have, backgroundColor: acc.mark, borderRadius: 2 }} />
-                    <View style={{ flex: n - have }} />
+            <View key={i} style={{ borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.divider }}>
+              <View style={styles.srow}>
+                <Pressable onPress={() => onSet(a, a + n, have !== n)} hitSlop={8} accessibilityRole="checkbox" accessibilityState={{ checked: st === 2 }} accessibilityLabel={surahName(sr)}>
+                  <Check st={st} />
+                </Pressable>
+                <Pressable onPress={() => setOpen(isOpen ? -1 : i)} accessibilityRole="button" accessibilityState={{ expanded: isOpen }} accessibilityLabel={`${surahName(sr)} · ${HIF.ayatShort()}`} style={styles.srowMain}>
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Txt size={16} weight={700} color={c.ink}>
+                      {i + 1}. {surahName(sr)}
+                    </Txt>
+                    <Txt size={13} color={st === 1 ? acc.ink : c.meta}>
+                      {st === 1 ? `${num(have)}/${num(n)} · ${unitCount('ayah', n)}` : unitCount('ayah', n)}
+                    </Txt>
                   </View>
-                )}
+                  <View style={{ transform: [{ rotate: isOpen ? (isEnglish ? '90deg' : '-90deg') : '0deg' }] }}>
+                    <BackIcon color={c.meta} size={18} rtl={isEnglish} />
+                  </View>
+                </Pressable>
               </View>
-              <Pressable onPress={() => setOpen(i)} hitSlop={6} accessibilityRole="button" accessibilityLabel={`${surahName(sr)} · ${HIF.ayatShort()}`} style={[styles.ayatBtn, { backgroundColor: acc.fill }]}>
-                <Txt size={13.5} weight={700} color={acc.ink}>
-                  {HIF.ayatShort()}
-                </Txt>
-              </Pressable>
-            </Pressable>
+              {isOpen && <RangeEditor key={i} n={n} a={a} bits={bits} onSet={onSet} />}
+            </View>
           );
         })}
       </View>
-      {open >= 0 && (
-        <RangeSheet key={open} title={surahName(SURAHS[open])} n={U.surahStart[open + 1] - U.surahStart[open]} a={U.surahStart[open]} bits={bits} onSet={onSet} onClose={() => setOpen(-1)} />
-      )}
     </View>
   );
 }
@@ -271,16 +249,16 @@ function JuzList({ bits, onSet }: Omit<Props, 'quick'>) {
   const end = (u: number): number => th.start[u] + th.size[u];
   // all in: tapping takes it out; otherwise it is put in
   const span = (from: number, to: number) => onSet(from, to, count(bits, from, to) !== to - from);
-  const cellColor = (s: St) => (s === 2 ? h.forest : s === 1 ? acc.fill : h.well);
+  const cellColor = (s: St) => (s === 2 ? h.forest : s === 1 ? acc.fill : 'transparent');
 
   return (
-    <View style={{ gap: 8 }}>
+    <View>
       {Array.from({ length: 30 }, (_, j) => {
         const cells = Array.from({ length: 16 }, (_, k) => 16 * j + k);
         const n = cells.filter((u) => st[u] === 2).length;
         const isOpen = open === j;
         return (
-          <View key={j} style={[styles.row, { backgroundColor: h.card, borderColor: h.cardLine }]}>
+          <View key={j} style={[styles.row, { borderBottomColor: c.divider }]}>
             <View style={styles.rowHead}>
               <Pressable onPress={() => span(th.start[16 * j], end(16 * j + 15))} hitSlop={6} accessibilityRole="button" accessibilityLabel={`${HIF.juzWord()} ${j + 1}`}>
                 <Check st={n === 16 ? 2 : cells.some((u) => st[u]) ? 1 : 0} />
@@ -291,7 +269,7 @@ function JuzList({ bits, onSet }: Omit<Props, 'quick'>) {
                 </Txt>
                 <View style={styles.strip}>
                   {cells.map((u) => (
-                    <View key={u} style={[styles.stripCell, { backgroundColor: cellColor(st[u]) }]} />
+                    <View key={u} style={[styles.stripCell, { backgroundColor: st[u] === 2 ? h.forest : st[u] === 1 ? acc.mark : alpha(h.leaf, 0.14) }]} />
                   ))}
                 </View>
                 <Txt size={13} color={c.meta}>
@@ -376,21 +354,19 @@ export function MemorizedPicker({ bits, onSet, quick = false }: Props) {
 const styles = StyleSheet.create({
   check: { width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   some: { width: 10, height: 3, borderRadius: 2 },
-  tabs: { flexDirection: 'row', borderRadius: 18, padding: 4, gap: 4 },
-  tab: { flex: 1, minHeight: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  tabs: { flexDirection: 'row', borderBottomWidth: StyleSheet.hairlineWidth },
+  tab: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2 },
   search: { minHeight: 48, borderRadius: 16, paddingHorizontal: 16, fontSize: 15 },
   searchRtl: { textAlign: 'right', writingDirection: 'rtl' },
-  group: { borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
-  srow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 64 },
-  prog: { flexDirection: 'row', height: 4, borderRadius: 2, overflow: 'hidden' },
-  ayatBtn: { minHeight: 34, paddingHorizontal: 14, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  row: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12, paddingVertical: 10, gap: 10 },
+  srow: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 64, paddingVertical: 8 },
+  srowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 48 },
+  row: { paddingVertical: 12, gap: 10, borderBottomWidth: StyleSheet.hairlineWidth },
   rowHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   rowMain: { flex: 1, minHeight: 36, justifyContent: 'center' },
-  step: { minWidth: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  step: { minWidth: 40, height: 40, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center' },
   stepWide: { minWidth: 46, borderRadius: 14, paddingHorizontal: 6 },
-  numPair: { gap: 10 },
-  numCard: { borderRadius: 20, padding: 14, gap: 8 },
+  range: { gap: 14, paddingTop: 4, paddingBottom: 18 },
+  numCard: { gap: 4 },
   numRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6 },
   numInput: { flex: 1, minWidth: 56, padding: 0, textAlign: 'center', fontSize: 26, fontWeight: '800', minHeight: 44 },
   stripWrap: { height: 14, justifyContent: 'center' },
@@ -399,7 +375,6 @@ const styles = StyleSheet.create({
   stripSel: { ...StyleSheet.absoluteFill as object, flexDirection: 'row' },
   stripMark: { borderWidth: 2, borderRadius: 6 },
   sumRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  sumPill: { minHeight: 34, paddingHorizontal: 14, borderRadius: 17, justifyContent: 'center' },
   actions: { flexDirection: 'row', gap: 10 },
   strip: { flex: 1, flexDirection: 'row', gap: 2, height: 8 },
   stripCell: { flex: 1, borderRadius: 2 },

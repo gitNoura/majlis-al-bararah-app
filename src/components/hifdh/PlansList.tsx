@@ -1,10 +1,11 @@
-// «My plans» (plansHTML of the website): a card per plan with Modify / Pause (or Resume) / Delete, and «Add plan».
-// The «My plans» tab (HifTabs) is the door to it from the plan screen.
+// «My plans» (plansHTML of the website): each plan with Modify / Pause (or Resume) / Delete, and «Add plan».
+// Flat (redesign v2): a plan is a block of text on the page with a hairline above it, not a card; the actions are quiet
+// text buttons in one row, and «Modify» is the one filled button.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { AccentPill, PrimaryButton, SecondaryButton } from '@/components/hifdh/Section';
+import { AccentPill, SecondaryButton } from '@/components/hifdh/Section';
 import { BackIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
@@ -12,9 +13,10 @@ import { isEnglish } from '@/i18n/i18n';
 import * as core from '@/lib/hifdh/core';
 import { kindOf, paceText, rangeLabel } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
-import { radius } from '@/theme/tokens';
 import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
+
+const DANGER = '#b3402f';
 
 export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onAdd: () => void }) {
   const { c } = useTheme();
@@ -36,55 +38,58 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
     ]);
 
   return (
-    <View style={{ gap: 12 }}>
-      <Pressable onPress={openMemorized} accessibilityRole="button" style={[styles.card, { backgroundColor: h.tile, borderColor: h.cardLine, flexDirection: 'row', alignItems: 'center', gap: 12 }]}>
+    <View>
+      <Pressable onPress={openMemorized} accessibilityRole="button" style={[styles.link, { borderBottomColor: c.divider }]}>
         <View style={{ flex: 1, gap: 2 }}>
-          <Txt size={17} weight={700} color={h.tileInk}>
+          <Txt size={17} weight={700} color={c.ink}>
             {HIF.memorizedTitle()}
           </Txt>
-          <Txt size={13} color={h.tileInk} style={{ opacity: 0.7 }}>
+          <Txt size={13} color={c.meta}>
             {HIF.editMemorized()}
           </Txt>
         </View>
-        <BackIcon color={h.tileInk} size={22} rtl={isEnglish} />
+        <BackIcon color={c.meta} size={20} rtl={isEnglish} />
       </Pressable>
+
       {plans.length === 0 && (
-        <Txt size={14.5} center color={c.meta} style={{ paddingVertical: 12 }}>
+        <Txt size={14.5} center color={c.meta} style={{ paddingVertical: 24 }}>
           {HIF.noPlans()}
         </Txt>
       )}
+
       {plans.map((p) => {
         const paused = core.pausedNow(p);
         return (
-          <View key={p.id} style={[styles.card, { backgroundColor: h.card, borderColor: h.cardLine, boxShadow: `0px 8px 20px ${h.shadow}` }, paused && { opacity: 0.8 }]}>
-            <View style={{ gap: 4 }}>
-              <AccentPill text={kindOf(p.type)} />
-              <Txt size={17} weight={700} color={c.ink}>
+          <View key={p.id} style={[styles.plan, { borderBottomColor: c.divider }, paused && { opacity: 0.75 }]}>
+            <View style={{ gap: 3 }}>
+              <AccentPill text={paused ? `${kindOf(p.type)} · ${HIF.paused()}` : kindOf(p.type)} />
+              <Txt size={18} weight={700} color={c.ink}>
                 {rangeLabel(p.range, p.type)}
               </Txt>
-              <Txt size={13} color={c.meta}>
+              <Txt size={13.5} color={c.meta}>
                 {paceText(p)}
               </Txt>
-              {paused && (
-                <Txt size={13} weight={700} color={c.goldStrong}>
-                  {HIF.paused()}
-                </Txt>
-              )}
             </View>
             <View style={styles.actions}>
-              <View style={styles.btn}>
-                <PrimaryButton label={HIF.modify()} onPress={() => onEdit(p.id)} />
-              </View>
-              <View style={styles.btn}>
-                <SecondaryButton
-                  label={paused ? HIF.resume() : HIF.pause()}
-                  onPress={() => {
-                    plan.setPaused(p.id, !paused);
-                    refresh();
-                  }}
-                />
-              </View>
-              <Pressable onPress={() => confirmDelete(p.id)} accessibilityRole="button" style={[styles.danger, { borderColor: DANGER }]}>
+              <Pressable onPress={() => onEdit(p.id)} accessibilityRole="button" style={[styles.modify, { backgroundColor: h.forest }]}>
+                <Txt size={15} weight={700} color={h.forestInk}>
+                  {HIF.modify()}
+                </Txt>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  plan.setPaused(p.id, !paused);
+                  refresh();
+                }}
+                hitSlop={6}
+                accessibilityRole="button"
+                style={styles.text}
+              >
+                <Txt size={15} weight={700} color={c.ink}>
+                  {paused ? HIF.resume() : HIF.pause()}
+                </Txt>
+              </Pressable>
+              <Pressable onPress={() => confirmDelete(p.id)} hitSlop={6} accessibilityRole="button" style={styles.text}>
                 <Txt size={15} weight={700} color={DANGER}>
                   {HIF.delete()}
                 </Txt>
@@ -93,17 +98,18 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
           </View>
         );
       })}
-      <SecondaryButton label={`+ ${HIF.addPlan()}`} onPress={onAdd} />
+
+      <View style={{ paddingTop: 20 }}>
+        <SecondaryButton label={`+ ${HIF.addPlan()}`} onPress={onAdd} />
+      </View>
     </View>
   );
 }
 
-const DANGER = '#b3402f';
-
 const styles = StyleSheet.create({
-  tile: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.card, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 16, minHeight: 60 },
-  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
-  btn: { flexGrow: 1, flexBasis: 100 },
-  danger: { minHeight: 50, borderRadius: 25, borderWidth: 1.5, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
+  link: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth },
+  plan: { gap: 14, paddingVertical: 18, borderBottomWidth: StyleSheet.hairlineWidth },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 18 },
+  modify: { minHeight: 42, paddingHorizontal: 22, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
+  text: { minHeight: 42, justifyContent: 'center' },
 });

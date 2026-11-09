@@ -111,17 +111,17 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
           onPress={() => listen(findRow(key) ?? row)}
           accessibilityRole="button"
           accessibilityLabel={HIF.listenPortion()}
-          style={[styles.icon, { backgroundColor: h.tile }]}
+          style={[styles.icon, { borderColor: c.chosenLine }]}
         >
-          <PlayIcon color={h.tileInk} size={20} />
+          <PlayIcon color={h.ink} size={20} />
         </Pressable>
         <Pressable
           onPress={() => recite(findRow(key) ?? row)}
           accessibilityRole="button"
           accessibilityLabel={HIF.recitePortion()}
-          style={[styles.icon, { backgroundColor: h.tile }]}
+          style={[styles.icon, { borderColor: c.chosenLine }]}
         >
-          <MicIcon color={h.tileInk} size={20} />
+          <MicIcon color={h.ink} size={20} />
         </Pressable>
         {row.status !== 'notdone' && (
           <Pressable
@@ -135,12 +135,12 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
             accessibilityHint={HIF.holdHint()}
             style={[
               styles.complete,
-              done ? { backgroundColor: h.tile } : { backgroundColor: h.forest },
+              done ? { borderWidth: StyleSheet.hairlineWidth * 2, borderColor: h.leaf } : { backgroundColor: h.forest },
               locked && { opacity: 0.45 },
             ]}
           >
-            {done && <CheckIcon color={h.tileInk} size={18} strokeWidth={2.4} />}
-            <Txt size={16} weight={700} color={done ? h.tileInk : h.forestInk}>
+            {done && <CheckIcon color={h.leaf} size={18} strokeWidth={2.4} />}
+            <Txt size={16} weight={700} color={done ? h.leaf : h.forestInk}>
               {done ? STATUS.done() : HIF.complete()}
             </Txt>
           </Pressable>
@@ -154,6 +154,6 @@ const styles = StyleSheet.create({
   task: { gap: 14, paddingVertical: 14 },
   main: { gap: 3 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  icon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  icon: { width: 44, height: 44, borderRadius: 22, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center' },
   complete: { flex: 1, minHeight: 44, paddingHorizontal: 18, borderRadius: 22, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
 });

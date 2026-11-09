@@ -24,7 +24,7 @@ export function TodayCard() {
 
   if (!st.plans.some((p: { type: string }) => p.type === 'memorize')) {
     return (
-      <Section title={title} icon={(color) => <BookOpenIcon color={color} size={22} />}>
+      <Section first title={title} icon={(color) => <BookOpenIcon color={color} size={22} />}>
         <Txt size={15} weight={700} color={c.ink}>
           {HIF.noHifdhPlan()}
         </Txt>
@@ -37,10 +37,10 @@ export function TodayCard() {
   const rows = plan.todayRows().filter((r: Row) => r.plan.type === 'memorize');
   const next = plan.upcomingRows().find((r: Row) => r.plan.type === 'memorize');
 
-  if (rows.length && rows.every(isDone)) return <DoneCard rows={rows} />; // done: the same card turns into the congratulation
+  if (rows.length && rows.every(isDone)) return <DoneCard rows={rows} first />; // done: the same card turns into the congratulation
 
   return (
-    <Section title={title} icon={(color) => <BookOpenIcon color={color} size={22} />}>
+    <Section first title={title} icon={(color) => <BookOpenIcon color={color} size={22} />}>
       {rows.length ? (
         <View>
           {rows.map((r: Row, i: number) => (

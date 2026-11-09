@@ -4,7 +4,7 @@
 // and delete under Save. Previous / Next at the bottom move between the questions only (the arrow at the top
 // leaves the setup); the plan is kept per day: the week's amount is shared over the days chosen.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Alert, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,7 +13,7 @@ import { HifHeader } from '@/components/hifdh/HifHeader';
 import { useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { MemorizedPicker } from '@/components/hifdh/MemorizedPicker';
 import { MemorizedScreen } from '@/components/hifdh/MemorizedScreen';
-import { AccentPill, Hint, PrimaryButton, SecondaryButton, alpha, useAccent } from '@/components/hifdh/Section';
+import { AccentPill, Hint, PrimaryButton, SecondaryButton } from '@/components/hifdh/Section';
 import { Sheet } from '@/components/ui/Sheet';
 import { BackIcon, CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
@@ -174,17 +174,13 @@ const clean = (x: number) => Math.round(x * 100) / 100;
 const stepKeys = (p: Pace) => ['type', ...(p.askMem && p.type === 'memorize' ? ['memorized'] : []), // revising asks what to revise, not what is memorized
    'scope', ...(p.mode === 'date' ? ['date', 'days'] : ['amount', 'days', 'split']), 'summary'];
 
-// A paper card like the Home page's: hairline border, soft shadow, generous corners; the questions' content sits in one
-const FlatCtx = createContext(false); // inside a sheet the cards are flat tints, not paper
-function Card({ children, flush }: { children: ReactNode; flush?: boolean }) {
-  const h = useHome();
-  const flat = useContext(FlatCtx);
-  return (
-    <View style={[styles.card, flush && { padding: 0, overflow: 'hidden' }, flat ? { backgroundColor: h.well, borderWidth: 0 } : { backgroundColor: h.card, borderColor: h.cardLine, boxShadow: `0px 8px 20px ${h.shadow}` }]}>{children}</View>
-  );
+// A plain block: its content sits on the page (no paper, border or shadow). `flush` is a list whose rows carry their own
+// hairlines.
+function Card({ children }: { children: ReactNode; flush?: boolean }) {
+  return <View style={styles.card}>{children}</View>;
 }
 
-// A row of the edit page: the setting's name, its value in the page's yellow, and an arrow; a tap opens a sheet for it
+// A row of the edit page: the setting's name, its value in green, and an arrow; a tap opens a sheet for it
 function EditRow({ label, value, onPress, last }: { label: string; value: string; onPress: () => void; last?: boolean }) {
   const { c } = useTheme();
   return (
@@ -209,10 +205,10 @@ function Opt({ on, text, sub, disabled, onPress }: { on: boolean; text: string; 
       disabled={disabled}
       accessibilityRole="radio"
       accessibilityState={{ selected: on, disabled }}
-      style={[styles.opt, { backgroundColor: on ? alpha(h.leaf, 0.08) : h.card, borderColor: on ? h.forest : h.cardLine, boxShadow: on ? 'none' : `0px 6px 16px ${h.shadow}`, opacity: disabled ? 0.55 : 1 }]}
+      style={[styles.opt, { borderBottomColor: c.divider, opacity: disabled ? 0.55 : 1 }]}
     >
       <View style={{ flex: 1, gap: 2 }}>
-        <Txt size={16.5} weight={700} color={c.ink}>
+        <Txt size={16.5} weight={on ? 800 : 600} color={c.ink}>
           {text}
         </Txt>
         {!!sub && (
@@ -228,9 +224,10 @@ function Opt({ on, text, sub, disabled, onPress }: { on: boolean; text: string; 
 
 function Chip({ on, text, onPress }: { on: boolean; text: string; onPress: () => void }) {
   const h = useHome();
+  const { c } = useTheme();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }} style={[styles.chip, { backgroundColor: on ? h.forest : h.tile }]}>
-      <Txt size={14.5} weight={on ? 700 : 600} color={on ? h.forestInk : h.tileInk}>
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }} style={[styles.chip, on ? { backgroundColor: h.forest, borderColor: h.forest } : { borderColor: c.chosenLine }]}>
+      <Txt size={14.5} weight={on ? 700 : 600} color={on ? h.forestInk : c.ink}>
         {text}
       </Txt>
     </Pressable>
@@ -267,6 +264,7 @@ function DayList({ days, onToggle }: { days: number[]; onToggle: (d: number) => 
 // A round − / + button
 function Stepper({ sign, label, onPress, disabled, size = 40 }: { sign: string; label: string; onPress: () => void; disabled?: boolean; size?: number }) {
   const h = useHome();
+  const { c } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -274,9 +272,9 @@ function Stepper({ sign, label, onPress, disabled, size = 40 }: { sign: string; 
       accessibilityRole="button"
       accessibilityLabel={label}
       hitSlop={6}
-      style={[styles.stepper, { width: size, height: size, borderRadius: size / 2, backgroundColor: h.tile, opacity: disabled ? 0.4 : 1 }]}
+      style={[styles.stepper, { width: size, height: size, borderRadius: size / 2, borderColor: c.chosenLine, opacity: disabled ? 0.4 : 1 }]}
     >
-      <Txt size={22} weight={600} color={h.tileInk} style={{ marginTop: -1 }}>
+      <Txt size={22} weight={600} color={h.ink} style={{ marginTop: -1 }}>
         {sign}
       </Txt>
     </Pressable>
@@ -357,7 +355,6 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   const { refresh, toast } = useHif();
   const [pace, setPace] = useState<Pace>(() => initPace(type, id));
   const [sheet, setSheet] = useState<'scope' | 'pace' | 'days' | 'split' | 'from' | null>(null); // the edit page's open sheet
-  const accent = useAccent();
   // a new amount, unit or set of days starts the split over: the even share is the default
   const patch = (next: Partial<Pace>) => setPace((p) => ({ ...p, ...(('amtText' in next || 'unit' in next || 'divide' in next || 'days' in next || 'mode' in next) && !('perDay' in next) ? { perDay: null } : {}), ...next }));
 
@@ -412,7 +409,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   // ----- the pieces, shared by the questions and the edit page -----
 
   const scopeBlock = () => (
-    <View style={{ gap: 10 }}>
+    <View>
       <Opt
         on={pace.scopeSel === 'all'}
         text={rangeLabel(null, revise && known ? 'revise' : 'memorize')}
@@ -425,6 +422,13 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
         onPress={() => patch({ scopeSel: 'part', range: core.bitsToRanges(pace.bits).length ? core.bitsToRanges(pace.bits) : null })}
       />
       {pace.scopeSel === 'part' && (
+        <View style={{ gap: 10, paddingTop: 6 }}>
+          <Txt size={14} color={c.meta}>
+            {pace.range ? `${HIF.covers()}: ` : ''}
+            <Txt size={14} weight={700} color={c.ink}>
+              {pace.range ? rangeLabel(pace.range, pace.type) : HIF.scopeSpecificSub()}
+            </Txt>
+          </Txt>
         <MemorizedPicker
           bits={pace.bits}
           onSet={(from, to, on) => {
@@ -434,6 +438,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
             patch({ bits, range: ranges.length ? ranges : null });
           }}
         />
+        </View>
       )}
     </View>
   );
@@ -593,66 +598,69 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     const close = () => setSheet(null);
     const sheetOf = (k: NonNullable<typeof sheet>, title: string, inner: ReactNode) => (
       <Sheet open={sheet === k} onClose={close} title={title}>
-        <FlatCtx.Provider value>{inner}</FlatCtx.Provider>
+        {inner}
         <PrimaryButton label={HIF.done()} onPress={close} />
       </Sheet>
     );
     return {
       body: (
-        <View style={{ gap: 16 }}>
+        <View style={{ gap: 20 }}>
           <AccentPill text={kindOf(pace.type)} size={14} />
-          <Card flush>
+          <View>
             <EditRow label={HIF.covers()} value={rangeLabel(pace.range, pace.type)} onPress={() => setSheet('scope')} />
             <EditRow label={HIF.pace()} value={paceWords} onPress={() => setSheet('pace')} />
             <EditRow label={HIF.days()} value={dayWords} onPress={() => setSheet('days')} />
             {showSplit && <EditRow label={HIF.perDay()} value={pace.perDay ? HIF.splitCustom() : HIF.splitEven()} onPress={() => setSheet('split')} />}
             <EditRow label={HIF.newPaceFrom()} value={fmtDate(pace.from)} onPress={() => setSheet('from')} last />
-          </Card>
+          </View>
           {finish && (
-            <View style={[styles.finishCard, { backgroundColor: accent.fill, borderColor: accent.line }]}>
-              <Txt size={14} color={accent.ink}>
+            <View style={{ gap: 2 }}>
+              <Txt size={14} color={c.meta}>
                 {HIF.finishLine(revise)}
               </Txt>
-              <Txt size={22} weight={800} color={accent.ink}>
+              <Txt size={24} weight={800} color={c.ink}>
                 {fmtDate(finish)}
               </Txt>
             </View>
           )}
-          <View style={styles.two}>
-            <View style={{ flex: 1 }}>
-              <SecondaryButton
-                label={paused ? HIF.resumePlan() : HIF.pausePlan()}
-                onPress={() => {
-                  plan.setPaused(pace.id, !paused);
-                  refresh();
-                  onExit();
-                }}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Pressable
-                onPress={() =>
-                  Alert.alert(HIF.confirmDelete(), undefined, [
-                    { text: HIF.close(), style: 'cancel' },
-                    {
-                      text: HIF.deletePlan(),
-                      style: 'destructive',
-                      onPress: () => {
-                        plan.deletePlan(pace.id);
-                        refresh();
-                        onExit();
-                      },
+          <View style={styles.textActions}>
+            <Pressable
+              onPress={() => {
+                plan.setPaused(pace.id, !paused);
+                refresh();
+                onExit();
+              }}
+              hitSlop={8}
+              accessibilityRole="button"
+              style={styles.textBtn}
+            >
+              <Txt size={16} weight={700} color={c.ink}>
+                {paused ? HIF.resumePlan() : HIF.pausePlan()}
+              </Txt>
+            </Pressable>
+            <Pressable
+              onPress={() =>
+                Alert.alert(HIF.confirmDelete(), undefined, [
+                  { text: HIF.close(), style: 'cancel' },
+                  {
+                    text: HIF.deletePlan(),
+                    style: 'destructive',
+                    onPress: () => {
+                      plan.deletePlan(pace.id);
+                      refresh();
+                      onExit();
                     },
-                  ])
-                }
-                accessibilityRole="button"
-                style={[styles.danger, { borderColor: '#b3402f' }]}
-              >
-                <Txt size={16} weight={700} color="#b3402f">
-                  {HIF.deletePlan()}
-                </Txt>
-              </Pressable>
-            </View>
+                  },
+                ])
+              }
+              hitSlop={8}
+              accessibilityRole="button"
+              style={styles.textBtn}
+            >
+              <Txt size={16} weight={700} color="#b3402f">
+                {HIF.deletePlan()}
+              </Txt>
+            </Pressable>
           </View>
 
           {sheetOf('scope', HIF.covers(), scopeBlock())}
@@ -861,26 +869,26 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 24, padding: 18, gap: 18 },
-  opt: { flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 1.5, borderRadius: 22, paddingHorizontal: 18, paddingVertical: 16, minHeight: 72 },
+  card: { gap: 16 },
+  opt: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, minHeight: 68, borderBottomWidth: StyleSheet.hairlineWidth },
   radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { minHeight: 40, paddingHorizontal: 16, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  chip: { minHeight: 40, paddingHorizontal: 16, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: 'transparent', alignItems: 'center', justifyContent: 'center' },
   amtRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   amt: { width: '100%', padding: 0, textAlign: 'center', fontSize: 30, fontWeight: '800', minHeight: 44 },
   track: { height: 6, borderRadius: 3, overflow: 'hidden' },
   fill: { height: 6, borderRadius: 3 },
   two: { flexDirection: 'row', gap: 10 },
   daysHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  dayRow: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 56, paddingHorizontal: 18 },
+  dayRow: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 56 },
   box: { width: 24, height: 24, borderRadius: 8, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-  splitRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 68, paddingHorizontal: 18 },
+  splitRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 68 },
   splitVal: { width: 78, alignItems: 'center' },
-  stepper: { alignItems: 'center', justifyContent: 'center' },
+  stepper: { alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth * 2 },
   totalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 4 },
-  danger: { minHeight: 50, borderRadius: 25, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 },
-  editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 60, paddingHorizontal: 18, paddingVertical: 10 },
-  finishCard: { borderRadius: 22, borderWidth: 1, padding: 16, gap: 2 },
+  textActions: { flexDirection: 'row', alignItems: 'center', gap: 28 },
+  textBtn: { minHeight: 44, justifyContent: 'center' },
+  editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 62, paddingVertical: 10 },
   sumRow: { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 12, gap: 2 },
   foot: { paddingHorizontal: 16, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth },
 });

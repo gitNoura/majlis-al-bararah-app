@@ -9,10 +9,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHif } from '@/components/hifdh/HifProvider';
 import { Heading, Hint, Section } from '@/components/hifdh/Section';
 import { ProgressRing } from '@/components/hifdh/ProgressRing';
-import { CloseIcon, BackIcon } from '@/components/icons';
+import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
-import { isEnglish } from '@/i18n/i18n';
 import * as core from '@/lib/hifdh/core';
 import { dayText, kindOf, num, portionName, rangeLabel, STATUS } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
@@ -23,47 +22,26 @@ import type { Row } from '@/components/hifdh/StopSheet';
 
 const PAGE = 40; // days shown at a time
 
-// «Progress» (the home of the history): a heading with a link to the history, then two cards side by side, as in the
-// reference: how far the plans are (a ring and the big value beside it) and the way into the past days.
+// «Progress» (the home of the history): a ring with how far the plans are, as plain words beside it; with a link into the
+// past days unless `plain`. No boxes: it sits on the page.
 export function ProgressSection({ onPress, plain }: { onPress: () => void; plain?: boolean }) {
   const { c } = useTheme();
   const h = useHome();
   const p = plan.planProgress();
   const pct = p == null ? null : Math.round(p * 100);
-  const arrow = <BackIcon color={c.meta} size={20} rtl={isEnglish} />;
   return (
     <View style={{ gap: 12 }}>
       {!plain && <Heading title={HIF.progress()} link={HIF.history()} onLink={onPress} />}
-      <View style={styles.pair}>
-        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: h.forest, borderColor: h.forest, boxShadow: `0px 12px 24px ${h.shadow}` }]}>
-          <Txt size={13.5} color={h.forestSoft}>
-            {HIF.progressLabel()}
+      <View style={styles.progress}>
+        <ProgressRing size={64} inside={false} color={h.leaf} track={c.divider} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Txt size={pct == null ? 20 : 30} weight={800} color={c.ink} lineHeight={pct == null ? 28 : 36}>
+            {pct == null ? HIF.progressNone() : `${num(pct)}%`}
           </Txt>
-          <View style={styles.miniRow}>
-            <ProgressRing size={60} inside={false} color={h.lime} track="rgba(255, 253, 245, 0.16)" />
-            <View style={{ flex: 1 }}>
-              <Txt size={pct == null ? 20 : 26} weight={800} color={h.forestInk} lineHeight={pct == null ? 28 : 32}>
-                {pct == null ? HIF.progressNone() : `${num(pct)}%`}
-              </Txt>
-              <Txt size={12.5} color={h.forestSoft} lineHeight={18}>
-                {pct == null ? HIF.progressNoneSub() : HIF.progressOfPlans()}
-              </Txt>
-            </View>
-          </View>
-        </Pressable>
-        {!plain && (
-        <Pressable onPress={onPress} accessibilityRole="button" style={[styles.mini, { backgroundColor: h.tile, borderColor: h.cardLine }]}>
-          <Txt size={13.5} color={h.tileInk} style={{ opacity: 0.7 }}>
-            {HIF.history()}
+          <Txt size={13.5} color={c.meta} lineHeight={19}>
+            {pct == null ? HIF.progressNoneSub() : HIF.progressOfPlans()}
           </Txt>
-          <View style={{ flex: 1, justifyContent: 'space-between', gap: 6 }}>
-            <Txt size={15} weight={600} color={h.tileInk} lineHeight={22}>
-              {HIF.historySub()}
-            </Txt>
-            <View style={{ alignSelf: 'flex-end' }}>{arrow}</View>
-          </View>
-        </Pressable>
-        )}
+        </View>
       </View>
     </View>
   );
@@ -140,6 +118,7 @@ function StatusSheet({ row, onClose }: { row: Row | null; onClose: () => void })
 
 export function HistoryScreen() {
   const { c } = useTheme();
+  const h = useHome();
   const { refresh, toast } = useHif(); // also redraws the list whenever `rev` changes
   const [shownDays, setShownDays] = useState(PAGE);
   const [statusRow, setStatusRow] = useState<Row | null>(null);
@@ -149,9 +128,9 @@ export function HistoryScreen() {
   const shown = days.slice(0, shownDays);
 
   return (
-    <View style={{ gap: 14 }}>
-      {shown.map((d) => (
-        <Section key={d.day} title={dayText(d.day)}>
+    <View>
+      {shown.map((d, di) => (
+        <Section key={d.day} first={di === 0} title={dayText(d.day)} style={{ paddingBottom: 18 }}>
           {d.rows.map((r) => {
             const name = r.weekly ? portionName(r.segs, core.shownUnit(core.versionAt(r.plan, r.day))) : portionName(r.segs, core.shownUnit(r.version));
             return (
@@ -159,7 +138,7 @@ export function HistoryScreen() {
                 key={`${r.plan.id}|${r.day}|${r.entry?.id ?? ''}`}
                 onPress={() => setStatusRow(r)}
                 accessibilityRole="button"
-                style={[styles.item, { borderColor: c.line, backgroundColor: r.status === 'done' ? c.soft : 'transparent' }]}
+                style={[styles.item, { borderBottomColor: c.divider }]}
               >
                 <View style={{ flex: 1 }}>
                   <Txt size={12.5} color={c.meta}>
@@ -169,7 +148,7 @@ export function HistoryScreen() {
                     {name}
                   </Txt>
                 </View>
-                <Txt size={13} weight={600} color={r.status === 'done' || r.status === 'partial' ? c.ink : c.meta}>
+                <Txt size={13} weight={700} color={r.status === 'done' || r.status === 'partial' ? h.leaf : c.meta}>
                   {STATUS[r.status as keyof typeof STATUS]()}
                 </Txt>
               </Pressable>
@@ -184,7 +163,7 @@ export function HistoryScreen() {
                 refresh();
               }}
               accessibilityRole="button"
-              style={[styles.item, { borderColor: c.line, backgroundColor: c.soft }]}
+              style={[styles.item, { borderBottomColor: c.divider }]}
             >
               <View style={{ flex: 1 }}>
                 <Txt size={12.5} color={c.meta}>
@@ -194,7 +173,7 @@ export function HistoryScreen() {
                   {rangeLabel(e.seg, 'revise')}
                 </Txt>
               </View>
-              <Txt size={13} weight={600} color={c.ink}>
+              <Txt size={13} weight={700} color={h.leaf}>
                 {STATUS.done()}
               </Txt>
             </Pressable>
@@ -214,12 +193,10 @@ export function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  pair: { flexDirection: 'row', gap: 12 },
-  mini: { flex: 1, minHeight: 116, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 10, overflow: 'hidden' },
-  miniRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  progress: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingBottom: 18 },
   root: { flex: 1, justifyContent: 'flex-end' },
   panel: { maxHeight: '80%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingTop: 18 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
   option: { minHeight: 48, borderRadius: radius.chip, borderWidth: 1, paddingHorizontal: 14, justifyContent: 'center' },
-  item: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: radius.chip, borderWidth: StyleSheet.hairlineWidth, padding: 12 },
+  item: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 54, paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth },
 });

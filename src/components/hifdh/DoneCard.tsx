@@ -15,7 +15,7 @@ import { findRow, portionName } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { useTheme } from '@/theme/theme';
 
-export function DoneCard({ rows, revise }: { rows: Row[]; revise?: boolean }) {
+export function DoneCard({ rows, revise, first }: { rows: Row[]; revise?: boolean; first?: boolean }) {
   const { c } = useTheme();
   const g = useGreen();
   const { refresh } = useHif();
@@ -28,7 +28,7 @@ export function DoneCard({ rows, revise }: { rows: Row[]; revise?: boolean }) {
   };
   const Icon = revise ? RepeatIcon : BookOpenIcon;
   return (
-    <Section title={revise ? HIF.cardMurajaa() : HIF.cardHifdh()} tone="done" icon={(color) => <Icon color={color} size={22} />}>
+    <Section first={first} title={revise ? HIF.cardMurajaa() : HIF.cardHifdh()} tone="done" icon={(color) => <Icon color={color} size={22} />}>
       <View style={{ gap: 2 }}>
         <Txt size={16} weight={700} color={c.ink}>
           {revise ? HIF.reviseDoneTitle() : HIF.congratsTitle()}
@@ -36,7 +36,7 @@ export function DoneCard({ rows, revise }: { rows: Row[]; revise?: boolean }) {
         <Hint>{partial ? HIF.partialToast() : revise ? HIF.reviseDoneBody() : HIF.congratsBody()}</Hint>
       </View>
       <View style={styles.foot}>
-        <View style={[styles.pill, { backgroundColor: g.chip }]}>
+        <View style={styles.pill}>
           <CheckIcon color={g.base} size={16} strokeWidth={2.4} />
           <Txt size={13.5} weight={700} color={g.base} numberOfLines={1} style={{ flexShrink: 1 }}>
             {revise ? HIF.doneRevised() : HIF.doneMemorized()} · {names}
@@ -56,5 +56,5 @@ export function DoneCard({ rows, revise }: { rows: Row[]; revise?: boolean }) {
 
 const styles = StyleSheet.create({
   foot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  pill: { flexShrink: 1, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999 },
+  pill: { flexShrink: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
 });

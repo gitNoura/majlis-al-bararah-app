@@ -31,16 +31,16 @@ export function WeekCard() {
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
-    <View style={[styles.card, { backgroundColor: h.tile, borderColor: h.cardLine }]}>
+    <View style={styles.card}>
       <View style={styles.top}>
-        <Txt size={18} weight={700} color={h.tileInk}>
+        <Txt size={18} weight={700} color={h.ink}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
-          <Txt size={26} weight={800} color={h.tileInk} lineHeight={30}>
+          <Txt size={26} weight={800} color={h.ink} lineHeight={30}>
             {num(n)}
           </Txt>
-          <Txt size={12} color={h.tileInk} style={{ opacity: 0.7 }}>
+          <Txt size={12} color={c.meta}>
             {HIF.ofSevenDays()}
           </Txt>
         </View>
@@ -50,14 +50,14 @@ export function WeekCard() {
           const state: DayState = kept.has(d) ? 'on' : d === today ? 'now' : started && d >= started && d < today ? 'miss' : 'idle';
           return (
             <View key={d} style={styles.day}>
-              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={h.tileInk}>
+              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={state === 'now' ? h.ink : c.meta}>
                 {weekdayName(core.weekdayOf(d))}
               </Txt>
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? h.forest : state === 'now' ? a.fill : alpha(h.leaf, isDark ? 0.22 : 0.18) },
-                  state === 'now' && { borderWidth: 2, borderColor: a.mark },
+                  { backgroundColor: state === 'on' ? h.forest : alpha(h.leaf, isDark ? 0.14 : 0.08) },
+                  state === 'now' && { backgroundColor: 'transparent', borderWidth: 2, borderColor: a.mark },
                 ]}
               >
                 {state === 'on' && <CheckIcon color={h.forestInk} size={16} strokeWidth={2.4} />}
@@ -72,10 +72,10 @@ export function WeekCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, overflow: 'hidden' },
+  card: { gap: 14 },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { alignItems: 'flex-end' },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 6 },
   day: { flex: 1, alignItems: 'center', gap: 6 },
-  pill: { width: '100%', maxWidth: 38, height: 44, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  pill: { width: '100%', maxWidth: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
 });

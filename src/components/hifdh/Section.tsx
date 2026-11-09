@@ -1,5 +1,9 @@
-// The pieces the daily cards share: a card with a title, a hint line, and the two button looks
+// The pieces the daily cards share: a section with a title, a hint line, and the two button looks
 // («hz-primary» and «hz-secondary» of the website).
+//
+// Look of the page (redesign v2): calm and flat. No boxes inside boxes: a section is a heading and its content on the
+// page itself, separated from the next by a hairline; rows are separated by hairlines, not drawn as cards. One colour,
+// forest green (no yellow anywhere): icons, the chosen state, the ring, the buttons.
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { ReactNode } from 'react';
 
@@ -9,8 +13,6 @@ import { useTheme } from '@/theme/theme';
 
 export type Tone = 'done';
 
-// The page is neutral with one accent, forest green: the icon chips, the ring, the kept days, the buttons. One font
-// (the app's UI font) for every title. `green` is the fill, its tints are for washes, borders and chips.
 export function alpha(hex: string, a: number) {
   const n = parseInt(hex.slice(1), 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
@@ -22,41 +24,34 @@ export function useGreen() {
   return { base: h.leaf, chip: h.tile, ink: h.tileInk, line: alpha(h.leaf, isDark ? 0.4 : 0.22), wash: alpha(h.leaf, isDark ? 0.14 : 0.07) };
 }
 
-// The page's second colour, next to the forest green: the light yellow of the website (Home's `gold`). It marks what can be
-// changed or picked (icon chips, value pills, the chosen day, a part-picked surah); the green stays for done and for buttons.
+// The accent of what can be changed or picked. It used to be a light yellow; it is now the same green as everything
+// else, so the page has one colour. `fill` is a quiet tint (a chosen row, a part-picked mark), `ink` the words on it,
+// `mark` the solid colour of a mark or a bar.
 export function useAccent() {
   const { isDark } = useTheme();
   const h = useHome();
-  return isDark
-    ? { fill: alpha(h.gold, 0.16), ink: h.gold, line: h.goldLine, mark: h.gold }
-    : { fill: '#f8efc2', ink: '#5b4a0c', line: 'rgba(168, 134, 24, 0.3)', mark: '#d9b43a' };
+  return { fill: alpha(h.leaf, isDark ? 0.18 : 0.1), ink: isDark ? h.tileInk : h.forest, line: alpha(h.leaf, isDark ? 0.4 : 0.3), mark: h.leaf };
 }
 
-// A pill in that colour (a kind of plan, a value)
+// A value or a kind of plan (no pill, no box: the words in the accent colour)
 export function AccentPill({ text, size = 13.5 }: { text: string; size?: number }) {
   const a = useAccent();
   return (
-    <View style={[styles.pill, { backgroundColor: a.fill }]}>
-      <Txt size={size} weight={700} color={a.ink} numberOfLines={1}>
-        {text}
-      </Txt>
-    </View>
+    <Txt size={size} weight={700} color={a.ink} numberOfLines={1}>
+      {text}
+    </Txt>
   );
 }
 
-// A card: paper on Home's page, a hairline border and a soft shadow, 24 px corners, the title in the UI font. The icon chip is the
-// card's only colour. `tone="done"` is a finished card: a soft green wash and border (the icon stays as it was).
-// Nothing is ever written under the title: the card's content goes below the head. Hifdh and Murajaa are identical.
-export function Section({ title, icon, tone, children, style }: { title: string; icon?: (color: string) => ReactNode; tone?: Tone; children: ReactNode; style?: StyleProp<ViewStyle> }) {
+// A section: its heading (an icon and a title) and its content, straight on the page. A hairline sets it apart from the one
+// above (`first` leaves it off). Nothing is ever written under the title: the content goes below the head.
+export function Section({ title, icon, children, style, first }: { title: string; icon?: (color: string) => ReactNode; tone?: Tone; first?: boolean; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const h = useHome();
-  const g = useGreen();
-  const a = useAccent();
-  const done = tone === 'done';
+  const { c } = useTheme();
   return (
-    <View style={[styles.card, { backgroundColor: h.card, borderColor: done ? g.line : h.cardLine, boxShadow: `0px 8px 20px ${h.shadow}` }, style]}>
-      {done && <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: g.wash }]} />}
+    <View style={[styles.section, !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider, paddingTop: 20 }, style]}>
       <View style={styles.head}>
-        {icon ? <View style={[styles.chip, { backgroundColor: a.fill }]}>{icon(a.ink)}</View> : null}
+        {icon ? icon(h.leaf) : null}
         <Txt size={18} weight={700} color={h.ink} style={{ flex: 1 }}>
           {title}
         </Txt>
@@ -66,7 +61,7 @@ export function Section({ title, icon, tone, children, style }: { title: string;
   );
 }
 
-// A heading between the cards («Today's plan», «Progress»), with an optional quiet link at its end
+// A heading between the sections («Today's plan», «Progress»), with an optional quiet link at its end
 export function Heading({ title, link, onLink }: { title: string; link?: string; onLink?: () => void }) {
   const { c } = useTheme();
   return (
@@ -113,13 +108,14 @@ export function PrimaryButton({ label, onPress, disabled }: { label: string; onP
 
 export function SecondaryButton({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
   const h = useHome();
+  const { c } = useTheme();
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
-      style={[styles.btn, { borderWidth: 1.5, borderColor: h.forest, backgroundColor: 'transparent', opacity: disabled ? 0.4 : 1 }]}
+      style={[styles.btn, { backgroundColor: 'transparent', borderWidth: StyleSheet.hairlineWidth * 2, borderColor: c.chosenLine, opacity: disabled ? 0.4 : 1 }]}
     >
       <Txt size={16} weight={700} color={h.ink}>
         {label}
@@ -129,10 +125,8 @@ export function SecondaryButton({ label, onPress, disabled }: { label: string; o
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, overflow: 'hidden' },
-  head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  pill: { alignSelf: 'flex-start', maxWidth: '100%', minHeight: 28, paddingHorizontal: 12, borderRadius: 14, justifyContent: 'center' },
-  chip: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  section: { gap: 12 },
+  head: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
   btn: { minHeight: 50, borderRadius: 25, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
 });
