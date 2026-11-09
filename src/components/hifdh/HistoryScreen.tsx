@@ -7,7 +7,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { Heading, Hint, Section } from '@/components/hifdh/Section';
+import { Heading, Hint, Section, useGold } from '@/components/hifdh/Section';
 import { ProgressRing } from '@/components/hifdh/ProgressRing';
 import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
@@ -119,6 +119,7 @@ function StatusSheet({ row, onClose }: { row: Row | null; onClose: () => void })
 export function HistoryScreen() {
   const { c } = useTheme();
   const h = useHome();
+  const gold = useGold();
   const { refresh, toast } = useHif(); // also redraws the list whenever `rev` changes
   const [shownDays, setShownDays] = useState(PAGE);
   const [statusRow, setStatusRow] = useState<Row | null>(null);
@@ -130,7 +131,7 @@ export function HistoryScreen() {
   return (
     <View>
       {shown.map((d, di) => (
-        <Section plain key={d.day} first={di === 0} title={dayText(d.day)} style={{ paddingBottom: 18 }}>
+        <Section plain key={d.day} first={di === 0} title={dayText(d.day)} titleColor={gold} style={{ paddingBottom: 18 }}>
           {d.rows.map((r) => {
             const name = r.weekly ? portionName(r.segs, core.shownUnit(core.versionAt(r.plan, r.day))) : portionName(r.segs, core.shownUnit(r.version));
             return (

@@ -41,7 +41,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
 
   const key = `${row.plan.id}|${weekly ? row.week : row.day}`;
   const done = row.status === 'done' || row.status === 'partial';
-  const sub = weekly ? weekLine(row) : row.plan.type === 'revise' && row.n ? HIF.dayOfN(row.k, row.n) : '';
+  const sub = weekly ? weekLine(row) : '';
   const when = ahead ? HIF.forDay(dayText(row.day)) : '';
 
   const undo = () => {
