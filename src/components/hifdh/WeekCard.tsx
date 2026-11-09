@@ -30,9 +30,9 @@ export function WeekCard() {
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
-    <View style={[styles.card, { backgroundColor: h.sand, borderColor: h.sandLine }]}>
+    <View style={styles.card}>
       <View style={styles.top}>
-        <Txt size={18} weight={700} color={h.amber}>
+        <Txt size={18} weight={700} color={h.ink}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
@@ -55,8 +55,8 @@ export function WeekCard() {
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? h.forest : alpha(h.amber, state === 'now' ? 0.3 : isDark ? 0.2 : 0.16) },
-                  state === 'now' && { borderWidth: 2, borderColor: h.amber },
+                  { backgroundColor: state === 'on' ? h.forest : alpha(h.leaf, state === 'now' ? 0.22 : isDark ? 0.16 : 0.09) },
+                  state === 'now' && { borderWidth: 2, borderColor: h.leaf },
                 ]}
               >
                 {state === 'on' && <CheckIcon color={h.forestInk} size={16} strokeWidth={2.4} />}
@@ -71,7 +71,7 @@ export function WeekCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12, overflow: 'hidden' },
+  card: { gap: 12 },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { alignItems: 'flex-end' },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 6 },

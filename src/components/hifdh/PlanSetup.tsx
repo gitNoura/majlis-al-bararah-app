@@ -632,14 +632,15 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
         <PrimaryButton label={HIF.done()} onPress={close} />
       </Sheet>
     );
+    const toggleDays = () => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] });
     return {
       body: (
-        <View style={{ gap: 12 }}>
-          <Section compact title={HIF.covers()}>
+        <View style={{ gap: 28 }}>
+          <Section plain first compact title={HIF.covers()} titleColor={c.ink}>
             <EditRow label={kindOf(pace.type)} value={rangeLabel(pace.range, pace.type)} onPress={() => setSheet('scope')} />
           </Section>
 
-          <Section compact title={HIF.pace()}>
+          <Section plain first compact title={HIF.pace()} titleColor={c.ink}>
             <View style={styles.modeRow}>
               <View style={{ flex: 1 }}>
                 <Chip on={pace.mode === 'amount'} text={HIF.paceByAmount()} onPress={() => pace.mode !== 'amount' && patch({ mode: 'amount', period: 'day' })} />
@@ -656,61 +657,56 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
             ) : (
               amountBlock()
             )}
-            <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: c.divider }} />
-            <EditRow label={HIF.newPaceFrom()} value={fmtDate(pace.from)} onPress={() => setSheet('from')} />
           </Section>
 
-          <Section
-            compact
-            title={HIF.days()}
-            action={<Chip on={pace.days.length === 7} text={pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll()} onPress={() => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] })} />}
-          >
+          <Section plain first compact title={HIF.days()} titleColor={c.ink} action={<Chip on={pace.days.length === 7} text={pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll()} onPress={toggleDays} />}>
             <DayChips days={pace.days} onToggle={(d) => patch({ days: pace.days.includes(d) ? pace.days.filter((x) => x !== d) : [...pace.days, d].sort() })} />
             {aboutLine()}
-            {showSplit && (
-              <>
-                <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: c.divider }} />
-                <EditRow label={HIF.perDay()} value={pace.perDay ? HIF.splitCustom() : HIF.splitEven()} onPress={() => setSheet('split')} />
-              </>
-            )}
+            {showSplit && <EditRow label={HIF.perDay()} value={pace.perDay ? HIF.splitCustom() : HIF.splitEven()} onPress={() => setSheet('split')} />}
           </Section>
 
-          <View style={styles.two}>
-            <View style={{ flex: 1 }}>
-              <SecondaryButton
-                square
-                label={paused ? HIF.resumePlan() : HIF.pausePlan()}
-                onPress={() => {
-                  plan.setPaused(pace.id, !paused);
-                  refresh();
-                  onExit();
-                }}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Pressable
-                onPress={() =>
-                  Alert.alert(HIF.confirmDelete(), undefined, [
-                    { text: HIF.close(), style: 'cancel' },
-                    {
-                      text: HIF.deletePlan(),
-                      style: 'destructive',
-                      onPress: () => {
-                        plan.deletePlan(pace.id);
-                        refresh();
-                        onExit();
-                      },
+          <Section plain first compact title={HIF.newPaceFrom()} titleColor={c.ink}>
+            <EditRow value={fmtDate(pace.from)} onPress={() => setSheet('from')} />
+          </Section>
+
+          <View style={styles.quietRow}>
+            <Pressable
+              onPress={() => {
+                plan.setPaused(pace.id, !paused);
+                refresh();
+                onExit();
+              }}
+              hitSlop={8}
+              accessibilityRole="button"
+              style={styles.quietBtn}
+            >
+              <Txt size={15} weight={700} color={c.ink}>
+                {paused ? HIF.resumePlan() : HIF.pausePlan()}
+              </Txt>
+            </Pressable>
+            <Pressable
+              onPress={() =>
+                Alert.alert(HIF.confirmDelete(), undefined, [
+                  { text: HIF.close(), style: 'cancel' },
+                  {
+                    text: HIF.deletePlan(),
+                    style: 'destructive',
+                    onPress: () => {
+                      plan.deletePlan(pace.id);
+                      refresh();
+                      onExit();
                     },
-                  ])
-                }
-                accessibilityRole="button"
-                style={styles.dangerBtn}
-              >
-                <Txt size={15.5} weight={700} center color="#b3402f">
-                  {HIF.deletePlan()}
-                </Txt>
-              </Pressable>
-            </View>
+                  },
+                ])
+              }
+              hitSlop={8}
+              accessibilityRole="button"
+              style={styles.quietBtn}
+            >
+              <Txt size={15} weight={700} color="#b3402f">
+                {HIF.deletePlan()}
+              </Txt>
+            </Pressable>
           </View>
 
           {sheetOf('scope', HIF.covers(), scopeBlock())}
@@ -924,6 +920,8 @@ const styles = StyleSheet.create({
   dayChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   dayChip: { flexGrow: 1, flexBasis: '22%', minHeight: 40, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
   modeRow: { flexDirection: 'row', gap: 8 },
+  quietRow: { flexDirection: 'row', justifyContent: 'center', gap: 32 },
+  quietBtn: { minHeight: 44, justifyContent: 'center' },
   dangerBtn: { minHeight: 48, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: '#b3402f', paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
   finishRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, paddingHorizontal: 2 },
   editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
