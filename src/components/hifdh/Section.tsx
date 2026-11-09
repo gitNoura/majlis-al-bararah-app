@@ -33,10 +33,10 @@ export function useAccent() {
   return { fill: alpha(h.leaf, isDark ? 0.18 : 0.1), ink: isDark ? h.tileInk : h.forest, line: alpha(h.leaf, isDark ? 0.4 : 0.3), mark: h.leaf };
 }
 
-// A quiet gold for dates (the one second colour, used sparingly): readable on the page and on a card
-export function useGold() {
+// The colour of headings and dates: the deep forest green of the app, not a second colour
+export function useHeading() {
   const { isDark } = useTheme();
-  return isDark ? '#e0c76a' : '#8f7219';
+  return isDark ? '#8fd0b2' : '#173f32';
 }
 
 // A value or a kind of plan (no pill, no box: the words in the accent colour)
@@ -55,7 +55,7 @@ export function AccentPill({ text, size = 13.5 }: { text: string; size?: number 
 export function Section({ title, titleColor, tone, children, style, first, plain }: { title: string; titleColor?: string; tone?: Tone; first?: boolean; plain?: boolean; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const h = useHome();
   const { c } = useTheme();
-  const gold = useGold();
+  const heading = useHeading();
   return (
     <View
       style={[
@@ -69,7 +69,7 @@ export function Section({ title, titleColor, tone, children, style, first, plain
       ]}
     >
       <View style={styles.head}>
-        <Txt size={19} weight={700} color={titleColor ?? gold} style={{ flex: 1 }}>
+        <Txt size={19} weight={700} color={titleColor ?? heading} style={{ flex: 1 }}>
           {title}
         </Txt>
       </View>

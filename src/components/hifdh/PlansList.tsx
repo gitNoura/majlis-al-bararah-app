@@ -5,7 +5,7 @@
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { SecondaryButton, useGold } from '@/components/hifdh/Section';
+import { SecondaryButton, useHeading } from '@/components/hifdh/Section';
 import { BackIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
@@ -21,7 +21,7 @@ const DANGER = '#b3402f';
 export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onAdd: () => void }) {
   const { c } = useTheme();
   const h = useHome();
-  const gold = useGold();
+  const heading = useHeading();
   const { refresh, openMemorized } = useHif(); // also redraws the list whenever `rev` changes
   const plans = plan.get().plans as { id: string; type: string; range: number[][] | null }[];
 
@@ -64,7 +64,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
           <View key={p.id} style={[styles.plan, { backgroundColor: h.card }, paused && { opacity: 0.75 }]}>
             <View style={styles.kindRow}>
               <View style={{ flex: 1, gap: 2 }}>
-                <Txt size={13.5} weight={700} color={gold}>
+                <Txt size={13.5} weight={700} color={heading}>
                   {paused ? `${kindOf(p.type)} · ${HIF.paused()}` : kindOf(p.type)}
                 </Txt>
                 <Txt size={19} weight={800} color={c.ink}>
