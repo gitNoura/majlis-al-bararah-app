@@ -46,14 +46,18 @@ export function AccentPill({ text, size = 13.5 }: { text: string; size?: number 
 // A section: its heading (an icon and a title) and its content. By default it is the page's one kind of box: a quiet
 // white surface (no border, no shadow) so each part of the page reads as its own thing. `plain` drops the surface and
 // separates sections with a hairline instead (the long history list). Nothing is ever written under the title.
-export function Section({ title, icon, children, style, first, plain }: { title: string; icon?: (color: string) => ReactNode; tone?: Tone; first?: boolean; plain?: boolean; children: ReactNode; style?: StyleProp<ViewStyle> }) {
+export function Section({ title, icon, tone, children, style, first, plain }: { title: string; icon?: (color: string) => ReactNode; tone?: Tone; first?: boolean; plain?: boolean; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const h = useHome();
   const { c } = useTheme();
   return (
     <View
       style={[
         styles.section,
-        plain ? !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider, paddingTop: 20 } : { backgroundColor: h.card, borderRadius: 22, padding: 18 },
+        plain
+          ? !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider, paddingTop: 20 }
+          : tone === 'done'
+            ? { backgroundColor: h.mint, borderRadius: 22, padding: 18, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: h.mintLine } // finished: the card turns green
+            : { backgroundColor: h.card, borderRadius: 22, padding: 18, borderWidth: StyleSheet.hairlineWidth, borderColor: h.cardLine },
         style,
       ]}
     >

@@ -69,73 +69,62 @@ function Tabs({ tab, onTab }: { tab: 'surah' | 'juz'; onTab: (t: 'surah' | 'juz'
   );
 }
 
-// One end of the range on one line: its name at the start, then − a number + (the number can also be typed)
-function NumField({ label, value, max, onChange }: { label: string; value: number; max: number; onChange: (v: number) => void }) {
+// One end of the range: a small field the number is typed in
+function NumField({ value, max, onChange, label }: { value: number; max: number; onChange: (v: number) => void; label: string }) {
   const { c } = useTheme();
+  const h = useHome();
   const [text, setText] = useState<string | null>(null); // what is being typed, until the field is left
-  const go = (v: number) => (setText(null), onChange(Math.min(Math.max(v, 1), max)));
-  const btn = (sign: string, to: number) => (
-    <Pressable onPress={() => go(to)} accessibilityRole="button" accessibilityLabel={sign} hitSlop={6} style={[styles.step, { borderColor: c.chosenLine }]}>
-      <Txt size={20} weight={600} color={c.ink} style={{ marginTop: -1 }}>
-        {sign}
-      </Txt>
-    </Pressable>
-  );
   return (
-    <View style={styles.numRow}>
-      <Txt size={15} weight={600} color={c.meta} style={{ flex: 1 }}>
-        {label}
-      </Txt>
-      {btn('−', value - 1)}
-      <TextInput
-        value={text ?? String(value)}
-        onChangeText={(t) => {
-          const d = t.replace(/\D/g, '');
-          setText(d);
-          if (d) onChange(Math.min(Math.max(Number(d), 1), max));
-        }}
-        onBlur={() => setText(null)}
-        keyboardType="number-pad"
-        selectTextOnFocus
-        accessibilityLabel={label}
-        style={[styles.numInput, { color: c.ink }]}
-      />
-      {btn('+', value + 1)}
-    </View>
+    <TextInput
+      value={text ?? String(value)}
+      onChangeText={(t) => {
+        const d = t.replace(/\D/g, '').slice(0, 3);
+        setText(d);
+        const v = Number(d);
+        if (d && v >= 1 && v <= max) onChange(v);
+      }}
+      onBlur={() => setText(null)}
+      keyboardType="number-pad"
+      selectTextOnFocus
+      accessibilityLabel={label}
+      style={[styles.numInput, { color: c.ink, backgroundColor: h.well }]}
+    />
   );
 }
 
-// The ayat of one surah, chosen inline under its row (no sheet): «from ayah» and «to» as two steppers (a number can also be
-// typed), a strip of the surah showing what is already picked (green) and the span being set (outlined), then Add / Remove.
-function RangeEditor({ n, a, onSet }: { n: number; a: number; bits: Bits; onSet: Props['onSet'] }) {
+// The ayat of one surah, under its row, on ONE line: «from ayah [x] to [y]». Typing a number sets the surah's span right
+// away (no Add button); the round mark of the row still takes the whole surah in or out.
+function RangeEditor({ n, a, bits, onSet }: { n: number; a: number; bits: Bits; onSet: Props['onSet'] }) {
   const { c } = useTheme();
-  const h = useHome();
-  const [from, setFrom] = useState(1);
-  const [to, setTo] = useState(n);
-  const setF = (v: number) => (setFrom(v), v > to && setTo(v));
-  const setT = (v: number) => (setTo(v), v < from && setFrom(v));
-  const apply = (on: boolean) => onSet(a + from - 1, a + to, on);
+  // the span already picked in this surah (from its first to its last picked ayah), else the whole surah
+  let lo = -1;
+  let hi = -1;
+  for (let g = 0; g < n; g++) {
+    if (!bits[a + g]) continue;
+    if (lo < 0) lo = g;
+    hi = g;
+  }
+  const [from, setFrom] = useState(lo < 0 ? 1 : lo + 1);
+  const [to, setTo] = useState(lo < 0 ? n : hi + 1);
+  const set = (f: number, t: number) => {
+    setFrom(f);
+    setTo(t);
+    onSet(a, a + n, false); // this surah is exactly the span: clear it, then put the span in
+    onSet(a + f - 1, a + t, true);
+  };
   return (
     <View style={styles.range}>
-      <NumField label={HIF.fromAyah()} value={from} max={n} onChange={setF} />
-      <NumField label={HIF.toAyah()} value={to} max={n} onChange={setT} />
-      <View style={styles.actions}>
-        <Pressable onPress={() => apply(true)} accessibilityRole="button" style={[styles.act, { backgroundColor: h.forest }]}>
-          <Txt size={15} weight={700} color={h.forestInk}>
-            {HIF.add()}
-          </Txt>
-        </Pressable>
-        <Pressable onPress={() => apply(false)} accessibilityRole="button" style={[styles.act, { borderWidth: StyleSheet.hairlineWidth * 2, borderColor: c.chosenLine }]}>
-          <Txt size={15} weight={700} color={c.ink}>
-            {HIF.remove()}
-          </Txt>
-        </Pressable>
-        <Pressable onPress={() => (setFrom(1), setTo(n))} accessibilityRole="button" hitSlop={6} style={{ minHeight: 40, justifyContent: 'center', marginStart: 'auto' }}>
-          <Txt size={14} weight={700} color={c.meta}>
-            {HIF.lsQuickSurah()}
-          </Txt>
-        </Pressable>
-      </View>
+      <Txt size={14.5} weight={600} color={c.meta}>
+        {HIF.fromAyah()}
+      </Txt>
+      <NumField label={HIF.fromAyah()} value={from} max={n} onChange={(v) => set(v, Math.max(v, to))} />
+      <Txt size={14.5} weight={600} color={c.meta}>
+        {HIF.toAyah()}
+      </Txt>
+      <NumField label={HIF.toAyah()} value={to} max={n} onChange={(v) => set(Math.min(v, from), v)} />
+      <Txt size={13} color={c.meta}>
+        / {num(n)}
+      </Txt>
     </View>
   );
 }
@@ -335,9 +324,8 @@ const styles = StyleSheet.create({
   rowMain: { flex: 1, minHeight: 36, justifyContent: 'center' },
   step: { width: 36, height: 36, borderRadius: 18, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center' },
   act: { minHeight: 40, paddingHorizontal: 20, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  range: { gap: 6, paddingBottom: 14 },
-  numRow: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 },
-  numInput: { width: 60, padding: 0, textAlign: 'center', fontSize: 20, fontWeight: '800', minHeight: 40 },
+  range: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 14 },
+  numInput: { width: 54, minHeight: 36, borderRadius: 10, padding: 0, textAlign: 'center', fontSize: 16, fontWeight: '800' },
   stripWrap: { height: 14, justifyContent: 'center' },
   stripRow: { flexDirection: 'row', gap: 2, height: 10 },
   stripBar: { flex: 1, borderRadius: 3 },
