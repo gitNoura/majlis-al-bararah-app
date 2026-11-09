@@ -1,25 +1,24 @@
-// The picker of what you know, or what to work on (pk* of the website's hifz.js): two tabs, «Surahs» (a
-// searchable list, each surah can be marked whole or by ayah range) and «Juz» (30 rows, each opening into
-// its 16 thumun, grouped in two hizb). It does not own the data: `bits` is one 0/1 per ayah and `onSet`
-// is called to put a span [from, to) in or out. The memorized page feeds it the ledger; the plan setup
-// (3c-2) feeds it the plan's range. `quick` adds the summary and the two shortcuts of the memorized page.
+// The picker of what a plan covers (pk* of the website's hifz.js): two tabs, «Surahs» (a searchable list, each surah
+// can be marked whole or by ayah range) and «Juz» (30 rows, each opening into its 16 thumun, grouped in two hizb). It
+// does not own the data: `bits` is one 0/1 per ayah and `onSet` is called to put a span [from, to) in or out. The plan
+// setup feeds it the plan's range.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { BackIcon, CheckIcon } from '@/components/icons';
-import { PrimaryButton, SecondaryButton, alpha, useAccent } from '@/components/hifdh/Section';
+import { alpha, useAccent } from '@/components/hifdh/Section';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { isEnglish, surahName } from '@/i18n/i18n';
-import { UNIT_PLURAL, num, unitCount } from '@/lib/hifdh/labels';
+import { num, unitCount } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { SURAHS } from '@/lib/quran';
 import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
 
 type Bits = ArrayLike<number>;
-type Props = { bits: Bits; onSet: (from: number, to: number, on: boolean) => void; quick?: boolean };
+type Props = { bits: Bits; onSet: (from: number, to: number, on: boolean) => void };
 type St = 0 | 1 | 2; // none, some, all
 
 const count = (bits: Bits, a: number, b: number) => {
@@ -28,13 +27,6 @@ const count = (bits: Bits, a: number, b: number) => {
   return n;
 };
 const stateOf = (have: number, size: number): St => (have === size ? 2 : have ? 1 : 0);
-// Progress is told in ahzab (a hizb is 8 thumun, 60 in the Quran), not ayat: a part-known hizb counts by its share.
-const hizbShare = (bits: Bits): number => {
-  const hz = plan.units().unit.hizb;
-  let sum = 0;
-  for (let u = 0; u < hz.count; u++) sum += count(bits, hz.start[u], hz.start[u] + hz.size[u]) / hz.size[u];
-  return Math.round(sum * 10) / 10;
-};
 const ARABIC = /[\u0600-\u06FF]/;
 
 // A round mark: empty, part-picked (a green dash) or all picked (forest green with a tick)
@@ -127,7 +119,7 @@ function RangeEditor({ n, a, bits, onSet }: { n: number; a: number; bits: Bits; 
 
 // The surahs: a search field and a plain list. The round mark puts the whole surah in or out; a tap on the name opens the
 // choice of ayat (from … to …) right under it.
-function SurahList({ bits, onSet }: Omit<Props, 'quick'>) {
+function SurahList({ bits, onSet }: Props) {
   const { c } = useTheme();
   const h = useHome();
   const acc = useAccent();
@@ -188,7 +180,7 @@ function SurahList({ bits, onSet }: Omit<Props, 'quick'>) {
   );
 }
 
-function JuzList({ bits, onSet }: Omit<Props, 'quick'>) {
+function JuzList({ bits, onSet }: Props) {
   const { c } = useTheme();
   const h = useHome();
   const acc = useAccent();
@@ -267,39 +259,11 @@ function JuzList({ bits, onSet }: Omit<Props, 'quick'>) {
   );
 }
 
-export function MemorizedPicker({ bits, onSet, quick = false }: Props) {
-  const { c } = useTheme();
+export function MemorizedPicker({ bits, onSet }: Props) {
   const [tab, setTab] = useState<'surah' | 'juz'>('surah');
-  const N: number = plan.units().N;
-  const total = count(bits, 0, N);
-  const none = total === 0 && plan.nothingMemorized(); // chosen on purpose; pressing it again lets go of it
 
   return (
     <View style={{ gap: 12 }}>
-      {quick && (
-        <>
-          <View style={styles.sum}>
-            <Txt size={22} weight={800} color={c.ink}>
-              {num(plan.ringPercent())}%
-            </Txt>
-            <Txt size={14} color={c.meta}>
-              {HIF.ofQuran()} · {num(hizbShare(bits))}/60 {UNIT_PLURAL.hizb()}
-            </Txt>
-          </View>
-          <View style={styles.quick}>
-            <View style={{ flex: 1 }}>
-              {total === N ? <PrimaryButton label={HIF.wholeQuran()} onPress={() => onSet(0, N, false)} /> : <SecondaryButton label={HIF.wholeQuran()} onPress={() => (plan.setNothingMemorized(false), onSet(0, N, true))} />}
-            </View>
-            <View style={{ flex: 1 }}>
-              {none ? (
-                <PrimaryButton label={HIF.nothingYet()} onPress={() => (plan.setNothingMemorized(false), onSet(0, 0, false))} />
-              ) : (
-                <SecondaryButton label={HIF.nothingYet()} onPress={() => (plan.setNothingMemorized(true), onSet(0, N, false))} />
-              )}
-            </View>
-          </View>
-        </>
-      )}
       <Tabs tab={tab} onTab={setTab} />
       {tab === 'surah' ? <SurahList bits={bits} onSet={onSet} /> : <JuzList bits={bits} onSet={onSet} />}
     </View>
@@ -335,6 +299,4 @@ const styles = StyleSheet.create({
   hizbBtn: { alignSelf: 'flex-start', minHeight: 36, paddingHorizontal: 14, borderRadius: 18, borderWidth: 1, justifyContent: 'center' },
   cells: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   cell: { width: 38, height: 38, borderRadius: 10, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  sum: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  quick: { flexDirection: 'row', gap: 8 },
 });

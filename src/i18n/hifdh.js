@@ -19,7 +19,6 @@ export const HIF = {
   progressNoneSub: () => L('ابدأ خطة لتظهر هنا', 'Start a plan to see it here', 'Lancez un plan pour le voir ici'),
   progressOfPlans: () => L('من مجموع خططك', 'across your plans', 'sur l’ensemble de vos plans'),
   historySub: () => L('تصفّح أيامك الماضية', 'Browse your past days', 'Parcourir vos jours passés'),
-  memorizedTitle: () => L('محفوظي', 'What I’ve memorized', 'Ce que j’ai mémorisé'),
   loading: () => L('جارٍ التحميل…', 'Loading…', 'Chargement…'),
   loadFailed: () => L('تعذّر تحميل البيانات.', 'The data could not be loaded.', 'Les données n’ont pas pu être chargées.'),
 
@@ -31,7 +30,6 @@ export const HIF = {
   // summary: week, ring, links
   yourWeek: () => L('أسبوعك', 'Your week', 'Votre semaine'),
   ofSevenDays: () => L('من 7 أيام', 'of 7 days', 'sur 7 jours'),
-  editMemorized: () => L('عدّل ما حفظتُه', 'Edit what I’ve memorized', 'Modifier ce que j’ai mémorisé'),
   historyRing: () => L('السجل', 'History', 'Historique'),
   pastDaysProgress: () => L('الأيام الماضية وتقدّم خططك', 'Past days and your plans’ progress', 'Jours passés et avancement de vos plans'),
   pastDays: () => L('الأيام الماضية', 'Past days', 'Jours passés'),
@@ -146,6 +144,8 @@ export const HIF = {
     L('قليلٌ دائم خيرٌ من كثيرٍ منقطع.', 'Small, consistent amounts add up powerfully over time.', 'Un peu, régulièrement, mène loin.'),
   pickDate: () => L('أفضّل اختيار تاريخ الانتهاء', 'I’d rather pick a finish date', 'Je préfère choisir une date de fin'),
   pickAmount: () => L('أفضّل تحديد المقدار', 'I’d rather set an amount', 'Je préfère fixer une quantité'),
+  paceByAmount: () => L('بالمقدار', 'By amount', 'Par quantité'),
+  paceByDate: () => L('بتاريخ الانتهاء', 'By finish date', 'Par date de fin'),
   whenQuestion: () => L('متى تريد أن تنتهي؟', 'When do you want to finish?', 'Quand voulez-vous finir ?'),
   unitLabel: () => L('الوحدة', 'Unit', 'Unité'),
   finishDate: () => L('تاريخ الانتهاء', 'Finish date', 'Date de fin'),
@@ -245,20 +245,9 @@ export const HIF = {
   older: () => L('أيام سابقة', 'Older', 'Plus ancien'),
   sessionRemoved: () => L('حُذفت الجلسة.', 'Session removed.', 'Séance supprimée.'),
 
-  // what I’ve memorized
-  memorizedQuestion: () => L('ما الذي حفظتَه؟', 'What have you memorized?', 'Qu’avez-vous mémorisé ?'),
-  memorizedSub: () => L('حدّد السور أو الأجزاء التي حفظتَها.', 'Mark it by surah or by juz.', 'Indiquez-le par sourate ou par juz.'),
-  ofQuran: () => L('من القرآن', 'of the Quran', 'du Coran'),
+  // the picker of surahs and juz
   surahs: () => L('السور', 'Surahs', 'Sourates'),
   juzPlural: () => L('الأجزاء', 'Juz', 'Juz'),
-  autoSaved: () =>
-    L(
-      'يُحفظ اختيارك تلقائيًا، وما تُنهيه من وِردك يُضاف هنا.',
-      'Saved as you go. Whatever you complete in your plan is added here.',
-      'Enregistré automatiquement. Ce que vous terminez dans votre plan s’ajoute ici.',
-    ),
-  wholeQuran: () => L('حفظتُ القرآن كله', 'I know the whole Quran', 'Je connais tout le Coran'),
-  nothingYet: () => L('لم أحفظ شيئاً بعد', 'Nothing yet', 'Rien encore'),
   searchSurah: () => L('ابحث عن سورة', 'Search a surah', 'Chercher une sourate'),
   fromAyah: () => L('من آية', 'From ayah', 'Du verset'),
   toAyah: () => L('إلى', 'to', 'au'),

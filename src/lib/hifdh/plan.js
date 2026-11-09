@@ -92,11 +92,6 @@ export function savedFraction() {
   return core.ringFraction(s.ledger.reduce((n, [a, b]) => n + b - a, 0), TOTAL_AYAT);
 }
 
-export function setLedger(ranges, on) {
-  core.setLedger(state, U, ranges, on);
-  save();
-}
-
 // ---------- Plans ----------
 
 export const planById = (id) => state.plans.find((p) => p.id === id);
@@ -122,21 +117,6 @@ export function setPaused(id, paused) {
   p.pauses ||= [];
   if (paused && !core.pausedNow(p)) p.pauses.push({ from: today(), to: null });
   if (!paused) for (const x of p.pauses) if (!x.to) x.to = today();
-  save();
-}
-
-// «What have you memorized?» is a question for the first plan only
-export const memorizedAsked = () => Boolean(state.settings?.memAsked);
-export function markMemorizedAsked() {
-  if (state.settings?.memAsked) return;
-  state.settings = { ...state.settings, memAsked: true };
-  save();
-}
-
-// «Nothing yet» is a choice of its own (a toggle), not just an empty ledger: it is kept in the settings
-export const nothingMemorized = () => Boolean(state.settings?.memNone) && memorizedCount() === 0;
-export function setNothingMemorized(on) {
-  state.settings = { ...state.settings, memNone: Boolean(on) };
   save();
 }
 

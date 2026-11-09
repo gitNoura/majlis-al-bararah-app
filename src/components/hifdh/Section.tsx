@@ -1,9 +1,9 @@
 // The pieces the daily cards share: a section with a title, a hint line, and the two button looks
 // («hz-primary» and «hz-secondary» of the website).
 //
-// Look of the page (redesign v2): calm and flat. No boxes inside boxes: a section is a heading and its content on the
-// page itself, separated from the next by a hairline; rows are separated by hairlines, not drawn as cards. One colour,
-// forest green (no yellow anywhere): icons, the chosen state, the ring, the buttons.
+// Look of the page (redesign v2): calm and flat. A section is its title on the page, and under it its content in one box
+// outlined thinly in green (no boxes inside boxes: rows inside a box are separated by hairlines, not drawn as cards).
+// One colour, forest green (no yellow anywhere): icons, the chosen state, the ring, the buttons.
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { ReactNode } from 'react';
 
@@ -49,31 +49,33 @@ export function AccentPill({ text, size = 13.5 }: { text: string; size?: number 
   );
 }
 
-// A section: its heading (an icon and a title) and its content. By default it is the page's one kind of box: a quiet
-// white surface (no border, no shadow) so each part of the page reads as its own thing. `plain` drops the surface and
-// separates sections with a hairline instead (the long history list). Nothing is ever written under the title.
+// A section: its title, then its content. The title sits outside, above the box; the box is the page's one kind of
+// surface, outlined thinly in green (a finished card: the paler green wash). `plain` drops the box and separates sections
+// with a hairline instead, the title staying on top of its content (the long history list). Nothing is ever written
+// under the title.
 export function Section({ title, titleColor, tone, children, style, first, plain }: { title: string; titleColor?: string; tone?: Tone; first?: boolean; plain?: boolean; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const h = useHome();
   const { c } = useTheme();
   const heading = useHeading();
-  return (
-    <View
-      style={[
-        styles.section,
-        plain
-          ? !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider, paddingTop: 20 }
-          : tone === 'done'
-            ? { backgroundColor: h.mint, borderRadius: 14, padding: 18, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: h.mintLine } // finished: the card turns green
-            : { backgroundColor: h.card, borderRadius: 14, padding: 18, borderWidth: StyleSheet.hairlineWidth, borderColor: h.cardLine },
-        style,
-      ]}
-    >
-      <View style={styles.head}>
-        <Txt size={19} weight={700} color={titleColor ?? heading} style={{ flex: 1 }}>
-          {title}
-        </Txt>
+  const head = (
+    <View style={styles.head}>
+      <Txt size={19} weight={700} color={titleColor ?? heading} style={{ flex: 1 }}>
+        {title}
+      </Txt>
+    </View>
+  );
+  if (plain) {
+    return (
+      <View style={[styles.section, !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.divider, paddingTop: 20 }, style]}>
+        {head}
+        {children}
       </View>
-      {children}
+    );
+  }
+  return (
+    <View style={[styles.outer, style]}>
+      {head}
+      <View style={[styles.box, { backgroundColor: tone === 'done' ? h.mint : h.card, borderColor: h.leaf }]}>{children}</View>
     </View>
   );
 }
@@ -143,7 +145,9 @@ export function SecondaryButton({ label, onPress, disabled, square }: { label: s
 
 const styles = StyleSheet.create({
   section: { gap: 14 },
-  head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  outer: { gap: 10 },
+  box: { gap: 14, padding: 18, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth * 2 },
+  head:{ flexDirection: 'row', alignItems: 'center', gap: 12 },
   heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
   square: { minHeight: 48, borderRadius: 12 },
   btn: { minHeight: 50, borderRadius: 25, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },

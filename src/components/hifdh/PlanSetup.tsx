@@ -1,8 +1,9 @@
 // Plan setup and edit (paceHTML / editHTML / savePace of the website's hifz.js). A new plan is a short run of
-// questions (what to do, what you know the first time, scope, how much a week, which days - or the finish date
-// first, then the days), then the summary, which is not a question; editing is one page with every choice, pause
-// and delete under Save. Previous / Next at the bottom move between the questions only (the arrow at the top
-// leaves the setup); the plan is kept per day: the week's amount is shared over the days chosen.
+// questions (what to do, scope, how much a week, which days - or the finish date first, then the days), then the
+// summary, which is not a question; editing is one page of titled boxes (what it covers, the pace, the days, when the
+// new pace starts) with pause and delete under them and Save at the bottom. Previous / Next at the bottom move between
+// the questions only (the arrow at the top leaves the setup); the plan is kept per day: the week's amount is shared
+// over the days chosen.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { useEffect, useState, type ReactNode } from 'react';
 import { Alert, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
@@ -12,8 +13,7 @@ import { DateCalendar } from '@/components/hifdh/DateCalendar';
 import { HifHeader } from '@/components/hifdh/HifHeader';
 import { useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { MemorizedPicker } from '@/components/hifdh/MemorizedPicker';
-import { MemorizedScreen } from '@/components/hifdh/MemorizedScreen';
-import { AccentPill, Hint, PrimaryButton, SecondaryButton } from '@/components/hifdh/Section';
+import { Hint, PrimaryButton, SecondaryButton, Section } from '@/components/hifdh/Section';
 import { Sheet } from '@/components/ui/Sheet';
 import { BackIcon, CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
@@ -40,7 +40,6 @@ type Pace = {
   mode: 'amount' | 'date';
   date: string;
   from: string;
-  askMem: boolean;
   step: number;
   first: number;
 };
@@ -48,7 +47,6 @@ type Pace = {
 const emptyBits = () => new Array<number>(plan.units().N).fill(0);
 
 function initPace(type: PlanType | null, id: string | null): Pace {
-  const known = plan.memorizedCount() > 0;
   const today: string = plan.today();
   const existing = id ? plan.planById(id) : null;
   if (existing) {
@@ -70,7 +68,6 @@ function initPace(type: PlanType | null, id: string | null): Pace {
       mode: existing.target?.kind === 'date' ? 'date' : 'amount',
       date: existing.target?.kind === 'date' ? existing.target.date : core.addDays(today, 90),
       from: today,
-      askMem: false,
       step: 0, // editing is one page, not a questionnaire
       first: 0,
     };
@@ -91,7 +88,6 @@ function initPace(type: PlanType | null, id: string | null): Pace {
     mode: 'amount',
     date: core.addDays(today, 90),
     from: today,
-    askMem: !plan.memorizedAsked() && !known,
     step: type ? 1 : 0,
     first: type ? 1 : 0,
   };
@@ -171,8 +167,7 @@ const nudge = (v: number, up: boolean, step: number) => (up ? (Math.floor(v / st
 const clean = (x: number) => Math.round(x * 100) / 100;
 
 // how much a week, then which days; for «finish by a date» the date comes first, then the days
-const stepKeys = (p: Pace) => ['type', ...(p.askMem && p.type === 'memorize' ? ['memorized'] : []), // revising asks what to revise, not what is memorized
-   'scope', ...(p.mode === 'date' ? ['date', 'days'] : ['amount', 'days', 'split']), 'summary'];
+const stepKeys = (p: Pace) => ['type', 'scope', ...(p.mode === 'date' ? ['date', 'days'] : ['amount', 'days', 'split']), 'summary'];
 
 // A plain block: its content sits on the page (no paper, border or shadow). `flush` is a list whose rows carry their own
 // hairlines.
@@ -180,16 +175,21 @@ function Card({ children }: { children: ReactNode; flush?: boolean }) {
   return <View style={styles.card}>{children}</View>;
 }
 
-// A row of the edit page: the setting's name, its value in green, and an arrow; a tap opens a sheet for it
-function EditRow({ label, value, onPress, last }: { label: string; value: string; onPress: () => void; last?: boolean }) {
+// A row of the edit page: the setting's value (a long one wraps), the setting's name small above it when the box's own
+// title does not already say it, and an arrow; a tap opens a sheet for it
+function EditRow({ label, value, onPress }: { label?: string; value: string; onPress: () => void }) {
   const { c } = useTheme();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.editRow, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.divider }]}>
-      <Txt size={15.5} weight={600} color={c.ink}>
-        {label}
-      </Txt>
-      <View style={{ flex: 1, alignItems: 'flex-end' }}>
-        <AccentPill text={value} size={14} />
+    <Pressable onPress={onPress} accessibilityRole="button" style={styles.editRow}>
+      <View style={{ flex: 1, gap: 2 }}>
+        {!!label && (
+          <Txt size={13} color={c.meta}>
+            {label}
+          </Txt>
+        )}
+        <Txt size={16.5} weight={700} color={c.ink}>
+          {value}
+        </Txt>
       </View>
       <BackIcon color={c.meta} size={18} rtl={isEnglish} />
     </Pressable>
@@ -261,7 +261,8 @@ function DayList({ days, onToggle }: { days: number[]; onToggle: (d: number) => 
   );
 }
 
-// The seven days in one row (Monday first), each a small toggle: the edit page shows every day at a glance
+// The seven days as a grid of toggles, four to a row (Monday first): the edit page shows every day at a glance, and a long
+// day name (Arabic short names are as long as the full ones) still fits
 function DayChips({ days, onToggle }: { days: number[]; onToggle: (d: number) => void }) {
   const h = useHome();
   const { c } = useTheme();
@@ -284,25 +285,6 @@ function DayChips({ days, onToggle }: { days: number[]; onToggle: (d: number) =>
           </Pressable>
         );
       })}
-    </View>
-  );
-}
-
-// A small label above a block of the edit page
-function Label({ text, action }: { text: string; action?: { text: string; onPress: () => void } }) {
-  const { c } = useTheme();
-  return (
-    <View style={styles.labelRow}>
-      <Txt size={14} weight={700} color={c.meta} style={{ flex: 1 }}>
-        {text}
-      </Txt>
-      {action && (
-        <Pressable onPress={action.onPress} hitSlop={10} accessibilityRole="button">
-          <Txt size={14} weight={700} color={c.ink}>
-            {action.text}
-          </Txt>
-        </Pressable>
-      )}
     </View>
   );
 }
@@ -630,9 +612,9 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   };
 
   const toDate = () => <Link text={HIF.pickDate()} onPress={() => patch({ mode: 'date', period: 'day' })} />;
-  const toAmount = () => <Link text={HIF.pickAmount()} onPress={() => patch(editing ? { mode: 'amount', period: 'day' } : { mode: 'amount', period: 'day', step: pace.step - 1 })} />; // from the date question back to the amount question
+  const toAmount = () => <Link text={HIF.pickAmount()} onPress={() => patch({ mode: 'amount', period: 'day', step: pace.step - 1 })} />; // from the date question back to the amount question
 
-  // ----- the edit page: one list, each row shows its value and opens a small sheet; pause and delete under it -----
+  // ----- the edit page: titled boxes (covers, pace, days, finish, start); a row shows its value and opens a small sheet; pause and delete under them -----
 
   const edit = () => {
     const p = plan.planById(pace.id);
@@ -648,58 +630,62 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
     );
     return {
       body: (
-        <View style={{ gap: 30 }}>
-          <AccentPill text={kindOf(pace.type)} size={14} />
+        <View style={{ gap: 22 }}>
+          <Section title={HIF.covers()}>
+            <EditRow label={kindOf(pace.type)} value={rangeLabel(pace.range, pace.type)} onPress={() => setSheet('scope')} />
+          </Section>
 
-          <View style={{ gap: 10 }}>
-            <Label text={HIF.covers()} action={{ text: HIF.modify(), onPress: () => setSheet('scope') }} />
-            <Txt size={20} weight={700} color={c.ink} lineHeight={28}>
-              {rangeLabel(pace.range, pace.type)}
-            </Txt>
-          </View>
-
-          <View style={{ gap: 12 }}>
-            <Label text={HIF.pace()} action={{ text: pace.mode === 'date' ? HIF.pickAmount() : HIF.pickDate(), onPress: () => patch(pace.mode === 'date' ? { mode: 'amount', period: 'day' } : { mode: 'date', period: 'day' }) }} />
+          <Section title={HIF.pace()}>
+            <View style={styles.modeRow}>
+              <View style={{ flex: 1 }}>
+                <Chip on={pace.mode === 'amount'} text={HIF.paceByAmount()} onPress={() => pace.mode !== 'amount' && patch({ mode: 'amount', period: 'day' })} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Chip on={pace.mode === 'date'} text={HIF.paceByDate()} onPress={() => pace.mode !== 'date' && patch({ mode: 'date', period: 'day' })} />
+              </View>
+            </View>
             {pace.mode === 'date' ? dateBlock() : amountBlock()}
-          </View>
+          </Section>
 
-          <View style={{ gap: 12 }}>
-            <Label text={HIF.days()} action={{ text: pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll(), onPress: () => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] }) }} />
+          <Section title={HIF.days()}>
+            <View style={styles.daysHead}>
+              <Txt size={14} color={c.meta}>
+                {HIF.selectedDays(pace.days.length)}
+              </Txt>
+              <Chip on={pace.days.length === 7} text={pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll()} onPress={() => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] })} />
+            </View>
             <DayChips days={pace.days} onToggle={(d) => patch({ days: pace.days.includes(d) ? pace.days.filter((x) => x !== d) : [...pace.days, d].sort() })} />
             {aboutLine()}
-          </View>
-
-          <View>
-            {showSplit && <EditRow label={HIF.perDay()} value={pace.perDay ? HIF.splitCustom() : HIF.splitEven()} onPress={() => setSheet('split')} />}
-            <EditRow label={HIF.newPaceFrom()} value={fmtDate(pace.from)} onPress={() => setSheet('from')} last />
-          </View>
+            {showSplit && (
+              <>
+                <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: c.divider }} />
+                <EditRow label={HIF.perDay()} value={pace.perDay ? HIF.splitCustom() : HIF.splitEven()} onPress={() => setSheet('split')} />
+              </>
+            )}
+          </Section>
 
           {finish && (
-            <View style={{ gap: 2 }}>
-              <Txt size={14} color={c.meta}>
-                {HIF.finishLine(revise)}
-              </Txt>
+            <Section title={HIF.finishLine(revise)}>
               <Txt size={24} weight={700} color={c.ink}>
                 {fmtDate(finish)}
               </Txt>
-            </View>
+            </Section>
           )}
 
-          <View style={styles.textActions}>
-            <Pressable
+          <Section title={HIF.newPaceFrom()}>
+            <EditRow value={fmtDate(pace.from)} onPress={() => setSheet('from')} />
+          </Section>
+
+          <View style={{ gap: 4 }}>
+            <SecondaryButton
+              square
+              label={paused ? HIF.resumePlan() : HIF.pausePlan()}
               onPress={() => {
                 plan.setPaused(pace.id, !paused);
                 refresh();
                 onExit();
               }}
-              hitSlop={8}
-              accessibilityRole="button"
-              style={styles.textBtn}
-            >
-              <Txt size={16} weight={700} color={c.ink}>
-                {paused ? HIF.resumePlan() : HIF.pausePlan()}
-              </Txt>
-            </Pressable>
+            />
             <Pressable
               onPress={() =>
                 Alert.alert(HIF.confirmDelete(), undefined, [
@@ -717,9 +703,9 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
               }
               hitSlop={8}
               accessibilityRole="button"
-              style={styles.textBtn}
+              style={styles.deleteBtn}
             >
-              <Txt size={16} weight={700} color="#b3402f">
+              <Txt size={16} weight={700} center color="#b3402f">
                 {HIF.deletePlan()}
               </Txt>
             </Pressable>
@@ -760,12 +746,6 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
           </View>
         ),
         foot: next(),
-      };
-    }
-    if (key === 'memorized') {
-      return {
-        body: <MemorizedScreen />,
-        foot: next(undefined, false, () => (plan.markMemorizedAsked(), goStep(pace.step + 1))),
       };
     }
     if (key === 'scope') {
@@ -878,8 +858,8 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   };
 
   const { body, foot } = editing ? edit() : question();
-  // the questions are counted; the memorized page and the summary are not questions
-  const asked = keys.filter((k) => k !== 'memorized' && k !== 'summary').slice(pace.first);
+  // the questions are counted; the summary is not a question
+  const asked = keys.filter((k) => k !== 'summary').slice(pace.first);
   const n = asked.length;
   const i = asked.indexOf(key);
 
@@ -924,12 +904,11 @@ const styles = StyleSheet.create({
   splitVal: { width: 78, alignItems: 'center' },
   stepper: { alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth * 2 },
   totalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 4 },
-  dayChips: { flexDirection: 'row', gap: 6 },
-  dayChip: { flex: 1, minHeight: 44, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
-  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  textActions: { flexDirection: 'row', alignItems: 'center', gap: 28 },
-  textBtn: { minHeight: 44, justifyContent: 'center' },
-  editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 62, paddingVertical: 10 },
+  dayChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  dayChip: { flexGrow: 1, flexBasis: '22%', minHeight: 44, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
+  modeRow: { flexDirection: 'row', gap: 8 },
+  deleteBtn: { minHeight: 48, justifyContent: 'center' },
+  editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48 },
   sumRow: { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 12, gap: 2 },
   foot: { paddingHorizontal: 16, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth },
 });

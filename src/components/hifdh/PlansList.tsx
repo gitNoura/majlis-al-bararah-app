@@ -6,10 +6,8 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
 import { SecondaryButton, useHeading } from '@/components/hifdh/Section';
-import { BackIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
-import { isEnglish } from '@/i18n/i18n';
 import * as core from '@/lib/hifdh/core';
 import { kindOf, paceText, rangeLabel } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
@@ -22,7 +20,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
   const { c } = useTheme();
   const h = useHome();
   const heading = useHeading();
-  const { refresh, openMemorized } = useHif(); // also redraws the list whenever `rev` changes
+  const { refresh } = useHif(); // also redraws the list whenever `rev` changes
   const plans = plan.get().plans as { id: string; type: string; range: number[][] | null }[];
 
   const confirmDelete = (id: string) =>
@@ -40,18 +38,6 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
 
   return (
     <View style={{ gap: 14 }}>
-      <Pressable onPress={openMemorized} accessibilityRole="button" style={[styles.link, { backgroundColor: h.card }]}>
-        <View style={{ flex: 1, gap: 2 }}>
-          <Txt size={17} weight={700} color={c.ink}>
-            {HIF.memorizedTitle()}
-          </Txt>
-          <Txt size={13} color={c.meta}>
-            {HIF.editMemorized()}
-          </Txt>
-        </View>
-        <BackIcon color={c.meta} size={20} rtl={isEnglish} />
-      </Pressable>
-
       {plans.length === 0 && (
         <Txt size={14.5} center color={c.meta} style={{ paddingVertical: 12 }}>
           {HIF.noPlans()}
@@ -112,7 +98,6 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
 }
 
 const styles = StyleSheet.create({
-  link: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 68, padding: 18, borderRadius: 14 },
   plan: { gap: 16, padding: 18, borderRadius: 14 },
   kindRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 18 },

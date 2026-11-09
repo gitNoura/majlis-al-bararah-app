@@ -566,16 +566,6 @@ export function removeLogEntry(state, U, id) {
   if (e) removeEntry(state, U, e);
 }
 
-// ---------- The ledger from the picker ----------
-
-export function setLedger(state, U, ranges, on) {
-  if (on) return addToLedger(state, U, ranges);
-  const bits = rangesToBits(state.ledger, U.N);
-  for (const [a, b] of ranges) bits.fill(0, a, b);
-  state.ledger = bitsToRanges(bits);
-  return [];
-}
-
 // ---------- Pace: the amount from a target, and the forecast ----------
 
 // The units in the plan's pool (what is left to memorize, or what is memorized to revise).
