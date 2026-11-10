@@ -933,7 +933,6 @@ const styles = StyleSheet.create({
   modeRow: { flexDirection: 'row', gap: 8 },
   quietRow: { flexDirection: 'row', justifyContent: 'center', gap: 32 },
   quietBtn: { minHeight: 44, justifyContent: 'center' },
-  dangerBtn: { minHeight: 48, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: '#b3402f', paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
   editRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 58, borderBottomWidth: StyleSheet.hairlineWidth },
   sumRow: { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 12, gap: 2 },
   foot: { paddingHorizontal: 16, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth },

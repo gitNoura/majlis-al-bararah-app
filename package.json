@@ -49,13 +49,12 @@
   },
   "scripts": {
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "npm run skia-web && expo start --web",
     "skia-web": "node -e \"require('fs').mkdirSync('public',{recursive:true});require('fs').copyFileSync('node_modules/canvaskit-wasm/bin/full/canvaskit.wasm','public/canvaskit.wasm')\"",
     "lint": "expo lint",
-    "check:boundaries": "node scripts/check-boundaries.mjs"
+    "test:hifdh": "node scripts/test-hifdh-plan.mjs"
   },
   "private": true
 }

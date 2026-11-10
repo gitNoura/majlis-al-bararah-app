@@ -1,6 +1,6 @@
 // What the daily cards share: `rev` (bumped after every mark or plan change, so the summary and the cards
-// redraw), the toast, the confetti, and the «where did you stop?» sheet. memorize.tsx wraps the screen in it.
-// `startPlan` is the door to the plan setup, `listen` the door to Listen; each says «coming soon» when memorize.tsx gives none.
+// redraw), the toast, the confetti, and the «where did you stop?» sheet. hifdh.tsx wraps the screen in it.
+// `startPlan` is the door to the plan setup, `listen` the door to Listen; each says «coming soon» when hifdh.tsx gives none.
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 

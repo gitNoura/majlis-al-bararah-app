@@ -138,7 +138,7 @@ export function PrayerCard() {
 const styles = StyleSheet.create({
   card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: space.cozy, gap: space.sm, overflow: 'hidden', boxShadow: '0px 8px 20px rgba(20, 50, 38, 0.16)' },
   edge: { position: 'absolute' },
-  skyClip: { ...StyleSheet.absoluteFillObject, borderRadius: RADIUS, borderCurve: 'continuous', overflow: 'hidden' },
+  skyClip: { ...StyleSheet.absoluteFill, borderRadius: RADIUS, borderCurve: 'continuous', overflow: 'hidden' },
   buttons: { flexDirection: 'row', gap: space.sm },
   btn: { flex: 1, minHeight: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md },
   head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
