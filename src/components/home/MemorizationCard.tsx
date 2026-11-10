@@ -85,8 +85,8 @@ export function MemorizationCard() {
 }
 
 const styles = StyleSheet.create({
-  panel: { flexDirection: 'row', borderRadius: 24, borderCurve: 'continuous', borderWidth: StyleSheet.hairlineWidth, padding: space.lg },
-  plan: { flex: 1, gap: space.sm },
+  panel: { flexDirection: 'row', borderRadius: 20, borderCurve: 'continuous', borderWidth: StyleSheet.hairlineWidth, padding: space.md },
+  plan: { flex: 1, gap: space.xs },
   rule: { width: StyleSheet.hairlineWidth * 2, alignSelf: 'stretch', marginHorizontal: space.md },
-  track: { height: 4, borderRadius: 2, overflow: 'hidden', flexDirection: 'row' },
+  track: { height: 3, borderRadius: 2, overflow: 'hidden', flexDirection: 'row', marginVertical: space.xs },
 });

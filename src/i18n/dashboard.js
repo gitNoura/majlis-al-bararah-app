@@ -9,6 +9,8 @@ export const DASH = {
       : m > 0
         ? L(`${m} د`, `${m}m`, `${m} min`)
         : L('أقل من دقيقة', 'under a minute', 'moins d’une minute'),
+  // «in 2h 14m»: the time left (DASH.left) said as a sentence, so the next prayer needs no label above it
+  inTime: (left) => L(`بعد ${left}`, `in ${left}`, `dans ${left}`),
   // reading
   reading: () => L('القراءة', 'Reading', 'Lecture'),
   continueReading: () => L('أكمل القراءة', 'Continue reading', 'Continuer la lecture'),

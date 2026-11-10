@@ -16,8 +16,8 @@ import { T } from '@/theme/homeType';
 import { space } from '@/theme/tokens';
 
 const digits = (n: number) => n.toLocaleString('en');
-const BAR = 72; // the height of the tallest capsule
-const STUB = 10;
+const BAR = 56; // the height of the tallest capsule
+const STUB = 8;
 
 export function ActivityCard() {
   const k = useSkin();
@@ -74,11 +74,11 @@ export function ActivityCard() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space.cozy },
+  wrap: { gap: space.sm },
   head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
   bars: { flexDirection: 'row', gap: space.xs },
   col: { flex: 1, alignItems: 'center', gap: space.xs },
   slot: { height: BAR, justifyContent: 'flex-end', alignItems: 'center' },
-  bar: { width: 20, borderRadius: 10 },
+  bar: { width: 16, borderRadius: 8 },
   dot: { width: 5, height: 5, borderRadius: 3 },
 });

@@ -1,8 +1,9 @@
 // HOME, the closing note: the hadith of the reader («read and rise») and who told it. Plain words on the page, no box. In
 // Arabic the hadith is set in Amiri (the app's face for the Prophet's words); in English and French in the interface face.
-// The short marigold bar is the screen's last "you are here" mark, and the only decoration in the note.
+// It opens with a small rosette, the mark that closes an ayah in the mushaf, and that is the only decoration in the note.
 import { StyleSheet, View } from 'react-native';
 
+import { Rosette } from '@/components/home/Rosette';
 import { Txt } from '@/components/Txt';
 import { HOME } from '@/i18n/home';
 import { LANG } from '@/i18n/i18n';
@@ -14,12 +15,12 @@ export function HadithNote() {
   const k = useSkin();
   return (
     <View style={styles.wrap}>
-      <View style={[styles.bar, { backgroundColor: k.spark }]} />
+      <Rosette size={20} color={k.accent} />
       <Txt {...T.small} color={k.meta}>
         {HOME.hadithIntro()}
       </Txt>
       {LANG === 'ar' ? (
-        <Txt serif size={21} lineHeight={36} color={k.ink}>
+        <Txt serif size={18} lineHeight={30} color={k.ink}>
           {HOME.hadith()}
         </Txt>
       ) : (
@@ -35,6 +36,5 @@ export function HadithNote() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space.sm },
-  bar: { width: 28, height: 3, borderRadius: 2, marginBottom: space.xs },
+  wrap: { gap: space.xs, paddingTop: space.sm },
 });

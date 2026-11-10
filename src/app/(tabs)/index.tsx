@@ -1,12 +1,13 @@
 // HOME tab: the dashboard, an overview of where the reader is, not a launcher and not a to-do list. Top to bottom:
 //   greeting and the date
-//   1 the next prayer (the day as one line)      2 reading (the one dark block: the khatma as thirty juz marks)
+//   1 the next prayer (on the sky of the moment, the day as one line)   2 reading (a mushaf page: the khatma as thirty juz marks)
 //   3 memorization and revision (how far each plan is through its whole run; the tasks are in Hifdh)
 //   4 activity (this week)                       5 the hadith of the reader, as a quiet closing note
 //   (the adhkar and ahadith libraries are the Library tab)
-// The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a quiet neutral page, one deep forest, and a single marigold
-// that only ever marks "where you are now". Structure comes from scale and space, not from boxes: only Reading (a solid
-// block) and Memorization (one white panel) have a surface. The one moment of motion is the marks drawing themselves in
+// The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a quiet neutral page at the app's everyday sizes (12 to 26),
+// one deep forest, and a single marigold that only ever marks "where you are now". The prayer card wears the sky and the
+// Reading block is a mushaf page (the Quran tab's paper); Memorization is one white panel; Activity and the hadith sit on
+// the page itself. The one moment of motion is the marks drawing themselves in
 // (Grow). Each section reads the saved state when it draws, so Home redraws every time it comes into view. It also keeps
 // one behaviour of the old home screen: after a change of narration the app opens again, and must land on the Quran tab
 // at the same place, not on Home.
@@ -53,7 +54,7 @@ export default function HomeTab() {
 
   return (
     <View style={{ flex: 1, backgroundColor: k.paper }}>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.md, paddingBottom: space.xl, gap: space.xl }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.sm, paddingBottom: space.lg, gap: space.md }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md }}>
           <View style={{ flex: 1 }}>
             <Txt {...T.date} color={k.meta}>
@@ -64,7 +65,7 @@ export default function HomeTab() {
             </Txt>
           </View>
           <Pressable onPress={() => router.push('/profile')} accessibilityRole="button" accessibilityLabel={HOME.profile()} hitSlop={8}>
-            <Avatar size={44} />
+            <Avatar size={40} />
           </Pressable>
         </View>
         <PrayerCard />

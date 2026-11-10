@@ -1,15 +1,16 @@
-// The Home screen's type scale, as props for <Txt>. One face (Tajawal) in three weights: 500 for quiet words, 700 for
-// names and small figures, 800 for the few big ones. No letter-spacing anywhere: it would break the joined Arabic letters.
+// The Home screen's type scale, as props for <Txt>. One face (Tajawal) in two weights: 500 for quiet words, 700 for names and
+// figures. Sizes are the app's everyday ones (12 to 26): Home is a screen to scan, so nothing shouts. The Arabic of the Quran
+// (the surah's name, the hadith) is set in Amiri where it appears, never here. No letter-spacing anywhere: it would break
+// the joined Arabic letters.
 export const T = {
-  greeting: { size: 30, weight: 800, lineHeight: 38 },
-  date: { size: 14, weight: 500, lineHeight: 20 },
-  display: { size: 38, weight: 800, lineHeight: 46 }, // the next prayer
-  hero: { size: 28, weight: 800, lineHeight: 38 }, // the surah
-  big: { size: 40, weight: 800, lineHeight: 46 }, // a plan's percentage
-  figure: { size: 20, weight: 800, lineHeight: 28 }, // the time left, "5 of 7"
-  title: { size: 17, weight: 700, lineHeight: 24 },
-  body: { size: 15, weight: 500, lineHeight: 24 },
-  small: { size: 13, weight: 500, lineHeight: 19 },
-  smallBold: { size: 13, weight: 700, lineHeight: 19 },
-  button: { size: 16, weight: 800, lineHeight: 22 },
+  greeting: { size: 22, weight: 700, lineHeight: 28 },
+  date: { size: 12, weight: 500, lineHeight: 17 },
+  display: { size: 24, weight: 700, lineHeight: 30 }, // the next prayer
+  big: { size: 26, weight: 700, lineHeight: 32 }, // a plan's percentage
+  figure: { size: 15, weight: 700, lineHeight: 20 }, // the time left, "3 of 7", the reading's percentage
+  title: { size: 15, weight: 700, lineHeight: 20 },
+  body: { size: 14, weight: 500, lineHeight: 22 },
+  small: { size: 12, weight: 500, lineHeight: 17 },
+  smallBold: { size: 12, weight: 700, lineHeight: 17 },
+  button: { size: 15, weight: 700, lineHeight: 20 },
 } as const;
