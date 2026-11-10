@@ -1,5 +1,5 @@
-// HOME, memorization and revision: one white panel with the two plans side by side, split by a single hairline (not two
-// cards, and no panel inside a panel). Each shows how far its plan is through its WHOLE run (not today's portions): a large
+// HOME, memorization and revision: no box. The two plans sit side by side on the page under a hairline, split by a single
+// vertical hairline. Each shows how far its plan is through its WHOLE run (not today's portions): a large
 // percentage, a thin bar that draws in once, and the days done out of all its days; the memorization side also says how
 // many juz are memorized. With no plan of that kind yet it is a plain invitation to create one; a plan not begun says
 // «Start today». A tap opens the Hifdh tab. Everything is read from the plan's saved state.
@@ -76,7 +76,7 @@ export function MemorizationCard() {
   const o = hifdhOverview();
   const juz = Math.round(memorizedCells().reduce((a, b) => a + b, 0) * 10) / 10;
   return (
-    <View style={[styles.panel, { backgroundColor: k.surface, borderColor: k.hairline }]}>
+    <View style={[styles.section, { borderTopColor: k.hairline }]}>
       <Plan title={DASH.memorizePlan()} part={o.memorize} emptyText={DASH.noMemorizePlan()} extra={juz > 0 ? `${digits(juz)} ${DASH.memorizedOf()}` : undefined} />
       <View style={[styles.rule, { backgroundColor: k.hairline }]} />
       <Plan title={DASH.revisionPlan()} part={o.revise} emptyText={DASH.noRevisionPlan()} />
@@ -85,7 +85,7 @@ export function MemorizationCard() {
 }
 
 const styles = StyleSheet.create({
-  panel: { flexDirection: 'row', borderRadius: 20, borderCurve: 'continuous', borderWidth: StyleSheet.hairlineWidth, padding: space.md },
+  section: { flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth, paddingTop: space.md },
   plan: { flex: 1, gap: space.xs },
   rule: { width: StyleSheet.hairlineWidth * 2, alignSelf: 'stretch', marginHorizontal: space.md },
   track: { height: 3, borderRadius: 2, overflow: 'hidden', flexDirection: 'row', marginVertical: space.xs },
