@@ -1,8 +1,8 @@
-// HOME, reading: a mushaf page. The block is the Quran tab's own paper (the pages' cream) in a thin frame, set like the top
+// HOME, reading: a mushaf page. The block is a deep navy card with off-white ink, in a thin frame, set like the top
 // of a page of the mushaf: a rule with the rosette of the ayah in its middle (the page number in the medallion), then the
 // surah's name in Arabic in Amiri, the face of the Quran, and under it the surah and the hizb and juz in the reader's
 // language. Then the khatma as thirty small marks, one per juz, that fill from the bottom as the reading passes through them
-// (the juz being read is amber), with how many juz are read and the percentage of the Quran, and one forest button that
+// (the juz being read is light blue), with how many juz are read and the percentage of the Quran, and one off-white button that
 // opens the Quran at the marker. The marks draw themselves in once (Grow). The hadith is its own quiet note at the end.
 'use no memo'; // reads saved state (the marker) when it draws, which the React Compiler cannot see change
 import * as Haptics from 'expo-haptics';

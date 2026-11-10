@@ -49,7 +49,7 @@ export type PrayerView = {
 // The prayers card takes the sky of the moment, whatever the app's day / night: worked out from the sun at the place
 // (skyNow: the night from the dusk's end to al-Fajr, the dawn, midday, the warm afternoon, the sunset's glow).
 export type Sky = { sky: readonly [string, string, string]; ink: string; soft: string; circle: string; next: string; nextIcon: string };
-const LIGHT_INK = { ink: '#173f32', soft: '#5f6650', circle: 'rgba(23, 63, 50, 0.08)', next: '#173f32', nextIcon: '#fffdf5' };
+const LIGHT_INK = { ink: '#1f3354', soft: '#4d586c', circle: 'rgba(31, 51, 84, 0.08)', next: '#1f3354', nextIcon: '#fbf8f1' };
 const NIGHT_INK = { ink: '#f6eedb', soft: '#d6cbb0', circle: 'rgba(255, 255, 255, 0.12)', next: '#f3e2b0', nextIcon: '#1b2a33' };
 export const SKIES: Record<Phase, Sky> = {
   night: { sky: ['#101b26', '#1b2b38', '#2a3c45'], ...NIGHT_INK },
