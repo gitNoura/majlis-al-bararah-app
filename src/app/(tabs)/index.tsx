@@ -1,19 +1,23 @@
 // HOME tab: the dashboard, an overview of where the reader is, not a launcher and not a to-do list. Top to bottom:
-//   1 the next prayer      2 reading (the hero: the khatma, the marker)
-//   3 memorization and revision (how far each plan is through its whole run; the tasks are in Hifdh)      4 activity (this week against last week)
+//   greeting and the date
+//   1 the next prayer (the day as one line)      2 reading (the one dark block: the khatma as thirty juz marks)
+//   3 memorization and revision (how far each plan is through its whole run; the tasks are in Hifdh)
+//   4 activity (this week)                       5 the hadith of the reader, as a quiet closing note
 //   (the adhkar and ahadith libraries are the Library tab)
-// The look is Home's own (src/theme/home.ts: the app's own page and greens, the prayer card's forest and cream); the prayer
-// card keeps wearing the sky. Only the Reading card has a filled button. Each card reads the saved state when it draws, so Home redraws every time it
-// comes into view. It also keeps one behaviour of the old home screen: after a change of narration the app opens
-// again, and must land on the Quran tab at the same place, not on Home.
-'use no memo'; // the cards read saved state (modules), which the React Compiler cannot see change
+// The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a quiet neutral page, one deep forest, and a single marigold
+// that only ever marks "where you are now". Structure comes from scale and space, not from boxes: only Reading (a solid
+// block) and Memorization (one white panel) have a surface. The one moment of motion is the marks drawing themselves in
+// (Grow). Each section reads the saved state when it draws, so Home redraws every time it comes into view. It also keeps
+// one behaviour of the old home screen: after a change of narration the app opens again, and must land on the Quran tab
+// at the same place, not on Home.
+'use no memo'; // the sections read saved state (modules), which the React Compiler cannot see change
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActivityCard } from '@/components/home/ActivityCard';
-import { Reveal } from '@/components/home/motion';
+import { HadithNote } from '@/components/home/HadithNote';
 import { MemorizationCard } from '@/components/home/MemorizationCard';
 import { PrayerCard } from '@/components/home/PrayerCard';
 import { ReadingCard } from '@/components/home/ReadingCard';
@@ -23,14 +27,14 @@ import { HOME } from '@/i18n/home';
 import { dateLine } from '@/lib/dashboard';
 import { stayInQuran } from '@/lib/riwaya';
 import { writeJSON } from '@/lib/storage';
-import { useHome } from '@/theme/home';
+import { useSkin } from '@/theme/homeSkin';
+import { T } from '@/theme/homeType';
 import { space } from '@/theme/tokens';
-import { type } from '@/theme/type';
 
 export default function HomeTab() {
-  const h = useHome();
+  const k = useSkin();
   const insets = useSafeAreaInsets();
-  const [, setRev] = useState(0); // bumped on focus: redraws the cards
+  const [, setRev] = useState(0); // bumped on focus: redraws the sections
 
   useEffect(() => {
     const stay = stayInQuran();
@@ -48,34 +52,26 @@ export default function HomeTab() {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: h.screen }}>
-      <ScrollView contentContainerStyle={{ padding: space.md, paddingTop: insets.top + space.md, paddingBottom: space.lg, gap: space.cozy }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ gap: space.hair, flex: 1 }}>
-            <Txt {...type.heading4} color={h.ink}>
-              {HOME.salam()}
-            </Txt>
-            <Txt {...type.body6} color={h.meta}>
+    <View style={{ flex: 1, backgroundColor: k.paper }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.md, paddingBottom: space.xl, gap: space.xl }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md }}>
+          <View style={{ flex: 1 }}>
+            <Txt {...T.date} color={k.meta}>
               {dateLine()}
+            </Txt>
+            <Txt {...T.greeting} color={k.ink}>
+              {HOME.salam()}
             </Txt>
           </View>
           <Pressable onPress={() => router.push('/profile')} accessibilityRole="button" accessibilityLabel={HOME.profile()} hitSlop={8}>
             <Avatar size={44} />
           </Pressable>
         </View>
-        {/* each card rises into place once, one after another */}
-        <Reveal index={0}>
-          <PrayerCard />
-        </Reveal>
-        <Reveal index={1}>
-          <ReadingCard />
-        </Reveal>
-        <Reveal index={2}>
-          <MemorizationCard />
-        </Reveal>
-        <Reveal index={3}>
-          <ActivityCard />
-        </Reveal>
+        <PrayerCard />
+        <ReadingCard />
+        <MemorizationCard />
+        <ActivityCard />
+        <HadithNote />
       </ScrollView>
     </View>
   );

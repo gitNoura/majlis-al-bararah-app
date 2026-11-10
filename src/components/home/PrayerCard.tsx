@@ -1,24 +1,75 @@
-// HOME, card 1: the next prayer, the time left to it, the day's five times and a button to the qibla.
-// With no place chosen yet it asks for one (the phone's location, or a city from the settings).
+// HOME, the next prayer. No card and no sky: the name of the prayer and the time left to it, large, and under them the
+// day as one line with five stops. A stop already prayed is filled, the next one is the marigold "you are here",
+// the rest are hollow. Two small links: the qibla and the calendar. With no place chosen yet it asks for one
+// (the phone's location, or a city from the settings).
+// The line is built from five equal columns, each with a half-line on either side of its stop, so it mirrors by itself in
+// Arabic (Fajr at the right) and needs no left/right maths.
 'use no memo'; // reads saved state (the place) when it draws, which the React Compiler cannot see change
-import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { PlaceSheet } from '@/components/PlaceSheet';
-import { PrayerSky } from '@/components/PrayerSky';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { HOME } from '@/i18n/home';
 import { t } from '@/i18n/i18n';
-import { prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
+import { prayerView, type PrayerView } from '@/lib/dashboard';
 import { locate } from '@/lib/prayer';
+import { useSkin, type HomeSkin } from '@/theme/homeSkin';
+import { T } from '@/theme/homeType';
 import { space } from '@/theme/tokens';
 
-const RADIUS = 22;
+const STOP = 24; // the width and height of a stop
+
+function Stop({ k, state }: { k: HomeSkin; state: 'past' | 'next' | 'later' }) {
+  if (state === 'next') {
+    return (
+      <View style={[styles.stop, { backgroundColor: k.sparkSoft }]}>
+        <View style={[styles.core, { backgroundColor: k.spark }]} />
+      </View>
+    );
+  }
+  return (
+    <View style={styles.stop}>
+      <View style={[styles.core, state === 'past' ? { backgroundColor: k.fill } : { borderWidth: 2, borderColor: k.dotOff }]} />
+    </View>
+  );
+}
+
+function DayLine({ k, view }: { k: HomeSkin; view: NonNullable<PrayerView> }) {
+  // after Isha the next prayer is tomorrow's Fajr: then the whole day is behind us
+  const dayDone = view.list[0].next && view.list.slice(1).every((p) => p.past);
+  const nextAt = dayDone ? view.list.length : view.list.findIndex((p) => p.next);
+  const last = view.list.length - 1;
+  return (
+    <View style={styles.line}>
+      {view.list.map((p, i) => {
+        const state = i < nextAt ? 'past' : i === nextAt ? 'next' : 'later';
+        const before = i <= nextAt; // the half-line leading into this stop is travelled
+        const after = i < nextAt; // and the one leaving it
+        return (
+          <View key={p.key} style={styles.col}>
+            <View style={styles.rail}>
+              <View style={[styles.seg, { backgroundColor: i === 0 ? 'transparent' : before ? k.fill : k.track }]} />
+              <Stop k={k} state={state} />
+              <View style={[styles.seg, { backgroundColor: i === last ? 'transparent' : after ? k.fill : k.track }]} />
+            </View>
+            <Txt {...T.small} weight={state === 'next' ? 800 : 500} color={state === 'next' ? k.ink : k.meta} center numberOfLines={1}>
+              {p.name}
+            </Txt>
+            <Txt {...T.small} weight={state === 'next' ? 800 : 500} color={state === 'past' ? k.meta : k.ink} center numberOfLines={1}>
+              {p.at}
+            </Txt>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
 
 export function PrayerCard() {
+  const k = useSkin();
   const [view, setView] = useState<PrayerView>(prayerView);
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -51,63 +102,55 @@ export function PrayerCard() {
     router.navigate({ pathname: '/settings', params: { cities: '1' } });
   };
 
-  const phase = view?.phase ?? skyByClock();
-  const sky = SKIES[phase]; // the card wears the sky of the moment (as in the earlier version)
+  const link = (label: string, to: '/qibla' | '/calendar') => (
+    <Pressable
+      onPress={() => router.push(to)}
+      accessibilityRole="button"
+      style={({ pressed }) => [styles.chip, { borderColor: k.hairline }, pressed && { backgroundColor: k.track }]}
+    >
+      <Txt {...T.smallBold} color={k.ink}>
+        {label}
+      </Txt>
+    </Pressable>
+  );
+
   return (
-    // the rounded clip is on the OUTER view and on the sky's own layer: the animated stars and clouds (moving layers)
-    // are not cut by the gradient view's own corners on every phone, which showed the card square
-    <View style={styles.card}>
-      <LinearGradient colors={sky.sky} style={StyleSheet.absoluteFill} />
-      <View style={styles.skyClip} pointerEvents="none">
-        <PrayerSky phase={phase} sun={view?.sun ?? 0.5} />
-      </View>
+    <View style={styles.wrap}>
       {view ? (
         <>
           <View style={styles.head}>
-            <View>
-              <Txt size={12} weight={700} color={sky.soft}>
+            <View style={styles.name}>
+              <Txt {...T.small} color={k.meta}>
                 {HOME.nextPrayer()}
               </Txt>
-              <Txt size={24} weight={800} lineHeight={32} color={sky.ink}>
+              <Txt {...T.display} color={k.ink} numberOfLines={1}>
                 {view.next}
               </Txt>
             </View>
-            <Txt size={15} weight={700} color={sky.ink}>
-              {DASH.left(view.h, view.m)}
-            </Txt>
-          </View>
-          <View style={styles.strip}>
-            {view.list.map((p) => (
-              <View key={p.key} style={[styles.time, { backgroundColor: p.next ? sky.next : sky.circle }]}>
-                <Txt size={11} weight={p.next ? 700 : 500} color={p.next ? sky.nextIcon : sky.soft} center>
-                  {p.name}
-                </Txt>
-                <Txt size={13} weight={p.next ? 700 : 500} color={p.next ? sky.nextIcon : sky.ink} center style={p.past && !p.next ? { opacity: 0.62 } : undefined}>
-                  {p.at}
-                </Txt>
-              </View>
-            ))}
-          </View>
-          <View style={styles.buttons}>
-            <Pressable onPress={() => router.push('/qibla')} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
-              <Txt size={14} weight={700} color={sky.ink}>
-                {HOME.qibla()}
+            <View style={styles.left}>
+              <View style={[styles.live, { backgroundColor: k.spark }]} />
+              <Txt {...T.figure} color={k.accent}>
+                {DASH.left(view.h, view.m)}
               </Txt>
-            </Pressable>
-            <Pressable onPress={() => router.push('/calendar')} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
-              <Txt size={14} weight={700} color={sky.ink}>
-                {DASH.calendar()}
-              </Txt>
-            </Pressable>
+            </View>
+          </View>
+          <DayLine k={k} view={view} />
+          <View style={styles.links}>
+            {link(HOME.qibla(), '/qibla')}
+            {link(DASH.calendar(), '/calendar')}
           </View>
         </>
       ) : (
         <>
-          <Txt size={15} color={sky.ink}>
+          <Txt {...T.title} color={k.ink}>
             {t('calPlaceAsk')}
           </Txt>
-          <Pressable onPress={() => setAsking(true)} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
-            <Txt size={15} weight={700} color={sky.ink}>
+          <Pressable
+            onPress={() => setAsking(true)}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.ask, { backgroundColor: k.fill }, pressed && { opacity: 0.88 }]}
+          >
+            <Txt {...T.button} color={k.paper}>
               {HOME.setPlace()}
             </Txt>
           </Pressable>
@@ -119,11 +162,18 @@ export function PrayerCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: space.md, gap: 10, overflow: 'hidden', boxShadow: '0px 8px 20px rgba(20, 50, 38, 0.16)' },
-  skyClip: { ...StyleSheet.absoluteFillObject, borderRadius: RADIUS, borderCurve: 'continuous', overflow: 'hidden' },
-  buttons: { flexDirection: 'row', gap: space.sm },
-  btn: { flex: 1, minHeight: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md },
-  head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
-  strip: { flexDirection: 'row', gap: space.xs },
-  time: { flex: 1, borderRadius: 10, paddingVertical: 6, gap: 1 },
+  wrap: { gap: space.md },
+  head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: space.md },
+  name: { flex: 1 },
+  left: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingBottom: space.sm },
+  live: { width: 8, height: 8, borderRadius: 4 },
+  line: { flexDirection: 'row' },
+  col: { flex: 1, alignItems: 'stretch', gap: 1 },
+  rail: { height: STOP, flexDirection: 'row', alignItems: 'center', marginBottom: space.xs },
+  seg: { flex: 1, height: 3 },
+  stop: { width: STOP, height: STOP, borderRadius: STOP / 2, alignItems: 'center', justifyContent: 'center' },
+  core: { width: 12, height: 12, borderRadius: 6 },
+  links: { flexDirection: 'row', gap: space.sm },
+  chip: { height: 36, paddingHorizontal: space.md, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  ask: { height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.lg },
 });

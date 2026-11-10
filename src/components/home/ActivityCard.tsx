@@ -1,84 +1,84 @@
-// HOME, card 4: activity, this week. On the same neutral surface as the other Home cards (Surface), under a small green title: on one side the number of days the reader was with the Quran, out of seven, in words; on the other seven green
-// capsules, one per day, Monday first, each as tall as the reading of that day (the ayat the wird counted; a day the reader only
-// opened the mushaf or Hifdh is a middle height), a day without activity a short pale stub, a day still to come a fainter one,
-// and today's letter in bold. A day counts when the reader opened the mushaf or Hifdh, or logged the wird (src/lib/activity.js).
-// The capsules grow in once, one after another.
+// HOME, activity this week. Open on the page, no card: the title and "5 of 7" on one line, then seven capsules, one per
+// day, Monday first, each as tall as the reading of that day (the ayat the wird counted; a day the reader only opened the
+// mushaf or Hifdh is a middle height), a day without activity a short stub, a day still to come a fainter one. Today is the
+// one with a marigold dot under its letter (and, if nothing was done yet, a marigold edge). A day counts when the reader
+// opened the mushaf or Hifdh, or logged the wird (src/lib/activity.js). The capsules draw in once with the rest of Home.
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
-import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 
-import { Grow } from '@/components/home/motion';
-import { Surface } from '@/components/home/Surface';
+import { Grow } from '@/components/home/Grow';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { LANG } from '@/i18n/i18n';
 import { activityGrid } from '@/lib/dashboard';
-import { useHome } from '@/theme/home';
+import { useSkin } from '@/theme/homeSkin';
+import { T } from '@/theme/homeType';
 import { space } from '@/theme/tokens';
-import { type } from '@/theme/type';
 
 const digits = (n: number) => n.toLocaleString('en');
-const BAR = 76; // the height of the tallest capsule
+const BAR = 72; // the height of the tallest capsule
+const STUB = 10;
 
 export function ActivityCard() {
-  const h = useHome();
+  const k = useSkin();
   const week = activityGrid().slice(21, 28); // the current week, Monday first
   const on = week.map((d) => !d.future && d.level > 0);
   const count = on.filter(Boolean).length;
   const todayIndex = week.reduce((a, d, i) => (d.future ? a : i), -1);
   const most = Math.max(1, ...week.map((d) => d.ayat));
   const letter = (day: string) => new Date(`${day}T12:00:00`).toLocaleDateString(LANG, { weekday: 'narrow' });
-  // how tall a day's capsule is: by the reading of the day, from a third to the full height; a stub when there is none
-  const height = (i: number) => (!on[i] ? 12 : week[i].ayat > 0 ? BAR * (0.34 + 0.66 * (week[i].ayat / most)) : BAR * 0.4);
+  // how tall a day's capsule is: by the reading of the day, from a third to the full height
+  const height = (i: number) => (week[i].ayat > 0 ? BAR * (0.34 + 0.66 * (week[i].ayat / most)) : BAR * 0.4);
 
-  const bars = (
-    <View key="bars" style={styles.bars} accessible accessibilityLabel={`${count}/7`}>
-      {week.map((d, i) => (
-        <View key={d.day} style={styles.col}>
-          <View style={styles.slot}>
-            {on[i] ? (
-              <Grow axis="y" delay={i * 60} style={[styles.bar, { height: height(i), overflow: 'hidden' }]}>
-                <LinearGradient colors={[h.deepTop, h.deepBottom]} style={StyleSheet.absoluteFill} />
-              </Grow>
-            ) : (
-              <View style={[styles.bar, { height: height(i), backgroundColor: h.trackSoft, opacity: d.future ? 0.5 : 1 }, i === todayIndex && { borderWidth: 1.5, borderColor: h.deepTop, backgroundColor: 'transparent' }]} />
-            )}
-          </View>
-          <Txt {...(i === todayIndex ? type.caption3 : type.caption4)} color={i === todayIndex ? h.ink : h.meta} center>
-            {letter(d.day)}
-          </Txt>
-        </View>
-      ))}
-    </View>
-  );
-  const words = (
-    <View key="words" style={styles.words}>
-      <Txt {...type.heading4} color={h.ink} center>
-        {DASH.activityOf7(digits(count))}
-      </Txt>
-      <Txt {...type.caption4} color={h.meta} center>
+  return (
+    <View style={styles.wrap}>
+      <View style={styles.head}>
+        <Txt {...T.title} color={k.ink}>
+          {DASH.activity()}
+        </Txt>
+        <Txt {...T.figure} color={k.accent}>
+          {DASH.activityOf7(digits(count))}
+        </Txt>
+      </View>
+      <View style={styles.bars} accessible accessibilityLabel={`${count}/7`}>
+        {week.map((d, i) => {
+          const today = i === todayIndex;
+          return (
+            <View key={d.day} style={styles.col}>
+              <View style={styles.slot}>
+                {on[i] ? (
+                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: k.fill }]} />
+                ) : (
+                  <View
+                    style={[
+                      styles.bar,
+                      { height: STUB, backgroundColor: k.track, opacity: d.future ? 0.5 : 1 },
+                      today && { backgroundColor: 'transparent', borderWidth: 2, borderColor: k.spark },
+                    ]}
+                  />
+                )}
+              </View>
+              <Txt {...T.small} weight={today ? 800 : 500} color={today ? k.ink : k.meta} center>
+                {letter(d.day)}
+              </Txt>
+              <View style={[styles.dot, { backgroundColor: today ? k.spark : 'transparent' }]} />
+            </View>
+          );
+        })}
+      </View>
+      <Txt {...T.small} color={k.meta}>
         {DASH.activityCaption()}
       </Txt>
     </View>
   );
-  const divider = <View key="divider" style={[styles.divider, { backgroundColor: h.trackSoft }]} />;
-  return (
-    <Surface>
-      <Txt {...type.title4} color={h.deepTop}>
-        {DASH.activity()}
-      </Txt>
-      {/* the capsules are always at the right edge of the screen: first in Arabic (the line begins at the right), last otherwise */}
-      <View style={styles.row}>{LANG === 'ar' ? [bars, divider, words] : [words, divider, bars]}</View>
-    </Surface>
-  );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  bars: { flex: 1.5, flexDirection: 'row', gap: 4 },
-  col: { flex: 1, alignItems: 'center', gap: space.sm },
+  wrap: { gap: space.cozy },
+  head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  bars: { flexDirection: 'row', gap: space.xs },
+  col: { flex: 1, alignItems: 'center', gap: space.xs },
   slot: { height: BAR, justifyContent: 'flex-end', alignItems: 'center' },
-  bar: { width: 16, borderRadius: 8 },
-  divider: { width: StyleSheet.hairlineWidth * 2, alignSelf: 'stretch' },
-  words: { flex: 1, gap: space.xs, alignItems: 'center' },
+  bar: { width: 20, borderRadius: 10 },
+  dot: { width: 5, height: 5, borderRadius: 3 },
 });
