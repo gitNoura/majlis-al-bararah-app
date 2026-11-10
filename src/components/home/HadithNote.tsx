@@ -1,8 +1,9 @@
-// HOME, the closing note: the hadith of the reader («read and rise») and who told it. Plain words on the page under a
-// hairline, no box and no decoration. In Arabic the hadith is set in Amiri (the app's face for the Prophet's words); in
-// English and French in the interface face.
+// HOME, the closing note: the hadith of the reader («read and rise») and who told it. Plain words on the page, no box. In
+// Arabic the hadith is set in Amiri (the app's face for the Prophet's words); in English and French in the interface face.
+// It opens with a small rosette, the mark that closes an ayah in the mushaf, and that is the only decoration in the note.
 import { StyleSheet, View } from 'react-native';
 
+import { Rosette } from '@/components/home/Rosette';
 import { Txt } from '@/components/Txt';
 import { HOME } from '@/i18n/home';
 import { LANG } from '@/i18n/i18n';
@@ -13,7 +14,8 @@ import { space } from '@/theme/tokens';
 export function HadithNote() {
   const k = useSkin();
   return (
-    <View style={[styles.wrap, { borderTopColor: k.hairline }]}>
+    <View style={styles.wrap}>
+      <Rosette size={20} color={k.accent} />
       <Txt {...T.small} color={k.meta}>
         {HOME.hadithIntro()}
       </Txt>
@@ -34,5 +36,5 @@ export function HadithNote() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space.xs, borderTopWidth: StyleSheet.hairlineWidth, paddingTop: space.md },
+  wrap: { gap: space.xs, paddingTop: space.sm },
 });
