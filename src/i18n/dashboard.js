@@ -19,6 +19,8 @@ export const DASH = {
   // memorization
   planOverall: () => L('من الخطة', 'of the plan', 'du plan'),
   planDays: (done, total) => L(`${done} من ${total} يوماً`, `${done} of ${total} days`, `${done} jours sur ${total}`),
+  createPlan: () => L('أنشئ خطة', 'Create a plan', 'Créer un plan'),
+  planBegin: () => L('ابدأ اليوم', 'Start today', 'Commencez aujourd’hui'),
   planIdle: () => L('متوقفة أو لم تبدأ بعد', 'Paused or not started yet', 'En pause ou pas encore commencé'),
   memorizedOf: () => L('من 30 جزءاً محفوظاً', 'of 30 juz memorized', 'sur 30 juz mémorisés'),
   newLabel: () => L('جديد', 'New', 'Nouveau'),
@@ -32,9 +34,8 @@ export const DASH = {
   addPlan: () => L('أنشئ خطة', 'Create one', 'Créer un plan'),
   // activity
   activity: () => L('النشاط', 'Activity', 'Activité'),
-  activeDaysWeek: () => L('أيام نشطة هذا الأسبوع', 'active days this week', 'jours actifs cette semaine'),
-  last4: () => L('آخر 4 أسابيع', 'Last 4 weeks', '4 dernières semaines'),
-  lastWeek: () => L('الأسبوع الماضي', 'Last week', 'Semaine dernière'),
+  activityOf7: (n) => L(`${n} من 7`, `${n} of 7`, `${n} sur 7`),
+  activityCaption: () => L('أيام تفاعلت فيها مع القرآن', 'days you engaged with the Quran', 'jours passés avec le Coran'),
   // additional resources
   resources: () => L('مصادر إضافية', 'Additional resources', 'Ressources complémentaires'),
   libAdhkar: () => L('مكتبة الأذكار', 'Adhkar library', 'Bibliothèque d’adhkar'),

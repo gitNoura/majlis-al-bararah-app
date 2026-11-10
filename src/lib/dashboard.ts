@@ -162,13 +162,15 @@ export function hifdhOverview() {
 
 // The last four weeks as 28 cells, a week to a row (it begins on Monday, as the Hifdh weeks do), the current week last.
 // level: how many kinds of activity the day had (0 to 3: the mushaf, adhkar, ahadith...); future: a day still to come.
-export function activityGrid(): { day: string; level: number; future: boolean }[] {
+// Each day also carries `ayat`, how many ayat the wird counted that day (the amount of reading, for the height of a bar).
+export function activityGrid(): { day: string; level: number; future: boolean; ayat: number }[] {
   const days = activeDays() as Map<string, Set<string>>;
+  const read = loadWird().days ?? {};
   const now = new Date();
   const today = dayKey(now);
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7) - 21);
   return Array.from({ length: 28 }, (_, i) => {
     const key = dayKey(new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
-    return { day: key, level: Math.min(3, days.get(key)?.size ?? 0), future: key > today };
+    return { day: key, level: Math.min(3, days.get(key)?.size ?? 0), future: key > today, ayat: read[key]?.ayat ?? 0 };
   });
 }

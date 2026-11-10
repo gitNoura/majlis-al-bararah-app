@@ -1,64 +1,84 @@
-// HOME, card 4: activity. Three plain numbers instead of a chart: the days this week the reader was active (out of 7, with
-// seven slim segments under it, Monday first, today's the last one lit so far), the same count for last week, and for the
-// last four weeks (out of 28). A day counts when the reader opened the mushaf or Hifdh, or logged the wird (src/lib/activity.js).
+// HOME, card 4: activity, this week. On the same neutral surface as the other Home cards (Surface), under a small green title: on one side the number of days the reader was with the Quran, out of seven, in words; on the other seven green
+// capsules, one per day, Monday first, each as tall as the reading of that day (the ayat the wird counted; a day the reader only
+// opened the mushaf or Hifdh is a middle height), a day without activity a short pale stub, a day still to come a fainter one,
+// and today's letter in bold. A day counts when the reader opened the mushaf or Hifdh, or logged the wird (src/lib/activity.js).
+// The capsules grow in once, one after another.
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
+import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 
+import { Grow } from '@/components/home/motion';
+import { Surface } from '@/components/home/Surface';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
-import { L } from '@/i18n/i18n';
+import { LANG } from '@/i18n/i18n';
 import { activityGrid } from '@/lib/dashboard';
 import { useHome } from '@/theme/home';
+import { space } from '@/theme/tokens';
+import { type } from '@/theme/type';
 
-const digits = (n: number) => n.toLocaleString(L('ar', 'en', 'fr'));
-const active = (cells: { level: number; future: boolean }[]) => cells.filter((d) => !d.future && d.level > 0).length;
+const digits = (n: number) => n.toLocaleString('en');
+const BAR = 76; // the height of the tallest capsule
 
 export function ActivityCard() {
   const h = useHome();
-  const grid = activityGrid();
-  const thisWeek = grid.slice(21, 28);
-  const lastWeek = grid.slice(14, 21);
-  const now = active(thisWeek);
-  const stat = (value: string, label: string) => (
-    <View style={{ flex: 1, gap: 2 }}>
-      <Txt size={17} weight={800} color={h.ink}>
-        {value}
+  const week = activityGrid().slice(21, 28); // the current week, Monday first
+  const on = week.map((d) => !d.future && d.level > 0);
+  const count = on.filter(Boolean).length;
+  const todayIndex = week.reduce((a, d, i) => (d.future ? a : i), -1);
+  const most = Math.max(1, ...week.map((d) => d.ayat));
+  const letter = (day: string) => new Date(`${day}T12:00:00`).toLocaleDateString(LANG, { weekday: 'narrow' });
+  // how tall a day's capsule is: by the reading of the day, from a third to the full height; a stub when there is none
+  const height = (i: number) => (!on[i] ? 12 : week[i].ayat > 0 ? BAR * (0.34 + 0.66 * (week[i].ayat / most)) : BAR * 0.4);
+
+  const bars = (
+    <View key="bars" style={styles.bars} accessible accessibilityLabel={`${count}/7`}>
+      {week.map((d, i) => (
+        <View key={d.day} style={styles.col}>
+          <View style={styles.slot}>
+            {on[i] ? (
+              <Grow axis="y" delay={i * 60} style={[styles.bar, { height: height(i), overflow: 'hidden' }]}>
+                <LinearGradient colors={[h.deepTop, h.deepBottom]} style={StyleSheet.absoluteFill} />
+              </Grow>
+            ) : (
+              <View style={[styles.bar, { height: height(i), backgroundColor: h.trackSoft, opacity: d.future ? 0.5 : 1 }, i === todayIndex && { borderWidth: 1.5, borderColor: h.deepTop, backgroundColor: 'transparent' }]} />
+            )}
+          </View>
+          <Txt {...(i === todayIndex ? type.caption3 : type.caption4)} color={i === todayIndex ? h.ink : h.meta} center>
+            {letter(d.day)}
+          </Txt>
+        </View>
+      ))}
+    </View>
+  );
+  const words = (
+    <View key="words" style={styles.words}>
+      <Txt {...type.heading4} color={h.ink} center>
+        {DASH.activityOf7(digits(count))}
       </Txt>
-      <Txt size={12} color={h.meta} numberOfLines={2}>
-        {label}
+      <Txt {...type.caption4} color={h.meta} center>
+        {DASH.activityCaption()}
       </Txt>
     </View>
   );
+  const divider = <View key="divider" style={[styles.divider, { backgroundColor: h.trackSoft }]} />;
   return (
-    <View style={[styles.card, { backgroundColor: h.card, borderColor: h.cardLine, boxShadow: `0px 8px 20px ${h.shadow}` }]}>
-      <Txt size={15} weight={700} color={h.ink}>
+    <Surface>
+      <Txt {...type.title4} color={h.deepTop}>
         {DASH.activity()}
       </Txt>
-      <View style={styles.big}>
-        <Txt size={38} weight={800} lineHeight={44} color={h.ink}>
-          {digits(now)}
-        </Txt>
-        <Txt size={15} weight={500} color={h.meta}>
-          {`/ ${digits(7)}  ${DASH.activeDaysWeek()}`}
-        </Txt>
-      </View>
-      <View style={styles.segments} accessible accessibilityLabel={`${now}/7`}>
-        {thisWeek.map((d) => (
-          <View key={d.day} style={[styles.segment, { backgroundColor: !d.future && d.level > 0 ? h.leaf : h.well }]} />
-        ))}
-      </View>
-      <View style={[styles.foot, { borderTopColor: h.cardLine }]}>
-        {stat(`${digits(active(lastWeek))} / ${digits(7)}`, DASH.lastWeek())}
-        {stat(`${digits(active(grid))} / ${digits(28)}`, DASH.last4())}
-      </View>
-    </View>
+      {/* the capsules are always at the right edge of the screen: first in Arabic (the line begins at the right), last otherwise */}
+      <View style={styles.row}>{LANG === 'ar' ? [bars, divider, words] : [words, divider, bars]}</View>
+    </Surface>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 10, overflow: 'hidden' },
-  big: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
-  segments: { flexDirection: 'row', gap: 5 },
-  segment: { flex: 1, height: 6, borderRadius: 3 },
-  foot: { flexDirection: 'row', gap: 12, paddingTop: 12, marginTop: 2, borderTopWidth: StyleSheet.hairlineWidth },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  bars: { flex: 1.5, flexDirection: 'row', gap: 4 },
+  col: { flex: 1, alignItems: 'center', gap: space.sm },
+  slot: { height: BAR, justifyContent: 'flex-end', alignItems: 'center' },
+  bar: { width: 16, borderRadius: 8 },
+  divider: { width: StyleSheet.hairlineWidth * 2, alignSelf: 'stretch' },
+  words: { flex: 1, gap: space.xs, alignItems: 'center' },
 });

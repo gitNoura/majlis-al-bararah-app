@@ -1,21 +1,25 @@
-// HOME, card 2: reading, the hero. A deep forest card framed like a mushaf page, the surah in Amiri (the Quran's own face), the surah and page where the reader stopped,
-// the khatma as one cream ring, and the one filled button of the screen (a cream pill that opens the Quran tab at the
-// marker).
+// HOME, card 2: reading, the hero. On the neutral surface of the Home cards (Surface): the surah and page where the reader stopped,
+// the khatma as one green ring, the one filled button of the screen (a green pill that opens the Quran tab at the marker), and,
+// under a hairline, the hadith of the reader. The surah is the largest line of the screen under the greeting (Heading 5), and the button
+// is a full 44 high with the prayer card's own forest green, so the one filled button of the screen reads as the hero.
 'use no memo'; // reads saved state (the marker) when it draws, which the React Compiler cannot see change
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { placeOf } from '@/components/quran/QuranHeader';
+import { Surface } from '@/components/home/Surface';
 import { Txt } from '@/components/Txt';
 import { Ring } from '@/components/ui';
 import { DASH } from '@/i18n/dashboard';
 import { HOME } from '@/i18n/home';
-import { L, LANG } from '@/i18n/i18n';
+import { LANG } from '@/i18n/i18n';
 import { readingView } from '@/lib/dashboard';
 import { useHome } from '@/theme/home';
+import { space } from '@/theme/tokens';
+import { type } from '@/theme/type';
 
-const digits = (n: number) => n.toLocaleString(L('ar', 'en', 'fr'));
+const digits = (n: number) => n.toLocaleString('en');
 
 // an arrow that points to the end of the line (left in Arabic)
 function Arrow({ color }: { color: string }) {
@@ -32,8 +36,8 @@ export function ReadingCard() {
   const where = placeOf(r.page);
 
   const ring = (
-    <Ring key="ring" value={r.percent / 100} size={54} color={h.ring} track="rgba(244,246,236,0.14)" a11y={`${r.percent}%`}>
-      <Txt size={13} weight={800} color={h.forestInk}>
+    <Ring key="ring" value={r.percent / 100} size={54} color={h.deepTop} track={h.trackSoft} a11y={`${r.percent}%`}>
+      <Txt {...type.caption3} color={h.ink}>
         {`${digits(r.percent)}%`}
       </Txt>
     </Ring>
@@ -42,40 +46,38 @@ export function ReadingCard() {
     <Pressable
       onPress={() => router.navigate({ pathname: '/quran', params: r.started ? { resume: String(r.page), n: String(Date.now()) } : undefined })}
       accessibilityRole="button"
-      style={({ pressed }) => [styles.btn, { backgroundColor: h.lime }, pressed && { opacity: 0.88 }]}
+      style={({ pressed }) => [styles.btn, { backgroundColor: h.forest }, pressed && { opacity: 0.88 }]}
     >
-      <Txt size={13} weight={800} color={h.limeInk}>
+      <Txt {...type.buttonMd} color={h.forestInk}>
         {r.started ? DASH.continueReading() : DASH.startReading()}
       </Txt>
-      <View style={[styles.go, { backgroundColor: h.limeInk }]}>
-        <Arrow color={h.lime} />
+      <View style={[styles.go, { backgroundColor: h.forestInk }]}>
+        <Arrow color={h.forest} />
       </View>
     </Pressable>
   );
   const words = (
-    <View style={{ flex: 1, gap: 2 }}>
+    <View style={{ flex: 1, gap: space.xs }}>
       {r.started ? (
         <>
-          <Txt size={18} weight={800} lineHeight={26} color={h.forestInk} numberOfLines={2}>
+          <Txt {...type.heading5} color={h.ink} numberOfLines={2}>
             {HOME.surah(where.surahs)}
           </Txt>
-          <Txt size={13} color={h.forestSoft} numberOfLines={1}>
+          <Txt {...type.body6} color={h.meta} numberOfLines={1}>
             {`${HOME.wirdPage(digits(r.page))} · ${where.extra}`}
           </Txt>
         </>
       ) : (
-        <Txt size={20} weight={800} lineHeight={28} color={h.forestInk}>
+        <Txt {...type.heading6} color={h.ink}>
           {DASH.beginKhatma()}
         </Txt>
       )}
     </View>
   );
   return (
-    <View style={[styles.card, { backgroundColor: h.forest, boxShadow: `0px 14px 28px ${h.shadow}` }]}>
-      {/* a thin inset frame, like a mushaf page */}
-      <View pointerEvents="none" style={[styles.frame, { borderColor: h.goldLine }]} />
+    <Surface>
       {/* «Reading»: its own line, apart from the row below */}
-      <Txt size={12} weight={700} color={h.gold}>
+      <Txt {...type.caption3} color={h.deepTop}>
         {DASH.reading()}
       </Txt>
       <View style={styles.top}>
@@ -83,27 +85,25 @@ export function ReadingCard() {
         {LANG === 'ar' ? <>{ring}{words}</> : <>{words}{ring}</>}
       </View>
       {button}
-      {/* the hadith of the reader («read and rise») and who told it, on a faint yellow panel */}
-      <View style={[styles.hadith, { backgroundColor: h.goldSoft, borderColor: h.goldLine }]}>
-        <Txt size={13} weight={500} lineHeight={20} color={h.forestInk}>
-          <Txt size={13} weight={500} lineHeight={20} color={h.gold}>
+      {/* the hadith of the reader («read and rise») and who told it, under a hairline */}
+      <View style={[styles.hadith, { borderTopColor: h.trackSoft }]}>
+        <Txt {...type.hadith} color={h.ink}>
+          <Txt {...type.hadith} color={h.deepTop}>
             {`${HOME.hadithIntro()} `}
           </Txt>
           {HOME.hadith()}
         </Txt>
-        <Txt size={12} lineHeight={17} color={h.gold}>
+        <Txt {...type.caption4} color={h.meta}>
           {HOME.heroSource()}
         </Txt>
       </View>
-    </View>
+    </Surface>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, paddingHorizontal: 16, paddingVertical: 14, gap: 10, overflow: 'hidden' },
-  frame: { position: 'absolute', top: 6, bottom: 6, start: 6, end: 6, borderRadius: 19, borderWidth: 1 },
-  top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  btn: { height: 34, borderRadius: 17, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: 16, paddingEnd: 4 },
-  hadith: { borderRadius: 14, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8, gap: 2 },
-  go: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+  top: { flexDirection: 'row', alignItems: 'center', gap: space.cozy },
+  btn: { height: 44, borderRadius: 22, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: space.md, paddingEnd: space.xs },
+  hadith: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: space.cozy, gap: space.xs },
+  go: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
 });

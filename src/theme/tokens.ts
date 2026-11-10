@@ -12,7 +12,7 @@
 // Type: two roles only (src/theme/fonts.ts): `ui` (Tajawal) and `quran` (Amiri: the Quran's and the hadith's
 // Arabic, and nothing decorative).
 //
-// Spacing: 4 / 8 / 16 / 24.
+// Spacing: 2 / 4 / 8 / 12 / 16 / 24 / 32, nothing in between.
 
 export const light = {
   screen: '#f6f8f5',
@@ -87,6 +87,6 @@ export const dark: Palette = {
   accentSoft: 'rgba(111, 181, 151, 0.16)',
 };
 
-export const space = { xs: 4, sm: 8, md: 16, lg: 24 } as const;
+export const space = { hair: 2, xs: 4, sm: 8, cozy: 12, md: 16, lg: 24, xl: 32 } as const;
 
 export const radius = { card: 20, button: 22, chip: 16, sheet: 24 };

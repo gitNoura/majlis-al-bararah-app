@@ -13,6 +13,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActivityCard } from '@/components/home/ActivityCard';
+import { Reveal } from '@/components/home/motion';
 import { MemorizationCard } from '@/components/home/MemorizationCard';
 import { PrayerCard } from '@/components/home/PrayerCard';
 import { ReadingCard } from '@/components/home/ReadingCard';
@@ -24,6 +25,7 @@ import { stayInQuran } from '@/lib/riwaya';
 import { writeJSON } from '@/lib/storage';
 import { useHome } from '@/theme/home';
 import { space } from '@/theme/tokens';
+import { type } from '@/theme/type';
 
 export default function HomeTab() {
   const h = useHome();
@@ -47,13 +49,13 @@ export default function HomeTab() {
 
   return (
     <View style={{ flex: 1, backgroundColor: h.screen }}>
-      <ScrollView contentContainerStyle={{ padding: space.md, paddingTop: insets.top + space.md, paddingBottom: space.lg, gap: 10 }}>
+      <ScrollView contentContainerStyle={{ padding: space.md, paddingTop: insets.top + space.md, paddingBottom: space.lg, gap: space.cozy }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ gap: 2, flex: 1 }}>
-            <Txt size={28} weight={800} lineHeight={36} color={h.ink}>
+          <View style={{ gap: space.hair, flex: 1 }}>
+            <Txt {...type.heading4} color={h.ink}>
               {HOME.salam()}
             </Txt>
-            <Txt size={14} color={h.meta}>
+            <Txt {...type.body6} color={h.meta}>
               {dateLine()}
             </Txt>
           </View>
@@ -61,10 +63,19 @@ export default function HomeTab() {
             <Avatar size={44} />
           </Pressable>
         </View>
-        <PrayerCard />
-        <ReadingCard />
-        <MemorizationCard />
-        <ActivityCard />
+        {/* each card rises into place once, one after another */}
+        <Reveal index={0}>
+          <PrayerCard />
+        </Reveal>
+        <Reveal index={1}>
+          <ReadingCard />
+        </Reveal>
+        <Reveal index={2}>
+          <MemorizationCard />
+        </Reveal>
+        <Reveal index={3}>
+          <ActivityCard />
+        </Reveal>
       </ScrollView>
     </View>
   );
