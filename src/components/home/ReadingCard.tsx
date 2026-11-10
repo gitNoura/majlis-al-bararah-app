@@ -1,19 +1,18 @@
-// HOME, reading: a mushaf page. The block is a deep navy card with off-white ink, in a thin frame, set like the top
-// of a page of the mushaf: a rule with the rosette of the ayah in its middle (the page number in the medallion), then the
-// surah's name in Arabic in Amiri, the face of the Quran, and under it the surah and the hizb and juz in the reader's
-// language. Then the khatma as thirty small marks, one per juz, that fill from the bottom as the reading passes through them
-// (the juz being read is light blue), with how many juz are read and the percentage of the Quran, and one off-white button that
-// opens the Quran at the marker. The marks draw themselves in once (Grow). The hadith is its own quiet note at the end.
+// HOME, reading: a small mushaf page. An off-white block in a thin green frame: the surah's name in Arabic in Amiri, the face
+// of the Quran, and under it the page, the hizb and juz (and, outside Arabic, the surah) in the reader's language. Then the
+// khatma as thirty small marks, one per juz, that fill from the bottom as the reading passes through them (the juz being
+// read is a fresher green), with how many juz are read and the percentage of the Quran, and one white button that opens the
+// Quran at the marker. The marks draw themselves in once (Grow). The hadith is its own quiet note at the end.
 'use no memo'; // reads saved state (the marker) when it draws, which the React Compiler cannot see change
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Grow } from '@/components/home/Grow';
-import { Rosette } from '@/components/home/Rosette';
 import { placeOf } from '@/components/quran/QuranHeader';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
+import { HOME } from '@/i18n/home';
 import { LANG } from '@/i18n/i18n';
 import { surahsOn } from '@/lib/boxes';
 import { readingView } from '@/lib/dashboard';
@@ -23,7 +22,7 @@ import { T } from '@/theme/homeType';
 import { space } from '@/theme/tokens';
 
 const digits = (n: number) => n.toLocaleString('en');
-const BEAD = 16; // the height of a juz mark
+const BEAD = 12; // the height of a juz mark
 
 // the surah(s) on the page, in Arabic, whatever the app's language is
 function arabicName(page: number): string {
@@ -38,7 +37,8 @@ export function ReadingCard() {
   const where = placeOf(r.page);
   const here = r.started ? r.cells.findIndex((n) => n < 1) : -1; // the juz being read
   const juzDone = Math.floor(r.cells.reduce((a, n) => a + n, 0));
-  const sub = !r.started ? DASH.beginKhatma() : LANG === 'ar' ? where.extra : `${where.surahs} • ${where.extra}`;
+  // the surah (outside Arabic, where the big name is not in the reader's language), the page, then the hizb and juz
+  const sub = !r.started ? DASH.beginKhatma() : [LANG === 'ar' ? null : where.surahs, HOME.wirdPage(digits(r.page)), where.extra].filter(Boolean).join(' · ');
 
   const open = () => {
     Haptics.selectionAsync().catch(() => {});
@@ -48,18 +48,8 @@ export function ReadingCard() {
   return (
     <View style={[styles.page, { backgroundColor: k.page }]}>
       <View style={[styles.frame, { borderColor: k.pageLine }]}>
-        {/* the head of the page: a rule, the rosette with the page number, a rule */}
-        <View style={styles.crest}>
-          <View style={[styles.rule, { backgroundColor: k.pageLine }]} />
-          <Rosette size={34} color={k.pageInk} fill={k.page}>
-            <Txt size={11} weight={700} lineHeight={14} color={k.pageInk}>
-              {digits(r.page)}
-            </Txt>
-          </Rosette>
-          <View style={[styles.rule, { backgroundColor: k.pageLine }]} />
-        </View>
         <View style={styles.title}>
-          <Txt serif weight={700} size={26} lineHeight={40} color={k.pageInk} center numberOfLines={1}>
+          <Txt serif weight={700} size={24} lineHeight={34} color={k.pageInk} center numberOfLines={1}>
             {arabicName(r.page)}
           </Txt>
           <Txt {...T.small} color={k.pageSoft} center numberOfLines={1}>
@@ -83,8 +73,8 @@ export function ReadingCard() {
           </Txt>
         </View>
 
-        <Pressable onPress={open} accessibilityRole="button" style={({ pressed }) => [styles.btn, { backgroundColor: k.pageInk }, pressed && { opacity: 0.88 }]}>
-          <Txt {...T.button} color={k.page}>
+        <Pressable onPress={open} accessibilityRole="button" style={({ pressed }) => [styles.btn, { backgroundColor: k.pageButton, borderColor: k.pageLine }, pressed && { opacity: 0.88 }]}>
+          <Txt {...T.button} color={k.pageInk}>
             {r.started ? DASH.continueReading() : DASH.startReading()}
           </Txt>
         </Pressable>
@@ -94,13 +84,11 @@ export function ReadingCard() {
 }
 
 const styles = StyleSheet.create({
-  page: { borderRadius: 22, borderCurve: 'continuous', padding: space.sm },
-  frame: { borderWidth: 1, borderRadius: 16, borderCurve: 'continuous', padding: space.md, gap: space.cozy },
-  crest: { flexDirection: 'row', alignItems: 'center', gap: space.cozy },
-  rule: { flex: 1, height: 1 },
+  page: { borderRadius: 20, borderCurve: 'continuous', padding: space.xs },
+  frame: { borderWidth: 1, borderRadius: 16, borderCurve: 'continuous', padding: space.cozy, gap: space.sm },
   title: { alignItems: 'center', gap: space.hair },
   beads: { flexDirection: 'row', gap: 2, height: BEAD },
   bead: { flex: 1, borderRadius: 2, overflow: 'hidden', justifyContent: 'flex-end' },
   counts: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  btn: { height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  btn: { height: 40, borderRadius: 20, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
 });

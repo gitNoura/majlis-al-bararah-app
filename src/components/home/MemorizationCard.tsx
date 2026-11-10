@@ -1,4 +1,4 @@
-// HOME, memorization and revision: one pale panel (a soft tint of the Reading block's navy) with the two plans side by side, split by a single hairline (not two
+// HOME, memorization and revision: one white panel with the two plans side by side, split by a single hairline (not two
 // cards, and no panel inside a panel). Each shows how far its plan is through its WHOLE run (not today's portions): a large
 // percentage, a thin bar that draws in once, and the days done out of all its days; the memorization side also says how
 // many juz are memorized. With no plan of that kind yet it is a plain invitation to create one; a plan not begun says

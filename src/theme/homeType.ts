@@ -5,7 +5,6 @@
 export const T = {
   greeting: { size: 22, weight: 700, lineHeight: 28 },
   date: { size: 12, weight: 500, lineHeight: 17 },
-  display: { size: 24, weight: 700, lineHeight: 30 }, // the next prayer
   big: { size: 26, weight: 700, lineHeight: 32 }, // a plan's percentage
   figure: { size: 15, weight: 700, lineHeight: 20 }, // the time left, "3 of 7", the reading's percentage
   title: { size: 15, weight: 700, lineHeight: 20 },

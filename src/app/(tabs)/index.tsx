@@ -1,12 +1,12 @@
 // HOME tab: the dashboard, an overview of where the reader is, not a launcher and not a to-do list. Top to bottom:
 //   greeting and the date
-//   1 the next prayer (on the sky of the moment, the day as one line)   2 reading (a mushaf page: the khatma as thirty juz marks)
+//   1 the next prayer (on the sky of the moment, with the day's five times, the qibla and the calendar)   2 reading (a small mushaf page: the khatma as thirty juz marks)
 //   3 memorization and revision (how far each plan is through its whole run; the tasks are in Hifdh)
 //   4 activity (this week)                       5 the hadith of the reader, as a quiet closing note
 //   (the adhkar and ahadith libraries are the Library tab)
 // The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a quiet neutral page at the app's everyday sizes (12 to 26),
-// one deep ink navy, and a single bright blue that only ever marks "where you are now". The prayer card wears the sky and the
-// Reading block is a mushaf page in navy; Memorization is one pale panel, a soft tint of it; Activity and the hadith sit on
+// one deep forest, and a single fresher green that only ever marks "where you are now". The prayer card wears the sky and the
+// Reading block is a small off-white mushaf page; Memorization is one white panel; Activity and the hadith sit on
 // the page itself. The one moment of motion is the marks drawing themselves in
 // (Grow). Each section reads the saved state when it draws, so Home redraws every time it comes into view. It also keeps
 // one behaviour of the old home screen: after a change of narration the app opens again, and must land on the Quran tab
