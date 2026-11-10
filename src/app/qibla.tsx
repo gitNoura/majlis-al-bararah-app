@@ -55,7 +55,7 @@ const shortWay = (from: number, to: number) => ((((to - from) % 360) + 540) % 36
 // the dial's and the needle's colours (the website's --ix-ink, --quran-gold), by day and by night
 const QC = {
   light: { ink: '#173f32', gold: '#c5a15a', face: 'rgba(255, 255, 255, 0.62)', headShade: '#b5862b', mark: '#b5862b', shadow: '0px 10px 24px rgba(68, 55, 43, 0.1)' },
-  dark: { ink: '#ffffff', gold: '#c5a15a', face: 'rgba(44, 47, 45, 0.85)', headShade: '#c39436', mark: '#f3d78e', shadow: '0px 12px 30px rgba(0, 0, 0, 0.4)' },
+  dark: { ink: '#ffffff', gold: '#c5a15a', face: 'rgba(44, 44, 44, 0.85)', headShade: '#c39436', mark: '#f3d78e', shadow: '0px 12px 30px rgba(0, 0, 0, 0.4)' },
 };
 type QColours = (typeof QC)['light'];
 

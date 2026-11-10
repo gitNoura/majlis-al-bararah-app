@@ -42,7 +42,7 @@ export function Row({ title, sub, icon, end, chevron, onPress, last, quiet }: Pr
   const line = !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.divider };
   const inside = (
     <>
-      {!!icon && <View style={[styles.icon, { backgroundColor: c.accentSoft }]}>{icon}</View>}
+      {!!icon && <View style={[styles.icon, { backgroundColor: c.ctlSoft }]}>{icon}</View>}
       <View style={styles.text}>
         <Txt size={16} weight={600} color={quiet ? c.meta : c.ink} style={start()}>
           {title}

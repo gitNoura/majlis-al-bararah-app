@@ -59,7 +59,7 @@ export function AyahMenu({ at, onClose, onTafsir, onNote }: { at: MenuAt | null;
           {
             left,
             top,
-            backgroundColor: isDark ? 'rgba(44, 47, 45, 0.97)' : 'rgba(252, 250, 245, 0.98)',
+            backgroundColor: isDark ? 'rgba(44, 44, 44, 0.97)' : 'rgba(252, 250, 245, 0.98)',
             borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
             boxShadow: isDark
               ? '0px 0px 0px 1px rgba(0, 0, 0, 0.3), 0px 18px 44px rgba(0, 0, 0, 0.45)'
@@ -89,7 +89,7 @@ export function AyahMenu({ at, onClose, onTafsir, onNote }: { at: MenuAt | null;
                   accessibilityLabel={t('highlight')}
                   style={[
                     styles.dot,
-                    { backgroundColor: col.dot, borderColor: isDark ? '#2c2f2d' : '#ffffff' },
+                    { backgroundColor: col.dot, borderColor: isDark ? '#2c2c2c' : '#ffffff' },
                     { boxShadow: on ? `0px 0px 0px 2px ${c.goldStrong}` : `0px 0px 0px 1px ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}` },
                     on && { transform: [{ scale: 1.08 }] },
                   ]}

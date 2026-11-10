@@ -140,7 +140,7 @@ export function useToTop(toTop: () => void) {
         styles.top,
         {
           bottom: insets.bottom + 16,
-          backgroundColor: isDark ? 'rgba(40, 43, 41, 0.45)' : 'rgba(255, 255, 255, 0.5)',
+          backgroundColor: isDark ? 'rgba(40, 40, 40, 0.45)' : 'rgba(255, 255, 255, 0.5)',
           borderColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(0, 0, 0, 0.08)',
         },
         pressed && { opacity: 0.6 },

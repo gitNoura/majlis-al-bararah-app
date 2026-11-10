@@ -98,8 +98,8 @@ function QuranSettings() {
         </Group>
 
         <Group title={READER.riwaya()} note={READER.riwayaSub()}>
-          <Row title={READER.warsh()} end={!HAFS && <CheckIcon color={c.accent} />} onPress={HAFS ? () => setRiwaya('warsh') : undefined} />
-          <Row title={READER.hafs()} end={HAFS && <CheckIcon color={c.accent} />} onPress={HAFS ? undefined : () => setRiwaya('hafs')} last />
+          <Row title={READER.warsh()} end={!HAFS && <CheckIcon color={c.ctlText} />} onPress={HAFS ? () => setRiwaya('warsh') : undefined} />
+          <Row title={READER.hafs()} end={HAFS && <CheckIcon color={c.ctlText} />} onPress={HAFS ? undefined : () => setRiwaya('hafs')} last />
         </Group>
 
         <Group title={READER.tafsirs()} note={READER.sourcesSub()}>

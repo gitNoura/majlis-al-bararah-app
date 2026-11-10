@@ -8,6 +8,9 @@
 //   fill     progress marks on paper (forest by day, a lighter green by night)
 //   accent   small green words   spark    the "you are here" green
 //   page*    the Reading block: its off-white, ink, soft ink, frame line, empty marks, current juz, button
+import { useContext } from 'react';
+
+import { HifdhTintContext } from './home';
 import { useTheme } from './theme';
 import { dark as darkTokens } from './tokens';
 
@@ -74,19 +77,19 @@ const light: HomeSkin = {
 // below, a real deep forest for the soft panel, and the warm parchment of the Quran's night pages (not a bright mint) for what
 // is lit: the ring, today's bar, the wide button. Words are a warm off-white.
 const dark: HomeSkin = {
-  paper: '#0d1310',
-  surface: '#18201c',
-  surfaceTop: '#1d2823',
-  surfaceBottom: '#141b17',
-  soft: '#1b3128',
-  softTop: '#22392f',
-  softBottom: '#172a22',
+  paper: '#121212',
+  surface: '#1c1c1c',
+  surfaceTop: '#232323',
+  surfaceBottom: '#191919',
+  soft: '#262726',
+  softTop: '#2c2d2c',
+  softBottom: '#222322',
   softLine: 'rgba(255, 255, 255, 0.06)',
   softTrack: 'rgba(255, 255, 255, 0.12)',
-  bar: '#4a6a5b',
+  bar: '#5c6660',
   hairline: 'rgba(255, 255, 255, 0.08)',
-  ink: '#ece8dc',
-  meta: '#a2a698',
+  ink: '#eeeeea',
+  meta: '#a3a39d',
   track: 'rgba(255, 255, 255, 0.1)',
   fill: '#e9dfbd', // what is lit: the parchment of the Quran's night pages
   accent: '#b4c8b8',
@@ -98,9 +101,27 @@ const dark: HomeSkin = {
   pageBead: 'rgba(255, 255, 255, 0.1)',
   pageHere: '#a8c4ae',
   pageButton: '#ece4c8',
-  goBg: '#244438',
+  goBg: '#343635',
   goInk: '#ece4c8',
-  buttonInk: '#16261f',
+  buttonInk: '#1d1d1d',
 };
 
-export const useSkin = (): HomeSkin => (useTheme().isDark ? dark : light);
+// The Hifdh tab in dark mode: a forest-green page and panels, with gold for what is lit (see HifdhTint in home.ts)
+const hifdhDark: Partial<HomeSkin> = {
+  // only hints: the page and the white panel stay the same grey as Home; the soft panel is barely green, what is lit is gold
+  soft: '#252a27',
+  softTop: '#2a302c',
+  softBottom: '#222623',
+  softLine: 'rgba(228, 196, 109, 0.14)',
+  bar: '#56665d',
+  fill: '#e4c46d',
+  accent: '#a9cdb8',
+  spark: '#b5dcc0',
+  goBg: '#33403a',
+};
+
+export const useSkin = (): HomeSkin => {
+  const isDark = useTheme().isDark;
+  const tint = useContext(HifdhTintContext);
+  return isDark ? (tint ? { ...dark, ...hifdhDark } : dark) : light;
+};

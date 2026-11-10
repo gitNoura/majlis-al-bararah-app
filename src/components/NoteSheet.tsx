@@ -61,7 +61,7 @@ function Note({ s, a, onClose }: { s: number; a: number; onClose: () => void }) 
             styles.card,
             {
               width: Math.min(340, width - 48),
-              backgroundColor: isDark ? '#2b2e2c' : '#fffdf8',
+              backgroundColor: isDark ? '#2b2b2b' : '#fffdf8',
               borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(68,55,43,0.08)',
               boxShadow: isDark ? '0px 16px 36px rgba(0,0,0,0.45)' : '0px 2px 6px rgba(60,45,20,0.06), 0px 16px 36px rgba(60,45,20,0.16)',
             },
@@ -130,7 +130,7 @@ function Note({ s, a, onClose }: { s: number; a: number; onClose: () => void }) 
                     style={[
                       styles.swatch,
                       { backgroundColor: n.dot },
-                      on && { boxShadow: `0px 0px 0px 2px ${isDark ? '#2b2e2c' : '#fffdf8'}, 0px 0px 0px 3.5px ${n.dot}` },
+                      on && { boxShadow: `0px 0px 0px 2px ${isDark ? '#2b2b2b' : '#fffdf8'}, 0px 0px 0px 3.5px ${n.dot}` },
                     ]}
                   >
                     {on && <CheckIcon color={n.on} size={11} strokeWidth={3.5} />}

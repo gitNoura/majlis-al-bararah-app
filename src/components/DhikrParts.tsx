@@ -505,7 +505,7 @@ export function ToneButton({ tint, label, onPress }: { tint: Tone; label: string
   const t = tone(tint, isDark);
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.toneBtn, { backgroundColor: t.ink }, pressed && { opacity: 0.85 }]}>
-      <Txt size={15} weight={700} color={isDark ? '#1f2221' : '#ffffff'}>
+      <Txt size={15} weight={700} color={isDark ? '#1d1d1d' : '#ffffff'}>
         {label}
       </Txt>
     </Pressable>

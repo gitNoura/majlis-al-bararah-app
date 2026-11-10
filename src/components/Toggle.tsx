@@ -24,7 +24,7 @@ export function Toggle({ value, onChange, label }: { value: boolean; onChange: (
       role="switch"
       aria-checked={value}
       accessibilityLabel={label}
-      style={[styles.track, { backgroundColor: value ? c.on : c.switchOff }]}
+      style={[styles.track, { backgroundColor: value ? c.ctl : c.switchOff }]}
     >
       <Animated.View style={[styles.knob, knob]} />
     </Pressable>

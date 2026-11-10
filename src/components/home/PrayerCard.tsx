@@ -12,12 +12,14 @@ import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { HOME } from '@/i18n/home';
 import { t } from '@/i18n/i18n';
-import { DARK_SKIES, prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
+import { prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
 import { locate } from '@/lib/prayer';
+import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
 const RADIUS = 22;
+const EDGE = 'rgba(48, 48, 48, 0.62)'; // dark mode: the grey at the very edge of the card (the vignette); lower the 0.62 for a lighter one
 
 export function PrayerCard() {
   const [view, setView] = useState<PrayerView>(prayerView);
@@ -53,15 +55,28 @@ export function PrayerCard() {
   };
 
   const { isDark } = useTheme();
+  const k = useSkin();
   const phase = view?.phase ?? skyByClock();
-  const sky = (isDark ? DARK_SKIES : SKIES)[phase]; // the card wears the sky of the moment; in dark mode its deep version
+  const sky = SKIES[phase];
+  const nextBg = isDark ? k.pageButton : sky.next; // dark mode: the next prayer is the cream-yellow of the Continue reading button
+  const nextInk = isDark ? k.buttonInk : sky.nextIcon; // the card wears the sky of the moment, the same in light and dark mode
   return (
     // the rounded clip is on the OUTER view and on the sky's own layer: the animated stars and clouds (moving layers)
     // are not cut by the gradient view's own corners on every phone, which showed the card square
     <View style={styles.card}>
       <LinearGradient colors={sky.sky} style={StyleSheet.absoluteFill} />
       <View style={styles.skyClip} pointerEvents="none">
-        <PrayerSky phase={isDark ? 'night' : phase} sun={view?.sun ?? 0.5} />
+        <PrayerSky phase={phase} sun={view?.sun ?? 0.5} />
+        {isDark && (
+          // dark mode: the card is as in light mode; only a soft grey vignette round its edges, to blend it into the dark page
+          // (four edge gradients: the corners get two of them, so they are the darkest)
+          <>
+            <LinearGradient colors={[EDGE, 'rgba(48, 48, 48, 0)']} style={[styles.edge, { top: 0, left: 0, right: 0, height: '38%' }]} />
+            <LinearGradient colors={['rgba(48, 48, 48, 0)', EDGE]} style={[styles.edge, { bottom: 0, left: 0, right: 0, height: '38%' }]} />
+            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={[EDGE, 'rgba(48, 48, 48, 0)']} style={[styles.edge, { top: 0, bottom: 0, left: 0, width: '30%' }]} />
+            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['rgba(48, 48, 48, 0)', EDGE]} style={[styles.edge, { top: 0, bottom: 0, right: 0, width: '30%' }]} />
+          </>
+        )}
       </View>
       {view ? (
         <>
@@ -80,11 +95,11 @@ export function PrayerCard() {
           </View>
           <View style={styles.strip}>
             {view.list.map((p) => (
-              <View key={p.key} style={[styles.time, { backgroundColor: p.next ? sky.next : sky.circle }]}>
-                <Txt size={11} weight={p.next ? 700 : 500} color={p.next ? sky.nextIcon : sky.soft} center>
+              <View key={p.key} style={[styles.time, { backgroundColor: p.next ? nextBg : sky.circle }]}>
+                <Txt size={11} weight={p.next ? 700 : 500} color={p.next ? nextInk : sky.soft} center>
                   {p.name}
                 </Txt>
-                <Txt size={13} weight={p.next ? 700 : 500} color={p.next ? sky.nextIcon : sky.ink} center style={p.past && !p.next ? { opacity: 0.62 } : undefined}>
+                <Txt size={13} weight={p.next ? 700 : 500} color={p.next ? nextInk : sky.ink} center style={p.past && !p.next ? { opacity: 0.62 } : undefined}>
                   {p.at}
                 </Txt>
               </View>
@@ -122,6 +137,7 @@ export function PrayerCard() {
 
 const styles = StyleSheet.create({
   card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: space.cozy, gap: space.sm, overflow: 'hidden', boxShadow: '0px 8px 20px rgba(20, 50, 38, 0.16)' },
+  edge: { position: 'absolute' },
   skyClip: { ...StyleSheet.absoluteFillObject, borderRadius: RADIUS, borderCurve: 'continuous', overflow: 'hidden' },
   buttons: { flexDirection: 'row', gap: space.sm },
   btn: { flex: 1, minHeight: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md },

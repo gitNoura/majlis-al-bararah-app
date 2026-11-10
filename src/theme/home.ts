@@ -2,6 +2,8 @@
 // deep forest green and cream (its chosen-prayer pill is #173f32 with cream words), so the hero, the plan boxes and the
 // prayer card belong together under every sky (night, dawn, midday, afternoon, sunset). The key names `forest`,
 // `lime` and `limeInk` are kept from the first draft: `lime` is now the cream of the button and ring on the hero.
+import { createContext, createElement, useContext, type ReactNode } from 'react';
+
 import { useTheme } from './theme';
 
 export type HomePalette = {
@@ -81,13 +83,13 @@ const light: HomePalette = {
 };
 
 const dark: HomePalette = {
-  screen: '#141816',
-  card: '#1c211e',
+  screen: '#161616',
+  card: '#1f1f1f',
   cardLine: 'rgba(255, 255, 255, 0.07)',
-  well: '#232925',
-  ink: '#f1f5f2',
-  meta: '#9db0a5',
-  forest: '#1d4a3a',
+  well: '#282828',
+  ink: '#f2f2f2',
+  meta: '#a3a3a3',
+  forest: '#2c2e2d',
   forestInk: '#fffdf5',
   forestSoft: 'rgba(255, 253, 245, 0.72)',
   forestLine: 'rgba(255, 253, 245, 0.16)',
@@ -97,27 +99,47 @@ const dark: HomePalette = {
   goldSoft: 'rgba(241, 226, 155, 0.13)',
   goldLine: 'rgba(241, 226, 155, 0.32)',
   ring: '#f3e2b0',
-  deepTop: '#436149',
-  deepBottom: '#2c4536',
-  surfaceTop: '#232825',
-  surfaceBottom: '#1b1f1c',
+  deepTop: '#3b3e3c',
+  deepBottom: '#2b2d2c',
+  surfaceTop: '#262626',
+  surfaceBottom: '#1d1d1d',
   surfaceRim: 'rgba(255, 255, 255, 0.08)',
   surfaceShadow: 'rgba(0, 0, 0, 0.4)',
   skyWash: 0.26,
   trackSoft: 'rgba(255, 255, 255, 0.12)',
-  greenSoft: 'rgba(120, 165, 135, 0.16)',
-  tile: '#27382f',
-  tileInk: '#d8eadf',
-  mint: '#28362f',
-  mintLine: 'rgba(111, 181, 151, 0.4)',
-  leaf: '#86ab99',
+  greenSoft: 'rgba(236, 228, 200, 0.10)',
+  tile: '#303332',
+  tileInk: '#e0e6e2',
+  mint: '#2a2d2b',
+  mintLine: 'rgba(236, 228, 200, 0.28)',
+  leaf: '#d6cdaa',
   amber: '#e4c46d',
-  sand: '#2a2519',
+  sand: '#2a2926',
   sandLine: 'rgba(228, 196, 109, 0.3)',
   ghost: 'rgba(255, 255, 255, 0.14)',
   shadow: 'rgba(0, 0, 0, 0.3)',
 };
 
+// The Hifdh tab in dark mode: the same grey as the rest, with small hints of green and gold.
+// <HifdhTint> (below) lays these over the dark palette for that tab only; nothing else changes.
+const hifdhDark: Partial<HomePalette> = {
+  // only hints: the page and cards stay the same grey as Home; a barely-green tile, gold for what is done, a gold edge
+  tile: '#2b312d',
+  tileInk: '#dcebe1',
+  mint: '#262b28',
+  mintLine: 'rgba(228, 196, 109, 0.32)',
+  leaf: '#9bc2ad',
+  amber: '#e4c46d',
+  sand: '#2a2922',
+  sandLine: 'rgba(228, 196, 109, 0.28)',
+};
+export const HifdhTintContext = createContext(false);
+export function HifdhTint({ children }: { children: ReactNode }) {
+  return createElement(HifdhTintContext.Provider, { value: true }, children);
+}
+
 export function useHome(): HomePalette {
-  return useTheme().isDark ? dark : light;
+  const isDark = useTheme().isDark;
+  const tint = useContext(HifdhTintContext);
+  return isDark ? (tint ? { ...dark, ...hifdhDark } : dark) : light;
 }

@@ -26,6 +26,7 @@ import { displayKeys } from '@/lib/ayahmap';
 import { keyOf } from '@/lib/hifdh';
 import * as plan from '@/lib/hifdh/plan';
 import { keysOfSegs } from '@/lib/hifdh/recite';
+import { HifdhTint } from '@/theme/home';
 import { useSkin } from '@/theme/homeSkin';
 import { T } from '@/theme/homeType';
 import { useTheme } from '@/theme/theme';
@@ -97,7 +98,16 @@ function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; s
   );
 }
 
+// the tab's own look in dark mode (green and gold, not black): HifdhTint changes the palettes read inside it only
 export default function HifdhTab() {
+  return (
+    <HifdhTint>
+      <HifdhScreen />
+    </HifdhTint>
+  );
+}
+
+function HifdhScreen() {
   const { c } = useTheme();
   const k = useSkin();
   const [load, setLoad] = useState<Load>('loading');

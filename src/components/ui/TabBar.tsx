@@ -21,13 +21,13 @@ export type TabItem = {
 };
 
 export function TabBar({ tabs, hidden }: { tabs: TabItem[]; hidden?: boolean }) {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   if (hidden) return null;
   return (
     <View style={[styles.bar, { backgroundColor: c.card, borderTopColor: c.line, height: TAB_BAR_H + insets.bottom, paddingBottom: insets.bottom }]} accessibilityRole="tablist">
       {tabs.map((tab) => {
-        const color = tab.focused ? c.accent : c.meta;
+        const color = tab.focused ? (isDark ? '#ffffff' : c.accent) : c.meta; // dark mode: the chosen tab is white
         return (
           <Pressable
             key={tab.key}
@@ -38,7 +38,7 @@ export function TabBar({ tabs, hidden }: { tabs: TabItem[]; hidden?: boolean }) 
             accessibilityState={{ selected: tab.focused }}
             style={({ pressed }) => [styles.tab, pressed && { opacity: 0.6 }]}
           >
-            <View style={[styles.pill, tab.focused && { backgroundColor: c.accentSoft }]}>{tab.icon(color)}</View>
+            <View style={[styles.pill, tab.focused && { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : c.accentSoft }]}>{tab.icon(color)}</View>
             <Txt size={12} weight={tab.focused ? 700 : 500} color={color} center numberOfLines={1}>
               {tab.label}
             </Txt>

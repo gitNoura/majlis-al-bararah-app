@@ -84,8 +84,8 @@ export function Segments<T extends string | number>({ value, options, onChange }
       {options.map(([v, label]) => {
         const on = v === value;
         return (
-          <Pressable key={String(v)} onPress={() => onChange(v)} style={[styles.segment, on && { backgroundColor: c.on }]} accessibilityState={{ selected: on }}>
-            <Txt size={14} weight={on ? 700 : 500} center color={on ? c.onInk : c.tabInk} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+          <Pressable key={String(v)} onPress={() => onChange(v)} style={[styles.segment, on && { backgroundColor: c.ctl }]} accessibilityState={{ selected: on }}>
+            <Txt size={14} weight={on ? 700 : 500} center color={on ? c.ctlInk : c.tabInk} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
               {label}
             </Txt>
           </Pressable>

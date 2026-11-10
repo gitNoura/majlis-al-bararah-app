@@ -186,7 +186,7 @@ export default function SettingsTab() {
           <Row title={where} />
           <Row
             title={SETTINGS.myLocation()}
-            end={locating ? <ActivityIndicator color={c.accent} /> : here?.source === 'gps' ? <CheckIcon color={c.accent} /> : undefined}
+            end={locating ? <ActivityIndicator color={c.ctlText} /> : here?.source === 'gps' ? <CheckIcon color={c.ctlText} /> : undefined}
             chevron={!locating && here?.source !== 'gps'}
             onPress={locating ? undefined : useLocation}
           />
@@ -205,7 +205,7 @@ export default function SettingsTab() {
                 <Txt size={15} color={c.text} style={{ flex: 1 }}>
                   {x.name}
                 </Txt>
-                {here?.source === 'city' && here.city === x.i && <CheckIcon color={c.accent} size={18} />}
+                {here?.source === 'city' && here.city === x.i && <CheckIcon color={c.ctlText} size={18} />}
               </Pressable>
             ))}
         </Group>
@@ -230,8 +230,8 @@ export default function SettingsTab() {
         </Group>
 
         <Group title={READER.riwaya()} note={READER.riwayaSub()}>
-          <Row title={READER.warsh()} end={!HAFS && <CheckIcon color={c.accent} />} onPress={HAFS ? () => setRiwaya('warsh') : undefined} />
-          <Row title={READER.hafs()} end={HAFS && <CheckIcon color={c.accent} />} onPress={HAFS ? undefined : () => setRiwaya('hafs')} last />
+          <Row title={READER.warsh()} end={!HAFS && <CheckIcon color={c.ctlText} />} onPress={HAFS ? () => setRiwaya('warsh') : undefined} />
+          <Row title={READER.hafs()} end={HAFS && <CheckIcon color={c.ctlText} />} onPress={HAFS ? undefined : () => setRiwaya('hafs')} last />
         </Group>
 
         <Group title={READER.tafsirs()} note={READER.sourcesSub()}>

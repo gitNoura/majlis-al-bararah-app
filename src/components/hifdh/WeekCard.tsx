@@ -24,10 +24,16 @@ function CloseMark({ color }: { color: string }) {
 }
 
 export function WeekCard() {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   const h = useHome();
   const k = useSkin();
   const { days, kept, today, started } = weekInfo();
+  // dark mode: a kept day is the light gold of the main page (a dark tick on it), a day not kept is the grey of the
+  // Complete button, and today is ringed in soft white
+  const keptBg = isDark ? '#e9dfbd' : h.forest;
+  const keptInk = isDark ? '#1d1d1d' : h.forestInk;
+  const emptyBg = isDark ? h.forest : k.soft;
+  const todayRing = isDark ? 'rgba(255, 255, 255, 0.7)' : k.spark;
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
@@ -56,11 +62,11 @@ export function WeekCard() {
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? h.forest : state === 'now' ? 'transparent' : k.soft },
-                  state === 'now' && { borderWidth: 2, borderColor: k.spark },
+                  { backgroundColor: state === 'on' ? keptBg : state === 'now' ? 'transparent' : emptyBg },
+                  state === 'now' && { borderWidth: 2, borderColor: todayRing },
                 ]}
               >
-                {state === 'on' && <CheckIcon color={h.forestInk} size={16} strokeWidth={2.4} />}
+                {state === 'on' && <CheckIcon color={keptInk} size={16} strokeWidth={2.4} />}
                 {state === 'miss' && <CloseMark color={c.meta} />}
               </View>
             </View>
