@@ -1,16 +1,20 @@
 // The pieces the daily cards share: a section with a title, a hint line, and the two button looks
 // («hz-primary» and «hz-secondary» of the website).
 //
-// Look of the page (redesign v2): calm and flat. A section is its title on the page, and under it its content in one box
-// outlined thinly in green (no boxes inside boxes: rows inside a box are separated by hairlines, not drawn as cards).
-// Forest green is the main colour (icons, the chosen state, the ring, the buttons, the box outlines); one warm gold, `amber`,
-// breaks it up: the headings and the week card.
+// Look of the page: Home's (src/theme/homeSkin.ts). A section is its title in ink on the neutral page, and under it its content
+// in one white panel with a hairline and 20 px corners (no boxes inside boxes: rows inside a panel are separated by hairlines).
+// A finished card turns the light green of Home's plans card. Forest is the colour of the filled buttons; the same light green
+// is the accent of the small things (the tabs, the round buttons, the empty days, the quiet buttons), never of the words.
+// The gold is gone.
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { ReactNode } from 'react';
 
 import { Txt } from '@/components/Txt';
+import { Panel } from '@/components/home/Panel';
 import { useHome } from '@/theme/home';
+import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
+import { space } from '@/theme/tokens';
 
 export type Tone = 'done';
 
@@ -34,9 +38,9 @@ export function useAccent() {
   return { fill: alpha(h.leaf, isDark ? 0.18 : 0.1), ink: isDark ? h.tileInk : h.forest, line: alpha(h.leaf, isDark ? 0.4 : 0.3), mark: h.leaf };
 }
 
-// The colour of headings and dates: the warm gold that sets them apart from the green boxes and buttons
+// The colour of headings and dates: the page's ink
 export function useHeading() {
-  return useHome().amber;
+  return useSkin().ink;
 }
 
 // A value or a kind of plan (no pill, no box: the words in the accent colour)
@@ -54,12 +58,11 @@ export function AccentPill({ text, size = 13.5 }: { text: string; size?: number 
 // with a hairline instead, the title staying on top of its content (the long history list). Nothing is ever written
 // under the title. `compact` is the smaller size of the edit page; `action` is a small control at the end of the title row.
 export function Section({ title, titleColor, tone, children, style, first, plain, compact, action }: { title: string; titleColor?: string; tone?: Tone; first?: boolean; plain?: boolean; compact?: boolean; action?: ReactNode; children: ReactNode; style?: StyleProp<ViewStyle> }) {
-  const h = useHome();
   const { c } = useTheme();
   const heading = useHeading();
   const head = (
     <View style={styles.head}>
-      <Txt size={compact ? 16 : 19} weight={700} color={titleColor ?? heading} style={{ flex: 1 }}>
+      <Txt size={compact ? 15 : 17} weight={700} color={titleColor ?? heading} style={{ flex: 1 }}>
         {title}
       </Txt>
       {action}
@@ -76,22 +79,24 @@ export function Section({ title, titleColor, tone, children, style, first, plain
   return (
     <View style={[styles.outer, compact && styles.outerCompact, style]}>
       {head}
-      <View style={[styles.box, compact && styles.boxCompact, { backgroundColor: tone === 'done' ? h.mint : h.card, borderColor: h.leaf }]}>{children}</View>
+      <Panel tone={tone === 'done' ? 'soft' : 'surface'} style={[styles.box, compact && styles.boxCompact]}>
+        {children}
+      </Panel>
     </View>
   );
 }
 
 // A heading between the sections («Today's plan», «Progress»), with an optional quiet link at its end
 export function Heading({ title, link, onLink }: { title: string; link?: string; onLink?: () => void }) {
-  const { c } = useTheme();
+  const k = useSkin();
   return (
     <View style={styles.heading}>
-      <Txt size={17} weight={700} color={c.meta} style={{ flexShrink: 1 }}>
+      <Txt size={17} weight={700} color={k.ink} style={{ flexShrink: 1 }}>
         {title}
       </Txt>
       {link ? (
         <Pressable onPress={onLink} hitSlop={10} accessibilityRole="button">
-          <Txt size={17} weight={700} color={c.meta}>
+          <Txt size={14} weight={700} color={k.meta}>
             {link} ›
           </Txt>
         </Pressable>
@@ -119,7 +124,7 @@ export function PrimaryButton({ label, onPress, disabled, square }: { label: str
       accessibilityState={{ disabled: !!disabled }}
       style={[styles.btn, square && styles.square, { backgroundColor: h.forest, opacity: disabled ? 0.45 : 1 }]}
     >
-      <Txt size={square ? 15.5 : 16} weight={700} color={h.forestInk}>
+      <Txt size={15} weight={700} color={h.forestInk}>
         {label}
       </Txt>
     </Pressable>
@@ -127,17 +132,16 @@ export function PrimaryButton({ label, onPress, disabled, square }: { label: str
 }
 
 export function SecondaryButton({ label, onPress, disabled, square }: { label: string; onPress: () => void; disabled?: boolean; square?: boolean }) {
-  const h = useHome();
-  const { c } = useTheme();
+  const k = useSkin();
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
-      style={[styles.btn, square && styles.square, { backgroundColor: 'transparent', borderWidth: StyleSheet.hairlineWidth * 2, borderColor: c.chosenLine, opacity: disabled ? 0.4 : 1 }]}
+      style={[styles.btn, square && styles.square, { backgroundColor: k.soft, opacity: disabled ? 0.4 : 1 }]}
     >
-      <Txt size={square ? 15.5 : 16} weight={700} color={h.ink}>
+      <Txt size={15} weight={700} color={k.ink}>
         {label}
       </Txt>
     </Pressable>
@@ -145,13 +149,13 @@ export function SecondaryButton({ label, onPress, disabled, square }: { label: s
 }
 
 const styles = StyleSheet.create({
-  section: { gap: 14 },
-  outer: { gap: 10 },
+  section: { gap: space.cozy },
+  outer: { gap: space.sm },
   outerCompact: { gap: 6 },
-  box: { gap: 14, padding: 18, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth * 2 },
-  boxCompact: { gap: 10, padding: 12 },
+  box: { gap: space.cozy, padding: space.md, borderRadius: 20, borderCurve: 'continuous', overflow: 'hidden' },
+  boxCompact: { gap: 10, padding: space.cozy, borderRadius: 16 },
   head:{ flexDirection: 'row', alignItems: 'center', gap: 12 },
   heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
-  square: { minHeight: 48, borderRadius: 12 },
-  btn: { minHeight: 50, borderRadius: 25, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
+  square: { minHeight: 44, borderRadius: 22 },
+  btn: { minHeight: 46, borderRadius: 23, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
 });

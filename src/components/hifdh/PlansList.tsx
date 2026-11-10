@@ -1,17 +1,18 @@
 // «My plans» (plansHTML of the website): each plan with Modify / Pause (or Resume) / Delete, and «Add plan».
-// Flat (redesign v2): a plan is a block of text on the page with a hairline above it, not a card; the actions are quiet
-// text buttons in one row, and «Modify» is the one filled button.
+// Home's look: a plan is a white panel with a hairline and 20 px corners; the actions sit in one row, and «Modify» is the
+// one filled (pill) button.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
-import { SecondaryButton, useHeading } from '@/components/hifdh/Section';
+import { SecondaryButton } from '@/components/hifdh/Section';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import * as core from '@/lib/hifdh/core';
 import { kindOf, paceText, rangeLabel } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { useHome } from '@/theme/home';
+import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 
 const DANGER = '#b3402f';
@@ -19,7 +20,7 @@ const DANGER = '#b3402f';
 export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onAdd: () => void }) {
   const { c } = useTheme();
   const h = useHome();
-  const heading = useHeading();
+  const k = useSkin();
   const { refresh } = useHif(); // also redraws the list whenever `rev` changes
   const plans = plan.get().plans as { id: string; type: string; range: number[][] | null }[];
 
@@ -47,10 +48,10 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
       {plans.map((p) => {
         const paused = core.pausedNow(p);
         return (
-          <View key={p.id} style={[styles.plan, { backgroundColor: h.card, borderColor: h.leaf }, paused && { opacity: 0.75 }]}>
+          <View key={p.id} style={[styles.plan, { backgroundColor: k.surface, borderColor: k.hairline }, paused && { opacity: 0.75 }]}>
             <View style={styles.kindRow}>
               <View style={{ flex: 1, gap: 2 }}>
-                <Txt size={13.5} weight={700} color={heading}>
+                <Txt size={13} weight={700} color={k.meta}>
                   {paused ? `${kindOf(p.type)} · ${HIF.paused()}` : kindOf(p.type)}
                 </Txt>
                 <Txt size={19} weight={800} color={c.ink}>
@@ -98,9 +99,9 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
 }
 
 const styles = StyleSheet.create({
-  plan: { gap: 16, padding: 18, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth * 2 },
+  plan: { gap: 14, padding: 16, borderRadius: 20, borderCurve: 'continuous', borderWidth: StyleSheet.hairlineWidth },
   kindRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 18 },
-  modify: { minHeight: 42, paddingHorizontal: 22, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  modify: { minHeight: 40, paddingHorizontal: 22, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   text: { minHeight: 42, justifyContent: 'center' },
 });

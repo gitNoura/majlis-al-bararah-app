@@ -110,7 +110,7 @@ const dark: HomePalette = {
   tileInk: '#d8eadf',
   mint: '#28362f',
   mintLine: 'rgba(111, 181, 151, 0.4)',
-  leaf: '#6fb597',
+  leaf: '#86ab99',
   amber: '#e4c46d',
   sand: '#2a2519',
   sandLine: 'rgba(228, 196, 109, 0.3)',

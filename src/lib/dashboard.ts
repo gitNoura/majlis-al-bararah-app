@@ -58,6 +58,15 @@ export const SKIES: Record<Phase, Sky> = {
   afternoon: { sky: ['#f4d6b8', '#f3e6d2', '#e8ebdb'], ...LIGHT_INK },
   sunset: { sky: ['#e69a6c', '#c97a6c', '#7a5a72'], ...NIGHT_INK, nextIcon: '#7a3f3a' },
 };
+// In dark mode the card does not dim the day's sky (a grey layer over a bright sky looks muddy): it has its own deep sky for each
+// hour, clean and low in colour, with the night's words, and the stars of the night.
+export const DARK_SKIES: Record<Phase, Sky> = {
+  night: SKIES.night,
+  dawn: { sky: ['#2b2230', '#392b37', '#47363f'], ...NIGHT_INK },
+  midday: { sky: ['#15303b', '#1a3944', '#1f4149'], ...NIGHT_INK },
+  afternoon: { sky: ['#2d2922', '#383125', '#443a2a'], ...NIGHT_INK },
+  sunset: { sky: ['#392636', '#472f3f', '#553a47'], ...NIGHT_INK },
+};
 // The Reading card is the prayers card's deeper companion: for each sky, a darker, more saturated gradient of the same
 // hue (so the two cards read as one family at every hour), white words, a ring and a button that suit it.
 export type ReadingSky = { grad: readonly [string, string]; ink: string; soft: string; track: string; btn: string; btnInk: string; shadow: string };

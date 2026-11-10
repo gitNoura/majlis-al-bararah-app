@@ -8,9 +8,9 @@ import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import * as core from '@/lib/hifdh/core';
-import { alpha } from '@/components/hifdh/Section';
 import { num, weekdayName, weekInfo } from '@/lib/hifdh/labels';
 import { useHome } from '@/theme/home';
+import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 
 type DayState = 'on' | 'now' | 'miss' | 'idle';
@@ -24,22 +24,23 @@ function CloseMark({ color }: { color: string }) {
 }
 
 export function WeekCard() {
-  const { c, isDark } = useTheme();
+  const { c } = useTheme();
   const h = useHome();
+  const k = useSkin();
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
     <View style={styles.card}>
       <View style={styles.top}>
-        <Txt size={18} weight={700} color={h.ink}>
+        <Txt size={17} weight={700} color={k.ink}>
           {HIF.yourWeek()}
         </Txt>
         <View style={styles.count}>
-          <Txt size={26} weight={800} color={h.ink} lineHeight={30}>
+          <Txt size={24} weight={700} color={k.ink} lineHeight={30}>
             {num(n)}
           </Txt>
-          <Txt size={12} color={h.meta}>
+          <Txt size={12} color={k.meta}>
             {HIF.ofSevenDays()}
           </Txt>
         </View>
@@ -49,14 +50,14 @@ export function WeekCard() {
           const state: DayState = kept.has(d) ? 'on' : d === today ? 'now' : started && d >= started && d < today ? 'miss' : 'idle';
           return (
             <View key={d} style={styles.day}>
-              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={h.ink}>
+              <Txt size={11} weight={state === 'now' ? 700 : 600} center color={k.ink}>
                 {weekdayName(core.weekdayOf(d))}
               </Txt>
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: state === 'on' ? h.forest : alpha(h.leaf, state === 'now' ? 0.22 : isDark ? 0.16 : 0.09) },
-                  state === 'now' && { borderWidth: 2, borderColor: h.leaf },
+                  { backgroundColor: state === 'on' ? h.forest : state === 'now' ? 'transparent' : k.soft },
+                  state === 'now' && { borderWidth: 2, borderColor: k.spark },
                 ]}
               >
                 {state === 'on' && <CheckIcon color={h.forestInk} size={16} strokeWidth={2.4} />}

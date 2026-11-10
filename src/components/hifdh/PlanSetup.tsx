@@ -23,6 +23,7 @@ import * as core from '@/lib/hifdh/core';
 import { ALL_DAYS, PLAN_UNITS, UNIT_NAME, UNIT_ONE, UNIT_PLURAL, WEEK_ORDER, fmtDate, kindOf, num, perWord, rangeLabel, unitCount, weekdayName } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { useHome } from '@/theme/home';
+import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 
 type Pace = {
@@ -347,10 +348,10 @@ function NavFoot({ onPrev, prevDisabled, onNext, nextLabel, nextDisabled }: { on
 }
 
 function Link({ text, onPress }: { text: string; onPress: () => void }) {
-  const { c } = useTheme();
+  const k = useSkin();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={{ minHeight: 40, justifyContent: 'center' }}>
-      <Txt size={14.5} weight={700} color={c.goldStrong}>
+      <Txt size={14.5} weight={700} color={k.ink}>
         {text}
       </Txt>
     </Pressable>

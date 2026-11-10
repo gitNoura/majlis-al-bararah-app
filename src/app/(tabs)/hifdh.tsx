@@ -26,7 +26,8 @@ import { displayKeys } from '@/lib/ayahmap';
 import { keyOf } from '@/lib/hifdh';
 import * as plan from '@/lib/hifdh/plan';
 import { keysOfSegs } from '@/lib/hifdh/recite';
-import { useHome } from '@/theme/home';
+import { useSkin } from '@/theme/homeSkin';
+import { T } from '@/theme/homeType';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
@@ -47,21 +48,20 @@ function openQuran(mode: 'listen' | 'recite', row: Row | null) {
 
 function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; seg: Seg; setSeg: (s: Seg) => void; setup: Setup; open: (s: Setup) => void; exit: () => void }) {
   const insets = useSafeAreaInsets();
-  const home = useHome();
-  const { c } = useTheme();
+  const k = useSkin();
   useHif(); // subscribing here redraws the whole screen when `rev` changes
 
   if (screen === 'pace') return <PlanSetup type={setup.type} id={setup.id} onExit={exit} />;
 
-  const pad = { padding: space.md, paddingBottom: space.lg + space.md, gap: 16 };
+  const pad = { padding: space.md, paddingBottom: space.lg + space.md, gap: space.md };
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ paddingHorizontal: space.md, paddingTop: insets.top + space.sm, paddingBottom: space.sm, gap: space.md }}>
-        <Txt size={26} weight={700} lineHeight={34} color={home.ink} numberOfLines={1}>
+      <View style={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.sm, gap: space.md }}>
+        <Txt {...T.greeting} size={26} lineHeight={34} color={k.ink} numberOfLines={1}>
           {HIF.title()}
         </Txt>
-        <View style={[styles.tabs, { borderBottomColor: c.divider }]} accessibilityRole="tablist">
+        <View style={[styles.tabs, { backgroundColor: k.soft }]} accessibilityRole="tablist">
           {(
             [
               ['today', HIF.segToday()],
@@ -69,8 +69,8 @@ function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; s
               ['progress', HIF.progress()],
             ] as [Seg, string][]
           ).map(([v, label]) => (
-            <Pressable key={v} onPress={() => setSeg(v)} accessibilityRole="tab" accessibilityState={{ selected: seg === v }} style={[styles.tab, { borderBottomColor: seg === v ? home.leaf : 'transparent' }]}>
-              <Txt size={15} weight={seg === v ? 700 : 500} color={seg === v ? c.ink : c.meta}>
+            <Pressable key={v} onPress={() => setSeg(v)} accessibilityRole="tab" accessibilityState={{ selected: seg === v }} style={[styles.tab, seg === v && { backgroundColor: k.surface, boxShadow: '0px 1px 3px rgba(20, 50, 38, 0.14)' }]}>
+              <Txt {...T.button} size={14} weight={seg === v ? 700 : 500} color={seg === v ? k.ink : k.meta}>
                 {label}
               </Txt>
             </Pressable>
@@ -99,7 +99,7 @@ function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; s
 
 export default function HifdhTab() {
   const { c } = useTheme();
-  const home = useHome();
+  const k = useSkin();
   const [load, setLoad] = useState<Load>('loading');
   const [screen, setScreen] = useState<Screen>('tabs');
   const [seg, setSeg] = useState<Seg>('today');
@@ -127,7 +127,7 @@ export default function HifdhTab() {
   const exit = useCallback(() => setScreen('tabs'), []); // back to the segment it was opened from
 
   return (
-    <View style={{ flex: 1, backgroundColor: home.screen }}>
+    <View style={{ flex: 1, backgroundColor: k.paper }}>
       {load === 'loading' && <ActivityIndicator color={c.meta} style={{ marginTop: 80 }} />}
       {load === 'failed' && (
         <Txt size={14} center color={c.meta} style={{ marginTop: 80 }}>
@@ -148,6 +148,6 @@ export default function HifdhTab() {
 }
 
 const styles = StyleSheet.create({
-  tabs: { flexDirection: 'row', borderBottomWidth: StyleSheet.hairlineWidth },
-  tab: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2 },
+  tabs: { flexDirection: 'row', borderRadius: 16, borderCurve: 'continuous', padding: 3 },
+  tab: { flex: 1, minHeight: 38, borderRadius: 13, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
 });

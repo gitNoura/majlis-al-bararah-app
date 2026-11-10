@@ -12,8 +12,9 @@ import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { HOME } from '@/i18n/home';
 import { t } from '@/i18n/i18n';
-import { prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
+import { DARK_SKIES, prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
 import { locate } from '@/lib/prayer';
+import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
 const RADIUS = 22;
@@ -51,15 +52,16 @@ export function PrayerCard() {
     router.navigate({ pathname: '/settings', params: { cities: '1' } });
   };
 
+  const { isDark } = useTheme();
   const phase = view?.phase ?? skyByClock();
-  const sky = SKIES[phase]; // the card wears the sky of the moment (as in the earlier version)
+  const sky = (isDark ? DARK_SKIES : SKIES)[phase]; // the card wears the sky of the moment; in dark mode its deep version
   return (
     // the rounded clip is on the OUTER view and on the sky's own layer: the animated stars and clouds (moving layers)
     // are not cut by the gradient view's own corners on every phone, which showed the card square
     <View style={styles.card}>
       <LinearGradient colors={sky.sky} style={StyleSheet.absoluteFill} />
       <View style={styles.skyClip} pointerEvents="none">
-        <PrayerSky phase={phase} sun={view?.sun ?? 0.5} />
+        <PrayerSky phase={isDark ? 'night' : phase} sun={view?.sun ?? 0.5} />
       </View>
       {view ? (
         <>
@@ -68,11 +70,11 @@ export function PrayerCard() {
               <Txt size={12} weight={700} color={sky.soft}>
                 {HOME.nextPrayer()}
               </Txt>
-              <Txt size={24} weight={800} lineHeight={32} color={sky.ink}>
+              <Txt size={21} weight={800} lineHeight={28} color={sky.ink}>
                 {view.next}
               </Txt>
             </View>
-            <Txt size={15} weight={700} color={sky.ink}>
+            <Txt size={14} weight={700} color={sky.ink}>
               {DASH.left(view.h, view.m)}
             </Txt>
           </View>
@@ -90,12 +92,12 @@ export function PrayerCard() {
           </View>
           <View style={styles.buttons}>
             <Pressable onPress={() => router.push('/qibla')} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
-              <Txt size={14} weight={700} color={sky.ink}>
+              <Txt size={13} weight={700} color={sky.ink}>
                 {HOME.qibla()}
               </Txt>
             </Pressable>
             <Pressable onPress={() => router.push('/calendar')} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
-              <Txt size={14} weight={700} color={sky.ink}>
+              <Txt size={13} weight={700} color={sky.ink}>
                 {DASH.calendar()}
               </Txt>
             </Pressable>
@@ -119,11 +121,11 @@ export function PrayerCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: space.md, gap: 10, overflow: 'hidden', boxShadow: '0px 8px 20px rgba(20, 50, 38, 0.16)' },
+  card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: space.cozy, gap: space.sm, overflow: 'hidden', boxShadow: '0px 8px 20px rgba(20, 50, 38, 0.16)' },
   skyClip: { ...StyleSheet.absoluteFillObject, borderRadius: RADIUS, borderCurve: 'continuous', overflow: 'hidden' },
   buttons: { flexDirection: 'row', gap: space.sm },
-  btn: { flex: 1, minHeight: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md },
+  btn: { flex: 1, minHeight: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md },
   head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   strip: { flexDirection: 'row', gap: space.xs },
-  time: { flex: 1, borderRadius: 10, paddingVertical: 6, gap: 1 },
+  time: { flex: 1, borderRadius: 10, paddingVertical: 5, gap: 0 },
 });

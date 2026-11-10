@@ -1,5 +1,5 @@
 // HOME, activity this week. Open on the page, no card: the title and "5 of 7" on one line, then seven capsules, one per
-// day, Monday first, each as tall as the reading of that day (the ayat the wird counted; a day the reader only opened the
+// day, Monday first, each in sage green (today's in the forest) as tall as the reading of that day (the ayat the wird counted; a day the reader only opened the
 // mushaf or Hifdh is a middle height), a day without activity a short stub, a day still to come a fainter one. Today is the
 // one with a green dot under its letter (and, if nothing was done yet, a green edge). A day counts when the reader
 // opened the mushaf or Hifdh, or logged the wird (src/lib/activity.js). The capsules draw in once with the rest of Home.
@@ -47,12 +47,12 @@ export function ActivityCard() {
             <View key={d.day} style={styles.col}>
               <View style={styles.slot}>
                 {on[i] ? (
-                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: k.fill }]} />
+                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: today ? k.fill : k.bar }]} />
                 ) : (
                   <View
                     style={[
                       styles.bar,
-                      { height: STUB, backgroundColor: k.track, opacity: d.future ? 0.5 : 1 },
+                      { height: STUB, backgroundColor: k.soft, opacity: d.future ? 0.6 : 1 },
                       today && { backgroundColor: 'transparent', borderWidth: 2, borderColor: k.spark },
                     ]}
                   />

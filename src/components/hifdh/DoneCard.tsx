@@ -37,7 +37,7 @@ export function DoneCard({ rows, revise, first }: { rows: Row[]; revise?: boolea
       <View style={styles.foot}>
         <View style={styles.pill}>
           <CheckIcon color={g.base} size={16} strokeWidth={2.4} />
-          <Txt size={13.5} weight={700} color={g.base} numberOfLines={1} style={{ flexShrink: 1 }}>
+          <Txt size={13.5} weight={700} color={c.ink} numberOfLines={1} style={{ flexShrink: 1 }}>
             {revise ? HIF.doneRevised() : HIF.doneMemorized()} · {names}
           </Txt>
         </View>

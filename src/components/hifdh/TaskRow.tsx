@@ -13,11 +13,13 @@ import * as core from '@/lib/hifdh/core';
 import { STATUS, dayText, findRow, isDone, rangeLines, weekLine } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
 import { useHome } from '@/theme/home';
+import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 
 export function TaskRow({ row, locked = false, ahead = false, first = false }: { row: Row; locked?: boolean; ahead?: boolean; first?: boolean }) {
   const { c } = useTheme();
   const h = useHome();
+  const k = useSkin();
   const { refresh, toast, burst, openStop, listen, recite } = useHif();
   const btn = useRef<any>(null); // the Pressable's instance (measureInWindow), whose type RN does not export
 
@@ -95,7 +97,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
         {row.status === 'notdone' && (
           <Txt size={13} color={c.text}>
             {HIF.notDoneToast()}{' '}
-            <Txt size={13} weight={700} color={c.goldStrong} onPress={undo} accessibilityRole="button">
+            <Txt size={13} weight={700} color={k.ink} onPress={undo} accessibilityRole="button">
               {HIF.undo()}
             </Txt>
           </Txt>
@@ -111,7 +113,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
           onPress={() => listen(findRow(key) ?? row)}
           accessibilityRole="button"
           accessibilityLabel={HIF.listenPortion()}
-          style={[styles.icon, { borderColor: c.chosenLine }]}
+          style={[styles.icon, { backgroundColor: k.soft }]}
         >
           <PlayIcon color={h.ink} size={20} />
         </Pressable>
@@ -119,7 +121,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
           onPress={() => recite(findRow(key) ?? row)}
           accessibilityRole="button"
           accessibilityLabel={HIF.recitePortion()}
-          style={[styles.icon, { borderColor: c.chosenLine }]}
+          style={[styles.icon, { backgroundColor: k.soft }]}
         >
           <MicIcon color={h.ink} size={20} />
         </Pressable>
@@ -135,12 +137,12 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
             accessibilityHint={HIF.holdHint()}
             style={[
               styles.complete,
-              done ? { borderWidth: StyleSheet.hairlineWidth * 2, borderColor: h.leaf } : { backgroundColor: h.forest },
+              done ? { backgroundColor: k.soft } : { backgroundColor: h.forest },
               locked && { opacity: 0.45 },
             ]}
           >
-            {done && <CheckIcon color={h.leaf} size={18} strokeWidth={2.4} />}
-            <Txt size={16} weight={700} color={done ? h.leaf : h.forestInk}>
+            {done && <CheckIcon color={k.ink} size={18} strokeWidth={2.4} />}
+            <Txt size={15} weight={700} color={done ? k.ink : h.forestInk}>
               {done ? STATUS.done() : HIF.complete()}
             </Txt>
           </Pressable>
@@ -154,6 +156,6 @@ const styles = StyleSheet.create({
   task: { gap: 14, paddingVertical: 14 },
   main: { gap: 3 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  icon: { width: 44, height: 44, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth * 2, alignItems: 'center', justifyContent: 'center' },
-  complete: { flex: 1, minHeight: 44, paddingHorizontal: 18, borderRadius: 12, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
+  icon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  complete: { flex: 1, minHeight: 44, paddingHorizontal: 18, borderRadius: 22, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
 });

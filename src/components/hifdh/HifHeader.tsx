@@ -9,24 +9,23 @@ import { BackIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { isEnglish } from '@/i18n/i18n';
 import { HOME } from '@/i18n/home';
-import { useHome } from '@/theme/home';
-import { useTheme } from '@/theme/theme';
+import { useSkin } from '@/theme/homeSkin';
+import { space } from '@/theme/tokens';
 
 export function HifHeader({ title, subtitle, big, onBack }: { title: string; subtitle?: string; big?: boolean; onBack?: () => void }) {
-  const { c } = useTheme();
-  const h = useHome();
+  const k = useSkin();
   const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.head, { paddingTop: insets.top + 6 }]}>
-      <Pressable onPress={onBack ?? (() => router.back())} hitSlop={10} style={[styles.back, { backgroundColor: h.card, borderColor: h.cardLine, borderWidth: StyleSheet.hairlineWidth, boxShadow: `0px 4px 12px ${h.shadow}` }]} accessibilityRole="button" accessibilityLabel={HOME.back()}>
-        <BackIcon color={c.ink} rtl={!isEnglish} />
+    <View style={[styles.head, { paddingTop: insets.top + space.md }]}>
+      <Pressable onPress={onBack ?? (() => router.back())} hitSlop={10} style={[styles.back, { backgroundColor: k.soft }]} accessibilityRole="button" accessibilityLabel={HOME.back()}>
+        <BackIcon color={k.ink} rtl={!isEnglish} />
       </Pressable>
       <View style={styles.text}>
-        <Txt size={big || subtitle ? 32 : 26} weight={800} color={c.ink} lineHeight={big || subtitle ? 46 : 38} numberOfLines={1}>
+        <Txt size={big || subtitle ? 28 : 26} weight={700} color={k.ink} lineHeight={big || subtitle ? 38 : 34} numberOfLines={1}>
           {title}
         </Txt>
         {subtitle ? (
-          <Txt size={13.5} weight={500} color={c.meta}>
+          <Txt size={12} weight={500} color={k.meta}>
             {subtitle}
           </Txt>
         ) : null}
