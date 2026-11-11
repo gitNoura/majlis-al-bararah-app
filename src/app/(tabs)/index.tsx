@@ -5,9 +5,9 @@
 //   4 the hadith of the reader, as a quiet note                       5 activity (this week), the last
 //   (the adhkar and ahadith libraries are the Library tab)
 // The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a quiet neutral page at the app's everyday sizes (12 to 26),
-// one deep forest, and a single fresher green that only ever marks "where you are now". The prayer card wears the sky and the
-// Reading block is a small off-white mushaf page; Memorization is one white panel; The hadith and Activity sit on
-// the page itself. The one moment of motion is the marks drawing themselves in
+// one deep forest, and a single fresher green that only ever marks "where you are now". The prayer card is the one card (it
+// wears the sky); everything else - Reading, Memorization, the hadith, Activity - sits open on the page itself, with air
+// between the sections instead of boxes or lines. The one moment of motion is the marks drawing themselves in
 // (Grow). Each section reads the saved state when it draws, so Home redraws every time it comes into view. It also keeps
 // one behaviour of the old home screen: after a change of narration the app opens again, and must land on the Quran tab
 // at the same place, not on Home.
@@ -54,7 +54,7 @@ export default function HomeTab() {
 
   return (
     <View style={{ flex: 1, backgroundColor: k.paper }}>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.lg, gap: space.md }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.xl, gap: space.xl }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md }}>
           <View style={{ flex: 1 }}>
             <Txt {...T.date} color={k.meta}>

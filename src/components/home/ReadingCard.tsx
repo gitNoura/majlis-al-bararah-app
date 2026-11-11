@@ -1,13 +1,12 @@
-// HOME, reading: the Quran card as it was in the earlier design (a thin inset frame, a small «Reading» chip, the surah's name
-// in Amiri, the page and juz under it, the khatma as one ring, and a long button with an arrow that opens the Quran at the
-// marker), now on white. The ring is in forest on a pale track; the button is white with a thin green edge.
+// HOME, reading: open on the page, no card, no frame, no box. A quiet «Reading» word, the surah's name large (Amiri in
+// Arabic), the page and juz under it, the khatma as one ring at the end, and «Continue reading» as plain green words with an
+// arrow. The whole block is one tap that opens the Quran at the marker.
 'use no memo'; // reads saved state (the marker) when it draws, which the React Compiler cannot see change
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { Panel } from '@/components/home/Panel';
 import { placeOf } from '@/components/quran/QuranHeader';
 import { Txt } from '@/components/Txt';
 import { Ring } from '@/components/ui';
@@ -60,7 +59,7 @@ export function ReadingCard() {
   );
   const words = (
     <View key="words" style={styles.words}>
-      <Txt {...T.big} size={21} lineHeight={28} color={k.ink} numberOfLines={1}>
+      <Txt {...T.big} serif={LANG === 'ar'} size={LANG === 'ar' ? 28 : 24} lineHeight={LANG === 'ar' ? 42 : 30} color={k.ink} numberOfLines={1}>
         {surahLine(r.page)}
       </Txt>
       <Txt {...T.small} color={k.meta} numberOfLines={1}>
@@ -70,37 +69,25 @@ export function ReadingCard() {
   );
 
   return (
-    <Panel style={styles.card}>
-      <View pointerEvents="none" style={[styles.frame, { borderColor: k.hairline }]} />
-      <View style={[styles.chip, { backgroundColor: k.track }]}>
-        <Txt {...T.smallBold} color={k.meta}>
-          {DASH.reading()}
-        </Txt>
-      </View>
+    <Pressable onPress={open} accessibilityRole="button" style={({ pressed }) => [styles.wrap, pressed && { opacity: 0.7 }]}>
+      <Txt {...T.smallBold} color={k.meta}>
+        {DASH.reading()}
+      </Txt>
       {/* the ring is always at the left edge of the screen in Arabic (the line begins at the right), at the right edge otherwise */}
       <View style={styles.top}>{LANG === 'ar' ? [ring, words] : [words, ring]}</View>
-      <Pressable
-        onPress={open}
-        accessibilityRole="button"
-        style={({ pressed }) => [styles.btn, { backgroundColor: k.pageButton, borderColor: k.pageLine }, pressed && { opacity: 0.88 }]}
-      >
-        <Txt {...T.button} color={k.buttonInk}>
+      <View style={styles.go}>
+        <Txt {...T.button} color={k.accent}>
           {r.started ? DASH.continueReading() : DASH.startReading()}
         </Txt>
-        <View style={[styles.go, { backgroundColor: k.goBg }]}>
-          <Arrow color={k.goInk} />
-        </View>
-      </Pressable>
-    </Panel>
+        <Arrow color={k.accent} />
+      </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, borderCurve: 'continuous', padding: space.cozy, gap: space.sm, overflow: 'hidden' },
-  frame: { position: 'absolute', top: 6, bottom: 6, start: 6, end: 6, borderRadius: 19, borderWidth: 1 },
-  chip: { alignSelf: 'flex-start', borderRadius: 12, paddingHorizontal: space.sm, paddingVertical: 3 },
+  wrap: { gap: space.sm, paddingHorizontal: space.xs },
   top: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   words: { flex: 1, gap: 2 },
-  btn: { height: 42, borderRadius: 21, borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: space.md, paddingEnd: 5 },
-  go: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  go: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
 });
