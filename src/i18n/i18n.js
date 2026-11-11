@@ -94,6 +94,20 @@ const STRINGS = {
 
   // Mutashabihat (tab of the ayah panel)
   noSimilar: ['لا متشابهات لهذه الآية.', 'This ayah has no similar ayat.'],
+  similar: ['المتشابهات', 'Similar ayat'],
+  simRepeats: ['تتكرر في سور أخرى', 'Repeated in other surahs'],
+  simSame: ['متشابهات في السورة نفسها', 'Similar in the same surah'],
+  simOther: ['متشابهات في سور أخرى', 'Similar in other surahs'],
+  agree_start: ['تتفق في البداية', 'Same beginning'],
+  agree_end: ['تتفق في النهاية', 'Same ending'],
+  agree_middle: ['تتشابه في الوسط', 'Alike in the middle'],
+  inSurah: [
+    (n) => `تتكرر هذه الآية في السورة نفسها ${n === 2 ? 'مرتين' : `${n} ${n <= 10 ? 'مرات' : 'مرة'}`}`,
+    (n) => `This ayah occurs ${n} times in this surah`,
+  ],
+  tjWhen: ['متى؟', 'When?'],
+  tjHow: ['كيف تقرأ؟', 'How to read it'],
+  tjSections: ['أقسام الدليل', 'Guide sections'],
   ayahRange: [(a, b) => `الآيات ${a}–${b}`, (a, b) => `Ayat ${a}–${b}`],
   simSource: ['المصدر: أصوات القرّاء (aswaatulqurraa.com)', 'Source: Aswaatul Qurraa (aswaatulqurraa.com)'],
 

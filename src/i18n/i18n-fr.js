@@ -34,6 +34,17 @@ export const FR = {
 
   // Mutashabihat
   noSimilar: 'Ce verset n’a pas de versets semblables.',
+  similar: 'Semblables',
+  simRepeats: 'Répété dans d’autres sourates',
+  simSame: 'Semblables dans la même sourate',
+  simOther: 'Semblables dans d’autres sourates',
+  agree_start: 'Même début',
+  agree_end: 'Même fin',
+  agree_middle: 'Semblables au milieu',
+  inSurah: (n) => `Ce verset revient ${n} fois dans cette sourate`,
+  tjWhen: 'Quand ?',
+  tjHow: 'Comment le lire',
+  tjSections: 'Sections du guide',
   ayahRange: (a, b) => `Versets ${a}–${b}`,
   simSource: 'Source : Aswaatul Qurraa (aswaatulqurraa.com)',
 

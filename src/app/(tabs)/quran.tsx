@@ -38,6 +38,7 @@ import { ReadButtons } from '@/components/quran/ReadButtons';
 import { useRecite } from '@/components/quran/ReciteMode';
 import { SearchPanel } from '@/components/quran/SearchPanel';
 import { QuranIndex } from '@/components/QuranIndex';
+import { TajweedGuide } from '@/components/TajweedGuide';
 import { Txt } from '@/components/Txt';
 import { LANG } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
@@ -102,6 +103,7 @@ function Quran() {
   const [hidden, setHidden] = useState(false); // full screen: header, tab bar and status bar gone; the page fills the screen
   const [room, setRoom] = useState<Room>({ width: 0, height: 0 });
   const [indexOpen, setIndexOpen] = useState(false);
+  const [tajweedOpen, setTajweedOpen] = useState(false); // the tajweed guide
   const [marksOpen, setMarksOpen] = useState(false); // the reader's marks
   const [marksTab, setMarksTab] = useState<MarksTab>('pages'); // which list of them
   const [searchOpen, setSearchOpen] = useState(false);
@@ -247,6 +249,13 @@ function Quran() {
     if (next.page !== page) jump(next.page);
   };
 
+  // a similar ayah (the sheet's third tab) was chosen: go to it, on its page, and show its own similar ayat
+  const goToAyah = (s: number, a: number) => {
+    setAyah({ s, a });
+    const target = pageOf(s, a);
+    if (target && target !== page) jump(target);
+  };
+
   // «Mark here» puts the exact pin on an ayah (a long press, or the ayah menu); on the ayah that carries it, the same
   // gesture takes it off
   const pinnedAt = (s: number, a: number) => pin?.shown === `${s}:${a}`;
@@ -373,6 +382,7 @@ function Quran() {
             ribbon={ribbon}
             bookmarked={mode === 'read' && here.bookmarked}
             onBookmark={mode === 'read' ? toggleBookmark : undefined}
+            onLegend={mode === 'read' ? () => setTajweedOpen(true) : undefined}
             around={around}
             veils={mode === 'recite' ? recite.veils : undefined}
           />
@@ -397,6 +407,7 @@ function Quran() {
             recite.bar
           ) : (
             <ReadButtons
+              onTajweed={() => setTajweedOpen(true)}
               onMarks={(tab) => {
                 setMarksTab(tab);
                 setMarksOpen(true);
@@ -441,7 +452,8 @@ function Quran() {
           light(found);
         }}
       />
-      <AyahSheet ayah={ayah} onClose={() => setAyah(null)} onMove={moveAyah} />
+      <AyahSheet ayah={ayah} onClose={() => setAyah(null)} onMove={moveAyah} onGo={goToAyah} />
+      <TajweedGuide open={tajweedOpen} onClose={() => setTajweedOpen(false)} />
       <AyahMenu
         at={menu}
         onClose={() => setMenu(null)}

@@ -18,6 +18,19 @@ const FRAME = HAFS ? HAFS_FRAME : WARSH;
 export const PAGE_SHAPE = 1400 / 2000;
 export const FULL_SHAPE = (FRAME.w * 1400) / (FRAME.h * 2000);
 
+// The colour legend printed at the foot of pages 3-604, in the same place on every page (measured on the pages by the
+// website; odd = right-hand page): [x0, y0, x1, y1] in fractions of the page picture. A tap on it opens the tajweed guide.
+const LEGEND_BOX = HAFS
+  ? { right: [0.0164, 0.864, 0.7971, 0.9115], left: [0.2014, 0.864, 0.9829, 0.9115] }
+  : { right: [0.0364, 0.883, 0.7571, 0.924], left: [0.2414, 0.883, 0.9614, 0.924] };
+
+// is the point (fractions of the page picture) on the page's colour legend?
+export function onLegend(page: number, x: number, y: number): boolean {
+  if (page < 3) return false;
+  const [x0, y0, x1, y1] = LEGEND_BOX[page % 2 ? 'right' : 'left'];
+  return x >= x0 && x <= x1 && y >= y0 && y <= y1;
+}
+
 export function cropOf(page: number, full: boolean): Crop {
   'worklet';
   if (!full) return WHOLE;

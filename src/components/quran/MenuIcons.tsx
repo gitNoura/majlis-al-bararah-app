@@ -20,6 +20,14 @@ export const BookIcon = ({ color, size }: Props) => (
   </Base>
 );
 
+// tajweed: a palette (the colours of the rules)
+export const TajweedIcon = ({ color, size }: Props) => (
+  <Base color={color} size={size}>
+    <Path d="M12 3.5c-4.7 0-8.5 3.4-8.5 7.7 0 3.1 2.3 4.6 4.3 4.6h1.4c1 0 1.6.8 1.3 1.7-.4 1.2.3 2.5 1.8 2.5 4.7 0 8.5-3.4 8.5-8 0-4.8-3.8-8.5-8.8-8.5z" />
+    <Path d="M7.6 11.2h.01M10.6 7.8h.01M14.6 8h.01M16.9 11.4h.01" strokeWidth={2.4} />
+  </Base>
+);
+
 export const BubbleIcon = ({ color, size }: Props) => (
   <Base color={color} size={size}>
     <Path d="M6 4.5h12a2.5 2.5 0 012.5 2.5v7.5a2.5 2.5 0 01-2.5 2.5h-6.2L8 21v-4H6a2.5 2.5 0 01-2.5-2.5V7A2.5 2.5 0 016 4.5zM8 9.2h8M8 12.6h5" />

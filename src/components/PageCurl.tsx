@@ -34,7 +34,7 @@ import { Easing, useAnimatedReaction, useDerivedValue, useSharedValue, withSeque
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { ayahAt } from '@/lib/boxes';
-import { cropOf } from '@/lib/crop';
+import { cropOf, onLegend } from '@/lib/crop';
 import { TOTAL_PAGES } from '@/lib/quran';
 import { pageUrl } from '@/lib/remote';
 import { useTheme } from '@/theme/theme';
@@ -83,6 +83,7 @@ type Props = {
   ribbon?: Chosen | null;
   bookmarked?: boolean; // the page read carries a bookmark
   onBookmark?: () => void; // a tap on the ribbon (given only where the page can be bookmarked)
+  onLegend?: () => void; // a tap on the colour legend at the foot of the page: the tajweed guide
   around?: Record<number, PageMarks>; // the marks of the pages before and after the one read
   // Tasmee (Recite): parts of the page covered with the paper's own colour, so the words under them cannot be read.
   // Boxes are fractions of the page picture, like `chosen`.
@@ -180,7 +181,7 @@ function PageLayer({ mine, role, at, mode, children }: { mine: number; role: Cov
   return <Group opacity={opacity}>{children}</Group>;
 }
 
-export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed, onHold, ribbon, bookmarked = false, onBookmark, around, veils }: Props) {
+export function PageCurl({ page, width, height, pageW, pageH, full, chosen, marks, pins, unzoom, onTurned, onAyah, onPin, onEmptyTap, onZoomed, onHold, ribbon, bookmarked = false, onBookmark, onLegend: openLegend, around, veils }: Props) {
   const { c, isDark } = useTheme();
   // night: the page always a little dimmer (its colours never changed); the choice in the settings is
   // only the screen around it in full screen (quran.tsx)
@@ -546,6 +547,8 @@ export function PageCurl({ page, width, height, pageW, pageH, full, chosen, mark
       const pin = pins.find((p) => Math.hypot(((p.x - crop.x) / crop.w - fx) * pageW * k, ((p.y - crop.y) / crop.h - fy) * pageH * k) < 22);
       if (pin) return onPin(pin.s, pin.a);
       const inside = fx >= 0 && fx <= 1 && fy >= 0 && fy <= 1;
+      // the colour legend at the page's foot opens the tajweed guide (before the ayat: it is drawn over them on the website)
+      if (inside && openLegend && onLegend(page, crop.x + fx * crop.w, crop.y + fy * crop.h)) return openLegend();
       const hit = inside ? ayahAt(page, crop.x + fx * crop.w, crop.y + fy * crop.h) : null;
       if (hit) return onAyah(hit.s, hit.a, e.x, e.y);
       if (inside && k <= 1.001 && fx < 0.1 && page < TOTAL_PAGES) return turnByTap(true);

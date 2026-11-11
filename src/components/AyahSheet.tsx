@@ -1,6 +1,6 @@
-// The chosen ayah (the website's tafsir panel), as a sheet from the bottom: its surah and number, two
-// tabs - the tafsir and the translation, each with the sources chosen (src/lib/sources.js) - and the
-// texts in the interface's own font (Tajawal), the ayat they quote in the Quran's (Amiri) and their own colour, each
+// The chosen ayah (the website's tafsir panel), as a sheet from the bottom: its surah and number, three
+// tabs - the tafsir and the translation (each with the sources chosen, src/lib/sources.js) and the similar ayat
+// (src/components/SimilarList.tsx). The texts are in the interface's own font (Tajawal), the ayat they quote in the Quran's (Amiri) and their own colour, each
 // source's name under its text. Previous (on the left) and next (on the right) go from ayah to ayah.
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Animated, Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { CloseIcon } from '@/components/icons';
+import { SimilarList } from '@/components/SimilarList';
 import { Txt } from '@/components/Txt';
 import { L, LANG, surahName, t } from '@/i18n/i18n';
 import { SURAHS } from '@/lib/quran';
@@ -16,13 +17,14 @@ import { loadTafsir, withQuotes } from '@/lib/tafsir';
 import { textSide } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 
-type Kind = 'tafsir' | 'translation';
+type Kind = 'tafsir' | 'translation' | 'similar';
+type Reading = 'tafsir' | 'translation';
 type Source = { id: string; name: string; nameEn: string; nameFr?: string; lang: string; kind?: string; perAyah?: boolean };
 type Block = { src: Source; paragraphs: string[] | null };
 
 export type Ayah = { s: number; a: number };
 
-export function AyahSheet({ ayah, onClose, onMove }: { ayah: Ayah | null; onClose: () => void; onMove: (step: 1 | -1) => void }) {
+export function AyahSheet({ ayah, onClose, onMove, onGo }: { ayah: Ayah | null; onClose: () => void; onMove: (step: 1 | -1) => void; onGo: (s: number, a: number) => void }) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
@@ -41,9 +43,10 @@ export function AyahSheet({ ayah, onClose, onMove }: { ayah: Ayah | null; onClos
 
   // the texts of the tab's sources, for this ayah (a newer ayah or tab replaces them)
   useEffect(() => {
-    if (!ayah) return;
+    if (!ayah || kind === 'similar') return;
     let stale = false;
-    const sources = (tafsirSources() as Source[]).filter((src) => (src.kind ?? 'tafsir') === kind);
+    const reading: Reading = kind;
+    const sources = (tafsirSources() as Source[]).filter((src) => (src.kind ?? 'tafsir') === reading);
     Promise.all(sources.map((src) => loadTafsir(src, ayah.s, ayah.a).catch(() => null))).then((texts) => {
       if (!stale) setLoaded({ key: `${ayah.s}:${ayah.a}:${kind}`, blocks: sources.map((src, i) => ({ src, paragraphs: texts[i] })) });
     });
@@ -82,23 +85,24 @@ export function AyahSheet({ ayah, onClose, onMove }: { ayah: Ayah | null; onClos
         </View>
 
         <View style={[styles.tabs, { backgroundColor: c.soft }]}>
-          {(['tafsir', 'translation'] as Kind[]).map((k) => (
+          {(['tafsir', 'translation', 'similar'] as Kind[]).map((k) => (
             <Pressable key={k} onPress={() => setKind(k)} style={[styles.tab, kind === k && { backgroundColor: c.on }]}>
               <Txt size={15} weight={kind === k ? 700 : 500} center color={kind === k ? c.onInk : c.tabInk}>
-                {t(k === 'tafsir' ? 'tafsir' : 'translation')}
+                {t(k)}
               </Txt>
             </Pressable>
           ))}
         </View>
 
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingVertical: 14, gap: 22 }}>
-          {!blocks && <ActivityIndicator color={c.gold} style={{ marginTop: 24 }} />}
-          {blocks?.length === 0 && (
+          {kind === 'similar' && ayah && <SimilarList key={`${ayah.s}:${ayah.a}`} s={ayah.s} a={ayah.a} onGo={onGo} />}
+          {kind !== 'similar' && !blocks && <ActivityIndicator color={c.gold} style={{ marginTop: 24 }} />}
+          {kind !== 'similar' && blocks?.length === 0 && (
             <Txt size={16} center color={c.meta}>
               {t(kind === 'translation' ? 'noTranslation' : 'noTafsir')}
             </Txt>
           )}
-          {blocks?.map(({ src, paragraphs }) => {
+          {kind !== 'similar' && blocks?.map(({ src, paragraphs }) => {
             const arabic = src.lang === 'ar';
             const size = arabic ? 18 : 16;
             const line = arabic ? 32 : 26;
