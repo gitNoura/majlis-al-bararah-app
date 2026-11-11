@@ -1,24 +1,22 @@
-// HOME, activity this week. Open on the page, no card: the title and "5 of 7" on one line, then seven capsules, one per
-// day, Monday first, each in sage green (today's in the forest) as tall as the reading of that day (the ayat the wird counted; a day the reader only opened the
-// mushaf or Hifdh is a middle height), a day without activity a short stub, a day still to come a fainter one. Today is the
-// one with a green dot under its letter (and, if nothing was done yet, a green edge). A day counts when the reader
-// opened the mushaf or Hifdh, or logged the wird (src/lib/activity.js). The capsules draw in once with the rest of Home.
+// HOME, activity this week: a card of the prayer card's family. Its head is the title with «5 of 7» at the end; under it seven
+// tinted day pills in a strip, Monday first, as the prayer card has its five times. Each holds a capsule as tall as the reading of
+// that day (the ayat the wird counted; a day the reader only opened the mushaf or Hifdh is a middle height), a day without
+// activity a short stub. Today is the one dark pill. A day counts when the reader opened the mushaf or Hifdh, or logged the
+// wird (src/lib/activity.js). The capsules draw in once with the rest of Home.
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
-import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 
 import { Grow } from '@/components/home/Grow';
+import { HomeCard } from '@/components/home/HomeCard';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { LANG } from '@/i18n/i18n';
 import { activityGrid } from '@/lib/dashboard';
 import { useSkin } from '@/theme/homeSkin';
-import { T } from '@/theme/homeType';
-import { space } from '@/theme/tokens';
 
 const digits = (n: number) => n.toLocaleString('en');
-const BAR = 56; // the height of the tallest capsule
-const STUB = 8;
+const BAR = 48; // the height of the tallest capsule
+const STUB = 6;
 
 export function ActivityCard() {
   const k = useSkin();
@@ -32,56 +30,46 @@ export function ActivityCard() {
   const height = (i: number) => (week[i].ayat > 0 ? BAR * (0.34 + 0.66 * (week[i].ayat / most)) : BAR * 0.4);
 
   return (
-    <View style={styles.wrap}>
+    <HomeCard>
       <View style={styles.head}>
-        <Txt {...T.title} color={k.ink}>
+        <Txt size={15} weight={700} color={k.cardInk}>
           {DASH.activity()}
         </Txt>
-        <Txt {...T.figure} color={k.accent}>
+        <Txt size={14} weight={700} color={k.cardInk}>
           {DASH.activityOf7(digits(count))}
         </Txt>
       </View>
-      <View style={styles.bars} accessible accessibilityLabel={`${count}/7`}>
+      <View style={styles.strip} accessible accessibilityLabel={`${count}/7`}>
         {week.map((d, i) => {
           const today = i === todayIndex;
+          const ink = today ? k.cardHiInk : k.cardInk;
           return (
-            <View key={d.day} style={styles.col}>
+            <View key={d.day} style={[styles.day, { backgroundColor: today ? k.cardHi : k.cardPill }]}>
               <View style={styles.slot}>
                 {on[i] ? (
-                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { boxShadow: `0px 4px 10px ${k.lift}` }]}>
-                    <LinearGradient colors={today ? [k.spark, k.fill] : [k.bar, k.bar]} style={{ flex: 1, borderRadius: 9 }} />
-                  </Grow>
+                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: ink, opacity: today ? 1 : 0.55 }]} />
                 ) : (
-                  <View
-                    style={[
-                      styles.bar,
-                      { height: STUB, backgroundColor: k.soft, opacity: d.future ? 0.6 : 1 },
-                      today && { backgroundColor: 'transparent', borderWidth: 2, borderColor: k.spark },
-                    ]}
-                  />
+                  <View style={[styles.bar, { height: STUB, backgroundColor: today ? k.cardHiInk : k.cardTrack, opacity: d.future ? 0.5 : 1 }]} />
                 )}
               </View>
-              <Txt {...T.small} weight={today ? 800 : 500} color={today ? k.ink : k.meta} center>
+              <Txt size={11} weight={today ? 700 : 500} color={today ? k.cardHiInk : k.cardSoft} center>
                 {letter(d.day)}
               </Txt>
-              <View style={[styles.dot, { backgroundColor: today ? k.spark : 'transparent' }]} />
             </View>
           );
         })}
       </View>
-      <Txt {...T.small} color={k.meta}>
+      <Txt size={12} weight={500} color={k.cardSoft}>
         {DASH.activityCaption()}
       </Txt>
-    </View>
+    </HomeCard>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space.sm },
   head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  bars: { flexDirection: 'row', gap: space.xs },
-  col: { flex: 1, alignItems: 'center', gap: space.xs },
+  strip: { flexDirection: 'row', gap: 4 },
+  day: { flex: 1, borderRadius: 10, paddingVertical: 6, alignItems: 'center', gap: 4 },
   slot: { height: BAR, justifyContent: 'flex-end', alignItems: 'center' },
-  bar: { width: 18, borderRadius: 9 },
-  dot: { width: 5, height: 5, borderRadius: 3 },
+  bar: { width: 12, borderRadius: 6 },
 });

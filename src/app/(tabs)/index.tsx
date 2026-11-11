@@ -5,17 +5,16 @@
 //   4 the hadith of the reader, as a quiet note                       5 activity (this week), the last
 //   (the adhkar and ahadith libraries are the Library tab)
 // The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a quiet neutral page at the app's everyday sizes (12 to 26),
-// one deep forest, and a single fresher green that only ever marks "where you are now". The prayer card is the one card (it
-// wears the sky); everything else - Reading, Memorization, the hadith, Activity - sits open on the page itself, with air
-// between the sections instead of boxes or lines. The one moment of motion is the marks drawing themselves in
+// one deep forest, and a single fresher green that only ever marks "where you are now". Four cards of ONE family (HomeCard):
+// the prayer card wears the sky of the moment; Reading, Memorization and Activity wear the same card (the same radius, shadow
+// and small tinted pills, one dark pill for what is current) in the page's own calm green. The hadith closes the page as a quiet note. The one moment of motion is the marks drawing themselves in
 // (Grow). Each section reads the saved state when it draws, so Home redraws every time it comes into view. It also keeps
 // one behaviour of the old home screen: after a change of narration the app opens again, and must land on the Quran tab
 // at the same place, not on Home.
 'use no memo'; // the sections read saved state (modules), which the React Compiler cannot see change
-import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActivityCard } from '@/components/home/ActivityCard';
@@ -55,8 +54,7 @@ export default function HomeTab() {
 
   return (
     <View style={{ flex: 1, backgroundColor: k.paper }}>
-      <LinearGradient colors={[k.paper, k.paper, k.wash]} locations={[0, 0.35, 1]} style={StyleSheet.absoluteFill} pointerEvents="none" />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.xl, gap: space.xl }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.lg, gap: space.md }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md }}>
           <View style={{ flex: 1 }}>
             <Txt {...T.date} color={k.meta}>

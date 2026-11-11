@@ -1,19 +1,18 @@
-// HOME, memorization and revision: the two plans side by side, open on the page (no panel, no line between them). Each shows how far its plan is through its WHOLE run (not today's portions): a large
-// percentage, a thin bar that draws in once, and the days done out of all its days; the memorization side also says how
-// many juz are memorized. With no plan of that kind yet it is a plain invitation to create one; a plan not begun says
-// «Start today». A tap opens the Hifdh tab. Everything is read from the plan's saved state.
+// HOME, memorization and revision: one card of the prayer card's family with the two plans as two tinted pills side by side
+// (as the prayer card has its five times). Each shows how far its plan is through its WHOLE run (not today's portions): a large
+// percentage, a thin bar that draws in once, and the days done out of all its days; the memorization pill also says how many
+// juz are memorized. With no plan of that kind yet it is a plain invitation to create one; a plan not begun says «Start
+// today». A tap on a pill opens the Hifdh tab. Everything is read from the plan's saved state.
 'use no memo'; // reads saved state (the plans) when it draws, which the React Compiler cannot see change
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Grow } from '@/components/home/Grow';
+import { HomeCard } from '@/components/home/HomeCard';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { hifdhOverview, memorizedCells } from '@/lib/dashboard';
 import { useSkin } from '@/theme/homeSkin';
-import { T } from '@/theme/homeType';
-import { space } from '@/theme/tokens';
 
 const digits = (n: number) => n.toLocaleString('en');
 
@@ -30,43 +29,39 @@ function Plan({ title, part, emptyText, extra }: { title: string; part: Part; em
       onPress={() => router.navigate('/hifdh')}
       accessibilityRole="button"
       accessibilityLabel={`${title} ${running ? `${pct}%` : emptyText}`}
-      style={({ pressed }) => [styles.plan, pressed && { opacity: 0.7 }]}
+      style={({ pressed }) => [styles.plan, { backgroundColor: k.cardPill }, pressed && { opacity: 0.7 }]}
     >
-      <Txt {...T.smallBold} color={k.meta} numberOfLines={1}>
+      <Txt size={12} weight={700} color={k.cardSoft} numberOfLines={1}>
         {title}
       </Txt>
       {part.has ? (
         <>
-          <Txt {...T.big} size={34} lineHeight={42} color={running ? k.ink : k.meta}>
+          <Txt size={26} weight={800} lineHeight={32} color={running ? k.cardInk : k.cardSoft}>
             {running ? `${digits(pct)}%` : '–'}
           </Txt>
-          <View style={[styles.track, { backgroundColor: k.track }]}>
-            {running && pct > 0 && (
-              <Grow axis="x" to={Math.max(pct, 6) / 100} delay={300} style={{ height: '100%', borderRadius: 5, boxShadow: `0px 3px 8px ${k.lift}` }}>
-                <LinearGradient colors={[k.spark, k.fill]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flex: 1, borderRadius: 5 }} />
-              </Grow>
-            )}
+          <View style={[styles.track, { backgroundColor: k.cardTrack }]}>
+            {running && pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={{ height: '100%', borderRadius: 2, backgroundColor: k.cardHi }} />}
           </View>
-          <Txt {...T.small} color={k.meta} numberOfLines={2}>
+          <Txt size={12} weight={500} color={k.cardSoft} numberOfLines={2}>
             {caption}
           </Txt>
           {notBegun && (
-            <Txt {...T.smallBold} color={k.ink} numberOfLines={1}>
+            <Txt size={12} weight={700} color={k.cardInk} numberOfLines={1}>
               {DASH.planBegin()}
             </Txt>
           )}
           {!!extra && (
-            <Txt {...T.smallBold} color={k.ink} numberOfLines={2}>
+            <Txt size={12} weight={700} color={k.cardInk} numberOfLines={2}>
               {extra}
             </Txt>
           )}
         </>
       ) : (
         <>
-          <Txt {...T.title} color={k.ink} numberOfLines={3}>
+          <Txt size={14} weight={700} lineHeight={20} color={k.cardInk} numberOfLines={3}>
             {emptyText}
           </Txt>
-          <Txt {...T.smallBold} color={k.ink} numberOfLines={1}>
+          <Txt size={12} weight={700} color={k.cardInk} numberOfLines={1}>
             {DASH.createPlan()}
           </Txt>
         </>
@@ -79,17 +74,15 @@ export function MemorizationCard() {
   const o = hifdhOverview();
   const juz = Math.round(memorizedCells().reduce((a, b) => a + b, 0) * 10) / 10;
   return (
-    <View style={styles.row}>
+    <HomeCard style={styles.row}>
       <Plan title={DASH.memorizePlan()} part={o.memorize} emptyText={DASH.noMemorizePlan()} extra={juz > 0 ? `${digits(juz)} ${DASH.memorizedOf()}` : undefined} />
-      <View style={styles.gap} />
       <Plan title={DASH.revisionPlan()} part={o.revise} emptyText={DASH.noRevisionPlan()} />
-    </View>
+    </HomeCard>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', paddingHorizontal: space.xs },
-  plan: { flex: 1, gap: space.xs },
-  gap: { width: space.xl },
-  track: { height: 10, borderRadius: 5, flexDirection: 'row', marginVertical: space.sm },
+  row: { flexDirection: 'row' },
+  plan: { flex: 1, gap: 4, borderRadius: 14, padding: 12 },
+  track: { height: 4, borderRadius: 2, overflow: 'hidden', flexDirection: 'row', marginVertical: 4 },
 });
