@@ -7,9 +7,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { SettingsIcon } from '@/components/icons';
 import type { Tab } from '@/components/quran/MarksSheet';
-import { BookmarkIcon, BubbleIcon, MarkerIcon, TajweedIcon } from '@/components/quran/MenuIcons';
+import { BookmarkIcon, BubbleIcon, MarkerIcon } from '@/components/quran/MenuIcons';
 import { Txt } from '@/components/Txt';
-import { t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
 import { READER } from '@/i18n/reader';
 import { useTheme } from '@/theme/theme';
@@ -17,7 +16,7 @@ import { space } from '@/theme/tokens';
 
 export const READ_BAR_H = 64;
 
-export function ReadButtons({ onMarks, onTajweed }: { onMarks: (tab: Tab) => void; onTajweed: () => void }) {
+export function ReadButtons({ onMarks }: { onMarks: (tab: Tab) => void }) {
   const { c } = useTheme();
   const item = (label: string, onPress: () => void, icon: ReactNode) => (
     <Pressable key={label} onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={({ pressed }) => [styles.item, pressed && { opacity: 0.6 }]}>
@@ -33,7 +32,6 @@ export function ReadButtons({ onMarks, onTajweed }: { onMarks: (tab: Tab) => voi
         {item(QURAN.marksPages(), () => onMarks('pages'), <BookmarkIcon color={c.ink} size={22} />)}
         {item(QURAN.marksHighlights(), () => onMarks('highlights'), <MarkerIcon color={c.ink} size={22} />)}
         {item(QURAN.marksComments(), () => onMarks('comments'), <BubbleIcon color={c.ink} size={22} />)}
-        {item(t('tajweed'), onTajweed, <TajweedIcon color={c.ink} size={22} />)}
         {item(READER.settingsTitle(), () => router.push('/quran-settings'), <SettingsIcon color={c.ink} size={22} />)}
       </View>
     </View>

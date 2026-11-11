@@ -9,10 +9,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CloseIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
-import { LANG, L, t } from '@/i18n/i18n';
+import { L, t } from '@/i18n/i18n';
 import { forDisplay } from '@/lib/search';
 import { guideSub, legend, sections } from '@/lib/tajweed';
-import { textSide } from '@/theme/ltr';
+import { lineStart } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 
 type Rule = { color: string; name: string; length: string; when: string; how: string; examples: string[][] };
@@ -27,13 +27,12 @@ type Section = {
 };
 
 const SECTIONS = sections as Section[];
-const rtl = LANG === 'ar';
 
 // «plain, coloured, plain, ...»: every second part in the rule's colour
 function Example({ parts, color }: { parts: string[]; color: string }) {
   const { c } = useTheme();
   return (
-    <Txt serif size={24} lineHeight={44} color={c.text} style={{ textAlign: textSide('right'), writingDirection: 'rtl' }}>
+    <Txt serif size={24} lineHeight={44} color={c.text} style={{ textAlign: 'auto', writingDirection: 'rtl' }}>
       {parts.map((part, i) => (
         <Txt key={i} serif size={24} lineHeight={44} color={i % 2 ? color : c.text}>
           {forDisplay(part)}
@@ -45,6 +44,7 @@ function Example({ parts, color }: { parts: string[]; color: string }) {
 
 function RuleCard({ rule }: { rule: Rule }) {
   const { c } = useTheme();
+  const start = lineStart();
   return (
     <View style={[styles.card, { backgroundColor: c.soft, borderStartColor: rule.color }]}>
       <View style={styles.row}>
@@ -59,13 +59,13 @@ function RuleCard({ rule }: { rule: Rule }) {
       <Txt size={14} weight={700} color={c.meta}>
         {t('tjWhen')}
       </Txt>
-      <Txt size={15} lineHeight={25} color={c.text} style={{ textAlign: textSide(rtl ? 'right' : 'left') }}>
+      <Txt size={15} lineHeight={25} color={c.text} style={start}>
         {rule.when}
       </Txt>
       <Txt size={14} weight={700} color={c.meta}>
         {t('tjHow')}
       </Txt>
-      <Txt size={15} lineHeight={25} color={c.text} style={{ textAlign: textSide(rtl ? 'right' : 'left') }}>
+      <Txt size={15} lineHeight={25} color={c.text} style={start}>
         {rule.how}
       </Txt>
       <View style={{ gap: 2, marginTop: 4 }}>
@@ -114,7 +114,7 @@ export function TajweedGuide({ open, onClose }: { open: boolean; onClose: () => 
     }
   };
 
-  const textAlign = textSide(rtl ? 'right' : 'left');
+  const start = lineStart();
 
   return (
     <Modal visible={open} transparent animationType="none" onRequestClose={close} statusBarTranslucent>
@@ -160,11 +160,11 @@ export function TajweedGuide({ open, onClose }: { open: boolean; onClose: () => 
         <ScrollView ref={body} style={{ flex: 1 }} contentContainerStyle={{ paddingVertical: 14, gap: 26 }} onScroll={onScroll} scrollEventThrottle={32}>
           {SECTIONS.map((s) => (
             <View key={s.id} style={{ gap: 12 }} onLayout={(e) => (tops.current[s.id] = e.nativeEvent.layout.y)}>
-              <Txt size={19} weight={700} color={c.ink} style={{ textAlign }}>
+              <Txt size={19} weight={700} color={c.ink} style={start}>
                 {s.title}
               </Txt>
               {!!s.intro && (
-                <Txt size={15} lineHeight={25} color={c.text} style={{ textAlign }}>
+                <Txt size={15} lineHeight={25} color={c.text} style={start}>
                   {s.intro}
                 </Txt>
               )}
@@ -191,10 +191,10 @@ export function TajweedGuide({ open, onClose }: { open: boolean; onClose: () => 
                     </Txt>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Txt size={15} weight={700} color={c.ink} style={{ textAlign }}>
+                    <Txt size={15} weight={700} color={c.ink} style={start}>
                       {title}
                     </Txt>
-                    <Txt size={14} lineHeight={22} color={c.meta} style={{ textAlign }}>
+                    <Txt size={14} lineHeight={22} color={c.meta} style={start}>
                       {text}
                     </Txt>
                   </View>
@@ -203,17 +203,17 @@ export function TajweedGuide({ open, onClose }: { open: boolean; onClose: () => 
               {s.rules?.map((r) => <RuleCard key={r.name} rule={r} />)}
               {s.features?.map(([title, text, example]) => (
                 <View key={title} style={[styles.card, { backgroundColor: c.soft, borderStartColor: c.line }]}>
-                  <Txt size={16} weight={700} color={c.ink} style={{ textAlign }}>
+                  <Txt size={16} weight={700} color={c.ink} style={start}>
                     {title}
                   </Txt>
-                  <Txt size={15} lineHeight={25} color={c.text} style={{ textAlign }}>
+                  <Txt size={15} lineHeight={25} color={c.text} style={start}>
                     {text}
                   </Txt>
                   <Example parts={[example]} color={c.text} />
                 </View>
               ))}
               {!!s.note && (
-                <Txt size={14} lineHeight={23} color={c.meta} style={{ textAlign }}>
+                <Txt size={14} lineHeight={23} color={c.meta} style={start}>
                   {s.note}
                 </Txt>
               )}

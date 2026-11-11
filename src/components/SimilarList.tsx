@@ -9,7 +9,6 @@ import { surahName, t } from '@/i18n/i18n';
 import { pageOf } from '@/lib/boxes';
 import { loadTexts, parseKey, similarOf, wordsOf } from '@/lib/mutashabihat';
 import { SURAHS } from '@/lib/quran';
-import { textSide } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 
 type Item = { k: string; at: string; d: number[] };
@@ -51,7 +50,7 @@ export function SimilarList({ s, a, onGo }: { s: number; a: number; onGo: (s: nu
     return { ...p, name: surahName(SURAHS[p.s - 1]), page };
   };
   const ayahText = (k: string, d: number[] = [], big = false) => (
-    <Txt size={big ? 21 : 19} lineHeight={big ? 38 : 34} serif color={c.text} style={{ textAlign: textSide('right'), writingDirection: 'rtl' }}>
+    <Txt size={big ? 21 : 19} lineHeight={big ? 38 : 34} serif color={c.text} style={{ textAlign: 'auto', writingDirection: 'rtl' }}>
       {wordsOf(k, d).map((w, i) => (
         <Txt key={i} serif size={big ? 21 : 19} lineHeight={big ? 38 : 34} color={w.mark ? c.onInk : c.text} style={w.mark ? { backgroundColor: c.on } : undefined}>
           {w.text}

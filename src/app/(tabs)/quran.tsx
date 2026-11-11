@@ -407,7 +407,6 @@ function Quran() {
             recite.bar
           ) : (
             <ReadButtons
-              onTajweed={() => setTajweedOpen(true)}
               onMarks={(tab) => {
                 setMarksTab(tab);
                 setMarksOpen(true);
