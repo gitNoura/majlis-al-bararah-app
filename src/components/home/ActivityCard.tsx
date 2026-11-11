@@ -4,6 +4,7 @@
 // one with a green dot under its letter (and, if nothing was done yet, a green edge). A day counts when the reader
 // opened the mushaf or Hifdh, or logged the wird (src/lib/activity.js). The capsules draw in once with the rest of Home.
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
+import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 
 import { Grow } from '@/components/home/Grow';
@@ -47,7 +48,9 @@ export function ActivityCard() {
             <View key={d.day} style={styles.col}>
               <View style={styles.slot}>
                 {on[i] ? (
-                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: today ? k.fill : k.bar }]} />
+                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { boxShadow: `0px 4px 10px ${k.lift}` }]}>
+                    <LinearGradient colors={today ? [k.spark, k.fill] : [k.bar, k.bar]} style={{ flex: 1, borderRadius: 9 }} />
+                  </Grow>
                 ) : (
                   <View
                     style={[
@@ -79,6 +82,6 @@ const styles = StyleSheet.create({
   bars: { flexDirection: 'row', gap: space.xs },
   col: { flex: 1, alignItems: 'center', gap: space.xs },
   slot: { height: BAR, justifyContent: 'flex-end', alignItems: 'center' },
-  bar: { width: 16, borderRadius: 8 },
+  bar: { width: 18, borderRadius: 9 },
   dot: { width: 5, height: 5, borderRadius: 3 },
 });

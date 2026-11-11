@@ -51,11 +51,13 @@ export function ReadingCard() {
   };
 
   const ring = (
-    <Ring key="ring" value={r.percent / 100} size={54} color={k.fill} track={k.pageBead} a11y={`${r.percent}%`}>
-      <Txt size={12} weight={700} color={k.ink}>
-        {`${digits(r.percent)}%`}
-      </Txt>
-    </Ring>
+    <View key="ring" style={[styles.ring, { backgroundColor: k.paper, boxShadow: `0px 8px 20px ${k.lift}` }]}>
+      <Ring value={r.percent / 100} size={74} color={k.fill} track={k.track} a11y={`${r.percent}%`}>
+        <Txt size={15} weight={700} color={k.ink}>
+          {`${digits(r.percent)}%`}
+        </Txt>
+      </Ring>
+    </View>
   );
   const words = (
     <View key="words" style={styles.words}>
@@ -75,19 +77,20 @@ export function ReadingCard() {
       </Txt>
       {/* the ring is always at the left edge of the screen in Arabic (the line begins at the right), at the right edge otherwise */}
       <View style={styles.top}>{LANG === 'ar' ? [ring, words] : [words, ring]}</View>
-      <View style={styles.go}>
-        <Txt {...T.button} color={k.accent}>
+      <View style={[styles.go, { backgroundColor: k.goBg, boxShadow: `0px 8px 18px ${k.lift}` }]}>
+        <Txt {...T.button} color={k.goInk}>
           {r.started ? DASH.continueReading() : DASH.startReading()}
         </Txt>
-        <Arrow color={k.accent} />
+        <Arrow color={k.goInk} />
       </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space.sm, paddingHorizontal: space.xs },
+  wrap: { gap: space.md, paddingHorizontal: space.xs },
   top: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   words: { flex: 1, gap: 2 },
-  go: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  ring: { width: 74, height: 74, borderRadius: 37 },
+  go: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: space.sm, height: 46, borderRadius: 23, paddingHorizontal: space.lg },
 });

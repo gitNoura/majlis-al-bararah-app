@@ -16,6 +16,8 @@ import { dark as darkTokens } from './tokens';
 
 export type HomeSkin = {
   paper: string;
+  wash: string; // the page's colour at its foot (the page fades into it, so it has depth without any box)
+  lift: string; // the shadow under what is lifted: the ring, the button, the bars
   surface: string;
   soft: string; // the light green of a soft panel (the memorization card)
   softTrack: string; // an empty bar on that soft panel
@@ -47,7 +49,9 @@ export type HomeSkin = {
 const PAGE = { pageInk: '#173f32', pageLine: 'rgba(23, 63, 50, 0.32)', pageBead: 'rgba(23, 63, 50, 0.14)', pageButton: '#ffffff' };
 
 const light: HomeSkin = {
-  paper: '#f4f5f3',
+  paper: '#f6f7f4',
+  wash: '#e3ede7',
+  lift: 'rgba(23, 63, 50, 0.24)',
   surface: '#ffffff',
   soft: '#dce9df',
   softTrack: 'rgba(255, 255, 255, 0.75)',
@@ -78,6 +82,8 @@ const light: HomeSkin = {
 // is lit: the ring, today's bar, the wide button. Words are a warm off-white.
 const dark: HomeSkin = {
   paper: '#121212',
+  wash: '#17211c',
+  lift: 'rgba(0, 0, 0, 0.6)',
   surface: '#1c1c1c',
   surfaceTop: '#232323',
   surfaceBottom: '#191919',

@@ -3,6 +3,7 @@
 // many juz are memorized. With no plan of that kind yet it is a plain invitation to create one; a plan not begun says
 // «Start today». A tap opens the Hifdh tab. Everything is read from the plan's saved state.
 'use no memo'; // reads saved state (the plans) when it draws, which the React Compiler cannot see change
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -36,11 +37,15 @@ function Plan({ title, part, emptyText, extra }: { title: string; part: Part; em
       </Txt>
       {part.has ? (
         <>
-          <Txt {...T.big} size={24} lineHeight={30} color={running ? k.ink : k.meta}>
+          <Txt {...T.big} size={34} lineHeight={42} color={running ? k.ink : k.meta}>
             {running ? `${digits(pct)}%` : '–'}
           </Txt>
           <View style={[styles.track, { backgroundColor: k.track }]}>
-            {running && pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={{ height: '100%', borderRadius: 2, backgroundColor: k.fill }} />}
+            {running && pct > 0 && (
+              <Grow axis="x" to={Math.max(pct, 6) / 100} delay={300} style={{ height: '100%', borderRadius: 5, boxShadow: `0px 3px 8px ${k.lift}` }}>
+                <LinearGradient colors={[k.spark, k.fill]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flex: 1, borderRadius: 5 }} />
+              </Grow>
+            )}
           </View>
           <Txt {...T.small} color={k.meta} numberOfLines={2}>
             {caption}
@@ -86,5 +91,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', paddingHorizontal: space.xs },
   plan: { flex: 1, gap: space.xs },
   gap: { width: space.xl },
-  track: { height: 3, borderRadius: 2, overflow: 'hidden', flexDirection: 'row', marginVertical: space.xs },
+  track: { height: 10, borderRadius: 5, flexDirection: 'row', marginVertical: space.sm },
 });

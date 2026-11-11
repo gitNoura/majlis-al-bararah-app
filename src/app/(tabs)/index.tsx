@@ -12,9 +12,10 @@
 // one behaviour of the old home screen: after a change of narration the app opens again, and must land on the Quran tab
 // at the same place, not on Home.
 'use no memo'; // the sections read saved state (modules), which the React Compiler cannot see change
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActivityCard } from '@/components/home/ActivityCard';
@@ -54,6 +55,7 @@ export default function HomeTab() {
 
   return (
     <View style={{ flex: 1, backgroundColor: k.paper }}>
+      <LinearGradient colors={[k.paper, k.paper, k.wash]} locations={[0, 0.35, 1]} style={StyleSheet.absoluteFill} pointerEvents="none" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.xl, gap: space.xl }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md }}>
           <View style={{ flex: 1 }}>
