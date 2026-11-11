@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { HomeCard } from '@/components/home/HomeCard';
+import { HomeCard, useCardSky } from '@/components/home/HomeCard';
 import { placeOf } from '@/components/quran/QuranHeader';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
@@ -17,7 +17,6 @@ import { isEnglish, isFrench, LANG } from '@/i18n/i18n';
 import { surahsOn } from '@/lib/boxes';
 import { readingView } from '@/lib/dashboard';
 import { SURAHS } from '@/lib/quran';
-import { useSkin } from '@/theme/homeSkin';
 
 const digits = (n: number) => n.toLocaleString('en');
 
@@ -38,7 +37,7 @@ function Arrow({ color }: { color: string }) {
 }
 
 export function ReadingCard() {
-  const k = useSkin();
+  const c = useCardSky();
   const r = readingView();
   const where = placeOf(r.page);
   // the page, then the hizb and juz
@@ -54,28 +53,28 @@ export function ReadingCard() {
     <HomeCard onPress={open} label={`${DASH.reading()} ${action}`}>
       <View style={styles.head}>
         <View style={styles.words}>
-          <Txt size={12} weight={700} color={k.cardSoft}>
+          <Txt size={12} weight={700} color={c.soft}>
             {DASH.reading()}
           </Txt>
-          <Txt serif={LANG === 'ar'} size={21} weight={800} lineHeight={LANG === 'ar' ? 34 : 28} color={k.cardInk} numberOfLines={1}>
+          <Txt serif={LANG === 'ar'} size={21} weight={800} lineHeight={LANG === 'ar' ? 34 : 28} color={c.ink} numberOfLines={1}>
             {surahLine(r.page)}
           </Txt>
         </View>
-        <Txt size={14} weight={700} color={k.cardInk}>
+        <Txt size={14} weight={700} color={c.ink}>
           {`${digits(r.percent)}%`}
         </Txt>
       </View>
       <View style={styles.buttons}>
-        <View style={[styles.btn, { backgroundColor: k.cardPill }]}>
-          <Txt size={12} weight={500} color={k.cardSoft} numberOfLines={1}>
+        <View style={[styles.btn, { backgroundColor: c.pill }]}>
+          <Txt size={12} weight={500} color={c.soft} numberOfLines={1}>
             {sub}
           </Txt>
         </View>
-        <View style={[styles.btn, { backgroundColor: k.cardHi }]}>
-          <Txt size={13} weight={700} color={k.cardHiInk} numberOfLines={1}>
+        <View style={[styles.btn, { backgroundColor: c.hi }]}>
+          <Txt size={13} weight={700} color={c.hiInk} numberOfLines={1}>
             {action}
           </Txt>
-          <Arrow color={k.cardHiInk} />
+          <Arrow color={c.hiInk} />
         </View>
       </View>
     </HomeCard>

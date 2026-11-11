@@ -7,19 +7,18 @@
 import { StyleSheet, View } from 'react-native';
 
 import { Grow } from '@/components/home/Grow';
-import { HomeCard } from '@/components/home/HomeCard';
+import { HomeCard, useCardSky } from '@/components/home/HomeCard';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { LANG } from '@/i18n/i18n';
 import { activityGrid } from '@/lib/dashboard';
-import { useSkin } from '@/theme/homeSkin';
 
 const digits = (n: number) => n.toLocaleString('en');
 const BAR = 48; // the height of the tallest capsule
 const STUB = 6;
 
 export function ActivityCard() {
-  const k = useSkin();
+  const c = useCardSky();
   const week = activityGrid().slice(21, 28); // the current week, Monday first
   const on = week.map((d) => !d.future && d.level > 0);
   const count = on.filter(Boolean).length;
@@ -32,34 +31,34 @@ export function ActivityCard() {
   return (
     <HomeCard>
       <View style={styles.head}>
-        <Txt size={15} weight={700} color={k.cardInk}>
+        <Txt size={15} weight={700} color={c.ink}>
           {DASH.activity()}
         </Txt>
-        <Txt size={14} weight={700} color={k.cardInk}>
+        <Txt size={14} weight={700} color={c.ink}>
           {DASH.activityOf7(digits(count))}
         </Txt>
       </View>
       <View style={styles.strip} accessible accessibilityLabel={`${count}/7`}>
         {week.map((d, i) => {
           const today = i === todayIndex;
-          const ink = today ? k.cardHiInk : k.cardInk;
+          const ink = today ? c.hiInk : c.ink;
           return (
-            <View key={d.day} style={[styles.day, { backgroundColor: today ? k.cardHi : k.cardPill }]}>
+            <View key={d.day} style={[styles.day, { backgroundColor: today ? c.hi : c.pill }]}>
               <View style={styles.slot}>
                 {on[i] ? (
                   <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: ink, opacity: today ? 1 : 0.55 }]} />
                 ) : (
-                  <View style={[styles.bar, { height: STUB, backgroundColor: today ? k.cardHiInk : k.cardTrack, opacity: d.future ? 0.5 : 1 }]} />
+                  <View style={[styles.bar, { height: STUB, backgroundColor: today ? c.hiInk : c.track, opacity: d.future ? 0.5 : 1 }]} />
                 )}
               </View>
-              <Txt size={11} weight={today ? 700 : 500} color={today ? k.cardHiInk : k.cardSoft} center>
+              <Txt size={11} weight={today ? 700 : 500} color={today ? c.hiInk : c.soft} center>
                 {letter(d.day)}
               </Txt>
             </View>
           );
         })}
       </View>
-      <Txt size={12} weight={500} color={k.cardSoft}>
+      <Txt size={12} weight={500} color={c.soft}>
         {DASH.activityCaption()}
       </Txt>
     </HomeCard>

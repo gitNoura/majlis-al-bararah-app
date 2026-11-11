@@ -8,18 +8,17 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Grow } from '@/components/home/Grow';
-import { HomeCard } from '@/components/home/HomeCard';
+import { HomeCard, useCardSky } from '@/components/home/HomeCard';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { hifdhOverview, memorizedCells } from '@/lib/dashboard';
-import { useSkin } from '@/theme/homeSkin';
 
 const digits = (n: number) => n.toLocaleString('en');
 
 type Part = { has: boolean; progress: number | null; days: { done: number; total: number } | null };
 
 function Plan({ title, part, emptyText, extra }: { title: string; part: Part; emptyText: string; extra?: string }) {
-  const k = useSkin();
+  const c = useCardSky();
   const pct = part.progress == null ? 0 : Math.round(part.progress * 100);
   const running = part.has && part.progress != null;
   const notBegun = running && part.days?.done === 0;
@@ -29,39 +28,39 @@ function Plan({ title, part, emptyText, extra }: { title: string; part: Part; em
       onPress={() => router.navigate('/hifdh')}
       accessibilityRole="button"
       accessibilityLabel={`${title} ${running ? `${pct}%` : emptyText}`}
-      style={({ pressed }) => [styles.plan, { backgroundColor: k.cardPill }, pressed && { opacity: 0.7 }]}
+      style={({ pressed }) => [styles.plan, { backgroundColor: c.pill }, pressed && { opacity: 0.7 }]}
     >
-      <Txt size={12} weight={700} color={k.cardSoft} numberOfLines={1}>
+      <Txt size={12} weight={700} color={c.soft} numberOfLines={1}>
         {title}
       </Txt>
       {part.has ? (
         <>
-          <Txt size={26} weight={800} lineHeight={32} color={running ? k.cardInk : k.cardSoft}>
+          <Txt size={26} weight={800} lineHeight={32} color={running ? c.ink : c.soft}>
             {running ? `${digits(pct)}%` : '–'}
           </Txt>
-          <View style={[styles.track, { backgroundColor: k.cardTrack }]}>
-            {running && pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={{ height: '100%', borderRadius: 2, backgroundColor: k.cardHi }} />}
+          <View style={[styles.track, { backgroundColor: c.track }]}>
+            {running && pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={{ height: '100%', borderRadius: 2, backgroundColor: c.hi }} />}
           </View>
-          <Txt size={12} weight={500} color={k.cardSoft} numberOfLines={2}>
+          <Txt size={12} weight={500} color={c.soft} numberOfLines={2}>
             {caption}
           </Txt>
           {notBegun && (
-            <Txt size={12} weight={700} color={k.cardInk} numberOfLines={1}>
+            <Txt size={12} weight={700} color={c.ink} numberOfLines={1}>
               {DASH.planBegin()}
             </Txt>
           )}
           {!!extra && (
-            <Txt size={12} weight={700} color={k.cardInk} numberOfLines={2}>
+            <Txt size={12} weight={700} color={c.ink} numberOfLines={2}>
               {extra}
             </Txt>
           )}
         </>
       ) : (
         <>
-          <Txt size={14} weight={700} lineHeight={20} color={k.cardInk} numberOfLines={3}>
+          <Txt size={14} weight={700} lineHeight={20} color={c.ink} numberOfLines={3}>
             {emptyText}
           </Txt>
-          <Txt size={12} weight={700} color={k.cardInk} numberOfLines={1}>
+          <Txt size={12} weight={700} color={c.ink} numberOfLines={1}>
             {DASH.createPlan()}
           </Txt>
         </>
