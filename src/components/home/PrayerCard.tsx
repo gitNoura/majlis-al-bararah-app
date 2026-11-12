@@ -96,11 +96,12 @@ export function PrayerCard() {
   return (
     // a glass box like the cards under it (blur + pale fill + sheen); the sky of the moment is only a tint inside it. The rounded
     // clip is on the sky's own layer: the animated stars and clouds (moving layers) are not cut by the glass's corners on every phone
-    <Glass radius={RADIUS} style={styles.card}>
+    <Glass radius={RADIUS} bare style={styles.card}>
       <View style={styles.skyClip} pointerEvents="none">
         <LinearGradient colors={sky.sky} style={[StyleSheet.absoluteFill, { opacity: TINT }]} />
         <PrayerSky phase={phase} sun={view?.sun ?? 0.5} />
-        <LinearGradient colors={['rgba(255, 255, 255, 0.28)', 'rgba(255, 255, 255, 0)']} style={styles.gloss} />
+        <LinearGradient colors={['rgba(255, 255, 255, 0.14)', 'rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.05)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+        <View style={[StyleSheet.absoluteFill, { borderRadius: RADIUS, borderCurve: 'continuous', boxShadow: 'inset 0px 1px 0px rgba(255, 255, 255, 0.45), inset 0px 0px 0px 1px rgba(255, 255, 255, 0.12), inset 0px -1px 0px rgba(0, 0, 0, 0.22)' }]} />
       </View>
       {view ? (
         // left to right on the screen in every language: in Arabic the prayer is at the right edge, then qibla, then calendar
@@ -121,7 +122,6 @@ export function PrayerCard() {
 const styles = StyleSheet.create({
   card: { padding: space.cozy, paddingVertical: space.cozy + 8 }, // a little thicker
   skyClip: { ...StyleSheet.absoluteFill, borderRadius: RADIUS, borderCurve: 'continuous', overflow: 'hidden' },
-  gloss: { position: 'absolute', top: 0, left: 0, right: 0, height: '55%' }, // the glass's light along the top edge
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   info: { flex: 1, gap: 1 },
   ask: { gap: space.sm },

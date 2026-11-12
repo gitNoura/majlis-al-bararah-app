@@ -24,9 +24,9 @@ const CAN_LIQUID = Platform.OS === 'ios' && isLiquidGlassAvailable();
 
 // `tint`: a soft colour inside the glass (two colours: the lit top corner, then clear), drawn over the fill and sheen so the colour shows
 // `native`: the system's Liquid Glass on iOS 26+ (the blur glass elsewhere); `interactive`: it reacts to touch (iOS 26+ only)
-type Props = { radius?: number; intensity?: number; tint?: readonly [string, string]; native?: boolean; interactive?: boolean; style?: StyleProp<ViewStyle>; children?: ReactNode };
+type Props = { radius?: number; intensity?: number; tint?: readonly [string, string]; native?: boolean; interactive?: boolean; bare?: boolean; style?: StyleProp<ViewStyle>; children?: ReactNode };
 
-export function Glass({ radius = 28, intensity = 60, tint, native, interactive, style, children }: Props) {
+export function Glass({ radius = 28, intensity = 60, tint, native, interactive, bare, style, children }: Props) {
   const k = useSkin();
   const { isDark } = useTheme();
   const target = useContext(GlassTarget);
@@ -46,14 +46,18 @@ export function Glass({ radius = 28, intensity = 60, tint, native, interactive, 
   }
   return (
     <View style={[shape, { boxShadow: isDark ? `0px 8px 24px ${k.glassShadow}` : `0px 8px 24px ${k.glassShadow}, 0px 1px 3px rgba(0, 0, 0, 0.06), 0px 0px 0px 0.5px rgba(0, 0, 0, 0.05)` }, style]}>
-      <View style={[StyleSheet.absoluteFill, shape, { overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth * 2, borderColor: k.glassEdge }]} pointerEvents="none">
-        <BlurView intensity={intensity} tint={isDark ? 'dark' : 'light'} blurTarget={target ?? undefined} blurMethod={target ? 'dimezisBlurViewSdk31Plus' : 'none'} style={StyleSheet.absoluteFill} />
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: k.glass }]} />
-        <LinearGradient colors={[k.glassSheen, 'rgba(255, 255, 255, 0)']} style={styles.sheen} />
-        <LinearGradient colors={['rgba(255, 255, 255, 0)', k.glassGlint]} style={styles.glint} />
-        {!isDark && <LinearGradient colors={['rgba(255, 255, 255, 0.55)', 'rgba(255, 255, 255, 0)', 'rgba(0, 0, 0, 0.035)']} locations={[0, 0.5, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />}
-        {!isDark && <View style={[StyleSheet.absoluteFill, shape, { boxShadow: 'inset 0px 1px 0px rgba(255, 255, 255, 1), inset 0px -1px 0px rgba(0, 0, 0, 0.05), inset 0px 0px 14px rgba(255, 255, 255, 0.6)' }]} />}
-        {tint && <LinearGradient colors={tint} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />}
+      <View style={[StyleSheet.absoluteFill, shape, { overflow: 'hidden', borderWidth: bare ? 0 : StyleSheet.hairlineWidth * 2, borderColor: k.glassEdge }]} pointerEvents="none">
+        {!bare && (
+          <>
+          <BlurView intensity={intensity} tint={isDark ? 'dark' : 'light'} blurTarget={target ?? undefined} blurMethod={target ? 'dimezisBlurViewSdk31Plus' : 'none'} style={StyleSheet.absoluteFill} />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: k.glass }]} />
+          <LinearGradient colors={[k.glassSheen, 'rgba(255, 255, 255, 0)']} style={styles.sheen} />
+          <LinearGradient colors={['rgba(255, 255, 255, 0)', k.glassGlint]} style={styles.glint} />
+          {!isDark && <LinearGradient colors={['rgba(255, 255, 255, 0.55)', 'rgba(255, 255, 255, 0)', 'rgba(0, 0, 0, 0.035)']} locations={[0, 0.5, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />}
+          {!isDark && <View style={[StyleSheet.absoluteFill, shape, { boxShadow: 'inset 0px 1px 0px rgba(255, 255, 255, 1), inset 0px -1px 0px rgba(0, 0, 0, 0.05), inset 0px 0px 14px rgba(255, 255, 255, 0.6)' }]} />}
+          {tint && <LinearGradient colors={tint} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />}
+          </>
+        )}
       </View>
       {children}
     </View>
