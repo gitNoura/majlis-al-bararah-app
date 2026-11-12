@@ -14,7 +14,8 @@ export function useSage() {
   const { isDark } = useTheme();
   return {
     grad: (isDark ? ['#2a4036', '#1c2c24'] : ['#cfe6d8', '#e6f1ea']) as [string, string],
-    inset: isDark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(255, 255, 255, 0.62)', // a pill inside the card
+    tone: isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(23, 63, 50, 0.07)', // a flat tonal surface inside the card (the plans): the card's own green a step deeper, no white, no shadow
+    button: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(23, 63, 50, 0.14)', // the filled-tonal button (Continue)
     track: isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(23, 63, 50, 0.13)', // an empty bar or ring
   };
 }

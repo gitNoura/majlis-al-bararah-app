@@ -29,7 +29,7 @@ function Plan({ title, part, emptyText, extra }: { title: string; part: Part; em
       onPress={() => router.navigate('/hifdh')}
       accessibilityRole="button"
       accessibilityLabel={`${title} ${running ? `${pct}%` : emptyText}`}
-      style={({ pressed }) => [styles.plan, { backgroundColor: sage.inset }, pressed && { opacity: 0.7 }]}
+      style={({ pressed }) => [styles.plan, { backgroundColor: sage.tone }, pressed && { opacity: 0.7 }]}
     >
       <Txt size={12} weight={700} color={k.meta} numberOfLines={1}>
         {title}
@@ -83,6 +83,6 @@ export function MemorizationCard() {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 8 },
-  plan: { flex: 1, gap: 4, padding: 12, borderRadius: 14 },
+  plan: { flex: 1, gap: 4, padding: 14, borderRadius: 18 },
   track: { height: 8, borderRadius: 4, overflow: 'hidden', flexDirection: 'row', marginVertical: 4 },
 });
