@@ -1,25 +1,50 @@
-// HOME's glass: a frosted, see-through panel. A real blur behind it (iOS and the web; on Android, until a blur target is set up, the
-// same translucent fill without the blur), a pale tinted fill, a thin bright edge and a soft shadow. Used by the cards, the
-// round profile button and the small pills on Home, so they all read as one material over the page's mint wash.
+// HOME's glass: a frosted, see-through panel, drawn the best way each phone can:
+//   iOS 26+   the system's own Liquid Glass (expo-glass-effect's GlassView)
+//   Android   a real blur of the page behind it: the BlurView blurs the page's BlurTargetView (HomeBackdrop, set up by the Home screen and
+//             passed down through GlassTarget); on Android 11 and older, which blur slowly, just the see-through fill
+//   iOS < 26, web   a BlurView blur
+// On top of the blur: a pale fill and a soft sheen along the top edge (no outline), and a soft shadow.
 import { BlurView } from 'expo-blur';
-import type { ReactNode } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
+import { LinearGradient } from 'expo-linear-gradient';
+import { createContext, useContext, type ReactNode, type RefObject } from 'react';
+import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 
+// the Home screen's BlurTargetView (Android): what the glass blurs. null elsewhere.
+export const GlassTarget = createContext<RefObject<View | null> | null>(null);
+
+const LIQUID = Platform.OS === 'ios' && isLiquidGlassAvailable();
+
 type Props = { radius?: number; intensity?: number; style?: StyleProp<ViewStyle>; children?: ReactNode };
 
-export function Glass({ radius = 28, intensity = 40, style, children }: Props) {
+export function Glass({ radius = 28, intensity = 60, style, children }: Props) {
   const k = useSkin();
   const { isDark } = useTheme();
+  const target = useContext(GlassTarget);
+  const shape = { borderRadius: radius, borderCurve: 'continuous' } as const;
+
+  if (LIQUID) {
+    return (
+      <GlassView glassEffectStyle="regular" colorScheme={isDark ? 'dark' : 'light'} style={[shape, style]}>
+        {children}
+      </GlassView>
+    );
+  }
   return (
-    <View style={[{ borderRadius: radius, borderCurve: 'continuous', borderWidth: 1, borderColor: k.glassEdge, boxShadow: `0px 8px 24px ${k.glassShadow}` }, style]}>
-      <View style={[StyleSheet.absoluteFill, { borderRadius: radius - 1, borderCurve: 'continuous', overflow: 'hidden' }]} pointerEvents="none">
-        <BlurView intensity={intensity} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+    <View style={[shape, { boxShadow: `0px 8px 24px ${k.glassShadow}` }, style]}>
+      <View style={[StyleSheet.absoluteFill, shape, { overflow: 'hidden' }]} pointerEvents="none">
+        <BlurView intensity={intensity} tint={isDark ? 'dark' : 'light'} blurTarget={target ?? undefined} blurMethod={target ? 'dimezisBlurViewSdk31Plus' : 'none'} style={StyleSheet.absoluteFill} />
         <View style={[StyleSheet.absoluteFill, { backgroundColor: k.glass }]} />
+        <LinearGradient colors={[k.glassSheen, 'rgba(255, 255, 255, 0)']} style={styles.sheen} />
       </View>
       {children}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  sheen: { position: 'absolute', top: 0, left: 0, right: 0, height: '60%' },
+});

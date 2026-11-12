@@ -30,7 +30,7 @@ export function PlanCard({ label, title, sub, percent = null, onPress, a11y }: P
   const pct = percent == null ? 0 : Math.round(percent);
 
   const arrow = (
-    <View key="arrow" style={[styles.go, { backgroundColor: k.glassBtn, borderColor: k.glassEdge }]}>
+    <View key="arrow" style={[styles.go, { backgroundColor: k.glassBtn }]}>
       <ArrowIcon color={k.pageInk} rtl={ar} size={20} />
     </View>
   );
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   card: { padding: space.md, gap: space.md },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   words: { flex: 1, gap: 2 },
-  go: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, alignItems: 'center', justifyContent: 'center', boxShadow: '0px 4px 12px rgba(20, 50, 38, 0.10)' },
+  go: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', boxShadow: '0px 4px 12px rgba(20, 50, 38, 0.10)' },
   meter: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   figure: { minWidth: 34 },
   track: { flex: 1, height: 6, borderRadius: 3, overflow: 'hidden', flexDirection: 'row' },
