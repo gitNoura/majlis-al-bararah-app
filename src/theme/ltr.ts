@@ -3,7 +3,7 @@
 // turned round
 import { Platform } from 'react-native';
 
-import { isEnglish } from '@/i18n/i18n';
+import { isEnglish, LANG } from '@/i18n/i18n';
 
 export const ltr = () =>
   Platform.OS === 'web' ? ({ flexDirection: isEnglish ? 'row' : 'row-reverse' } as const) : ({ direction: 'ltr' } as const);
@@ -24,3 +24,8 @@ export const lineStart = () =>
   Platform.OS === 'ios'
     ? ({ textAlign: 'auto', writingDirection: isEnglish ? 'ltr' : 'rtl' } as const)
     : ({ textAlign: textSide(isEnglish ? 'left' : 'right') } as const);
+
+// Text at the start of its language's line (the right in Arabic) INSIDE a row kept left to right with ltr(): there the layout is plainly
+// left to right, so «right» is the right on every phone. (lineStart and textSide are for text in the app's own, possibly swapped,
+// layout; used in an ltr() row on Android they put the Arabic at the left.)
+export const ltrStart = () => (LANG === 'ar' ? ({ textAlign: 'right', writingDirection: 'rtl' } as const) : ({ textAlign: 'left', writingDirection: 'ltr' } as const));

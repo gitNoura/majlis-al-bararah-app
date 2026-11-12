@@ -13,7 +13,7 @@ export function HadithNote() {
   const k = useSkin();
   return (
     <View style={styles.wrap}>
-      <Txt size={LANG === 'ar' ? 16 : 15} weight={500} lineHeight={LANG === 'ar' ? 28 : 22} color={k.ink} center>
+      <Txt size={LANG === 'ar' ? 14 : 13} weight={500} lineHeight={LANG === 'ar' ? 24 : 20} color={k.ink} center>
         <Text style={{ color: k.meta }}>{`${HOME.hadithIntro()} `}</Text>
         {HOME.hadith()}
       </Txt>

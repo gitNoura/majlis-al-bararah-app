@@ -9,7 +9,7 @@ import { Grow } from '@/components/home/Grow';
 import { ArrowIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { LANG } from '@/i18n/i18n';
-import { lineStart, ltr } from '@/theme/ltr';
+import { ltr, ltrStart } from '@/theme/ltr';
 import { useSkin } from '@/theme/homeSkin';
 import { space } from '@/theme/tokens';
 
@@ -36,14 +36,14 @@ export function PlanCard({ label, title, sub, percent = null, onPress, a11y }: P
   );
   const words = (
     <View key="words" style={styles.words}>
-      <Txt size={12} weight={700} color={k.meta} style={lineStart()}>
+      <Txt size={12} weight={700} color={k.meta} style={ltrStart()}>
         {label}
       </Txt>
-      <Txt size={18} weight={700} lineHeight={26} color={k.pageInk} numberOfLines={2} style={lineStart()}>
+      <Txt size={18} weight={700} lineHeight={26} color={k.pageInk} numberOfLines={2} style={ltrStart()}>
         {title}
       </Txt>
       {!!sub && (
-        <Txt size={12} weight={500} color={k.meta} numberOfLines={2} style={lineStart()}>
+        <Txt size={12} weight={500} color={k.meta} numberOfLines={2} style={ltrStart()}>
           {sub}
         </Txt>
       )}

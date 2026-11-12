@@ -32,7 +32,7 @@ import { stayInQuran } from '@/lib/riwaya';
 import { writeJSON } from '@/lib/storage';
 import { useSkin } from '@/theme/homeSkin';
 import { T } from '@/theme/homeType';
-import { lineStart, ltr } from '@/theme/ltr';
+import { ltr, ltrStart } from '@/theme/ltr';
 import { space } from '@/theme/tokens';
 
 export default function HomeTab() {
@@ -58,10 +58,10 @@ export default function HomeTab() {
   // the date and the greeting start the language's line (right in Arabic); the profile icon is at the other end
   const words = (
     <View key="words" style={styles.words}>
-      <Txt {...T.date} color={k.meta} style={lineStart()}>
+      <Txt {...T.date} color={k.meta} style={ltrStart()}>
         {dateLine()}
       </Txt>
-      <Txt {...T.greeting} color={k.pageInk} style={lineStart()}>
+      <Txt {...T.greeting} color={k.pageInk} style={ltrStart()}>
         {HOME.salam()}
       </Txt>
     </View>
