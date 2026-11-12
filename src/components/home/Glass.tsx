@@ -44,7 +44,7 @@ export function Glass({ radius = 28, intensity = 60, tint, style, children }: Pr
   }
   return (
     <View style={[shape, { boxShadow: `0px 8px 24px ${k.glassShadow}` }, style]}>
-      <View style={[StyleSheet.absoluteFill, shape, { overflow: 'hidden' }]} pointerEvents="none">
+      <View style={[StyleSheet.absoluteFill, shape, { overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth * 2, borderColor: k.glassEdge }]} pointerEvents="none">
         <BlurView intensity={intensity} tint={isDark ? 'dark' : 'light'} blurTarget={target ?? undefined} blurMethod={target ? 'dimezisBlurViewSdk31Plus' : 'none'} style={StyleSheet.absoluteFill} />
         <View style={[StyleSheet.absoluteFill, { backgroundColor: k.glass }]} />
         <LinearGradient colors={[k.glassSheen, 'rgba(255, 255, 255, 0)']} style={styles.sheen} />

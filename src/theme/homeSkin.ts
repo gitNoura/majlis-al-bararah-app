@@ -59,6 +59,7 @@ export type HomeSkin = {
   glow: string; // the soft halo around the green progress bars and today's activity bar
   glowOpacity: number;
   glassGlint: string; // a faint light along the glass's bottom edge, like light passing through
+  glassEdge: string; // the glass's thin lit edge, so a pale panel still reads against a pale page
 };
 
 const PAGE = { pageInk: '#173f32', pageLine: 'rgba(23, 63, 50, 0.32)', pageBead: 'rgba(23, 63, 50, 0.14)', pageButton: '#ffffff' };
@@ -91,8 +92,8 @@ const light: HomeSkin = {
   pageHere: '#0F6B58',
   wash: ['#f1f2ef', '#f4f5f3', '#f4f5f3'], // Home's own off-white (paper)
   glass: 'rgba(255, 255, 255, 0.34)',
-  glassSheen: 'rgba(255, 255, 255, 0.45)',
-  glassShadow: 'rgba(20, 50, 38, 0.10)',
+  glassSheen: 'rgba(255, 255, 255, 0.55)',
+  glassShadow: 'rgba(20, 50, 38, 0.16)',
   glassTrack: 'rgba(9, 74, 61, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
   glassTint: ['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.02)'],
@@ -104,6 +105,7 @@ const light: HomeSkin = {
   glow: '#3A9C85',
   glowOpacity: 0.25,
   glassGlint: 'rgba(255, 255, 255, 0.10)',
+  glassEdge: 'rgba(255, 255, 255, 0.85)',
   ...PAGE,
 };
 
@@ -152,6 +154,7 @@ const dark: HomeSkin = {
   glow: '#ece4c8',
   glowOpacity: 0.4,
   glassGlint: 'rgba(255, 255, 255, 0.03)',
+  glassEdge: 'rgba(255, 255, 255, 0.12)',
   goBg: '#343635',
   goInk: '#ece4c8',
   buttonInk: '#1d1d1d',

@@ -12,8 +12,9 @@ import { useTheme } from '@/theme/theme';
 const POOLS = {
   light: [
     { color: '#ffffff', x: 0.1, y: 0.3, o: 1 },
-    { color: '#f4efe4', x: 0.92, y: 0.12, o: 0.55 }, // a faint warm ivory, not grey
-    { color: '#f6f2e9', x: 0.9, y: 0.75, o: 0.5 },
+    { color: '#cfe3d8', x: 0.92, y: 0.14, o: 0.7 }, // a soft sage, so the glass has colour to blur
+    { color: '#ece2c8', x: 0.08, y: 0.62, o: 0.6 }, // a warm ivory
+    { color: '#d4e6dc', x: 0.9, y: 0.82, o: 0.6 },
   ],
   dark: [
     { color: '#4a4d4a', x: 0.92, y: 0.12, o: 0.4 },
