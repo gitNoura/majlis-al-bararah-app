@@ -142,5 +142,5 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   strip: { flexDirection: 'row', gap: space.xs },
   time: { flex: 1, borderRadius: 10, paddingVertical: 5, gap: 0 },
-  timeNow: { boxShadow: '0px 2px 6px rgba(20, 30, 25, 0.2)' }, // the frosted white lifts off every sky
+  timeNow: { boxShadow: '0px 2px 6px rgba(20, 30, 25, 0.22)' }, // lifts the current prayer a little off its sky
 });

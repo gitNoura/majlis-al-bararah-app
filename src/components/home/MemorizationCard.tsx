@@ -1,4 +1,4 @@
-// HOME, memorization and revision: the two plans side by side on the page, transparent: no box, no tint, no card round them. Each shows how far its plan is through its WHOLE run (not today's portions): a large
+// HOME, memorization and revision: the two plans side by side, each a pane of frosted glass (Glass.tsx) on the page. Each shows how far its plan is through its WHOLE run (not today's portions): a large
 // percentage, a thin bar that draws in once, and the days done out of all its days; the memorization pill also says how many
 // juz are memorized. With no plan of that kind yet it is a plain invitation to create one; a plan not begun says «Start
 // today». A tap on a pill opens the Hifdh tab. Everything is read from the plan's saved state.
@@ -6,6 +6,7 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { Glass } from '@/components/home/Glass';
 import { Grow } from '@/components/home/Grow';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
@@ -27,8 +28,9 @@ function Plan({ title, part, emptyText, extra }: { title: string; part: Part; em
       onPress={() => router.navigate('/hifdh')}
       accessibilityRole="button"
       accessibilityLabel={`${title} ${running ? `${pct}%` : emptyText}`}
-      style={({ pressed }) => [styles.plan, pressed && { opacity: 0.7 }]}
+      style={({ pressed }) => [styles.planWrap, pressed && { opacity: 0.7 }]}
     >
+      <Glass radius={18} style={styles.plan}>
       <Txt size={12} weight={700} color={k.meta} numberOfLines={1}>
         {title}
       </Txt>
@@ -64,6 +66,7 @@ function Plan({ title, part, emptyText, extra }: { title: string; part: Part; em
           </Txt>
         </>
       )}
+      </Glass>
     </Pressable>
   );
 }
@@ -81,6 +84,7 @@ export function MemorizationCard() {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 8 },
-  plan: { flex: 1, gap: 4, paddingHorizontal: 4 },
+  planWrap: { flex: 1 },
+  plan: { flex: 1, gap: 4, padding: 14 },
   track: { height: 6, borderRadius: 3, overflow: 'hidden', flexDirection: 'row', marginVertical: 4 },
 });
