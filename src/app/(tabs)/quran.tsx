@@ -198,11 +198,31 @@ function Quran() {
   }, []);
   const turned = useCallback((p: number) => move(p, true), [move]);
   const jump = useCallback((p: number) => move(p, false), [move]);
+  // Home's «Continue reading» shows the wird's page WITHOUT making it the marker: the Quran tab keeps taking the reader to the last page
+  // they browsed ('lastPage'); the marker only moves once they turn a page from here
+  const show = useCallback((p: number) => {
+    const target = clampPage(p);
+    pageRef.current = target;
+    setPage(target);
+  }, []);
+  // opened any other way (the tab bar, Hifdh, back from another screen): at the last page browsed, whatever Continue reading showed
+  const resumeAsked = params.resume;
+  useFocusEffect(
+    useCallback(() => {
+      if (resumeAsked) return;
+      const last = savedPage();
+      if (last !== pageRef.current) {
+        pageRef.current = last;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setPage(last);
+      }
+    }, [resumeAsked]),
+  );
   useEffect(() => {
     // Home's «Continue reading» asks for the page of the mark: a request from another screen, answered once per request
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (params.resume && params.n) jump(Number(params.resume));
-  }, [params.resume, params.n, jump]);
+    if (params.resume && params.n) show(Number(params.resume));
+  }, [params.resume, params.n, show]);
 
   const light = (found: Ayah | null) => {
     clearTimeout(flashTimer.current);
