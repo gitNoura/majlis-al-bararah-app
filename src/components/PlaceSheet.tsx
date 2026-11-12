@@ -6,6 +6,7 @@ import { Modal, Pressable, StyleSheet, View, ActivityIndicator } from 'react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BackIcon, PinIcon } from '@/components/icons';
+import { Sheen } from '@/components/home/Glass';
 import { Txt } from '@/components/Txt';
 import { isEnglish, t } from '@/i18n/i18n';
 import { SETTINGS } from '@/i18n/settings';
@@ -29,6 +30,7 @@ export function PlaceSheet({ open, busy, failed, onClose, onLocate, onChooseCity
       <View style={[styles.dim, { backgroundColor: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(25,24,19,0.18)' }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={READER.close()} />
         <View style={[styles.sheet, { backgroundColor: c.panel, paddingBottom: insets.bottom + 18 }]}>
+          <Sheen topOnly radius={26} />
           <View style={[styles.grip, { backgroundColor: c.line }]} />
           <Txt size={20} weight={700} serif color={c.ink}>
             {t('qbAskTitle')}

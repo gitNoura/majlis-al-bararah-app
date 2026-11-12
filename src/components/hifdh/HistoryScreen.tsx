@@ -10,6 +10,7 @@ import { useHif } from '@/components/hifdh/HifProvider';
 import { Heading, Hint, Section, useHeading } from '@/components/hifdh/Section';
 import { ProgressRing } from '@/components/hifdh/ProgressRing';
 import { CloseIcon } from '@/components/icons';
+import { Sheen } from '@/components/home/Glass';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import * as core from '@/lib/hifdh/core';
@@ -81,6 +82,7 @@ function StatusSheet({ row, onClose }: { row: Row | null; onClose: () => void })
       <View style={styles.root}>
         <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: c.dim }]} onPress={onClose} accessibilityLabel={HIF.close()} />
         <View style={[styles.panel, { backgroundColor: c.panel, paddingBottom: insets.bottom + 16 }]}>
+          <Sheen topOnly radius={24} />
           <View style={styles.head}>
             <Txt size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
               {dayText(row.day)}

@@ -8,6 +8,7 @@ import { Animated, Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CloseIcon } from '@/components/icons';
+import { Sheen } from '@/components/home/Glass';
 import { Txt } from '@/components/Txt';
 import { L, t } from '@/i18n/i18n';
 import { forDisplay } from '@/lib/search';
@@ -127,6 +128,7 @@ export function TajweedGuide({ open, onClose }: { open: boolean; onClose: () => 
           { height: sheetH, backgroundColor: c.panel, paddingBottom: insets.bottom + 8, transform: [{ translateY: rise.interpolate({ inputRange: [0, 1], outputRange: [sheetH, 0] }) }] },
         ]}
       >
+        <Sheen topOnly radius={28} />
         <View style={[styles.grip, { backgroundColor: c.line }]} />
         <View style={styles.head}>
           <View style={{ flex: 1 }}>

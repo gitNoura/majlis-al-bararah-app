@@ -83,16 +83,16 @@ const light: HomePalette = {
 };
 
 const dark: HomePalette = {
-  screen: '#161616',
-  card: '#1f1f1f',
+  screen: '#121212',
+  card: '#1c1c1c',
   cardLine: 'rgba(255, 255, 255, 0.07)',
   well: '#282828',
-  ink: '#f2f2f2',
+  ink: '#eeeeea',
   meta: '#a3a3a3',
-  forest: '#2c2e2d',
-  forestInk: '#fffdf5',
-  forestSoft: 'rgba(255, 253, 245, 0.72)',
-  forestLine: 'rgba(255, 253, 245, 0.16)',
+  forest: '#e9dfbd', // what is filled or chosen: the parchment of the night pages
+  forestInk: '#1d1d1d',
+  forestSoft: 'rgba(29, 29, 29, 0.7)',
+  forestLine: 'rgba(29, 29, 29, 0.2)',
   lime: '#fffdf5',
   limeInk: '#233a2e',
   gold: '#f1e29b',
@@ -108,11 +108,11 @@ const dark: HomePalette = {
   skyWash: 0.26,
   trackSoft: 'rgba(255, 255, 255, 0.12)',
   greenSoft: 'rgba(236, 228, 200, 0.10)',
-  tile: '#303332',
-  tileInk: '#e0e6e2',
-  mint: '#2a2d2b',
+  tile: '#2c2d2c',
+  tileInk: '#ece4c8',
+  mint: '#262726',
   mintLine: 'rgba(236, 228, 200, 0.28)',
-  leaf: '#d6cdaa',
+  leaf: '#e9dfbd',
   amber: '#e4c46d',
   sand: '#2a2926',
   sandLine: 'rgba(228, 196, 109, 0.3)',
@@ -123,12 +123,8 @@ const dark: HomePalette = {
 // The Hifdh tab in dark mode: the same grey as the rest, with small hints of green and gold.
 // <HifdhTint> (below) lays these over the dark palette for that tab only; nothing else changes.
 const hifdhDark: Partial<HomePalette> = {
-  // only hints: the page and cards stay the same grey as Home; a barely-green tile, gold for what is done, a gold edge
-  tile: '#2b312d',
-  tileInk: '#dcebe1',
-  mint: '#262b28',
-  mintLine: 'rgba(228, 196, 109, 0.32)',
-  leaf: '#9bc2ad',
+  // the same neutral grey and parchment as Home: only the gold edge and the warm sand tile are Hifdh's own
+  mintLine: 'rgba(233, 223, 189, 0.28)',
   amber: '#e4c46d',
   sand: '#2a2922',
   sandLine: 'rgba(228, 196, 109, 0.28)',

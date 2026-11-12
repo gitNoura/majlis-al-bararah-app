@@ -11,6 +11,7 @@ import { AdhkarScene, MorningEvening } from '@/components/AdhkarScene';
 import { CategoryPainting, isNightPainting } from '@/components/CategoryPaintings';
 import { PaintedScene } from '@/components/PaintedScene';
 import { CheckIcon, CloseIcon, CopyIcon, HeartIcon, ListenPauseIcon, ListenPlayIcon, PlusIcon, ShareIcon } from '@/components/icons';
+import { Sheen } from '@/components/home/Glass';
 import { Txt } from '@/components/Txt';
 import { ADHKAR } from '@/i18n/adhkar';
 import { isEnglish } from '@/i18n/i18n';
@@ -269,6 +270,7 @@ export function GroupSheet({ r, onClose, onToast }: { r: Ref | null; onClose: ()
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: c.dim }]} onPress={onClose} />
       <View style={[styles.sheet, { backgroundColor: c.surface, paddingBottom: insets.bottom + 16 }]}>
+          <Sheen topOnly radius={24} />
         <View style={[styles.grip, { backgroundColor: c.line }]} />
         <Txt size={17} weight={700} center color={c.ink} style={{ marginBottom: 8 }}>
           {ADHKAR.addTo()}

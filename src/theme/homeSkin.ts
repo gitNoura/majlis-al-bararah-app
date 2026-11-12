@@ -100,7 +100,7 @@ const light: HomeSkin = {
   cardShadow: '0px 1px 2px rgba(0, 0, 0, 0.05), 0px 4px 10px rgba(0, 0, 0, 0.05), 0px 14px 28px rgba(0, 0, 0, 0.07)',
   glassTop: '#ffffff',
   glassBottom: '#eef0ec',
-  vivid: '#12A88A',
+  vivid: '#12A88A', // (light mode takes the prayer card's sky instead: components/home/useSkyAccent.ts)
   halo: 'rgba(18, 168, 138, 0.5)',
   tabBar: '#ffffff',
   glassTrack: 'rgba(9, 74, 61, 0.12)',
@@ -148,14 +148,15 @@ const dark: HomeSkin = {
   pageHere: '#e9dfbd',
   pageButton: '#ece4c8',
   wash: ['#141414', '#151515', '#151515'], // near-black
-  glass: 'rgba(255, 255, 255, 0.06)',
+  glass: '#202020', // solid: a sheet or the bar never shows the page through it
+
   glassShadow: 'rgba(0, 0, 0, 0.35)',
   cardShadow: '0px 1px 2px rgba(0, 0, 0, 0.30), 0px 6px 14px rgba(0, 0, 0, 0.25), 0px 16px 32px rgba(0, 0, 0, 0.30)',
-  glassTop: 'rgba(255, 255, 255, 0.09)',
-  glassBottom: 'rgba(255, 255, 255, 0.02)',
-  vivid: '#5ED6B4',
-  halo: 'rgba(94, 214, 180, 0.5)',
-  tabBar: '#262726',
+  glassTop: 'rgba(255, 255, 255, 0.08)',
+  glassBottom: 'rgba(255, 255, 255, 0.015)',
+  vivid: '#e9dfbd',
+  halo: 'rgba(233, 223, 189, 0.5)',
+  tabBar: '#202020',
   glassTrack: 'rgba(255, 255, 255, 0.14)',
   glassBtn: 'rgba(255, 255, 255, 0.12)',
   mark: '#e9dfbd',

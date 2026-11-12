@@ -32,7 +32,7 @@ export function WeekCard() {
   // Complete button, and today is ringed in soft white
   const keptBg = isDark ? '#e9dfbd' : h.forest;
   const keptInk = isDark ? '#1d1d1d' : h.forestInk;
-  const emptyBg = isDark ? h.forest : k.soft;
+  const emptyBg = k.soft;
   const todayRing = isDark ? 'rgba(255, 255, 255, 0.7)' : k.spark;
   const n = days.filter((d: string) => kept.has(d)).length;
 

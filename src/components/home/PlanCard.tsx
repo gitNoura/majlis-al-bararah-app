@@ -11,6 +11,7 @@ import { Txt } from '@/components/Txt';
 import { LANG } from '@/i18n/i18n';
 import { ltr, ltrStart } from '@/theme/ltr';
 import { useSkin } from '@/theme/homeSkin';
+import { useSkyAccent } from '@/components/home/useSkyAccent';
 import { space } from '@/theme/tokens';
 
 type Props = {
@@ -28,6 +29,7 @@ const digits = (n: number) => n.toLocaleString('en');
 
 export function PlanCard({ label, title, sub, percent = null, arrow: showArrow = true, action, onPress, a11y }: Props) {
   const k = useSkin();
+  const accent = useSkyAccent();
   const ar = LANG === 'ar';
   const pct = percent == null ? 0 : Math.round(percent);
 
@@ -58,7 +60,7 @@ export function PlanCard({ label, title, sub, percent = null, arrow: showArrow =
   );
   const track = (
     <View key="track" style={[styles.track, ltr(), { backgroundColor: k.glassTrack, justifyContent: ar ? 'flex-end' : 'flex-start' }]}>
-      {pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={[styles.fill, { backgroundColor: k.vivid, boxShadow: `0px 0px 8px 1px ${k.halo}` }]} />}
+      {pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={[styles.fill, { backgroundColor: accent.color, boxShadow: `0px 0px 8px 1px ${accent.glow}` }]} />}
     </View>
   );
 

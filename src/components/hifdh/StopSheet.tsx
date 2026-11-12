@@ -5,6 +5,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CloseIcon } from '@/components/icons';
+import { Sheen } from '@/components/home/Glass';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
 import { surahName } from '@/i18n/i18n';
@@ -42,6 +43,7 @@ export function StopSheet({ row, onPick, onClose }: { row: Row | null; onPick: (
       <View style={styles.root}>
         <Pressable style={[StyleSheet.absoluteFill, { backgroundColor: c.dim }]} onPress={onClose} accessibilityLabel={HIF.close()} />
         <View style={[styles.panel, { backgroundColor: c.panel, paddingBottom: insets.bottom + 16 }]}>
+          <Sheen topOnly radius={24} />
           <View style={styles.head}>
             <Txt size={20} weight={700} color={c.ink} style={{ flex: 1 }}>
               {HIF.stopTitle()}
