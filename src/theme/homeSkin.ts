@@ -106,7 +106,7 @@ const light: HomeSkin = {
   tabBar: '#ffffff',
   glassTrack: 'rgba(9, 74, 61, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
-  well: '#e1eae4',
+  well: '#eeeeea', // a neutral off-white, the page's own: no tint
   mark: '#2e3230',
   markSoft: '#b4b7b3',
   hue: '#2e3230', // the progress bars and today's activity bar: a neutral charcoal in light mode, no green
@@ -114,8 +114,8 @@ const light: HomeSkin = {
   hueDeep: '#094A3D',
   glow: '#2e3230',
   glowOpacity: 0.07,
-  doneBg: '#f2f4f1', // light mode: a finished card only slips a shade from white, with a faint green edge
-  doneLine: 'rgba(15, 107, 88, 0.26)',
+  doneBg: '#f6f6f3', // light mode: a finished card only slips a shade from white, with a neutral edge
+  doneLine: 'rgba(20, 28, 24, 0.14)',
   ...PAGE,
 };
 
