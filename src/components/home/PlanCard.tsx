@@ -9,7 +9,7 @@ import { Grow } from '@/components/home/Grow';
 import { ArrowIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { LANG } from '@/i18n/i18n';
-import { ltr } from '@/theme/ltr';
+import { lineStart, ltr } from '@/theme/ltr';
 import { useSkin } from '@/theme/homeSkin';
 import { space } from '@/theme/tokens';
 
@@ -31,26 +31,26 @@ export function PlanCard({ label, title, sub, percent = null, onPress, a11y }: P
 
   const arrow = (
     <View key="arrow" style={[styles.go, { backgroundColor: k.glassBtn, borderColor: k.glassEdge }]}>
-      <ArrowIcon color={k.pageInk} rtl={ar} />
+      <ArrowIcon color={k.pageInk} rtl={ar} size={20} />
     </View>
   );
   const words = (
     <View key="words" style={styles.words}>
-      <Txt size={12} weight={700} color={k.meta}>
+      <Txt size={12} weight={700} color={k.meta} style={lineStart()}>
         {label}
       </Txt>
-      <Txt size={22} weight={800} lineHeight={32} color={k.pageInk} numberOfLines={2}>
+      <Txt size={18} weight={700} lineHeight={26} color={k.pageInk} numberOfLines={2} style={lineStart()}>
         {title}
       </Txt>
       {!!sub && (
-        <Txt size={13} weight={500} color={k.meta} numberOfLines={2}>
+        <Txt size={12} weight={500} color={k.meta} numberOfLines={2} style={lineStart()}>
           {sub}
         </Txt>
       )}
     </View>
   );
   const figure = (
-    <Txt key="figure" size={14} weight={700} color={k.pageInk} style={styles.figure}>
+    <Txt key="figure" size={13} weight={700} color={k.pageInk} style={styles.figure}>
       {`${digits(pct)}%`}
     </Txt>
   );
@@ -74,9 +74,9 @@ const styles = StyleSheet.create({
   card: { padding: space.md, gap: space.md },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   words: { flex: 1, gap: 2 },
-  go: { width: 58, height: 58, borderRadius: 29, borderWidth: 1, alignItems: 'center', justifyContent: 'center', boxShadow: '0px 4px 12px rgba(20, 50, 38, 0.10)' },
+  go: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, alignItems: 'center', justifyContent: 'center', boxShadow: '0px 4px 12px rgba(20, 50, 38, 0.10)' },
   meter: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  figure: { minWidth: 36 },
+  figure: { minWidth: 34 },
   track: { flex: 1, height: 6, borderRadius: 3, overflow: 'hidden', flexDirection: 'row' },
   fill: { height: '100%', borderRadius: 3 },
 });

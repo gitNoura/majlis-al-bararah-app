@@ -1,6 +1,6 @@
-// HOME, the hadith of the reader («read and rise») and who told it. Plain words on the page, no box, centred. «The Prophet said» is
-// set exactly like the date above it (same size, same colour).
-import { StyleSheet, View } from 'react-native';
+// HOME, the hadith of the reader («read and rise») and who told it. Plain words on the page, no box, centred. «The Prophet said» runs
+// on into the hadith on the same line, in the same font and size; only its colour differs (the date's grey).
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Txt } from '@/components/Txt';
 import { HOME } from '@/i18n/home';
@@ -13,10 +13,8 @@ export function HadithNote() {
   const k = useSkin();
   return (
     <View style={styles.wrap}>
-      <Txt {...T.date} color={k.meta} center>
-        {HOME.hadithIntro()}
-      </Txt>
-      <Txt size={LANG === 'ar' ? 17 : 15} weight={500} lineHeight={LANG === 'ar' ? 32 : 24} color={k.ink} center>
+      <Txt size={LANG === 'ar' ? 16 : 15} weight={500} lineHeight={LANG === 'ar' ? 28 : 22} color={k.ink} center>
+        <Text style={{ color: k.meta }}>{`${HOME.hadithIntro()} `}</Text>
         {HOME.hadith()}
       </Txt>
       <Txt {...T.small} color={k.meta} center>

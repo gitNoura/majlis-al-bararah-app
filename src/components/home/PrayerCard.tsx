@@ -15,12 +15,12 @@ import { HOME } from '@/i18n/home';
 import { LANG, t } from '@/i18n/i18n';
 import { prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
 import { locate } from '@/lib/prayer';
-import { ltr } from '@/theme/ltr';
+import { lineStart, ltr } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 import { useSkin } from '@/theme/homeSkin';
 import { space } from '@/theme/tokens';
 
-const RADIUS = 30;
+const RADIUS = 26;
 const EDGE = 'rgba(48, 48, 48, 0.62)'; // dark mode: the grey at the very edge of the card (the vignette); lower the 0.62 for a lighter one
 
 export function PrayerCard() {
@@ -62,7 +62,7 @@ export function PrayerCard() {
   const sky = SKIES[phase];
   const pill = (label: string, onPress: () => void, key: string) => (
     <Pressable key={key} onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.btn, { backgroundColor: sky.btn, borderColor: k.glassEdge }, pressed && { opacity: 0.7 }]}>
-      <Txt size={15} weight={700} color={sky.ink}>
+      <Txt size={13} weight={700} color={sky.ink}>
         {label}
       </Txt>
     </Pressable>
@@ -72,10 +72,10 @@ export function PrayerCard() {
   const next = view?.list.find((p) => p.next);
   const info = view && (
     <View key="info" style={styles.info}>
-      <Txt size={12} weight={500} color={sky.soft}>
+      <Txt size={12} weight={500} color={sky.soft} style={lineStart()}>
         {`${HOME.nextPrayer()} · ${DASH.left(view.h, view.m)}`}
       </Txt>
-      <Txt size={22} weight={800} lineHeight={30} color={sky.ink}>
+      <Txt size={18} weight={800} lineHeight={26} color={sky.ink} style={lineStart()}>
         {next ? `${view.next} · ${next.at}` : view.next}
       </Txt>
     </View>
@@ -119,11 +119,11 @@ export function PrayerCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: RADIUS, borderCurve: 'continuous', borderWidth: 1, padding: space.md, overflow: 'hidden' },
+  card: { borderRadius: RADIUS, borderCurve: 'continuous', borderWidth: 1, padding: space.cozy, overflow: 'hidden' },
   edge: { position: 'absolute' },
   skyClip: { ...StyleSheet.absoluteFill, borderRadius: RADIUS, borderCurve: 'continuous', overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   info: { flex: 1, gap: 1 },
   ask: { gap: space.sm },
-  btn: { minHeight: 44, borderRadius: 22, borderWidth: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md, boxShadow: '0px 4px 12px rgba(20, 50, 38, 0.10)' },
+  btn: { minHeight: 38, borderRadius: 19, borderWidth: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md, boxShadow: '0px 4px 12px rgba(20, 50, 38, 0.10)' },
 });

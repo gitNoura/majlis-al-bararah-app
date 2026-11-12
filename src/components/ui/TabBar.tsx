@@ -10,12 +10,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Txt } from '@/components/Txt';
 import { useTheme } from '@/theme/theme';
 
-export const TAB_BAR_H = 80; // the pill and the space round it, without the bottom safe area
+export const TAB_BAR_H = 72; // the pill and the space round it, without the bottom safe area
 
 export type TabItem = {
   key: string;
   label: string;
-  icon: (color: string) => ReactNode;
+  icon: (color: string, focused: boolean) => ReactNode;
   focused: boolean;
   onPress: () => void;
   onLongPress?: () => void;
@@ -45,8 +45,8 @@ export function TabBar({ tabs, hidden }: { tabs: TabItem[]; hidden?: boolean }) 
               style={({ pressed }) => [styles.tab, pressed && { opacity: 0.6 }]}
             >
               <View style={[styles.pill, tab.focused && { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.14)' : c.card, boxShadow: isDark ? undefined : `0px 2px 8px ${c.shadow}` }]}>
-                {tab.icon(color)}
-                <Txt size={11} weight={tab.focused ? 700 : 500} color={color} center numberOfLines={1}>
+                {tab.icon(color, tab.focused)}
+                <Txt size={11} weight={tab.focused ? 700 : 500} lineHeight={14} color={color} center numberOfLines={1}>
                   {tab.label}
                 </Txt>
               </View>
@@ -60,8 +60,8 @@ export function TabBar({ tabs, hidden }: { tabs: TabItem[]; hidden?: boolean }) 
 
 const styles = StyleSheet.create({
   wrap: { paddingHorizontal: 16, paddingTop: 8, justifyContent: 'flex-end' },
-  bar: { flex: 1, flexDirection: 'row', alignItems: 'center', borderRadius: 36, borderCurve: 'continuous', borderWidth: 1, paddingHorizontal: 6 },
-  glass: { borderRadius: 35, borderCurve: 'continuous', overflow: 'hidden' },
+  bar: { flex: 1, flexDirection: 'row', alignItems: 'center', borderRadius: 32, borderCurve: 'continuous', borderWidth: 1, paddingHorizontal: 6 },
+  glass: { borderRadius: 31, borderCurve: 'continuous', overflow: 'hidden' },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  pill: { alignSelf: 'stretch', marginHorizontal: 2, height: 52, borderRadius: 26, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center', gap: 1 },
+  pill: { alignSelf: 'stretch', marginHorizontal: 2, height: 48, borderRadius: 24, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center', gap: 1 },
 });

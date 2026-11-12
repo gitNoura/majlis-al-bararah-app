@@ -6,3 +6,4 @@ export { SegmentedControl } from './SegmentedControl';
 export { ProgressStrip } from './ProgressStrip';
 export { Ring } from './Ring';
 export { TAB_BAR_H, TabBar, type TabItem } from './TabBar';
+export { TabHifdhIcon, TabHomeIcon, TabLibraryIcon, TabQuranIcon, TabSettingsIcon } from './TabIcons';

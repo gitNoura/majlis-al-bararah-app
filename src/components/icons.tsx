@@ -57,14 +57,7 @@ export const SearchIcon = (p: IconProps) => (
     <Path d="M20 20l-4.2-4.2" />
   </Line>
 );
-// the home screen: its tab (filled when it is the one open), the member's round, and the five prayers
-export function HomeIcon({ size = 22, color, filled }: IconProps & { filled?: boolean }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={1.7} strokeLinejoin="round">
-      <Path d="M4 10.5L12 4l8 6.5V19.5a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" />
-    </Svg>
-  );
-}
+// the home screen: the member's round, and the five prayers
 export const PersonIcon = (p: IconProps) => (
   <Line {...p}>
     <Circle cx={12} cy={8.5} r={3.8} />
@@ -168,12 +161,6 @@ export const PinIcon = (p: IconProps) => (
   <Line {...p}>
     <Path d="M12 21s-6.5-6.1-6.5-11a6.5 6.5 0 0 1 13 0c0 4.9-6.5 11-6.5 11z" />
     <Circle cx={12} cy={10} r={2.3} />
-  </Line>
-);
-export const BookOpenIcon = (p: IconProps) => (
-  <Line {...p}>
-    <Path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5M12 6.5C14 5 17 4.5 20 5v13c-3-.5-6 0-8 1.5M12 6.5v13" />
-    <Path d="M15.5 5.3v5.2l1.5-1.2 1.5 1.2V5.1" />
   </Line>
 );
 export const MoonIcon = (p: IconProps) => (
@@ -286,13 +273,7 @@ export const MicIcon = (p: IconProps) => (
   </Line>
 );
 // Hifdh «Revision» (two arrows going round) and «History» (a calendar)
-// Hifdh (a book with a bookmark) and My plans (a checklist)
-export const HifdhIcon = (p: IconProps) => (
-  <Line {...p}>
-    <Path d="M10 2v8l3-3 3 3V2" />
-    <Path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
-  </Line>
-);
+// My plans (a checklist)
 export const PlansIcon = (p: IconProps) => (
   <Line {...p}>
     <Path d="M3 17l2 2 4-4M3 7l2 2 4-4M13 6h8M13 12h8M13 18h8" />
@@ -318,17 +299,6 @@ export function CollapseIcon({ size = 22, color, strokeWidth = 1.8 }: IconProps)
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <Path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" />
-    </Svg>
-  );
-}
-
-// the library (books on a shelf)
-export function LibraryIcon({ size = 22, color }: IconProps) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.7} strokeLinejoin="round" strokeLinecap="round">
-      <Path d="M5 4h4v16H5z" />
-      <Path d="M10 4h4v16h-4z" />
-      <Path d="M15.2 5.4l3.8-1 3 14.6-3.8 1z" transform="translate(-1.5 0)" />
     </Svg>
   );
 }

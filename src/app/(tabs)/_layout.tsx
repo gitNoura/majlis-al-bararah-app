@@ -8,20 +8,19 @@ import { router, Tabs, type Href } from 'expo-router';
 import type { ComponentProps, ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 
-import { BookOpenIcon, HifdhIcon, HomeIcon, LibraryIcon, SettingsIcon } from '@/components/icons';
-import { TabBar, type TabItem } from '@/components/ui';
+import { TabBar, type TabItem, TabHifdhIcon, TabHomeIcon, TabLibraryIcon, TabQuranIcon, TabSettingsIcon } from '@/components/ui';
 import { DASH } from '@/i18n/dashboard';
 import { HOME } from '@/i18n/home';
 
 // the props the navigator gives a custom bar, taken from Tabs itself
 type BarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
 
-const TABS: Record<string, { label: () => string; icon: (color: string) => ReactNode; href: Href }> = {
-  index: { href: '/', label: () => HOME.tabHome(), icon: (color) => <HomeIcon color={color} /> },
-  quran: { href: '/quran', label: () => HOME.tabQuran(), icon: (color) => <BookOpenIcon color={color} /> },
-  hifdh: { href: '/hifdh', label: () => HOME.tabMemorize(), icon: (color) => <HifdhIcon color={color} /> },
-  library: { href: '/library', label: () => DASH.tabLibrary(), icon: (color) => <LibraryIcon color={color} /> },
-  settings: { href: '/settings', label: () => HOME.tabSettings(), icon: (color) => <SettingsIcon color={color} /> },
+const TABS: Record<string, { label: () => string; icon: (color: string, active: boolean) => ReactNode; href: Href }> = {
+  index: { href: '/', label: () => HOME.tabHome(), icon: (color, active) => <TabHomeIcon color={color} active={active} /> },
+  quran: { href: '/quran', label: () => HOME.tabQuran(), icon: (color, active) => <TabQuranIcon color={color} active={active} /> },
+  hifdh: { href: '/hifdh', label: () => HOME.tabMemorize(), icon: (color, active) => <TabHifdhIcon color={color} active={active} /> },
+  library: { href: '/library', label: () => DASH.tabLibrary(), icon: (color, active) => <TabLibraryIcon color={color} active={active} /> },
+  settings: { href: '/settings', label: () => HOME.tabSettings(), icon: (color, active) => <TabSettingsIcon color={color} active={active} /> },
 };
 
 function AppTabBar({ state, descriptors }: BarProps) {

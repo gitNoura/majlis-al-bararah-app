@@ -32,7 +32,7 @@ import { stayInQuran } from '@/lib/riwaya';
 import { writeJSON } from '@/lib/storage';
 import { useSkin } from '@/theme/homeSkin';
 import { T } from '@/theme/homeType';
-import { ltr } from '@/theme/ltr';
+import { lineStart, ltr } from '@/theme/ltr';
 import { space } from '@/theme/tokens';
 
 export default function HomeTab() {
@@ -58,18 +58,18 @@ export default function HomeTab() {
   // the date and the greeting start the language's line (right in Arabic); the profile icon is at the other end
   const words = (
     <View key="words" style={styles.words}>
-      <Txt {...T.date} color={k.meta}>
+      <Txt {...T.date} color={k.meta} style={lineStart()}>
         {dateLine()}
       </Txt>
-      <Txt size={34} weight={800} lineHeight={46} color={k.pageInk}>
+      <Txt {...T.greeting} color={k.pageInk} style={lineStart()}>
         {HOME.salam()}
       </Txt>
     </View>
   );
   const profile = (
     <Pressable key="profile" onPress={() => router.push('/profile')} accessibilityRole="button" accessibilityLabel={HOME.profile()} hitSlop={8}>
-      <Glass radius={26} style={styles.profile}>
-        <PersonIcon color={k.pageInk} size={24} />
+      <Glass radius={22} style={styles.profile}>
+        <PersonIcon color={k.pageInk} size={22} />
       </Glass>
     </Pressable>
   );
@@ -90,7 +90,7 @@ export default function HomeTab() {
 }
 
 const styles = StyleSheet.create({
-  head: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: space.md },
+  head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md },
   words: { flex: 1 },
-  profile: { width: 52, height: 52, alignItems: 'center', justifyContent: 'center' },
+  profile: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 });
