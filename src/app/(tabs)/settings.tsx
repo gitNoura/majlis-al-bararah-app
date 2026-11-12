@@ -10,6 +10,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TAB_BAR_H } from '@/components/ui/TabBar';
 
 import { ScreenBackground } from '@/components/Stars';
 import { Avatar } from '@/components/Avatar';
@@ -110,7 +111,7 @@ export default function SettingsTab() {
     <View style={{ flex: 1, backgroundColor: c.screen }}>
       <ScreenBackground />
       <ScrollView
-        contentContainerStyle={{ padding: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.lg, gap: space.lg }}
+        contentContainerStyle={{ padding: space.md, paddingTop: insets.top + space.lg, paddingBottom: TAB_BAR_H + insets.bottom + space.md, gap: space.lg }}
         keyboardShouldPersistTaps="handled"
       >
         <Txt size={30} weight={800} lineHeight={40} color={c.ink}>

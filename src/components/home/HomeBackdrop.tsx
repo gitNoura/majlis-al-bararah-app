@@ -1,9 +1,11 @@
 // HOME's page: its own off-white with three large, faint pools of grey and white that stay still while the cards scroll over
 // them, so the glass has something to blur and show through. The Home screen puts this inside the BlurTargetView on Android.
 import { LinearGradient } from 'expo-linear-gradient';
+import { useContext } from 'react';
 import { StyleSheet } from 'react-native';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { HifdhTintContext } from '@/theme/home';
 import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 
@@ -16,6 +18,12 @@ const POOLS = {
     { color: '#f0e8d4', x: 0.08, y: 0.62, o: 0.5 }, // a faint warm ivory
     { color: '#e0ede6', x: 0.9, y: 0.82, o: 0.5 },
   ],
+  neutral: [
+    { color: '#ffffff', x: 0.1, y: 0.3, o: 1 },
+    { color: '#e9e9e6', x: 0.92, y: 0.14, o: 0.5 },
+    { color: '#f0ede4', x: 0.08, y: 0.62, o: 0.4 },
+    { color: '#e9e9e6', x: 0.9, y: 0.82, o: 0.4 },
+  ],
   dark: [
     { color: '#4a4d4a', x: 0.92, y: 0.12, o: 0.4 },
     { color: '#8a8d89', x: 0.08, y: 0.42, o: 0.08 },
@@ -27,7 +35,8 @@ const LIGHT_WASH = ['#fbfaf7', '#fdfdfb', '#fbfaf7'] as const; // a clean, brigh
 export function HomeBackdrop() {
   const k = useSkin();
   const { isDark } = useTheme();
-  const pools = isDark ? POOLS.dark : POOLS.light;
+  const hifdh = useContext(HifdhTintContext);
+  const pools = isDark ? POOLS.dark : hifdh ? POOLS.neutral : POOLS.light; // the Hifdh tab's light page has no green in it
   return (
     <>
       <LinearGradient colors={isDark ? k.wash : LIGHT_WASH} style={StyleSheet.absoluteFill} />

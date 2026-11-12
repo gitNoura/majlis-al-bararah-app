@@ -16,6 +16,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TAB_BAR_H } from '@/components/ui/TabBar';
 
 import { ActivityCard } from '@/components/home/ActivityCard';
 import { Glass, GlassTarget } from '@/components/home/Glass';
@@ -84,7 +85,7 @@ export default function HomeTab() {
         <Backdrop ref={target} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: screenH }}>
           <HomeBackdrop />
         </Backdrop>
-        <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.md, paddingBottom: space.lg, gap: space.md }}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.md, paddingBottom: TAB_BAR_H + insets.bottom + space.md, gap: space.md }}>
           <View style={[styles.head, ltr()]}>{LANG === 'ar' ? [profile, words] : [words, profile]}</View>
           <PrayerCard />
           <HadithNote />

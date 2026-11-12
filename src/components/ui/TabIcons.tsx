@@ -1,5 +1,5 @@
-// The bottom bar's icons: one family, drawn together on a 24 × 24 grid (a fine 1.6 stroke, round caps and joins). The chosen tab's icon also
-// gets a soft fill of its own colour, so it reads as "on" without changing shape. (The rest of the app keeps using icons.tsx.)
+// The bottom bar's icons: one family, drawn together on a 24 × 24 grid (a fine 1.6 stroke, round caps and joins). The chosen tab's icon stays an outline
+// (no fill); the pill behind it shows which tab is on. (The rest of the app keeps using icons.tsx.)
 import type { ReactNode } from 'react';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
@@ -8,7 +8,6 @@ type Props = { color: string; active?: boolean; size?: number };
 function Frame({ color, active, size = 24, children, fill }: Props & { children: ReactNode; fill: (props: { fill: string; fillOpacity: number }) => ReactNode }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-      {active && fill({ fill: color, fillOpacity: 0.2 })}
       {children}
     </Svg>
   );

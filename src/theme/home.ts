@@ -133,6 +133,18 @@ const hifdhDark: Partial<HomePalette> = {
   sand: '#2a2922',
   sandLine: 'rgba(228, 196, 109, 0.28)',
 };
+// the Hifdh tab in light mode: neutral tiles and washes instead of the pale green, charcoal headings instead of the warm gold
+const hifdhLight: Partial<HomePalette> = {
+  tile: '#ebecea',
+  tileInk: '#2e3230',
+  mint: '#f1f2f0',
+  mintLine: 'rgba(20, 28, 24, 0.08)',
+  sand: '#f1f2f0',
+  sandLine: 'rgba(20, 28, 24, 0.1)',
+  amber: '#2e3230',
+  well: '#ecedeb',
+  greenSoft: 'rgba(20, 28, 24, 0.06)',
+};
 export const HifdhTintContext = createContext(false);
 export function HifdhTint({ children }: { children: ReactNode }) {
   return createElement(HifdhTintContext.Provider, { value: true }, children);
@@ -141,5 +153,5 @@ export function HifdhTint({ children }: { children: ReactNode }) {
 export function useHome(): HomePalette {
   const isDark = useTheme().isDark;
   const tint = useContext(HifdhTintContext);
-  return isDark ? (tint ? { ...dark, ...hifdhDark } : dark) : light;
+  return isDark ? dark : tint ? { ...light, ...hifdhLight } : light;
 }

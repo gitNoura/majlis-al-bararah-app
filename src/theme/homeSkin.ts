@@ -103,7 +103,7 @@ const light: HomeSkin = {
   hueSoft: '#c6ddd0',
   hueDeep: '#094A3D',
   glow: '#3A9C85',
-  glowOpacity: 0.25,
+  glowOpacity: 0.07,
   glassGlint: 'rgba(255, 255, 255, 0.10)',
   glassEdge: 'rgba(255, 255, 255, 0.85)',
   ...PAGE,
@@ -140,8 +140,8 @@ const dark: HomeSkin = {
   pageHere: '#e9dfbd',
   pageButton: '#ece4c8',
   wash: ['#141414', '#151515', '#151515'], // near-black
-  glass: 'rgba(255, 255, 255, 0.06)',
-  glassSheen: 'rgba(255, 255, 255, 0.09)',
+  glass: 'rgba(255, 255, 255, 0.045)',
+  glassSheen: 'rgba(255, 255, 255, 0.025)',
   glassShadow: 'rgba(0, 0, 0, 0.35)',
   glassTrack: 'rgba(255, 255, 255, 0.14)',
   glassBtn: 'rgba(255, 255, 255, 0.12)',
@@ -152,15 +152,15 @@ const dark: HomeSkin = {
   hueSoft: 'rgba(236, 228, 200, 0.35)',
   hueDeep: '#cfc6a3',
   glow: '#ece4c8',
-  glowOpacity: 0.4,
-  glassGlint: 'rgba(255, 255, 255, 0.03)',
-  glassEdge: 'rgba(255, 255, 255, 0.12)',
+  glowOpacity: 0.12,
+  glassGlint: 'rgba(255, 255, 255, 0)',
+  glassEdge: 'rgba(255, 255, 255, 0.05)',
   goBg: '#343635',
   goInk: '#ece4c8',
   buttonInk: '#1d1d1d',
 };
 
-// The Hifdh tab in dark mode: a forest-green page and panels, with gold for what is lit (see HifdhTint in home.ts)
+// (unused since the Hifdh tab wears Home's dark look)
 const hifdhDark: Partial<HomeSkin> = {
   // only hints: the page and the white panel stay the same grey as Home; the soft panel is barely green, what is lit is gold
   soft: '#252a27',
@@ -174,8 +174,18 @@ const hifdhDark: Partial<HomeSkin> = {
   goBg: '#3a3832',
 };
 
+// The Hifdh tab in light mode: no pale green anywhere, just neutral greys and white (dark mode is Home's own)
+const hifdhLight: Partial<HomeSkin> = {
+  soft: '#ebecea',
+  softTop: '#ebecea',
+  softBottom: '#ebecea',
+  pill: 'rgba(20, 28, 24, 0.06)',
+  pillTrack: 'rgba(20, 28, 24, 0.12)',
+  glassTrack: 'rgba(20, 28, 24, 0.1)',
+};
+
 export const useSkin = (): HomeSkin => {
   const isDark = useTheme().isDark;
   const tint = useContext(HifdhTintContext);
-  return isDark ? (tint ? { ...dark, ...hifdhDark } : dark) : light;
+  return isDark ? dark : tint ? { ...light, ...hifdhLight } : light;
 };

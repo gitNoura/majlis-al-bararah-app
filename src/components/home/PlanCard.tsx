@@ -58,7 +58,7 @@ export function PlanCard({ label, title, sub, percent = null, arrow: showArrow =
   );
   const track = (
     <View key="track" style={[styles.track, ltr(), { backgroundColor: k.glassTrack, justifyContent: ar ? 'flex-end' : 'flex-start' }]}>
-      {pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={[styles.fill, { backgroundColor: k.hue, shadowColor: k.glow, shadowOpacity: k.glowOpacity, shadowRadius: 5, shadowOffset: { width: 0, height: 0 } }]} />}
+      {pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={[styles.fill, { backgroundColor: k.hue, shadowColor: k.glow, shadowOpacity: k.glowOpacity, shadowRadius: 3, shadowOffset: { width: 0, height: 0 } }]} />}
     </View>
   );
 

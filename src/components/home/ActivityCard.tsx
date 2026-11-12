@@ -47,7 +47,7 @@ export function ActivityCard() {
             <View key={d.day} style={styles.col}>
               <View style={styles.slot}>
                 {on[i] ? (
-                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: today ? k.hue : k.hueSoft }, today && { shadowColor: k.glow, shadowOpacity: k.glowOpacity, shadowRadius: 6, shadowOffset: { width: 0, height: 0 } }]} />
+                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: today ? k.hue : k.hueSoft }, today && { shadowColor: k.glow, shadowOpacity: k.glowOpacity, shadowRadius: 4, shadowOffset: { width: 0, height: 0 } }]} />
                 ) : (
                   <View style={[styles.bar, { height: STUB, backgroundColor: k.pillTrack, opacity: d.future ? 0.5 : 1 }]} />
                 )}

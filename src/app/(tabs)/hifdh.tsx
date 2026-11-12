@@ -7,11 +7,15 @@
 // The data and logic are src/lib/hifdh (unchanged); `rev` in HifProvider redraws the cards after every mark.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { router } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { BlurTargetView } from 'expo-blur';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TAB_BAR_H } from '@/components/ui/TabBar';
+import { HifdhTint } from '@/theme/home';
 
-import { ScreenBackground } from '@/components/Stars';
+import { GlassTarget } from '@/components/home/Glass';
+import { HomeBackdrop } from '@/components/home/HomeBackdrop';
 import { HistoryScreen, ProgressSection } from '@/components/hifdh/HistoryScreen';
 import { HifProvider, useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { PlansList } from '@/components/hifdh/PlansList';
@@ -27,7 +31,6 @@ import { displayKeys } from '@/lib/ayahmap';
 import { keyOf } from '@/lib/hifdh';
 import * as plan from '@/lib/hifdh/plan';
 import { keysOfSegs } from '@/lib/hifdh/recite';
-import { HifdhTint } from '@/theme/home';
 import { useSkin } from '@/theme/homeSkin';
 import { T } from '@/theme/homeType';
 import { useTheme } from '@/theme/theme';
@@ -53,9 +56,9 @@ function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; s
   const k = useSkin();
   useHif(); // subscribing here redraws the whole screen when `rev` changes
 
-  if (screen === 'pace') return <PlanSetup type={setup.type} id={setup.id} onExit={exit} />;
+  if (screen === 'pace') return <View style={{ flex: 1, paddingBottom: TAB_BAR_H + insets.bottom }}><PlanSetup type={setup.type} id={setup.id} onExit={exit} /></View>;
 
-  const pad = { padding: space.md, paddingBottom: space.lg + space.md, gap: space.md };
+  const pad = { padding: space.md, paddingBottom: TAB_BAR_H + insets.bottom + space.md, gap: space.md };
 
   return (
     <View style={{ flex: 1 }}>
@@ -99,7 +102,7 @@ function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; s
   );
 }
 
-// the tab's own look in dark mode (green and gold, not black): HifdhTint changes the palettes read inside it only
+// the Hifdh tab: Home's look in dark mode; in light mode Home's too but with neutral greys instead of pale green (see HifdhTint)
 export default function HifdhTab() {
   return (
     <HifdhTint>
@@ -115,6 +118,9 @@ function HifdhScreen() {
   const [screen, setScreen] = useState<Screen>('tabs');
   const [seg, setSeg] = useState<Seg>('today');
   const [setup, setSetup] = useState<Setup>({ type: null, id: null });
+  const target = useRef<View | null>(null); // Android: the page behind the glass, which the glass blurs (as on Home)
+  const screenH = useWindowDimensions().height;
+  const Backdrop = Platform.OS === 'android' ? BlurTargetView : View;
 
   // opening it counts today in the streak, as the Quran and the wird do
   useEffect(() => markToday('quran'), []);
@@ -138,8 +144,11 @@ function HifdhScreen() {
   const exit = useCallback(() => setScreen('tabs'), []); // back to the segment it was opened from
 
   return (
+    <GlassTarget.Provider value={Platform.OS === 'android' ? target : null}>
     <View style={{ flex: 1, backgroundColor: k.paper }}>
-      <ScreenBackground />
+      <Backdrop ref={target} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: screenH }}>
+        <HomeBackdrop />
+      </Backdrop>
       {load === 'loading' && <ActivityIndicator color={c.meta} style={{ marginTop: 80 }} />}
       {load === 'failed' && (
         <Txt size={14} center color={c.meta} style={{ marginTop: 80 }}>
@@ -156,6 +165,7 @@ function HifdhScreen() {
         </HifProvider>
       )}
     </View>
+    </GlassTarget.Provider>
   );
 }
 
