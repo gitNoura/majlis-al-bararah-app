@@ -45,12 +45,10 @@ export type HomeSkin = {
   pageHere: string; // the juz being read (a fresher green, to read beside the forest ones)
   pageButton: string; // the white button
   wash: readonly [string, string, string]; // Home's page: Home's own off-white (top, middle, bottom) for the glass to sit on
-  glass: string; // the glass panels' fill (over the blur)
-  glassSheen: string; // the soft light along their top edge
-  glassShadow: string; // and their soft shadow
+  glass: string; // the cards' fill
+  glassShadow: string; // and their soft shadow (neutral)
   glassTrack: string; // an empty progress bar inside a glass card
   glassBtn: string; // the round arrow button inside a glass card
-  glassTint: readonly [string, string]; // a soft colour inside the plan cards' glass (lit corner, then clear)
   mark: string; // Home's progress bars and today's activity bar: a neutral charcoal (parchment at night), no green
   markSoft: string; // the other days' activity bars
   hue: string; // the progress bars, and today's activity bar (a neutral charcoal in light mode, parchment in dark)
@@ -58,8 +56,6 @@ export type HomeSkin = {
   hueDeep: string; // a deeper, quieter shade of it: the hadith's words
   glow: string; // the soft halo around the green progress bars and today's activity bar
   glowOpacity: number;
-  glassGlint: string; // a faint light along the glass's bottom edge, like light passing through
-  glassEdge: string; // the glass's thin lit edge, so a pale panel still reads against a pale page
   doneBg: string; // a card whose work is finished: a light green fill...
   doneLine: string; // ...and its green edge
 };
@@ -93,12 +89,10 @@ const light: HomeSkin = {
   pageSoft: 'rgba(23, 63, 50, 0.74)',
   pageHere: '#0F6B58',
   wash: ['#f1f2ef', '#f4f5f3', '#f4f5f3'], // Home's own off-white (paper)
-  glass: 'rgba(246, 247, 247, 0.38)', // a cool neutral body, so the glass still reads on the plain white page
-  glassSheen: 'rgba(255, 255, 255, 0.75)',
-  glassShadow: 'rgba(0, 0, 0, 0.10)', // neutral (a green shadow tinted the top and bottom of the cards)
+  glass: '#ffffff',
+  glassShadow: 'rgba(0, 0, 0, 0.07)',
   glassTrack: 'rgba(9, 74, 61, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
-  glassTint: ['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.02)'],
   mark: '#2e3230',
   markSoft: '#b4b7b3',
   hue: '#2e3230', // the progress bars and today's activity bar: a neutral charcoal in light mode, no green
@@ -106,8 +100,6 @@ const light: HomeSkin = {
   hueDeep: '#094A3D',
   glow: '#2e3230',
   glowOpacity: 0.07,
-  glassGlint: 'rgba(255, 255, 255, 0.10)',
-  glassEdge: 'rgba(255, 255, 255, 0.95)',
   doneBg: '#e0efe6',
   doneLine: 'rgba(15, 107, 88, 0.30)',
   ...PAGE,
@@ -144,12 +136,10 @@ const dark: HomeSkin = {
   pageHere: '#e9dfbd',
   pageButton: '#ece4c8',
   wash: ['#141414', '#151515', '#151515'], // near-black
-  glass: 'rgba(255, 255, 255, 0.045)',
-  glassSheen: 'rgba(255, 255, 255, 0.025)',
+  glass: 'rgba(255, 255, 255, 0.06)',
   glassShadow: 'rgba(0, 0, 0, 0.35)',
   glassTrack: 'rgba(255, 255, 255, 0.14)',
   glassBtn: 'rgba(255, 255, 255, 0.12)',
-  glassTint: ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.01)'],
   mark: '#e9dfbd',
   markSoft: '#5c6660',
   hue: '#e9dfbd', // dark mode: a deeper light green
@@ -157,8 +147,6 @@ const dark: HomeSkin = {
   hueDeep: '#cfc6a3',
   glow: '#ece4c8',
   glowOpacity: 0.12,
-  glassGlint: 'rgba(255, 255, 255, 0)',
-  glassEdge: 'rgba(255, 255, 255, 0.05)',
   doneBg: '#23302a',
   doneLine: 'rgba(155, 194, 173, 0.32)',
   goBg: '#343635',

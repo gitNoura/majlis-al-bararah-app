@@ -74,7 +74,7 @@ export function AyahSheet({ ayah, onClose, onMove, onGo }: { ayah: Ayah | null; 
           },
         ]}
       >
-        <GlassBack topOnly strong radius={28} />
+        <GlassBack topOnly radius={28} />
         <View style={[styles.grip, { backgroundColor: c.line }]} />
         <View style={styles.head}>
           <Txt size={18} weight={700} color={c.ink} style={{ flex: 1 }} numberOfLines={1}>

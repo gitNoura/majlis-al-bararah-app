@@ -7,14 +7,12 @@
 // The data and logic are src/lib/hifdh (unchanged); `rev` in HifProvider redraws the cards after every mark.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { router } from 'expo-router';
-import { BlurTargetView } from 'expo-blur';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TAB_BAR_H } from '@/components/ui/TabBar';
 import { HifdhTint } from '@/theme/home';
 
-import { GlassTarget } from '@/components/home/Glass';
 import { HomeBackdrop } from '@/components/home/HomeBackdrop';
 import { HistoryScreen, ProgressSection } from '@/components/hifdh/HistoryScreen';
 import { HifProvider, useHif, type PlanType } from '@/components/hifdh/HifProvider';
@@ -118,9 +116,6 @@ function HifdhScreen() {
   const [screen, setScreen] = useState<Screen>('tabs');
   const [seg, setSeg] = useState<Seg>('today');
   const [setup, setSetup] = useState<Setup>({ type: null, id: null });
-  const target = useRef<View | null>(null); // Android: the page behind the glass, which the glass blurs (as on Home)
-  const screenH = useWindowDimensions().height;
-  const Backdrop = Platform.OS === 'android' ? BlurTargetView : View;
 
   // opening it counts today in the streak, as the Quran and the wird do
   useEffect(() => markToday('quran'), []);
@@ -144,11 +139,8 @@ function HifdhScreen() {
   const exit = useCallback(() => setScreen('tabs'), []); // back to the segment it was opened from
 
   return (
-    <GlassTarget.Provider value={Platform.OS === 'android' ? target : null}>
     <View style={{ flex: 1, backgroundColor: k.paper }}>
-      <Backdrop ref={target} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: screenH }}>
-        <HomeBackdrop />
-      </Backdrop>
+      <HomeBackdrop />
       {load === 'loading' && <ActivityIndicator color={c.meta} style={{ marginTop: 80 }} />}
       {load === 'failed' && (
         <Txt size={14} center color={c.meta} style={{ marginTop: 80 }}>
@@ -165,7 +157,6 @@ function HifdhScreen() {
         </HifProvider>
       )}
     </View>
-    </GlassTarget.Provider>
   );
 }
 

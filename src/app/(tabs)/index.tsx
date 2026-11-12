@@ -2,24 +2,23 @@
 //   greeting and the date, with the profile icon at the far end
 //   1 the next prayer (a box on the sky of the moment: its time, the time left, qibla and calendar)
 //   the hadith of the reader, centred
-//   2 reading, 3 memorization, 4 revision (three glass cards: today's portion and how far each is; the tasks are in Hifdh)
-//   5 activity (this week), the last, also glass
+//   2 reading, 3 memorization, 4 revision (three cards: today's portion and how far each is; the tasks are in Hifdh)
+//   5 activity (this week), the last, also a card
 //   (the adhkar and ahadith libraries are the Library tab)
-// The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a soft mint page with pools of colour (HomeBackdrop), with everything on
-// it in glass (components/home/Glass.tsx; on Android the page is the BlurTargetView the glass blurs), one deep forest for words and one fresher green for progress. The prayer card is the only thing that
+// The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a flat neutral page (HomeBackdrop), with everything on
+// it in plain cards (components/home/Glass.tsx), one deep forest for words and one fresher green for progress. The prayer card is the only thing that
 // changes with the day (its sky). The one moment of motion is the marks drawing themselves in (Grow). Each section reads the saved
 // state when it draws, so Home redraws every time it comes into view. It also keeps one behaviour of the old home screen: after a
 // change of narration the app opens again, and must land on the Quran tab at the same place, not on Home.
 'use no memo'; // the sections read saved state (modules), which the React Compiler cannot see change
-import { BlurTargetView } from 'expo-blur';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TAB_BAR_H } from '@/components/ui/TabBar';
 
 import { ActivityCard } from '@/components/home/ActivityCard';
-import { Glass, GlassTarget } from '@/components/home/Glass';
+import { Glass } from '@/components/home/Glass';
 import { HadithNote } from '@/components/home/HadithNote';
 import { HomeBackdrop } from '@/components/home/HomeBackdrop';
 import { MemorizationCard } from '@/components/home/MemorizationCard';
@@ -40,9 +39,7 @@ import { space } from '@/theme/tokens';
 export default function HomeTab() {
   const k = useSkin();
   const insets = useSafeAreaInsets();
-  const screenH = useWindowDimensions().height; // the page is as tall as the screen: it runs on under the tab bar, which shows the same page (see (tabs)/_layout.tsx)
   const [, setRev] = useState(0); // bumped on focus: redraws the sections
-  const target = useRef<View | null>(null); // Android: the page behind the glass, which the glass blurs
 
   useEffect(() => {
     const stay = stayInQuran();
@@ -78,13 +75,9 @@ export default function HomeTab() {
     </Pressable>
   );
 
-  const Backdrop = Platform.OS === 'android' ? BlurTargetView : View;
   return (
-    <GlassTarget.Provider value={Platform.OS === 'android' ? target : null}>
-      <View style={{ flex: 1, backgroundColor: k.paper }}>
-        <Backdrop ref={target} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: screenH }}>
-          <HomeBackdrop />
-        </Backdrop>
+    <View style={{ flex: 1, backgroundColor: k.paper }}>
+      <HomeBackdrop />
         <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.md, paddingBottom: TAB_BAR_H + insets.bottom + space.md, gap: space.md }}>
           <View style={[styles.head, ltr()]}>{LANG === 'ar' ? [profile, words] : [words, profile]}</View>
           <PrayerCard />
@@ -93,8 +86,7 @@ export default function HomeTab() {
           <MemorizationCard />
           <ActivityCard />
         </ScrollView>
-      </View>
-    </GlassTarget.Provider>
+    </View>
   );
 }
 

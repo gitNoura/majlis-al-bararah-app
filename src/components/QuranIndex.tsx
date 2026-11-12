@@ -71,7 +71,7 @@ export function QuranIndex({ open, page, onClose, onGo, onPlay }: { open: boolea
           },
         ]}
       >
-        <GlassBack topOnly strong radius={28} />
+        <GlassBack topOnly radius={28} />
         <View style={styles.head}>
           <Txt size={22} weight={700} color={c.ink} style={{ flex: 1, textAlign: 'center' }}>
             {READER.index()}

@@ -261,7 +261,7 @@ function Pill({ children }: { children: ReactNode }) {
   const { c } = useTheme();
   return (
     <View style={[styles.pill, { borderWidth: 0 }]}>
-      <GlassBack strong radius={LISTEN_BAR_H / 2} />
+      <GlassBack radius={LISTEN_BAR_H / 2} />
       {children}
     </View>
   );

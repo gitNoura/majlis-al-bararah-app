@@ -82,7 +82,7 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
             },
           ]}
         >
-          <GlassBack strong radius={0} />
+          <GlassBack radius={0} />
           <View style={styles.top}>
             <View style={[styles.field, { backgroundColor: c.surface2, borderColor: c.line }]}>
               <SearchIcon color={c.meta} size={20} />

@@ -21,7 +21,7 @@ export function Sheet({ open, onClose, title, children }: Props) {
       <Pressable style={[styles.backdrop, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }, Platform.OS !== 'web' && { direction: LANG === 'ar' ? 'rtl' : 'ltr' }]} onPress={onClose} accessibilityLabel={title}>
         {/* a tap inside the sheet must not reach the backdrop */}
         <Pressable onPress={() => {}} style={[styles.sheet, { paddingBottom: insets.bottom + space.md }]}>
-          <GlassBack topOnly strong radius={radius.sheet} />
+          <GlassBack topOnly radius={radius.sheet} />
           <View style={[styles.handle, { backgroundColor: c.surface3 }]} />
           {!!title && (
             <Txt size={18} weight={700} color={c.ink} style={styles.title}>

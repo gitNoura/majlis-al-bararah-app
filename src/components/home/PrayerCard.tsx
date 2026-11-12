@@ -1,5 +1,5 @@
-// HOME, card 1: the next prayer with its time and the time left, and the two buttons (qibla, calendar), as one glass box (like the cards under it)
-// that keeps a tint of the sky of the moment inside it (white glass pills). The day's five times are in the calendar.
+// HOME, card 1: the next prayer with its time and the time left, and the two buttons (qibla, calendar), as one card (like the ones under it)
+// filled with the sky of the moment (with pills). The day's five times are in the calendar.
 // With no place chosen yet it asks for one (the phone's location, or a city from the settings).
 'use no memo'; // reads saved state (the place) when it draws, which the React Compiler cannot see change
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,7 +21,6 @@ import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
 const RADIUS = 26;
-const TINT = 0.92; // how much of the sky of the moment colours the glass (0 = clear glass, 1 = solid sky); the blur and sheen show through the rest
 
 export function PrayerCard() {
   const [view, setView] = useState<PrayerView>(prayerView);
@@ -94,14 +93,12 @@ export function PrayerCard() {
   const calendar = pill(DASH.calendar(), () => router.push('/calendar'), 'calendar');
 
   return (
-    // a glass box like the cards under it (blur + pale fill + sheen); the sky of the moment is only a tint inside it. The rounded
-    // clip is on the sky's own layer: the animated stars and clouds (moving layers) are not cut by the glass's corners on every phone
-    <Glass radius={RADIUS} bare style={styles.card}>
+    // a card like the ones under it, filled with the sky of the moment. The rounded clip is on the sky's own layer: the animated
+    // stars and clouds (moving layers) are not cut by the card's corners on every phone
+    <Glass radius={RADIUS} style={styles.card}>
       <View style={styles.skyClip} pointerEvents="none">
-        <LinearGradient colors={sky.sky} style={[StyleSheet.absoluteFill, { opacity: TINT }]} />
+        <LinearGradient colors={sky.sky} style={StyleSheet.absoluteFill} />
         <PrayerSky phase={phase} sun={view?.sun ?? 0.5} />
-        <LinearGradient colors={['rgba(255, 255, 255, 0.14)', 'rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.05)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-        <View style={[StyleSheet.absoluteFill, { borderRadius: RADIUS, borderCurve: 'continuous', boxShadow: 'inset 0px 1px 0px rgba(255, 255, 255, 0.45), inset 0px 0px 0px 1px rgba(255, 255, 255, 0.12), inset 0px -1px 0px rgba(0, 0, 0, 0.22)' }]} />
       </View>
       {view ? (
         // left to right on the screen in every language: in Arabic the prayer is at the right edge, then qibla, then calendar

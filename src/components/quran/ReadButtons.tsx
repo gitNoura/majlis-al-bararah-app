@@ -30,7 +30,7 @@ export function ReadButtons({ onMarks }: { onMarks: (tab: Tab) => void }) {
   return (
     <View style={styles.box}>
       <View style={[styles.pill, { borderWidth: 0 }]}>
-        <GlassBack strong radius={READ_BAR_H / 2} />
+        <GlassBack radius={READ_BAR_H / 2} />
         {item(QURAN.marksPages(), () => onMarks('pages'), <BookmarkIcon color={c.ink} size={22} />)}
         {item(QURAN.marksHighlights(), () => onMarks('highlights'), <MarkerIcon color={c.ink} size={22} />)}
         {item(QURAN.marksComments(), () => onMarks('comments'), <BubbleIcon color={c.ink} size={22} />)}

@@ -136,7 +136,7 @@ export function useRecite(active: boolean, page: number) {
   const bar = (
     <View style={styles.box}>
       <View style={[styles.row, { borderWidth: 0 }]}>
-        <GlassBack strong radius={32} />
+        <GlassBack radius={32} />
         <Round onPress={eye} label={override === 'hide' ? HIF.reciteShowAll() : HIF.reciteHideAll()}>
           {override === 'hide' ? <EyeOpen color={c.ink} /> : <EyeClosed color={c.ink} />}
         </Round>
