@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
+import { Title } from '@/components/home/Title';
 import { placeOf } from '@/components/quran/QuranHeader';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
@@ -55,9 +56,7 @@ export function ReadingCard() {
     <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={`${DASH.reading()} ${action}`} style={({ pressed }) => [styles.wrap, pressed && { opacity: 0.85 }]}>
       <View style={styles.head}>
         <View style={styles.words}>
-          <Txt size={13} weight={800} color={k.gold}>
-            {DASH.reading()}
-          </Txt>
+          <Title>{DASH.reading()}</Title>
           <Txt size={24} weight={800} lineHeight={34} color={k.ink} numberOfLines={1}>
             {surahLine(r.page)}
           </Txt>

@@ -7,6 +7,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { Grow } from '@/components/home/Grow';
+import { Title } from '@/components/home/Title';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { LANG } from '@/i18n/i18n';
@@ -32,9 +33,7 @@ export function ActivityCard() {
   return (
     <View style={styles.wrap}>
       <View style={styles.head}>
-        <Txt size={13} weight={800} color={k.gold}>
-          {DASH.activity()}
-        </Txt>
+        <Title>{DASH.activity()}</Title>
         <Txt size={14} weight={700} color={k.ink}>
           {DASH.activityOf7(digits(count))}
         </Txt>

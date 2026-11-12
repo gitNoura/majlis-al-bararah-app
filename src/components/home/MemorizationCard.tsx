@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Grow } from '@/components/home/Grow';
+import { Title } from '@/components/home/Title';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { hifdhOverview, memorizedCells } from '@/lib/dashboard';
@@ -30,9 +31,7 @@ function Plan({ title, part, emptyText, extra }: { title: string; part: Part; em
       accessibilityLabel={`${title} ${running ? `${pct}%` : emptyText}`}
       style={({ pressed }) => [styles.plan, { backgroundColor: k.pill }, pressed && { opacity: 0.7 }]}
     >
-      <Txt size={13} weight={800} color={k.gold} numberOfLines={1}>
-        {title}
-      </Txt>
+      <Title>{title}</Title>
       {part.has ? (
         <>
           <Txt size={26} weight={800} lineHeight={32} color={running ? k.ink : k.meta}>
