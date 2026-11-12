@@ -1,6 +1,6 @@
 // HOME, reading: the head of the sage card (SageCard), set like the prayer card's head: «Reading», the surah's name and the page, hizb
 // and juz as plain words on one side, the khatma as a ring on the other, level with the name; under it «Continue reading» as one
-// see-through pill. A tap anywhere on it opens the Quran at the marker.
+// filled-tonal pill. A tap anywhere on it opens the Quran at the marker.
 'use no memo'; // reads saved state (the marker) when it draws, which the React Compiler cannot see change
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
@@ -67,7 +67,7 @@ export function ReadingCard() {
     <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={`${DASH.reading()} ${action}`} style={({ pressed }) => [styles.wrap, pressed && { opacity: 0.85 }]}>
       {/* the ring is always at the left edge of the screen in Arabic (the line begins at the right), at the right edge otherwise */}
       <View style={styles.head}>{LANG === 'ar' ? [ring, words] : [words, ring]}</View>
-      <View style={[styles.go, { backgroundColor: sage.inset }]}>
+      <View style={[styles.go, { backgroundColor: sage.button }]}>
         <Txt size={14} weight={700} color={k.ink}>
           {action}
         </Txt>
@@ -80,5 +80,5 @@ const styles = StyleSheet.create({
   wrap: { gap: space.cozy },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   words: { flex: 1, gap: 1 },
-  go: { height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  go: { height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
 });
