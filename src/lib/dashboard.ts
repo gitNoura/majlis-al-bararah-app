@@ -49,14 +49,14 @@ export type PrayerView = {
 // The prayers card takes the sky of the moment, whatever the app's day / night: worked out from the sun at the place
 // (skyNow: the night from the dusk's end to al-Fajr, the dawn, midday, the warm afternoon, the sunset's glow).
 export type Sky = { sky: readonly [string, string, string]; ink: string; soft: string; circle: string; next: string; nextIcon: string };
-const LIGHT_INK = { ink: '#173f32', soft: '#5f6650', circle: 'rgba(23, 63, 50, 0.08)', next: '#173f32', nextIcon: '#fffdf5' }; // (each sky below sets its own current-prayer colour)
+const LIGHT_INK = { ink: '#173f32', soft: '#5f6650', circle: 'rgba(23, 63, 50, 0.08)', next: '#173f32', nextIcon: '#fffdf5' }; // the current prayer is forest green with cream words in every sky
 const NIGHT_INK = { ink: '#f6eedb', soft: '#d6cbb0', circle: 'rgba(255, 255, 255, 0.12)', next: '#173f32', nextIcon: '#fffdf5' };
 export const SKIES: Record<Phase, Sky> = {
-  night: { sky: ['#101b26', '#1b2b38', '#2a3c45'], ...NIGHT_INK, next: '#5fa7b3', nextIcon: '#0f1f27' },
-  dawn: { sky: ['#f3cfc4', '#f7e3d3', '#e6eef0'], ...LIGHT_INK, next: '#b4655e', nextIcon: '#ffffff' },
-  midday: { sky: ['#c9e1ec', '#e0eef0', '#eef3e6'], ...LIGHT_INK, next: '#3f8099', nextIcon: '#ffffff' },
-  afternoon: { sky: ['#f4d6b8', '#f3e6d2', '#e8ebdb'], ...LIGHT_INK, next: '#a46b34', nextIcon: '#ffffff' },
-  sunset: { sky: ['#e69a6c', '#c97a6c', '#7a5a72'], ...NIGHT_INK, next: '#5a3a58', nextIcon: '#ffffff' },
+  night: { sky: ['#101b26', '#1b2b38', '#2a3c45'], ...NIGHT_INK },
+  dawn: { sky: ['#f3cfc4', '#f7e3d3', '#e6eef0'], ...LIGHT_INK },
+  midday: { sky: ['#c9e1ec', '#e0eef0', '#eef3e6'], ...LIGHT_INK },
+  afternoon: { sky: ['#f4d6b8', '#f3e6d2', '#e8ebdb'], ...LIGHT_INK },
+  sunset: { sky: ['#e69a6c', '#c97a6c', '#7a5a72'], ...NIGHT_INK },
 };
 // In dark mode the card does not dim the day's sky (a grey layer over a bright sky looks muddy): it has its own deep sky for each
 // hour, clean and low in colour, with the night's words, and the stars of the night.

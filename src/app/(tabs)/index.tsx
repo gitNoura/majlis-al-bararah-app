@@ -18,6 +18,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActivityCard } from '@/components/home/ActivityCard';
+import { GlassBackdrop } from '@/components/home/Glass';
 import { HadithNote } from '@/components/home/HadithNote';
 import { MemorizationCard } from '@/components/home/MemorizationCard';
 import { PrayerCard } from '@/components/home/PrayerCard';
@@ -69,8 +70,13 @@ export default function HomeTab() {
           </Pressable>
         </View>
         <PrayerCard />
-        <ReadingCard />
-        <MemorizationCard />
+        <View style={{ gap: space.lg + space.sm }}>
+          <View style={{ position: 'absolute', top: -space.lg, bottom: -space.lg, left: -space.md, right: -space.md }} pointerEvents="none">
+            <GlassBackdrop />
+          </View>
+          <ReadingCard />
+          <MemorizationCard />
+        </View>
         <HadithNote />
         <ActivityCard />
       </ScrollView>
