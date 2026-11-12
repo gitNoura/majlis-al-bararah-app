@@ -1,6 +1,7 @@
 // The parts of a settings page, as in the phone's own apps (the app's settings, the Quran's): groups of
 // rows on white cards under their names, a row with an icon, its name and a line under it, and at its
 // end a switch, a mark, a tag or an arrow; a row of choices side by side (day / night / device...).
+import { GlassBack } from '@/components/home/Glass';
 import { type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -20,7 +21,10 @@ export function Section({ title, note, children }: { title: string; note?: strin
       <Txt size={13.5} weight={700} color={c.meta} style={styles.sectionTitle}>
         {title}
       </Txt>
-      <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }]}>{children}</View>
+      <View style={[styles.card, { borderWidth: 0 }]}>
+        <GlassBack radius={20} />
+        {children}
+      </View>
       {!!note && (
         <Txt size={12.5} color={c.meta} style={styles.note}>
           {note}

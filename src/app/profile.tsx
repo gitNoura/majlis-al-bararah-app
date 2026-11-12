@@ -2,6 +2,7 @@
 // name, brother or sister and since when; their days of reading; the account (email, settings, log
 // out). The first time after signing in it asks for the profile instead: the name and brother or
 // sister (never changed later), and the age confirmation.
+import { GlassBack } from '@/components/home/Glass';
 import { Redirect, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
@@ -65,7 +66,8 @@ function ProfileView() {
   return (
     <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 28 }}>
       {/* the picture and the name, on a card with a gold edge */}
-      <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line, boxShadow: `0px 10px 28px ${c.shadow}` }]}>
+      <View style={[styles.card, { borderWidth: 0 }]}>
+        <GlassBack radius={26} />
         <Avatar name={profile.display_name} size={84} />
         <Txt serif size={28} weight={700} center color={c.ink} lineHeight={44} style={{ marginTop: 12 }}>
           {profile.display_name}

@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenBackground } from '@/components/Stars';
 import { BackIcon } from '@/components/icons';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Txt } from '@/components/Txt';
@@ -100,6 +101,7 @@ export default function CalendarScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
+      <ScreenBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScreenHeader title={DASH.calendar()} />
       <ScrollView contentContainerStyle={{ padding: space.md, paddingBottom: insets.bottom + 28, gap: space.md }}>

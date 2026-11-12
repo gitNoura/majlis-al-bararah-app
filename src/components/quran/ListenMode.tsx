@@ -9,6 +9,7 @@
 // The engine (steps, two players taking turns, the log) is `Listener` in src/lib/hifdh/listen.js and is only alive while
 // this mode is on. Nothing here writes 'lastPage' except through the page turn the Quran tab already handles.
 'use no memo'; // reads the Listener's own state (a class), which the React Compiler cannot see change: it would keep the first drawing
+import { GlassBack } from '@/components/home/Glass';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
@@ -258,7 +259,12 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
 
 function Pill({ children }: { children: ReactNode }) {
   const { c } = useTheme();
-  return <View style={[styles.pill, { backgroundColor: c.card, borderColor: c.line }]}>{children}</View>;
+  return (
+    <View style={[styles.pill, { borderWidth: 0 }]}>
+      <GlassBack strong radius={LISTEN_BAR_H / 2} />
+      {children}
+    </View>
+  );
 }
 
 function Btn({ label, onPress, children, disabled, main }: { label: string; onPress: () => void; children: ReactNode; disabled?: boolean; main?: boolean }) {

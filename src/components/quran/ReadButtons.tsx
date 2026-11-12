@@ -1,6 +1,7 @@
 // Read's bottom bar, in the same pill as Listen's and Recite's: the reader's marks one by one (the pages with a bookmark,
 // the highlights, the comments) and the Quran's settings (a long label such as «Quran settings» takes two lines). A mark button opens its own list (MarksSheet.tsx). The row
 // follows the layout's direction, so in Arabic it begins at the right.
+import { GlassBack } from '@/components/home/Glass';
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -28,7 +29,8 @@ export function ReadButtons({ onMarks }: { onMarks: (tab: Tab) => void }) {
   );
   return (
     <View style={styles.box}>
-      <View style={[styles.pill, { backgroundColor: c.card, borderColor: c.line }]}>
+      <View style={[styles.pill, { borderWidth: 0 }]}>
+        <GlassBack strong radius={READ_BAR_H / 2} />
         {item(QURAN.marksPages(), () => onMarks('pages'), <BookmarkIcon color={c.ink} size={22} />)}
         {item(QURAN.marksHighlights(), () => onMarks('highlights'), <MarkerIcon color={c.ink} size={22} />)}
         {item(QURAN.marksComments(), () => onMarks('comments'), <BubbleIcon color={c.ink} size={22} />)}

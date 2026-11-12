@@ -2,12 +2,14 @@
 // books at the top (in Arabic, without tashkeel), «continue reading» under it, then the three books -
 // Sahih al-Bukhari, Sahih Muslim, an-Nawawi's Forty - as rows. A book opens its kitabs (/hadith-book); an-Nawawi has one, opened at
 // once (/hadith-kitab). The bookmark at the top opens the saved hadiths (/hadith-saved).
+import { GlassBack } from '@/components/home/Glass';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenBackground } from '@/components/Stars';
 import { BookmarkIcon, SearchIcon } from '@/components/icons';
 import { Note, openBook, openHadith, ReadLangButton } from '@/components/HadithParts';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -56,6 +58,7 @@ export default function Ahadith() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
+      <ScreenBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {/* at the end of the top bar: the hadiths' language, then the saved hadiths */}
       <ScreenHeader
@@ -69,7 +72,8 @@ export default function Ahadith() {
       />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 28, gap: 18 }} keyboardShouldPersistTaps="handled">
         {/* the search, in Arabic in every language */}
-        <View style={[styles.search, { backgroundColor: c.card, borderColor: c.line }]}>
+        <View style={[styles.search, { borderWidth: 0 }]}>
+          <GlassBack radius={25} />
           <SearchIcon color={c.meta} size={20} />
           <TextInput
             value={query}
@@ -116,8 +120,9 @@ function Results({ results }: { results: { found: Found[]; many: boolean } | 'bu
         <Pressable
           key={`${r.b}-${r.n}`}
           onPress={() => openHadith(r.b, r.k, r.n)}
-          style={({ pressed }) => [styles.result, { backgroundColor: c.card, borderColor: c.line }, pressed && { opacity: 0.7 }]}
+          style={({ pressed }) => [styles.result, { borderWidth: 0 }, pressed && { opacity: 0.7 }]}
         >
+          <GlassBack radius={18} />
           <Txt size={13} weight={700} color={c.accent}>
             {`${bookName(r.b)} · ${t('ahNumber', r.n)}`}
           </Txt>

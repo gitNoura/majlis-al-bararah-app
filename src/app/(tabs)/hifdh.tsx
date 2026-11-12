@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenBackground } from '@/components/Stars';
 import { HistoryScreen, ProgressSection } from '@/components/hifdh/HistoryScreen';
 import { HifProvider, useHif, type PlanType } from '@/components/hifdh/HifProvider';
 import { PlansList } from '@/components/hifdh/PlansList';
@@ -138,6 +139,7 @@ function HifdhScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: k.paper }}>
+      <ScreenBackground />
       {load === 'loading' && <ActivityIndicator color={c.meta} style={{ marginTop: 80 }} />}
       {load === 'failed' && (
         <Txt size={14} center color={c.meta} style={{ marginTop: 80 }}>

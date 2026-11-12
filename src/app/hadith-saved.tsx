@@ -1,10 +1,12 @@
 // The saved hadiths (from the bookmark on the Ahadith shelf), newest first: the book and number, the
 // kitab, the start of the matn; a tap opens it in its kitab, the cross removes it.
+import { GlassBack } from '@/components/home/Glass';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenBackground } from '@/components/Stars';
 import { openHadith, useToast } from '@/components/HadithParts';
 import { BookmarkIcon, CloseIcon } from '@/components/icons';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -32,6 +34,7 @@ export default function HadithSaved() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
+      <ScreenBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScreenHeader title={t('ahSaved')} />
       <FlatList
@@ -49,7 +52,8 @@ export default function HadithSaved() {
         renderItem={({ item: s }) => {
           const kitab = kitabTitle(s.b, s.k);
           return (
-            <View style={[styles.row, { backgroundColor: c.card, borderColor: c.line }]}>
+            <View style={[styles.row, { borderWidth: 0 }]}>
+              <GlassBack radius={18} />
               <Pressable onPress={() => openHadith(s.b, s.k, s.n)} style={({ pressed }) => [{ flex: 1, gap: 3 }, pressed && { opacity: 0.6 }]}>
                 <Txt size={14} weight={700} color={c.ink}>
                   {`${bookName(s.b)} · ${t('ahNumber', s.n)}`}

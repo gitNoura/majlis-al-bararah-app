@@ -1,6 +1,7 @@
 // A category of adhkar (sleep, prayer, travel...): its panel in its colour with its icon, then its
 // chapters of Hisn al-Muslim - each with its own little painting in a round, its name and
 // how many adhkar. A chapter opens its adhkar (/adhkar-chapter).
+import { GlassBack } from '@/components/home/Glass';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -57,8 +58,9 @@ export default function AdhkarCategory() {
                 <Pressable
                   key={ch.id}
                   onPress={() => router.push({ pathname: '/adhkar-chapter', params: { c: String(ch.id) } })}
-                  style={({ pressed }) => [styles.row, { backgroundColor: c.card, boxShadow: `0px 4px 14px ${c.shadow}` }, pressed && { opacity: 0.75 }]}
+                  style={({ pressed }) => [styles.row, pressed && { opacity: 0.75 }]}
                 >
+                  <GlassBack radius={20} />
                   <View style={[styles.art, { backgroundColor: tone(chapterTone(ch.id), isDark).wash }]}>
                     <Art name={ch.id === 27 ? 'sunrise' : chapterScene(ch.id)} scene color={tone(chapterTone(ch.id), isDark).ink} size={26} width={1.4} />
                   </View>

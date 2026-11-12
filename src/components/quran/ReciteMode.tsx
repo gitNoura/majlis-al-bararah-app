@@ -6,6 +6,7 @@
 //   a tap on an ayah starts again from that ayah (the ones before it are shown)
 // Any page can be recited: it is the page on screen, and turning the page starts that page afresh. The logic is
 // src/lib/hifdh/recite.js; the cover is PageCurl's `veils`; the words' real edges are read from the page picture (ink.ts).
+import { GlassBack } from '@/components/home/Glass';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
@@ -134,7 +135,8 @@ export function useRecite(active: boolean, page: number) {
   const shown = sess.finished ? n : Math.min(sess.i + 1, n);
   const bar = (
     <View style={styles.box}>
-      <View style={[styles.row, { backgroundColor: c.card, borderColor: c.line }]}>
+      <View style={[styles.row, { borderWidth: 0 }]}>
+        <GlassBack strong radius={32} />
         <Round onPress={eye} label={override === 'hide' ? HIF.reciteShowAll() : HIF.reciteHideAll()}>
           {override === 'hide' ? <EyeOpen color={c.ink} /> : <EyeClosed color={c.ink} />}
         </Round>

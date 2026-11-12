@@ -8,6 +8,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
+import { ScreenBackground } from '@/components/Stars';
 import { Panel } from '@/components/home/Panel';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
@@ -55,6 +56,7 @@ export default function LibraryTab() {
   const insets = useSafeAreaInsets();
   return (
     <View style={{ flex: 1, backgroundColor: k.paper }}>
+      <ScreenBackground />
       <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.lg, gap: space.md }}>
         <Txt {...T.greeting} size={26} lineHeight={34} color={k.ink}>
           {DASH.libraryTitle()}

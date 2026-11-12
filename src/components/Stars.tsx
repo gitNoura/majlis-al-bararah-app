@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Defs, G, Mask, Path, Pattern, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { HomeBackdrop } from '@/components/home/HomeBackdrop';
 import { useTheme } from '@/theme/theme';
 
 // the star tile (48 × 48): an eight-pointed star, a smaller one inside, a diamond at each corner
@@ -58,10 +59,18 @@ export function Stars({ glow, faint }: { glow?: { x: number; y: number } | null;
 // screen (no stars): `stars` brings them back on a page.
 export function ScreenBackground({ glow, stars }: { glow?: { x: number; y: number } | null; stars?: boolean }) {
   const { c } = useTheme();
+  // the Quran's own background (stars, the lantern's glow) stays; every other page wears Home's page, so the glass cards have something to show through
+  if (stars || glow) {
+    return (
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: c.screen }]} />
+        <Stars faint glow={glow} />
+      </View>
+    );
+  }
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: c.screen }]} />
-      {stars && <Stars faint glow={glow} />}
+      <HomeBackdrop />
     </View>
   );
 }

@@ -56,14 +56,17 @@ export type HomeSkin = {
   hue: string; // the one accent colour (light green): the progress bars, and today's activity bar
   hueSoft: string; // its paler partner: the other active days' bars
   hueDeep: string; // a deeper, quieter shade of it: the hadith's words
+  glow: string; // the soft halo around the green progress bars and today's activity bar
+  glowOpacity: number;
+  glassGlint: string; // a faint light along the glass's bottom edge, like light passing through
 };
 
 const PAGE = { pageInk: '#173f32', pageLine: 'rgba(23, 63, 50, 0.32)', pageBead: 'rgba(23, 63, 50, 0.14)', pageButton: '#ffffff' };
 
 const light: HomeSkin = {
   paper: '#f4f5f3',
-  pill: 'rgba(23, 63, 50, 0.08)',
-  pillTrack: 'rgba(23, 63, 50, 0.14)',
+  pill: 'rgba(9, 74, 61, 0.08)',
+  pillTrack: 'rgba(9, 74, 61, 0.14)',
   surface: '#ffffff',
   soft: '#dce9df',
   softTrack: 'rgba(255, 255, 255, 0.75)',
@@ -72,32 +75,35 @@ const light: HomeSkin = {
   softLine: 'transparent',
   surfaceTop: '#ffffff',
   surfaceBottom: '#ffffff',
-  goBg: '#173f32',
+  goBg: '#094A3D',
   goInk: '#ffffff',
-  buttonInk: '#173f32',
+  buttonInk: '#094A3D',
   bar: '#9cc4ae',
   hairline: 'rgba(20, 28, 24, 0.1)',
   ink: '#141c18',
   meta: '#5f6b65',
   track: 'rgba(20, 28, 24, 0.09)',
-  fill: '#173f32',
-  accent: '#1f5a45',
-  spark: '#2a9266',
+  fill: '#094A3D',
+  accent: '#0C5A49',
+  spark: '#0F6B58',
   page: '#f9f7ee',
   pageSoft: 'rgba(23, 63, 50, 0.74)',
-  pageHere: '#2a9266',
+  pageHere: '#0F6B58',
   wash: ['#f1f2ef', '#f4f5f3', '#f4f5f3'], // Home's own off-white (paper)
-  glass: 'rgba(255, 255, 255, 0.34)',
-  glassSheen: 'rgba(255, 255, 255, 0.55)',
+  glass: 'rgba(255, 255, 255, 0.22)',
+  glassSheen: 'rgba(255, 255, 255, 0.8)',
   glassShadow: 'rgba(20, 50, 38, 0.10)',
-  glassTrack: 'rgba(23, 63, 50, 0.12)',
+  glassTrack: 'rgba(9, 74, 61, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
-  glassTint: ['rgba(120, 164, 142, 0.34)', 'rgba(120, 164, 142, 0.08)'],
+  glassTint: ['rgba(255, 255, 255, 0.45)', 'rgba(255, 255, 255, 0.04)'],
   mark: '#2e3230',
   markSoft: '#b4b7b3',
-  hue: '#5fa07f', // the one accent, a light green (progress bars, today's activity bar)
+  hue: '#2F8A74', // the one accent, a light green (progress bars, today's activity bar)
   hueSoft: '#c6ddd0',
-  hueDeep: '#1c4d39',
+  hueDeep: '#094A3D',
+  glow: '#3A9C85',
+  glowOpacity: 0.25,
+  glassGlint: 'rgba(255, 255, 255, 0.35)',
   ...PAGE,
 };
 
@@ -122,27 +128,30 @@ const dark: HomeSkin = {
   meta: '#a3a39d',
   track: 'rgba(255, 255, 255, 0.1)',
   fill: '#e9dfbd', // what is lit: the parchment of the Quran's night pages
-  accent: '#b4c8b8',
-  spark: '#a8c4ae',
+  accent: '#ece4c8',
+  spark: '#e9dfbd',
   page: darkTokens.paper,
   pageInk: '#ece8dc',
   pageSoft: 'rgba(236, 232, 220, 0.66)',
   pageLine: 'rgba(255, 255, 255, 0.14)',
   pageBead: 'rgba(255, 255, 255, 0.1)',
-  pageHere: '#a8c4ae',
+  pageHere: '#e9dfbd',
   pageButton: '#ece4c8',
   wash: ['#141414', '#151515', '#151515'], // near-black
-  glass: 'rgba(255, 255, 255, 0.06)',
-  glassSheen: 'rgba(255, 255, 255, 0.10)',
+  glass: 'rgba(255, 255, 255, 0.04)',
+  glassSheen: 'rgba(255, 255, 255, 0.17)',
   glassShadow: 'rgba(0, 0, 0, 0.35)',
   glassTrack: 'rgba(255, 255, 255, 0.14)',
   glassBtn: 'rgba(255, 255, 255, 0.12)',
-  glassTint: ['rgba(233, 223, 189, 0.20)', 'rgba(233, 223, 189, 0.05)'],
+  glassTint: ['rgba(255, 255, 255, 0.10)', 'rgba(255, 255, 255, 0.02)'],
   mark: '#e9dfbd',
   markSoft: '#5c6660',
-  hue: '#6a9f82', // dark mode: a deeper light green
-  hueSoft: '#3e5a4b',
-  hueDeep: '#6f9c85',
+  hue: '#e9dfbd', // dark mode: a deeper light green
+  hueSoft: 'rgba(236, 228, 200, 0.35)',
+  hueDeep: '#cfc6a3',
+  glow: '#ece4c8',
+  glowOpacity: 0.4,
+  glassGlint: 'rgba(255, 255, 255, 0.06)',
   goBg: '#343635',
   goInk: '#ece4c8',
   buttonInk: '#1d1d1d',
@@ -154,12 +163,12 @@ const hifdhDark: Partial<HomeSkin> = {
   soft: '#252a27',
   softTop: '#2a302c',
   softBottom: '#222623',
-  softLine: 'rgba(228, 196, 109, 0.14)',
-  bar: '#56665d',
-  fill: '#e4c46d',
-  accent: '#a9cdb8',
-  spark: '#b5dcc0',
-  goBg: '#33403a',
+  softLine: 'rgba(236, 228, 200, 0.14)',
+  bar: '#8f8a73',
+  fill: '#e9dfbd',
+  accent: '#ece4c8',
+  spark: '#e9dfbd',
+  goBg: '#3a3832',
 };
 
 export const useSkin = (): HomeSkin => {

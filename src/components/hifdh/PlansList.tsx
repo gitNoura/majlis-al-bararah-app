@@ -2,6 +2,7 @@
 // Home's look: a plan is a white panel with a hairline and 20 px corners; the actions sit in one row, and «Modify» is the
 // one filled (pill) button.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
+import { GlassBack } from '@/components/home/Glass';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
@@ -48,7 +49,8 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
       {plans.map((p) => {
         const paused = core.pausedNow(p);
         return (
-          <View key={p.id} style={[styles.plan, { backgroundColor: k.surface, borderColor: k.hairline }, paused && { opacity: 0.75 }]}>
+          <View key={p.id} style={[styles.plan, { borderWidth: 0 }, paused && { opacity: 0.75 }]}>
+            <GlassBack radius={20} />
             <View style={styles.kindRow}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Txt size={13} weight={700} color={k.meta}>

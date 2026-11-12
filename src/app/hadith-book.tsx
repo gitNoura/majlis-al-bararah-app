@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenBackground } from '@/components/Stars';
 import { Note, openHadith, useToTop } from '@/components/HadithParts';
 import { BackIcon } from '@/components/icons';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -33,6 +34,7 @@ export default function HadithBook() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
+      <ScreenBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScreenHeader title={bookName(b)} />
       {failed ? (

@@ -21,7 +21,7 @@ const LIQUID = Platform.OS === 'ios' && isLiquidGlassAvailable();
 // `tint`: a soft colour inside the glass (two colours: the lit top corner, then clear), drawn over the fill and sheen so the colour shows
 type Props = { radius?: number; intensity?: number; tint?: readonly [string, string]; style?: StyleProp<ViewStyle>; children?: ReactNode };
 
-export function Glass({ radius = 28, intensity = 60, tint, style, children }: Props) {
+export function Glass({ radius = 28, intensity = 80, tint, style, children }: Props) {
   const k = useSkin();
   const { isDark } = useTheme();
   const target = useContext(GlassTarget);
@@ -45,6 +45,7 @@ export function Glass({ radius = 28, intensity = 60, tint, style, children }: Pr
         <BlurView intensity={intensity} tint={isDark ? 'dark' : 'light'} blurTarget={target ?? undefined} blurMethod={target ? 'dimezisBlurViewSdk31Plus' : 'none'} style={StyleSheet.absoluteFill} />
         <View style={[StyleSheet.absoluteFill, { backgroundColor: k.glass }]} />
         <LinearGradient colors={[k.glassSheen, 'rgba(255, 255, 255, 0)']} style={styles.sheen} />
+        <LinearGradient colors={['rgba(255, 255, 255, 0)', k.glassGlint]} style={styles.glint} />
         {tint && <LinearGradient colors={tint} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />}
       </View>
       {children}
@@ -54,4 +55,21 @@ export function Glass({ radius = 28, intensity = 60, tint, style, children }: Pr
 
 const styles = StyleSheet.create({
   sheen: { position: 'absolute', top: 0, left: 0, right: 0, height: '60%' },
+  glint: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '35%' },
 });
+
+// Glass drawn behind the children of a box that lays itself out (a row, a result, a card with its own padding): put it first
+// inside the box, give the box its `borderRadius`, and take the box's own background and border off.
+//   strong   a firmer fill, for panels over the Quran's text (so the Arabic stays easy to read)
+//   topOnly  only the top corners are round (a side panel or a sheet that runs to the screen's edge)
+export function GlassBack({ radius = 20, strong, topOnly }: { radius?: number; strong?: boolean; topOnly?: boolean }) {
+  const { isDark } = useTheme();
+  const firm = isDark ? 'rgba(22, 22, 22, 0.62)' : 'rgba(255, 255, 255, 0.62)';
+  const clip = topOnly ? { borderTopLeftRadius: radius, borderTopRightRadius: radius, overflow: 'hidden' as const } : { borderRadius: radius, overflow: 'hidden' as const };
+  return (
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, clip]}>
+      <Glass radius={topOnly ? 0 : radius} style={[StyleSheet.absoluteFill, topOnly && { bottom: -radius }]} />
+      {strong && <View style={[StyleSheet.absoluteFill, { backgroundColor: firm }]} />}
+    </View>
+  );
+}

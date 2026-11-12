@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenBackground } from '@/components/Stars';
 import { Avatar } from '@/components/Avatar';
 import { CheckIcon } from '@/components/icons';
 import { Toggle } from '@/components/Toggle';
@@ -107,6 +108,7 @@ export default function SettingsTab() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }}>
+      <ScreenBackground />
       <ScrollView
         contentContainerStyle={{ padding: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.lg, gap: space.lg }}
         keyboardShouldPersistTaps="handled"

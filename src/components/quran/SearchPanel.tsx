@@ -2,6 +2,7 @@
 // reference like 2:255 (the website's text search, src/lib/search.js). The surahs whose name matches come first, then
 // the ayat. A row or a result opens its page; a result also lights its ayah for a moment. (The index of surahs,
 // ahzab and ajza is src/components/QuranIndex.tsx.) The list fills the page and is kept above the keyboard.
+import { GlassBack } from '@/components/home/Glass';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Animated, Keyboard, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -74,7 +75,6 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
           style={[
             styles.panel,
             {
-              backgroundColor: c.card,
               paddingTop: insets.top + space.sm,
               paddingBottom: Math.max(keyboard, insets.bottom) + space.sm, // the list stops above the keyboard
               opacity: slide,
@@ -82,6 +82,7 @@ export function SearchPanel({ open, onClose, onGo }: Props) {
             },
           ]}
         >
+          <GlassBack strong radius={0} />
           <View style={styles.top}>
             <View style={[styles.field, { backgroundColor: c.surface2, borderColor: c.line }]}>
               <SearchIcon color={c.meta} size={20} />

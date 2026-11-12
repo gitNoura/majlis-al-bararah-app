@@ -10,6 +10,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View 
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withSpring, withTiming, type SharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenBackground } from '@/components/Stars';
 import { CategoryPainting } from '@/components/CategoryPaintings';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Txt } from '@/components/Txt';
@@ -78,6 +79,7 @@ export default function Misbaha() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.screen }} onLayout={(e) => setPage({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}>
+      <ScreenBackground />
       {/* the page: the remembrance painting at its bottom, its sky above */}
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
         <CategoryPainting name="dhikr" width={page.w || width} height={page.h || height} mirrored={!isEnglish} tall />

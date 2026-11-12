@@ -3,6 +3,7 @@
 // «my groups» (the liked adhkar, the member's own groups, a new one) in a row that scrolls sideways;
 // then the categories, soft tiles of their own colours with their drawn icons. A tile opens its
 // chapters (/adhkar-category), or its one chapter at once. The globe: Arabic, English or both.
+import { GlassBack } from '@/components/home/Glass';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -70,8 +71,9 @@ export default function Adhkar() {
         {/* the misbaha: counting tasbih, istighfar, the prayer on the Prophet */}
         <Pressable
           onPress={() => router.push('/misbaha')}
-          style={({ pressed }) => [styles.misbaha, { backgroundColor: c.card, boxShadow: `0px 6px 18px ${c.shadow}` }, pressed && { opacity: 0.8 }]}
+          style={({ pressed }) => [styles.misbaha, pressed && { opacity: 0.8 }]}
         >
+          <GlassBack radius={22} />
           <View style={[styles.misbahaRound, { borderColor: c.chosenLine }]}>
             <CategoryPainting name="misbaha" width={52} height={52} />
           </View>

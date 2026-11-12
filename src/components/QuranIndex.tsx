@@ -1,6 +1,7 @@
 // The index of the mushaf (the website's index panel): a panel from the side of the page with three
 // tabs - the surahs, the 60 ahzab, the 30 ajza - a search field, and the list; the place being read
 // is marked (a green star, the row a little darker, a bar on its edge). A row opens its page.
+import { GlassBack } from '@/components/home/Glass';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, FlatList, Modal, Pressable, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -60,7 +61,6 @@ export function QuranIndex({ open, page, onClose, onGo, onPlay }: { open: boolea
           styles.panel,
           {
             width: panelW,
-            backgroundColor: c.panel,
             paddingTop: insets.top + 8,
             [isEnglish ? 'left' : 'right']: 0,
             // curved at the top only (both top corners: a phone may swap left and right in Arabic,
@@ -71,6 +71,7 @@ export function QuranIndex({ open, page, onClose, onGo, onPlay }: { open: boolea
           },
         ]}
       >
+        <GlassBack topOnly strong radius={28} />
         <View style={styles.head}>
           <Txt size={22} weight={700} color={c.ink} style={{ flex: 1, textAlign: 'center' }}>
             {READER.index()}

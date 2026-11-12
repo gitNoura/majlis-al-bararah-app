@@ -64,7 +64,7 @@ export default function HomeTab() {
       <Txt {...T.date} color={k.meta} style={ltrStart()}>
         {dateLine()}
       </Txt>
-      <Txt {...T.greeting} color={k.pageInk} style={ltrStart()}>
+      <Txt {...T.greeting} color={k.ink} style={ltrStart()}>
         {HOME.salam()}
       </Txt>
     </View>

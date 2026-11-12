@@ -15,24 +15,24 @@
 // Spacing: 2 / 4 / 8 / 12 / 16 / 24 / 32, nothing in between.
 
 export const light = {
-  screen: '#f6f8f5',
-  screenEnd: '#f6f8f5',
+  screen: '#f4f5f3',
+  screenEnd: '#f4f5f3',
   stars: '#9bb8aa', // (the faint stars of the old screens; removed with them)
-  line: 'rgba(20, 50, 38, 0.12)', // hairlines
+  line: 'rgba(20, 28, 24, 0.10)', // hairlines
   // words and controls
-  ink: '#14261e', // titles, names, icons
-  text: '#22332b', // body text
-  meta: '#5d6d64', // second lines, quiet words
-  tabInk: '#5d6d64',
-  gold: '#1f5a45', // = accent (kept for screens not yet rebuilt)
-  goldStrong: '#17493a',
+  ink: '#141c18', // titles, names, icons
+  text: '#26332c', // body text
+  meta: '#5f6b65', // second lines, quiet words
+  tabInk: '#5f6b65',
+  gold: '#094A3D', // = accent (kept for screens not yet rebuilt)
+  goldStrong: '#094A3D',
   brown: '#44372b',
   // surfaces
   card: '#ffffff',
-  soft: 'rgba(20, 50, 38, 0.06)', // tracks, a chosen row, round icon backgrounds
+  soft: 'rgba(20, 28, 24, 0.06)', // tracks, a chosen row, round icon backgrounds
   glass: 'rgba(255, 255, 255, 0.72)', // the round buttons over the page
-  divider: 'rgba(20, 50, 38, 0.08)',
-  on: '#1f5a45', // a filled button, a chosen tab
+  divider: 'rgba(20, 28, 24, 0.08)',
+  on: '#094A3D', // a filled button, a chosen tab
   onInk: '#ffffff', // the words on it
   switchOff: '#cfd8d2',
   shadow: 'rgba(20, 50, 38, 0.08)',
@@ -40,38 +40,38 @@ export const light = {
   // the Quran's panels (the index, the tafsir panel)
   panel: '#ffffff',
   surface: '#ffffff',
-  pageNum: '#1f5a45',
-  accent: '#1f5a45',
-  chosenLine: 'rgba(31, 90, 69, 0.4)',
+  pageNum: '#094A3D',
+  accent: '#094A3D',
+  chosenLine: 'rgba(9, 74, 61, 0.4)',
   // the mushaf's paper (the pages' own cream), and how much the night dims the pages
   paper: '#fffce0',
   nightDim: 0,
   // the neutral scale and the accent's tint (new)
-  surface2: '#eef2ee',
-  surface3: '#e3e9e4',
-  accentSoft: 'rgba(31, 90, 69, 0.10)',
+  surface2: '#eceeeb',
+  surface3: '#e1e4e0',
+  accentSoft: 'rgba(9, 74, 61, 0.10)',
   // the Settings screens' controls (switch, chosen segment, ticks, icon discs): green, in both modes
-  ctl: '#1f5a45',
+  ctl: '#094A3D',
   ctlInk: '#ffffff',
-  ctlText: '#1f5a45',
-  ctlSoft: 'rgba(31, 90, 69, 0.10)',
+  ctlText: '#094A3D',
+  ctlSoft: 'rgba(9, 74, 61, 0.10)',
 };
 
 export type Palette = typeof light;
 
 export const dark: Palette = {
-  screen: '#161616',
-  screenEnd: '#111111',
+  screen: '#121212',
+  screenEnd: '#121212',
   stars: '#8a8a8a',
   line: 'rgba(255, 255, 255, 0.10)',
-  ink: '#f2f2f2',
-  text: '#e2e2e2',
-  meta: '#a3a3a3',
-  tabInk: '#a3a3a3',
+  ink: '#eeeeea',
+  text: '#e2e2de',
+  meta: '#a3a39d',
+  tabInk: '#a3a39d',
   gold: '#e9dfbd', // = accent
   goldStrong: '#f3ead0',
   brown: '#ddd3bb',
-  card: '#1f1f1f',
+  card: '#1c1c1c',
   soft: 'rgba(255, 255, 255, 0.06)',
   glass: 'rgba(255, 255, 255, 0.08)',
   divider: 'rgba(255, 255, 255, 0.07)',
@@ -80,20 +80,20 @@ export const dark: Palette = {
   switchOff: 'rgba(255, 255, 255, 0.18)',
   shadow: 'rgba(0, 0, 0, 0.3)',
   dim: 'rgba(0, 0, 0, 0.2)',
-  panel: '#1f1f1f',
-  surface: '#1f1f1f',
+  panel: '#1c1c1c',
+  surface: '#1c1c1c',
   pageNum: '#e9dfbd',
   accent: '#e9dfbd',
   chosenLine: 'rgba(236, 228, 200, 0.45)',
   paper: '#d7d0b3',
   nightDim: 0.22, // the pages at 78 % of their brightness
-  surface2: '#282828',
-  surface3: '#313131',
+  surface2: '#262726',
+  surface3: '#2c2d2c',
   accentSoft: 'rgba(236, 228, 200, 0.12)',
-  ctl: '#2f6650',
-  ctlInk: '#ffffff',
-  ctlText: '#7fc0a2',
-  ctlSoft: 'rgba(111, 181, 151, 0.16)',
+  ctl: '#e9dfbd',
+  ctlInk: '#1d1d1d',
+  ctlText: '#e9dfbd',
+  ctlSoft: 'rgba(236, 228, 200, 0.12)',
 };
 
 export const space = { hair: 2, xs: 4, sm: 8, cozy: 12, md: 16, lg: 24, xl: 32 } as const;

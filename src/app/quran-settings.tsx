@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenBackground } from '@/components/Stars';
 import { CheckIcon, DownloadIcon } from '@/components/icons';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Toggle } from '@/components/Toggle';
@@ -75,6 +76,7 @@ function QuranSettings() {
   return (
     // the page's own direction (right to left in Arabic), so it never falls back to left to right
     <View style={[{ flex: 1, backgroundColor: c.screen }, Platform.OS !== 'web' && { direction: LANG === 'ar' ? 'rtl' : 'ltr' }]}>
+      <ScreenBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScreenHeader title={READER.settingsTitle()} />
       <ScrollView contentContainerStyle={{ padding: space.md, paddingBottom: insets.bottom + space.lg, gap: space.lg }}>
