@@ -125,5 +125,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   info: { flex: 1, gap: 1 },
   ask: { gap: space.sm },
-  btn: { minHeight: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md, boxShadow: '0px 4px 12px rgba(20, 50, 38, 0.10)' },
+  btn: { minHeight: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md, boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)' },
 });

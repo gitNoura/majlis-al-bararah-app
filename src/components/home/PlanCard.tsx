@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   card: { padding: space.md, gap: space.md },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   words: { flex: 1, gap: 2 },
-  go: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', boxShadow: '0px 4px 12px rgba(20, 50, 38, 0.10)' },
+  go: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)' },
   pill: { alignSelf: 'stretch', height: 40, borderRadius: 20, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
   meter: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   figure: { minWidth: 34 },

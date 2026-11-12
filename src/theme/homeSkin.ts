@@ -93,9 +93,9 @@ const light: HomeSkin = {
   pageSoft: 'rgba(23, 63, 50, 0.74)',
   pageHere: '#0F6B58',
   wash: ['#f1f2ef', '#f4f5f3', '#f4f5f3'], // Home's own off-white (paper)
-  glass: 'rgba(255, 255, 255, 0.34)',
-  glassSheen: 'rgba(255, 255, 255, 0.55)',
-  glassShadow: 'rgba(20, 50, 38, 0.16)',
+  glass: 'rgba(246, 247, 247, 0.38)', // a cool neutral body, so the glass still reads on the plain white page
+  glassSheen: 'rgba(255, 255, 255, 0.75)',
+  glassShadow: 'rgba(0, 0, 0, 0.10)', // neutral (a green shadow tinted the top and bottom of the cards)
   glassTrack: 'rgba(9, 74, 61, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
   glassTint: ['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.02)'],
@@ -107,7 +107,7 @@ const light: HomeSkin = {
   glow: '#2e3230',
   glowOpacity: 0.07,
   glassGlint: 'rgba(255, 255, 255, 0.10)',
-  glassEdge: 'rgba(255, 255, 255, 0.85)',
+  glassEdge: 'rgba(255, 255, 255, 0.95)',
   doneBg: '#e0efe6',
   doneLine: 'rgba(15, 107, 88, 0.30)',
   ...PAGE,
