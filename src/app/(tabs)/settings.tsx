@@ -16,7 +16,7 @@ import { Avatar } from '@/components/Avatar';
 import { HifHeader } from '@/components/hifdh/HifHeader';
 import { Glass } from '@/components/home/Glass';
 import { HomeBackdrop } from '@/components/home/HomeBackdrop';
-import { BookIcon, CalendarIcon, CheckIcon, ClockIcon, ContrastIcon, LanguageIcon, MoonIcon, RiwayaIcon, TafsirIcon } from '@/components/icons';
+import { CheckIcon } from '@/components/icons';
 import { Toggle } from '@/components/Toggle';
 import { Txt } from '@/components/Txt';
 import { Chevron, Row, SegmentedControl, TAB_BAR_H } from '@/components/ui';
@@ -55,12 +55,12 @@ function Group({ children }: { children: ReactNode }) {
 }
 
 // a row of the list: a line icon, the name, the present value, the arrow; a hairline under it that starts after the icon
-function Item({ icon, title, sub, value, onPress, last }: { icon: ReactNode; title: string; sub?: string; value?: string; onPress: () => void; last?: boolean }) {
+function Item({ icon, title, sub, value, onPress, last }: { icon?: ReactNode; title: string; sub?: string; value?: string; onPress: () => void; last?: boolean }) {
   const k = useSkin();
   return (
     <>
       <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={title} style={({ pressed }) => [styles.item, pressed && { opacity: 0.6 }]}>
-        <View style={styles.iconBox}>{icon}</View>
+        {!!icon && <View style={styles.iconBox}>{icon}</View>}
         <View style={{ flex: 1, gap: 1 }}>
           <Txt size={16.5} weight={500} color={k.ink} style={lineStart()} numberOfLines={1}>
             {title}
@@ -78,7 +78,7 @@ function Item({ icon, title, sub, value, onPress, last }: { icon: ReactNode; tit
         )}
         <Chevron color={k.meta} size={16} />
       </Pressable>
-      {!last && <View style={[styles.line, { backgroundColor: k.hairline }]} />}
+      {!last && <View style={[styles.line, { backgroundColor: k.hairline }, !!icon && { marginStart: 40 }]} />}
     </>
   );
 }
@@ -173,7 +173,6 @@ export default function SettingsTab() {
   const riwayaName = HAFS ? L('حفص', 'Hafs', 'Hafs') : L('ورش', 'Warsh', 'Warsh');
   const where = here ? (placeName(here) ?? t('calMyLocation')) : SETTINGS.noPlace();
   const tick = <CheckIcon color={k.accent} />;
-  const ico = (Icon: typeof ClockIcon) => <Icon color={k.accent} size={23} />;
   const back = () => setPage(null);
 
   const detail = () => {
@@ -328,23 +327,20 @@ export default function SettingsTab() {
           </Group>
 
           <Group>
-            <Item icon={ico(RiwayaIcon)} title={READER.riwaya()} value={riwayaName} onPress={() => setPage('riwaya')} last />
+            <Item title={READER.riwaya()} value={riwayaName} onPress={() => setPage('riwaya')} />
+            <Item title={READER.night()} value={nightOn ? L('مفعّل', 'On', 'Activé') : L('معطّل', 'Off', 'Désactivé')} onPress={() => setPage('night')} />
+            <Item title={READER.tafsirs()} value={countOf('tafsir')} onPress={() => setPage('tafsirs')} />
+            <Item title={READER.translations()} value={countOf('translation')} onPress={() => setPage('translations')} last />
           </Group>
 
           <Group>
-            <Item icon={ico(MoonIcon)} title={READER.night()} value={nightOn ? L('مفعّل', 'On', 'Activé') : L('معطّل', 'Off', 'Désactivé')} onPress={() => setPage('night')} />
-            <Item icon={ico(TafsirIcon)} title={READER.tafsirs()} value={countOf('tafsir')} onPress={() => setPage('tafsirs')} />
-            <Item icon={ico(BookIcon)} title={READER.translations()} value={countOf('translation')} onPress={() => setPage('translations')} last />
+            <Item title={SETTINGS.appearance()} value={modeName} onPress={() => setPage('appearance')} />
+            <Item title={SETTINGS.language()} value={LANGUAGES[LANG]} onPress={() => setPage('language')} last />
           </Group>
 
           <Group>
-            <Item icon={ico(ContrastIcon)} title={SETTINGS.appearance()} value={modeName} onPress={() => setPage('appearance')} />
-            <Item icon={ico(LanguageIcon)} title={SETTINGS.language()} value={LANGUAGES[LANG]} onPress={() => setPage('language')} />
-            <Item icon={ico(CalendarIcon)} title={SETTINGS.hijri()} value={`${shift > 0 ? '+' : ''}${shift}`} onPress={() => setPage('hijri')} last />
-          </Group>
-
-          <Group>
-            <Item icon={ico(ClockIcon)} title={SETTINGS.prayer()} value={where} onPress={() => setPage('prayer')} last />
+            <Item title={SETTINGS.hijri()} value={`${shift > 0 ? '+' : ''}${shift}`} onPress={() => setPage('hijri')} />
+            <Item title={SETTINGS.prayer()} value={where} onPress={() => setPage('prayer')} last />
           </Group>
         </ScrollView>
       )}
@@ -357,7 +353,7 @@ const styles = StyleSheet.create({
   item: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 58, paddingVertical: 10 },
   iconBox: { width: 26, alignItems: 'center', justifyContent: 'center' },
   value: { maxWidth: '45%', textAlign: 'right' },
-  line: { height: StyleSheet.hairlineWidth, marginStart: 40 },
+  line: { height: StyleSheet.hairlineWidth },
   block: { gap: space.sm, paddingVertical: space.sm + 4 },
   between: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   city: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 4 },

@@ -50,13 +50,13 @@ export function FrostBack({ radius = 24, topOnly, intensity = 55 }: { radius?: n
   const { isDark } = useTheme();
   const corners = topOnly ? { borderTopLeftRadius: radius, borderTopRightRadius: radius } : { borderRadius: radius };
   const ios = Platform.OS === 'ios';
-  const tint = isDark ? (ios ? 'rgba(24, 24, 24, 0.55)' : 'rgba(24, 24, 24, 0.9)') : ios ? 'rgba(250, 250, 247, 0.58)' : 'rgba(250, 250, 247, 0.92)';
+  const tint = isDark ? (ios ? 'rgba(24, 24, 24, 0.55)' : 'rgba(24, 24, 24, 0.9)') : ios ? 'rgba(255, 255, 255, 0.74)' : 'rgba(255, 255, 255, 0.94)';
   return (
     <View pointerEvents="none" style={[StyleSheet.absoluteFill, corners, { overflow: 'hidden', borderCurve: 'continuous' }]}>
-      <BlurView intensity={intensity} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+      <BlurView intensity={isDark ? intensity : Math.min(intensity, 38)} tint={isDark ? 'dark' : 'systemUltraThinMaterialLight'} style={StyleSheet.absoluteFill} />
       <View style={[StyleSheet.absoluteFill, { backgroundColor: tint }]} />
-      <LinearGradient colors={[k.glassTop, 'transparent']} style={StyleSheet.absoluteFill} />
-      <View style={[StyleSheet.absoluteFill, corners, { borderWidth: StyleSheet.hairlineWidth, borderColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.9)' }]} />
+      {isDark && <LinearGradient colors={[k.glassTop, 'transparent']} style={StyleSheet.absoluteFill} />}
+      <View style={[StyleSheet.absoluteFill, corners, { borderWidth: StyleSheet.hairlineWidth, borderColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 1)' }]} />
     </View>
   );
 }

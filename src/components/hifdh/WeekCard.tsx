@@ -1,12 +1,10 @@
-// «Your week»: how many of the seven days (Monday first) had something done. Drawn like Home's activity week (the title with «3 of 7»
-// at its end, a letter for each day, today in bold with a dot under it) on one of the page's lit glass cards, with a round mark for
-// each day: kept (the page's own charcoal by day, parchment by night, with a check), today (a ring), missed since the first plan began
+// «Your week»: how many of the seven days (Monday first) had something done. Drawn (the title with «3 of 7»
+// at its end), straight on the page with no card behind it: the day's name over a tall rounded capsule for each day: kept (the page's own charcoal by day, parchment by night, with a check), today (a ring), missed since the first plan began
 // (a faint disc with a cross), or still to come (a fainter one). No green anywhere.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { Glass } from '@/components/home/Glass';
 import { CheckIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HIF } from '@/i18n/hifdh';
@@ -33,7 +31,7 @@ export function WeekCard() {
   const checkInk = isDark ? '#1d1d1d' : '#ffffff';
 
   return (
-    <Glass radius={24} style={styles.card}>
+    <View style={styles.card}>
       <View style={styles.top}>
         <Txt size={17} weight={700} color={k.ink}>
           {HIF.yourWeek()}
@@ -52,12 +50,12 @@ export function WeekCard() {
           const state: DayState = kept.has(d) ? 'on' : d === today ? 'now' : started && d >= started && d < today ? 'miss' : 'idle';
           return (
             <View key={d} style={styles.day}>
-              <Txt size={12} weight={d === today ? 800 : 500} center color={d === today ? k.ink : k.meta}>
-                {weekdayName(core.weekdayOf(d), 'narrow')}
+              <Txt size={12} weight={d === today ? 800 : 500} center color={d === today ? k.ink : k.meta} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                {weekdayName(core.weekdayOf(d))}
               </Txt>
               <View
                 style={[
-                  styles.dot,
+                  styles.capsule,
                   { backgroundColor: state === 'on' ? k.hue : k.pillTrack },
                   state === 'now' && { backgroundColor: 'transparent', borderWidth: 2, borderColor: k.ink },
                   state === 'idle' && { opacity: 0.55 },
@@ -66,21 +64,19 @@ export function WeekCard() {
                 {state === 'on' && <CheckIcon color={checkInk} size={17} strokeWidth={2.4} />}
                 {state === 'miss' && <CloseMark color={k.meta} />}
               </View>
-              <View style={[styles.mark, { backgroundColor: d === today ? k.ink : 'transparent' }]} />
             </View>
           );
         })}
       </View>
-    </Glass>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { padding: 16, gap: 14 },
+  card: { gap: 12 },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { flexDirection: 'row', alignItems: 'baseline', gap: 5 },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 4 },
-  day: { flex: 1, alignItems: 'center', gap: 7 },
-  dot: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  mark: { width: 5, height: 5, borderRadius: 3 },
+  day: { flex: 1, alignItems: 'center', gap: 10 },
+  capsule: { width: '100%', maxWidth: 54, height: 52, borderRadius: 27, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
 });

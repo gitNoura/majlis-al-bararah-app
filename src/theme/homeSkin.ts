@@ -112,8 +112,8 @@ const light: HomeSkin = {
   hueDeep: '#094A3D',
   glow: '#2e3230',
   glowOpacity: 0.07,
-  doneBg: '#e0efe6',
-  doneLine: 'rgba(15, 107, 88, 0.30)',
+  doneBg: '#f2f4f1', // light mode: a finished card only slips a shade from white, with a faint green edge
+  doneLine: 'rgba(15, 107, 88, 0.26)',
   ...PAGE,
 };
 

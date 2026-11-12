@@ -17,7 +17,7 @@ import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 
 export function TaskRow({ row, locked = false, ahead = false, first = false }: { row: Row; locked?: boolean; ahead?: boolean; first?: boolean }) {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   const h = useHome();
   const k = useSkin();
   const { refresh, toast, burst, openStop, listen, recite } = useHif();
@@ -113,7 +113,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
           onPress={() => listen(findRow(key) ?? row)}
           accessibilityRole="button"
           accessibilityLabel={HIF.listenPortion()}
-          style={[styles.icon, { backgroundColor: k.soft }]}
+          style={[styles.icon, { backgroundColor: k.pillTrack }]}
         >
           <PlayIcon color={h.ink} size={20} />
         </Pressable>
@@ -121,7 +121,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
           onPress={() => recite(findRow(key) ?? row)}
           accessibilityRole="button"
           accessibilityLabel={HIF.recitePortion()}
-          style={[styles.icon, { backgroundColor: k.soft }]}
+          style={[styles.icon, { backgroundColor: k.pillTrack }]}
         >
           <MicIcon color={h.ink} size={20} />
         </Pressable>
@@ -137,12 +137,12 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
             accessibilityHint={HIF.holdHint()}
             style={[
               styles.complete,
-              done ? { backgroundColor: k.doneBg } : { backgroundColor: k.goBg },
+              done ? { backgroundColor: k.pillTrack } : { backgroundColor: isDark ? k.fill : k.goBg },
               locked && { opacity: 0.45 },
             ]}
           >
             {done && <CheckIcon color={k.ink} size={18} strokeWidth={2.4} />}
-            <Txt size={15} weight={700} color={done ? k.ink : k.goInk}>
+            <Txt size={15} weight={700} color={done ? k.ink : isDark ? k.buttonInk : k.goInk}>
               {done ? STATUS.done() : HIF.complete()}
             </Txt>
           </Pressable>
