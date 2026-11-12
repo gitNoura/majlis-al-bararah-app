@@ -11,7 +11,6 @@ import { Txt } from '@/components/Txt';
 import { LANG } from '@/i18n/i18n';
 import { ltr, ltrStart } from '@/theme/ltr';
 import { useSkin } from '@/theme/homeSkin';
-import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
 type Props = {
@@ -29,7 +28,6 @@ const digits = (n: number) => n.toLocaleString('en');
 
 export function PlanCard({ label, title, sub, percent = null, arrow: showArrow = true, action, onPress, a11y }: Props) {
   const k = useSkin();
-  const { isDark } = useTheme();
   const ar = LANG === 'ar';
   const pct = percent == null ? 0 : Math.round(percent);
 
@@ -69,8 +67,8 @@ export function PlanCard({ label, title, sub, percent = null, arrow: showArrow =
       <Glass style={styles.card}>
         <View style={[styles.head, ltr()]}>{!showArrow ? words : ar ? [arrow, words] : [words, arrow]}</View>
         {!!action && (
-          <View style={[styles.pill, { backgroundColor: k.hue, shadowColor: k.glow, shadowOpacity: k.glowOpacity, shadowRadius: 8, shadowOffset: { width: 0, height: 0 } }]}>
-            <Txt size={15} weight={700} color={isDark ? k.buttonInk : '#ffffff'}>
+          <View style={[styles.pill, { backgroundColor: k.goBg }]}>
+            <Txt size={15} weight={700} color={k.goInk}>
               {action}
             </Txt>
           </View>
