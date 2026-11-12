@@ -51,7 +51,7 @@ export const DASH = {
   activity: () => L('النشاط', 'Activity', 'Activité'),
   activityOf7: (n) => L(`${n} من 7`, `${n} of 7`, `${n} sur 7`),
   activityStreak: (n) =>
-    L(n === 1 ? 'يوم متتالٍ' : n === 2 ? 'يومان متتاليان' : n <= 10 ? `${n} أيام متتالية` : `${n} يومًا متتاليًا`, `${n}-day streak`, `${n} jours d’affilée`),
+    L(n === 1 ? 'يوم' : n === 2 ? 'يومان' : n <= 10 ? `${n} أيام` : `${n} يومًا`, `${n}-day streak`, `${n} jours`),
   activityVsLast: (pct) => L(`${pct > 0 ? '+' : ''}${pct}٪ عن الأسبوع الماضي`, `${pct > 0 ? '+' : ''}${pct}% vs last week`, `${pct > 0 ? '+' : ''}${pct} % vs semaine dernière`),
   activityAyat: (n) => L(n === 1 ? 'آية واحدة' : n === 2 ? 'آيتان' : n <= 10 ? `${n} آيات` : `${n} آية`, n === 1 ? '1 ayah' : `${n} ayat`, `${n} verset${n > 1 ? 's' : ''}`),
   activityNone: () => L('لا نشاط', 'No activity', 'Aucune activité'),
