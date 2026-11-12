@@ -1,17 +1,18 @@
-// HOME, reading: open on the page, no box. «Reading» and the surah's name (in the page's one font) with the khatma's percentage at
-// the end, as the prayer card has the next prayer and the time left; the page, hizb and juz as plain words under it (not a pill);
-// then «Continue reading» as a pane of frosted glass (the plans' too) (just the words). A tap anywhere opens the Quran at the marker.
+// HOME, reading: the head of the sage card (SageCard), set like the prayer card's head: «Reading», the surah's name and the page, hizb
+// and juz as plain words on one side, the khatma as a ring on the other, level with the name; under it «Continue reading» as one
+// see-through pill. A tap anywhere on it opens the Quran at the marker.
 'use no memo'; // reads saved state (the marker) when it draws, which the React Compiler cannot see change
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Glass } from '@/components/home/Glass';
+import { useSage } from '@/components/home/SageCard';
 import { placeOf } from '@/components/quran/QuranHeader';
 import { Txt } from '@/components/Txt';
+import { Ring } from '@/components/ui';
 import { DASH } from '@/i18n/dashboard';
 import { HOME } from '@/i18n/home';
-import { isEnglish, isFrench } from '@/i18n/i18n';
+import { isEnglish, isFrench, LANG } from '@/i18n/i18n';
 import { surahsOn } from '@/lib/boxes';
 import { readingView } from '@/lib/dashboard';
 import { SURAHS } from '@/lib/quran';
@@ -29,6 +30,7 @@ function surahLine(page: number): string {
 
 export function ReadingCard() {
   const k = useSkin();
+  const sage = useSage();
   const r = readingView();
   const where = placeOf(r.page);
   // the page, then the hizb and juz
@@ -40,36 +42,43 @@ export function ReadingCard() {
     router.navigate({ pathname: '/quran', params: r.started ? { resume: String(r.page), n: String(Date.now()) } : undefined });
   };
 
+  const ring = (
+    <Ring key="ring" value={r.percent / 100} size={58} color={k.fill} track={sage.track} a11y={`${r.percent}%`}>
+      <Txt size={13} weight={700} color={k.ink}>
+        {`${digits(r.percent)}%`}
+      </Txt>
+    </Ring>
+  );
+  const words = (
+    <View key="words" style={styles.words}>
+      <Txt size={12} weight={700} color={k.meta}>
+        {DASH.reading()}
+      </Txt>
+      <Txt size={22} weight={800} lineHeight={32} color={k.ink} numberOfLines={1}>
+        {surahLine(r.page)}
+      </Txt>
+      <Txt size={12} weight={500} color={k.meta} numberOfLines={1}>
+        {sub}
+      </Txt>
+    </View>
+  );
+
   return (
     <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={`${DASH.reading()} ${action}`} style={({ pressed }) => [styles.wrap, pressed && { opacity: 0.85 }]}>
-      <View style={styles.head}>
-        <View style={styles.words}>
-          <Txt size={12} weight={700} color={k.meta}>
-            {DASH.reading()}
-          </Txt>
-          <Txt size={24} weight={800} lineHeight={34} color={k.ink} numberOfLines={1}>
-            {surahLine(r.page)}
-          </Txt>
-          <Txt size={12} weight={500} color={k.meta} numberOfLines={1}>
-            {sub}
-          </Txt>
-        </View>
-        <Txt size={14} weight={700} color={k.ink}>
-          {`${digits(r.percent)}%`}
-        </Txt>
-      </View>
-      <Glass radius={18} style={styles.go}>
+      {/* the ring is always at the left edge of the screen in Arabic (the line begins at the right), at the right edge otherwise */}
+      <View style={styles.head}>{LANG === 'ar' ? [ring, words] : [words, ring]}</View>
+      <View style={[styles.go, { backgroundColor: sage.inset }]}>
         <Txt size={14} weight={700} color={k.ink}>
           {action}
         </Txt>
-      </Glass>
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space.cozy, paddingHorizontal: space.xs },
-  head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: space.md },
+  wrap: { gap: space.cozy },
+  head: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   words: { flex: 1, gap: 1 },
-  go: { height: 46, alignItems: 'center', justifyContent: 'center' },
+  go: { height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
 });

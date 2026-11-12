@@ -7,7 +7,7 @@
 // The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a quiet neutral page at the app's everyday sizes (12 to 26),
 // one deep forest, and the prayer card's cream-yellow (its next prayer, in every sky). The
 // prayer card is the one card and the only thing that changes with the day (its sky). Everything under it sits open on the page,
-// in the page's one font: Reading, the two plans (the prayer card's small tinted pills), the hadith, then Activity. The one moment of motion is the marks drawing themselves in
+// in the page's one font. Under it, ONE sage card built like it (SageCard: Reading with its ring, Continue, the two plans as pills), then the hadith and Activity open on the page. The one moment of motion is the marks drawing themselves in
 // (Grow). Each section reads the saved state when it draws, so Home redraws every time it comes into view. It also keeps
 // one behaviour of the old home screen: after a change of narration the app opens again, and must land on the Quran tab
 // at the same place, not on Home.
@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActivityCard } from '@/components/home/ActivityCard';
 import { HadithNote } from '@/components/home/HadithNote';
+import { SageCard } from '@/components/home/SageCard';
 import { MemorizationCard } from '@/components/home/MemorizationCard';
 import { PrayerCard } from '@/components/home/PrayerCard';
 import { ReadingCard } from '@/components/home/ReadingCard';
@@ -54,7 +55,7 @@ export default function HomeTab() {
 
   return (
     <View style={{ flex: 1, backgroundColor: k.paper }}>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.lg, gap: space.lg + space.sm }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.lg, gap: space.lg }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md }}>
           <View style={{ flex: 1 }}>
             <Txt {...T.date} color={k.meta}>
@@ -69,8 +70,10 @@ export default function HomeTab() {
           </Pressable>
         </View>
         <PrayerCard />
-        <ReadingCard />
-        <MemorizationCard />
+        <SageCard>
+          <ReadingCard />
+          <MemorizationCard />
+        </SageCard>
         <HadithNote />
         <ActivityCard />
       </ScrollView>
