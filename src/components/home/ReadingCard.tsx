@@ -26,7 +26,7 @@ export function ReadingCard() {
   const r = readingView();
   const where = placeOf(r.page);
   // the page, then the hizb and juz
-  const sub = !r.started ? DASH.beginKhatma() : [HOME.wirdPage(digits(r.page)), where.extra].filter(Boolean).join(' · ');
+  const sub = [HOME.wirdPage(digits(r.page)), where.extra].filter(Boolean).join(' · ');
   const action = r.started ? DASH.continueReading() : DASH.startReading();
 
   const open = () => {
@@ -34,5 +34,7 @@ export function ReadingCard() {
     router.navigate({ pathname: '/quran', params: r.started ? { resume: String(r.page), n: String(Date.now()) } : undefined });
   };
 
+  // first run: an invitation (what the app is for), with no page line, no 0% bar and no arrow
+  if (!r.started) return <PlanCard label={DASH.reading()} title={DASH.startWird()} arrow={false} onPress={open} a11y={`${DASH.reading()} ${action}`} />;
   return <PlanCard label={DASH.reading()} title={surahLine(r.page)} sub={sub} percent={r.percent} onPress={open} a11y={`${DASH.reading()} ${action}`} />;
 }

@@ -14,6 +14,12 @@ export const DASH = {
   continueReading: () => L('أكمل القراءة', 'Continue reading', 'Continuer la lecture'),
   startReading: () => L('ابدأ القراءة', 'Start reading', 'Commencer la lecture'),
   beginKhatma: () => L('ابدأ ختمتك من الفاتحة', 'Begin your khatma from al-Fatiha', 'Commencez votre khatma par al-Fatiha'),
+  // first run: the three Home cards say what the app is for (no plan and no progress yet)
+  startWird: () => L('ابدأ وِردك من الفاتحة', 'Start your daily reading from al-Fatiha', 'Commencez votre lecture quotidienne par al-Fatiha'),
+  startHifdh: () => L('ابدأ رحلتك في الحفظ', 'Start your memorization journey', 'Commencez votre parcours de mémorisation'),
+  startHifdhSub: () => L('أنشئ خطة تناسب وقتك', 'Create a plan that fits your day', 'Créez un plan adapté à votre rythme'),
+  startRevise: () => L('ثبّت حفظك بالمراجعة', 'Keep what you memorize with revision', 'Consolidez votre mémorisation par la révision'),
+  startReviseSub: () => L('أنشئ خطة مراجعة', 'Create a revision plan', 'Créez un plan de révision'),
   juzRead: (n) => L(`${n} من 30 جزءاً مقروءاً`, `${n} of 30 juz read`, `${n} juz lus sur 30`),
   khatmas: (n) => L(`ختمات مكتملة: ${n}`, `Khatmas completed: ${n}`, `Khatmas terminées : ${n}`),
   // memorization

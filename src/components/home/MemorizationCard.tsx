@@ -18,11 +18,12 @@ const digits = (n: number) => n.toLocaleString('en');
 type Kind = 'memorize' | 'revise';
 type Part = { has: boolean; progress: number | null; days: { done: number; total: number } | null };
 
-function Plan({ kind, label, part, none, nothingToday }: { kind: Kind; label: string; part: Part; none: string; nothingToday: string }) {
+function Plan({ kind, label, part, invite, inviteSub, nothingToday }: { kind: Kind; label: string; part: Part; invite: string; inviteSub: string; nothingToday: string }) {
   const open = () => router.navigate('/hifdh');
   const pct = part.progress == null ? null : part.progress * 100;
 
-  if (!part.has) return <PlanCard label={label} title={none} sub={DASH.createPlan()} onPress={open} a11y={`${label} ${none}`} />;
+  // no plan yet: an invitation that says what this is for, words only (no arrow)
+  if (!part.has) return <PlanCard label={label} title={invite} sub={inviteSub} arrow={false} onPress={open} a11y={`${label} ${invite}`} />;
 
   // today's first portion of this kind of plan (a weekly plan that is complete has none left to name)
   const row = plan.todayRows().find((r: { plan: { type: string } }) => r.plan.type === kind);
@@ -38,8 +39,8 @@ export function MemorizationCard() {
   const o = hifdhOverview();
   return (
     <>
-      <Plan kind="memorize" label={HIF.cardHifdh()} part={o.memorize} none={HIF.noHifdhPlan()} nothingToday={HIF.nothingToday()} />
-      <Plan kind="revise" label={HIF.cardMurajaa()} part={o.revise} none={HIF.noRevPlan()} nothingToday={HIF.noRevision()} />
+      <Plan kind="memorize" label={HIF.cardHifdh()} part={o.memorize} invite={DASH.startHifdh()} inviteSub={DASH.startHifdhSub()} nothingToday={HIF.nothingToday()} />
+      <Plan kind="revise" label={HIF.cardMurajaa()} part={o.revise} invite={DASH.startRevise()} inviteSub={DASH.startReviseSub()} nothingToday={HIF.noRevision()} />
     </>
   );
 }
