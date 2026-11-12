@@ -18,9 +18,10 @@ export const GlassTarget = createContext<RefObject<View | null> | null>(null);
 
 const LIQUID = Platform.OS === 'ios' && isLiquidGlassAvailable();
 
-type Props = { radius?: number; intensity?: number; style?: StyleProp<ViewStyle>; children?: ReactNode };
+// `tint`: a soft colour inside the glass (two colours: the lit top corner, then clear), drawn over the fill and sheen so the colour shows
+type Props = { radius?: number; intensity?: number; tint?: readonly [string, string]; style?: StyleProp<ViewStyle>; children?: ReactNode };
 
-export function Glass({ radius = 28, intensity = 60, style, children }: Props) {
+export function Glass({ radius = 28, intensity = 60, tint, style, children }: Props) {
   const k = useSkin();
   const { isDark } = useTheme();
   const target = useContext(GlassTarget);
@@ -29,6 +30,11 @@ export function Glass({ radius = 28, intensity = 60, style, children }: Props) {
   if (LIQUID) {
     return (
       <GlassView glassEffectStyle="regular" colorScheme={isDark ? 'dark' : 'light'} style={[shape, style]}>
+        {tint && (
+          <View style={[StyleSheet.absoluteFill, shape, { overflow: 'hidden' }]} pointerEvents="none">
+            <LinearGradient colors={tint} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+          </View>
+        )}
         {children}
       </GlassView>
     );
@@ -39,6 +45,7 @@ export function Glass({ radius = 28, intensity = 60, style, children }: Props) {
         <BlurView intensity={intensity} tint={isDark ? 'dark' : 'light'} blurTarget={target ?? undefined} blurMethod={target ? 'dimezisBlurViewSdk31Plus' : 'none'} style={StyleSheet.absoluteFill} />
         <View style={[StyleSheet.absoluteFill, { backgroundColor: k.glass }]} />
         <LinearGradient colors={[k.glassSheen, 'rgba(255, 255, 255, 0)']} style={styles.sheen} />
+        {tint && <LinearGradient colors={tint} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />}
       </View>
       {children}
     </View>

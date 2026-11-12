@@ -42,6 +42,7 @@ export type PrayerView = {
   next: string; // the next prayer's name
   h: number; // the time left to it
   m: number;
+  nextAt: number; // when it starts (ms), for the live countdown
   phase: Phase; // the sky of the moment (see SKIES)
   sun: number; // how far the sun is through its day: 0 at sunrise, 1 at sunset
 } | null;
@@ -98,6 +99,7 @@ export function prayerView(): PrayerView {
     next: t(`pr_${next.key}`),
     h: Math.floor(minutes / 60),
     m: minutes % 60,
+    nextAt: next.at.getTime(),
     phase: (skyNow(p) ?? skyByClock()) as Phase,
     sun: (() => {
       const st = skyTimes(now, p);

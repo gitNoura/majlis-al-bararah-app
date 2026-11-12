@@ -50,8 +50,12 @@ export type HomeSkin = {
   glassShadow: string; // and their soft shadow
   glassTrack: string; // an empty progress bar inside a glass card
   glassBtn: string; // the round arrow button inside a glass card
+  glassTint: readonly [string, string]; // a soft colour inside the plan cards' glass (lit corner, then clear)
   mark: string; // Home's progress bars and today's activity bar: a neutral charcoal (parchment at night), no green
   markSoft: string; // the other days' activity bars
+  hue: string; // the one accent colour (light green): the progress bars, and today's activity bar
+  hueSoft: string; // its paler partner: the other active days' bars
+  hueDeep: string; // a deeper, quieter shade of it: the hadith's words
 };
 
 const PAGE = { pageInk: '#173f32', pageLine: 'rgba(23, 63, 50, 0.32)', pageBead: 'rgba(23, 63, 50, 0.14)', pageButton: '#ffffff' };
@@ -88,8 +92,12 @@ const light: HomeSkin = {
   glassShadow: 'rgba(20, 50, 38, 0.10)',
   glassTrack: 'rgba(23, 63, 50, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
+  glassTint: ['rgba(120, 164, 142, 0.34)', 'rgba(120, 164, 142, 0.08)'],
   mark: '#2e3230',
   markSoft: '#b4b7b3',
+  hue: '#5fa07f', // the one accent, a light green (progress bars, today's activity bar)
+  hueSoft: '#c6ddd0',
+  hueDeep: '#1c4d39',
   ...PAGE,
 };
 
@@ -129,8 +137,12 @@ const dark: HomeSkin = {
   glassShadow: 'rgba(0, 0, 0, 0.35)',
   glassTrack: 'rgba(255, 255, 255, 0.14)',
   glassBtn: 'rgba(255, 255, 255, 0.12)',
+  glassTint: ['rgba(233, 223, 189, 0.20)', 'rgba(233, 223, 189, 0.05)'],
   mark: '#e9dfbd',
   markSoft: '#5c6660',
+  hue: '#6a9f82', // dark mode: a deeper light green
+  hueSoft: '#3e5a4b',
+  hueDeep: '#6f9c85',
   goBg: '#343635',
   goInk: '#ece4c8',
   buttonInk: '#1d1d1d',

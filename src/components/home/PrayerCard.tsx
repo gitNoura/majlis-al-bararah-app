@@ -1,5 +1,5 @@
-// HOME, card 1: the next prayer with its time and the time left, and the two buttons (qibla, calendar), as one glass box that keeps
-// the sky of the moment behind it (a white veil over the sky, white glass pills). The day's five times are in the calendar.
+// HOME, card 1: the next prayer with its time and the time left, and the two buttons (qibla, calendar), as one glass box (like the cards under it)
+// that keeps a tint of the sky of the moment inside it (white glass pills). The day's five times are in the calendar.
 // With no place chosen yet it asks for one (the phone's location, or a city from the settings).
 'use no memo'; // reads saved state (the place) when it draws, which the React Compiler cannot see change
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,6 +7,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { Glass } from '@/components/home/Glass';
 import { PlaceSheet } from '@/components/PlaceSheet';
 import { PrayerSky } from '@/components/PrayerSky';
 import { Txt } from '@/components/Txt';
@@ -16,15 +17,13 @@ import { LANG, t } from '@/i18n/i18n';
 import { prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
 import { locate } from '@/lib/prayer';
 import { ltr, ltrStart } from '@/theme/ltr';
-import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
 const RADIUS = 26;
-const EDGE = 'rgba(48, 48, 48, 0.62)'; // dark mode: the grey at the very edge of the card (the vignette); lower the 0.62 for a lighter one
+const TINT = 0.92; // how much of the sky of the moment colours the glass (0 = clear glass, 1 = solid sky); the blur and sheen show through the rest
 
 export function PrayerCard() {
-  const k = useSkin();
   const [view, setView] = useState<PrayerView>(prayerView);
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -36,8 +35,13 @@ export function PrayerCard() {
       setView(prayerView());
     }, []),
   );
+  // the countdown ticks every second; when it reaches zero the next prayer takes over
+  const [now, setNow] = useState(Date.now);
   useEffect(() => {
-    const timer = setInterval(() => setView(prayerView()), 30000);
+    const timer = setInterval(() => {
+      setNow(Date.now());
+      setView((v) => (v && Date.now() >= v.nextAt ? prayerView() : v));
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -57,25 +61,31 @@ export function PrayerCard() {
     router.navigate({ pathname: '/settings', params: { cities: '1' } });
   };
 
-  const { isDark } = useTheme();
   const phase = view?.phase ?? skyByClock();
-  const sky = SKIES[phase];
+  const { isDark } = useTheme();
+  const sky = SKIES[phase]; // the same sky in light and dark mode
+  const lightSky = phase !== 'night' && phase !== 'sunset';
+  const darkPill = isDark && lightSky; // dark mode on a light sky: a mid-grey pill with white words, not the bright white one and not a black one
   const pill = (label: string, onPress: () => void, key: string) => (
-    <Pressable key={key} onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.btn, { backgroundColor: sky.btn }, pressed && { opacity: 0.7 }]}>
-      <Txt size={13} weight={700} color={sky.ink}>
+    <Pressable key={key} onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.btn, { backgroundColor: darkPill ? 'rgba(100, 106, 112, 0.55)' : sky.btn }, pressed && { opacity: 0.7 }]}>
+      <Txt size={13} weight={700} color={darkPill ? '#ffffff' : sky.ink}>
         {label}
       </Txt>
     </Pressable>
   );
 
-  // the next prayer: «Next prayer · 4h 33m» over «Dhuhr · 12:20»
+  // the next prayer: «Next prayer · 04:33:12» (a live countdown) over «Dhuhr · 12:20»
   const next = view?.list.find((p) => p.next);
+  const secs = view ? Math.max(0, Math.floor((view.nextAt - now) / 1000)) : 0;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const countdown = `${pad(Math.floor(secs / 3600))}:${pad(Math.floor((secs % 3600) / 60))}:${pad(secs % 60)}`;
+  const nameInk = lightSky ? '#111111' : sky.ink; // black on the light skies; the night's cream on the dark ones
   const info = view && (
     <View key="info" style={styles.info}>
-      <Txt size={12} weight={500} color={sky.soft} style={ltrStart()}>
-        {`${HOME.nextPrayer()} · ${DASH.left(view.h, view.m)}`}
+      <Txt size={12} weight={500} color={sky.soft} style={[ltrStart(), { fontVariant: ['tabular-nums'] }]}>
+        {`${HOME.nextPrayer()} · ${countdown}`}
       </Txt>
-      <Txt size={18} weight={800} lineHeight={26} color={sky.ink} style={ltrStart()}>
+      <Txt size={18} weight={800} lineHeight={26} color={nameInk} style={ltrStart()}>
         {next ? `${view.next} · ${next.at}` : view.next}
       </Txt>
     </View>
@@ -84,23 +94,13 @@ export function PrayerCard() {
   const calendar = pill(DASH.calendar(), () => router.push('/calendar'), 'calendar');
 
   return (
-    // the rounded clip is on the OUTER view and on the sky's own layer: the animated stars and clouds (moving layers)
-    // are not cut by the gradient view's own corners on every phone, which showed the card square
-    <View style={[styles.card, { boxShadow: `0px 8px 24px ${k.glassShadow}` }]}>
-      <LinearGradient colors={sky.sky} style={StyleSheet.absoluteFill} />
+    // a glass box like the cards under it (blur + pale fill + sheen); the sky of the moment is only a tint inside it. The rounded
+    // clip is on the sky's own layer: the animated stars and clouds (moving layers) are not cut by the glass's corners on every phone
+    <Glass radius={RADIUS} style={styles.card}>
       <View style={styles.skyClip} pointerEvents="none">
+        <LinearGradient colors={sky.sky} style={[StyleSheet.absoluteFill, { opacity: TINT }]} />
         <PrayerSky phase={phase} sun={view?.sun ?? 0.5} />
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: sky.veil }]} />
-        {isDark && (
-          // dark mode: the card is as in light mode; only a soft grey vignette round its edges, to blend it into the dark page
-          // (four edge gradients: the corners get two of them, so they are the darkest)
-          <>
-            <LinearGradient colors={[EDGE, 'rgba(48, 48, 48, 0)']} style={[styles.edge, { top: 0, left: 0, right: 0, height: '38%' }]} />
-            <LinearGradient colors={['rgba(48, 48, 48, 0)', EDGE]} style={[styles.edge, { bottom: 0, left: 0, right: 0, height: '38%' }]} />
-            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={[EDGE, 'rgba(48, 48, 48, 0)']} style={[styles.edge, { top: 0, bottom: 0, left: 0, width: '30%' }]} />
-            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['rgba(48, 48, 48, 0)', EDGE]} style={[styles.edge, { top: 0, bottom: 0, right: 0, width: '30%' }]} />
-          </>
-        )}
+        <LinearGradient colors={['rgba(255, 255, 255, 0.28)', 'rgba(255, 255, 255, 0)']} style={styles.gloss} />
       </View>
       {view ? (
         // left to right on the screen in every language: in Arabic the prayer is at the right edge, then qibla, then calendar
@@ -114,14 +114,14 @@ export function PrayerCard() {
         </View>
       )}
       <PlaceSheet open={asking} busy={busy} failed={failed} onClose={() => setAsking(false)} onLocate={findPlace} onChooseCity={chooseCity} />
-    </View>
+    </Glass>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: space.cozy, overflow: 'hidden' },
-  edge: { position: 'absolute' },
+  card: { padding: space.cozy, paddingVertical: space.cozy + 8 }, // a little thicker
   skyClip: { ...StyleSheet.absoluteFill, borderRadius: RADIUS, borderCurve: 'continuous', overflow: 'hidden' },
+  gloss: { position: 'absolute', top: 0, left: 0, right: 0, height: '55%' }, // the glass's light along the top edge
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   info: { flex: 1, gap: 1 },
   ask: { gap: space.sm },

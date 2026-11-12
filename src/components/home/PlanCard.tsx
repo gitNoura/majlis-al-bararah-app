@@ -56,7 +56,7 @@ export function PlanCard({ label, title, sub, percent = null, onPress, a11y }: P
   );
   const track = (
     <View key="track" style={[styles.track, ltr(), { backgroundColor: k.glassTrack, justifyContent: ar ? 'flex-end' : 'flex-start' }]}>
-      {pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={[styles.fill, { backgroundColor: k.mark }]} />}
+      {pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={[styles.fill, { backgroundColor: k.hue }]} />}
     </View>
   );
 
