@@ -1,6 +1,6 @@
 // HOME, activity this week: open on the page, no box. The title with «3 of 7» at the end, then seven capsules, one per day, Monday
 // first, as tall as the reading of that day (the ayat the wird counted; a day the reader only opened the mushaf or Hifdh is a middle
-// height), a day without activity a short stub, a day still to come a fainter one. A day with activity is the prayer card's yellow.
+// height), a day without activity a short stub, a day still to come a fainter one. A day with activity is sage green (today's the forest).
 // Today's letter is bold with a dot under it. A day counts when the reader opened the mushaf or Hifdh, or logged the wird
 // (src/lib/activity.js). The capsules draw in once with the rest of Home.
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
@@ -32,7 +32,7 @@ export function ActivityCard() {
   return (
     <View style={styles.wrap}>
       <View style={styles.head}>
-        <Txt size={15} weight={700} color={k.ink}>
+        <Txt size={13} weight={800} color={k.gold}>
           {DASH.activity()}
         </Txt>
         <Txt size={14} weight={700} color={k.ink}>
@@ -46,7 +46,7 @@ export function ActivityCard() {
             <View key={d.day} style={styles.col}>
               <View style={styles.slot}>
                 {on[i] ? (
-                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: k.yellow, boxShadow: k.yellowShadow }]} />
+                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: today ? k.fill : k.bar }]} />
                 ) : (
                   <View style={[styles.bar, { height: STUB, backgroundColor: k.pillTrack, opacity: d.future ? 0.5 : 1 }]} />
                 )}

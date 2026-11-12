@@ -1,6 +1,6 @@
 // HOME, reading: open on the page, no box. «Reading» and the surah's name (in the page's one font) with the khatma's percentage at
 // the end, as the prayer card has the next prayer and the time left; the page, hizb and juz as plain words under it (not a pill);
-// then «Continue reading», the one yellow pill (the prayer card's next-prayer yellow). A tap anywhere opens the Quran at the marker.
+// then «Continue reading» as the one dark pill (cream in dark mode, as on the prayer card). A tap anywhere opens the Quran at the marker.
 'use no memo'; // reads saved state (the marker) when it draws, which the React Compiler cannot see change
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
@@ -16,6 +16,7 @@ import { surahsOn } from '@/lib/boxes';
 import { readingView } from '@/lib/dashboard';
 import { SURAHS } from '@/lib/quran';
 import { useSkin } from '@/theme/homeSkin';
+import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
 const digits = (n: number) => n.toLocaleString('en');
@@ -38,6 +39,7 @@ function Arrow({ color }: { color: string }) {
 
 export function ReadingCard() {
   const k = useSkin();
+  const { isDark } = useTheme();
   const r = readingView();
   const where = placeOf(r.page);
   // the page, then the hizb and juz
@@ -53,7 +55,7 @@ export function ReadingCard() {
     <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={`${DASH.reading()} ${action}`} style={({ pressed }) => [styles.wrap, pressed && { opacity: 0.85 }]}>
       <View style={styles.head}>
         <View style={styles.words}>
-          <Txt size={12} weight={700} color={k.meta}>
+          <Txt size={13} weight={800} color={k.gold}>
             {DASH.reading()}
           </Txt>
           <Txt size={24} weight={800} lineHeight={34} color={k.ink} numberOfLines={1}>
@@ -67,11 +69,11 @@ export function ReadingCard() {
           {`${digits(r.percent)}%`}
         </Txt>
       </View>
-      <View style={[styles.go, { backgroundColor: k.yellow }]}>
-        <Txt size={14} weight={700} color={k.yellowInk}>
+      <View style={[styles.go, { backgroundColor: isDark ? k.pageButton : k.goBg }]}>
+        <Txt size={14} weight={700} color={isDark ? k.buttonInk : k.goInk}>
           {action}
         </Txt>
-        <Arrow color={k.yellowInk} />
+        <Arrow color={isDark ? k.buttonInk : k.goInk} />
       </View>
     </Pressable>
   );

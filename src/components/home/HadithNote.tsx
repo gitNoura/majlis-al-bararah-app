@@ -26,5 +26,5 @@ export function HadithNote() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space.xs, paddingHorizontal: space.xs },
+  wrap: { gap: space.xs, paddingHorizontal: space.xs, paddingVertical: space.sm },
 });

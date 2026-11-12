@@ -30,7 +30,7 @@ function Plan({ title, part, emptyText, extra }: { title: string; part: Part; em
       accessibilityLabel={`${title} ${running ? `${pct}%` : emptyText}`}
       style={({ pressed }) => [styles.plan, { backgroundColor: k.pill }, pressed && { opacity: 0.7 }]}
     >
-      <Txt size={12} weight={700} color={k.meta} numberOfLines={1}>
+      <Txt size={13} weight={800} color={k.gold} numberOfLines={1}>
         {title}
       </Txt>
       {part.has ? (
@@ -39,7 +39,7 @@ function Plan({ title, part, emptyText, extra }: { title: string; part: Part; em
             {running ? `${digits(pct)}%` : '–'}
           </Txt>
           <View style={[styles.track, { backgroundColor: k.pillTrack }]}>
-            {running && pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={{ height: '100%', borderRadius: 3, backgroundColor: k.yellow, boxShadow: k.yellowShadow }} />}
+            {running && pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={{ height: '100%', borderRadius: 3, backgroundColor: k.fill }} />}
           </View>
           <Txt size={12} weight={500} color={k.meta} numberOfLines={2}>
             {caption}
