@@ -37,6 +37,17 @@ export const DASH = {
   revisionPlan: () => L('خطة المراجعة', 'Revision plan', 'Plan de révision'),
   noMemorizePlan: () => L('لم تضع خطة حفظ بعد', 'No plan yet', 'Pas encore de plan'),
   noRevisionPlan: () => L('لم تضع خطة مراجعة بعد', 'No plan yet', 'Pas encore de plan'),
+  // the memorization and revision cards (plan name, pace, and one line under the ring)
+  perDay: (a) => L(`${a} في اليوم`, `${a} a day`, `${a} par jour`),
+  perWeek: (a) => L(`${a} في الأسبوع`, `${a} a week`, `${a} par semaine`),
+  daysAWeek: (n) => L(n === 1 ? 'يوم واحد في الأسبوع' : n === 2 ? 'يومان في الأسبوع' : `${n} أيام في الأسبوع`, `${n} ${n === 1 ? 'day' : 'days'} a week`, `${n} ${n === 1 ? 'jour' : 'jours'} par semaine`),
+  daysLeft: (n) => L(n === 1 ? 'متبقي يوم واحد' : n === 2 ? 'متبقي يومان' : n <= 10 ? `متبقي ${n} أيام` : `متبقي ${n} يوماً`, `${n} ${n === 1 ? 'day' : 'days'} left`, `${n} ${n === 1 ? 'jour restant' : 'jours restants'}`),
+  unitsDone: (done, total, word) => L(`${done} من ${total} ${word}`, `${done} of ${total} ${word}`, `${done} sur ${total} ${word}`),
+  restDay: () => L('اليوم راحة', 'Rest day today', 'Jour de repos aujourd’hui'),
+  sessionTomorrow: () => L('الجلسة غداً', 'Next session tomorrow', 'Prochaine séance demain'),
+  sessionOn: (day) => L(`الجلسة يوم ${day}`, `Next session ${day}`, `Prochaine séance ${day}`),
+  doneToday: () => L('أنجزتَ ما عليك اليوم', 'Done for today', 'Terminé pour aujourd’hui'),
+  todayIs: (portion) => L(`اليوم: ${portion}`, `Today: ${portion}`, `Aujourd’hui : ${portion}`),
   addPlan: () => L('أنشئ خطة', 'Create one', 'Créer un plan'),
   // activity
   activity: () => L('النشاط', 'Activity', 'Activité'),

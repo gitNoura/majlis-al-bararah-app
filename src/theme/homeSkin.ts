@@ -48,6 +48,9 @@ export type HomeSkin = {
   glass: string; // the cards' fill
   glassShadow: string; // and their soft shadow (neutral)
   cardShadow: string; // the cards' raised look: a tight, a middle and a wide soft shadow, stacked
+  glassTop: string; // a card's gradient: its lit top...
+  glassBottom: string; // ...and its slightly deeper bottom (a little dimension)
+  halo: string; // the soft glow around the ring and the reading bar
   glassTrack: string; // an empty progress bar inside a glass card
   glassBtn: string; // the round arrow button inside a glass card
   mark: string; // Home's progress bars and today's activity bar: a neutral charcoal (parchment at night), no green
@@ -93,6 +96,9 @@ const light: HomeSkin = {
   glass: '#ffffff',
   glassShadow: 'rgba(0, 0, 0, 0.07)',
   cardShadow: '0px 1px 2px rgba(0, 0, 0, 0.05), 0px 4px 10px rgba(0, 0, 0, 0.05), 0px 14px 28px rgba(0, 0, 0, 0.07)',
+  glassTop: '#ffffff',
+  glassBottom: '#eef0ec',
+  halo: 'rgba(46, 50, 48, 0.42)',
   glassTrack: 'rgba(9, 74, 61, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
   mark: '#2e3230',
@@ -141,6 +147,9 @@ const dark: HomeSkin = {
   glass: 'rgba(255, 255, 255, 0.06)',
   glassShadow: 'rgba(0, 0, 0, 0.35)',
   cardShadow: '0px 1px 2px rgba(0, 0, 0, 0.30), 0px 6px 14px rgba(0, 0, 0, 0.25), 0px 16px 32px rgba(0, 0, 0, 0.30)',
+  glassTop: 'rgba(255, 255, 255, 0.09)',
+  glassBottom: 'rgba(255, 255, 255, 0.02)',
+  halo: 'rgba(233, 223, 189, 0.55)',
   glassTrack: 'rgba(255, 255, 255, 0.14)',
   glassBtn: 'rgba(255, 255, 255, 0.12)',
   mark: '#e9dfbd',

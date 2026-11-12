@@ -58,13 +58,13 @@ export function PlanCard({ label, title, sub, percent = null, arrow: showArrow =
   );
   const track = (
     <View key="track" style={[styles.track, ltr(), { backgroundColor: k.glassTrack, justifyContent: ar ? 'flex-end' : 'flex-start' }]}>
-      {pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={[styles.fill, { backgroundColor: k.hue, shadowColor: k.glow, shadowOpacity: k.glowOpacity, shadowRadius: 3, shadowOffset: { width: 0, height: 0 } }]} />}
+      {pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={[styles.fill, { backgroundColor: k.hue, boxShadow: `0px 0px 8px 1px ${k.halo}` }]} />}
     </View>
   );
 
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={a11y} style={({ pressed }) => pressed && { transform: [{ scale: 0.985 }] }}>
-      <Glass style={styles.card}>
+      <Glass gradient style={styles.card}>
         <View style={[styles.head, ltr()]}>{!showArrow ? words : ar ? [arrow, words] : [words, arrow]}</View>
         {!!action && (
           <View style={[styles.pill, { backgroundColor: k.goBg }]}>
