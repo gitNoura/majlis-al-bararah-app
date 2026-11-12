@@ -90,12 +90,12 @@ const light: HomeSkin = {
   pageSoft: 'rgba(23, 63, 50, 0.74)',
   pageHere: '#0F6B58',
   wash: ['#f1f2ef', '#f4f5f3', '#f4f5f3'], // Home's own off-white (paper)
-  glass: 'rgba(255, 255, 255, 0.22)',
-  glassSheen: 'rgba(255, 255, 255, 0.8)',
+  glass: 'rgba(255, 255, 255, 0.34)',
+  glassSheen: 'rgba(255, 255, 255, 0.45)',
   glassShadow: 'rgba(20, 50, 38, 0.10)',
   glassTrack: 'rgba(9, 74, 61, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
-  glassTint: ['rgba(255, 255, 255, 0.45)', 'rgba(255, 255, 255, 0.04)'],
+  glassTint: ['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.02)'],
   mark: '#2e3230',
   markSoft: '#b4b7b3',
   hue: '#2F8A74', // the one accent, a light green (progress bars, today's activity bar)
@@ -103,7 +103,7 @@ const light: HomeSkin = {
   hueDeep: '#094A3D',
   glow: '#3A9C85',
   glowOpacity: 0.25,
-  glassGlint: 'rgba(255, 255, 255, 0.35)',
+  glassGlint: 'rgba(255, 255, 255, 0.10)',
   ...PAGE,
 };
 
@@ -138,12 +138,12 @@ const dark: HomeSkin = {
   pageHere: '#e9dfbd',
   pageButton: '#ece4c8',
   wash: ['#141414', '#151515', '#151515'], // near-black
-  glass: 'rgba(255, 255, 255, 0.04)',
-  glassSheen: 'rgba(255, 255, 255, 0.17)',
+  glass: 'rgba(255, 255, 255, 0.06)',
+  glassSheen: 'rgba(255, 255, 255, 0.09)',
   glassShadow: 'rgba(0, 0, 0, 0.35)',
   glassTrack: 'rgba(255, 255, 255, 0.14)',
   glassBtn: 'rgba(255, 255, 255, 0.12)',
-  glassTint: ['rgba(255, 255, 255, 0.10)', 'rgba(255, 255, 255, 0.02)'],
+  glassTint: ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.01)'],
   mark: '#e9dfbd',
   markSoft: '#5c6660',
   hue: '#e9dfbd', // dark mode: a deeper light green
@@ -151,7 +151,7 @@ const dark: HomeSkin = {
   hueDeep: '#cfc6a3',
   glow: '#ece4c8',
   glowOpacity: 0.4,
-  glassGlint: 'rgba(255, 255, 255, 0.06)',
+  glassGlint: 'rgba(255, 255, 255, 0.03)',
   goBg: '#343635',
   goInk: '#ece4c8',
   buttonInk: '#1d1d1d',

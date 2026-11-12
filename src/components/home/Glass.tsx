@@ -21,7 +21,7 @@ const LIQUID = Platform.OS === 'ios' && isLiquidGlassAvailable();
 // `tint`: a soft colour inside the glass (two colours: the lit top corner, then clear), drawn over the fill and sheen so the colour shows
 type Props = { radius?: number; intensity?: number; tint?: readonly [string, string]; style?: StyleProp<ViewStyle>; children?: ReactNode };
 
-export function Glass({ radius = 28, intensity = 80, tint, style, children }: Props) {
+export function Glass({ radius = 28, intensity = 60, tint, style, children }: Props) {
   const k = useSkin();
   const { isDark } = useTheme();
   const target = useContext(GlassTarget);
@@ -54,8 +54,8 @@ export function Glass({ radius = 28, intensity = 80, tint, style, children }: Pr
 }
 
 const styles = StyleSheet.create({
-  sheen: { position: 'absolute', top: 0, left: 0, right: 0, height: '60%' },
-  glint: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '35%' },
+  sheen: { position: 'absolute', top: 0, left: 0, right: 0, height: '40%' },
+  glint: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '20%' },
 });
 
 // Glass drawn behind the children of a box that lays itself out (a row, a result, a card with its own padding): put it first
