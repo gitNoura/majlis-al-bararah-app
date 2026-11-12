@@ -1,4 +1,4 @@
-// HOME's page: a soft beige wash with three large, faint pools of sand and white that stay still while the cards scroll over
+// HOME's page: its own off-white with three large, faint pools of grey and white that stay still while the cards scroll over
 // them, so the glass has something to blur and show through. The Home screen puts this inside the BlurTargetView on Android.
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet } from 'react-native';
@@ -7,18 +7,18 @@ import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 
-// each pool: its colour, where its centre is (0 to 1 across and down the page) and how strong it is. One hue only (the page's beige) in
-// two depths, plus white for light: enough for the glass to show, without a second colour.
+// each pool: its colour, where its centre is (0 to 1 across and down the page) and how strong it is. No hue at all: Home's off-white in
+// two deeper greys, plus white for light, so the glass shows without adding a colour.
 const POOLS = {
   light: [
-    { color: '#d8c59c', x: 0.92, y: 0.12, o: 0.55 },
+    { color: '#cfd1cc', x: 0.92, y: 0.12, o: 0.55 },
     { color: '#ffffff', x: 0.08, y: 0.42, o: 0.9 },
-    { color: '#e2d1ab', x: 0.9, y: 0.78, o: 0.5 },
+    { color: '#d8dad5', x: 0.9, y: 0.78, o: 0.5 },
   ],
   dark: [
-    { color: '#8f7a52', x: 0.92, y: 0.12, o: 0.32 },
-    { color: '#cbb98f', x: 0.08, y: 0.42, o: 0.1 },
-    { color: '#7a6840', x: 0.9, y: 0.78, o: 0.26 },
+    { color: '#4a4d4a', x: 0.92, y: 0.12, o: 0.4 },
+    { color: '#8a8d89', x: 0.08, y: 0.42, o: 0.08 },
+    { color: '#3d403d', x: 0.9, y: 0.78, o: 0.3 },
   ],
 };
 
