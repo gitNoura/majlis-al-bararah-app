@@ -1,20 +1,21 @@
-// CALENDAR (التقويم): a month at a time, in the Hijri calendar or the Gregorian, each day with the other date small
+// CALENDAR (التقويم), in Home's look (the flat page, the large heading, glass cards): a month at a time, in the Hijri calendar or the Gregorian, each day with the other date small
 // under it; today lit; the occasions and the fasts marked; and what is coming. The data is src/lib/hijri.js (Umm al-Qura
 // where the phone has it, the country's own start of the months, the ±1 day the reader sets in the Settings).
 'use no memo'; // reads the Hijri settings (a module) when it draws, which the React Compiler cannot see change
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ScreenBackground } from '@/components/Stars';
 import { BackIcon } from '@/components/icons';
-import { ScreenHeader } from '@/components/ScreenHeader';
+import { Glass } from '@/components/home/Glass';
+import { HomeBackdrop } from '@/components/home/HomeBackdrop';
+import { HifHeader } from '@/components/hifdh/HifHeader';
 import { Txt } from '@/components/Txt';
-import { Card, Row, SegmentedControl } from '@/components/ui';
 import { DASH } from '@/i18n/dashboard';
 import { isEnglish, L, LANG, t } from '@/i18n/i18n';
 import * as hijri from '@/lib/hijri';
+import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
@@ -38,7 +39,8 @@ function monthCells(kind: Kind, y: number, m: number): Cell[] {
 }
 
 export default function CalendarScreen() {
-  const { c, isDark } = useTheme();
+  const { isDark } = useTheme();
+  const k = useSkin();
   const insets = useSafeAreaInsets();
   const now = new Date();
   const todayH = hijri.hijri(hijri.noon(now));
@@ -99,43 +101,67 @@ export default function CalendarScreen() {
 
   const when = (d: Date, n: number) => (n === 0 ? t('calIsToday') : t('calInDays', n)) + ` · ${d.toLocaleDateString(LANG, { day: 'numeric', month: 'short' })}`;
 
-  return (
-    <View style={{ flex: 1, backgroundColor: c.screen }}>
-      <ScreenBackground />
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-      <ScreenHeader title={DASH.calendar()} />
-      <ScrollView contentContainerStyle={{ padding: space.md, paddingBottom: insets.bottom + 28, gap: space.md }}>
-        <SegmentedControl<Kind>
-          value={kind}
-          onChange={switchKind}
-          options={[
-            { value: 'hijri', label: t('calHijri') },
-            { value: 'gregorian', label: t('calGregorian') },
-          ]}
-        />
+  const todayInk = isDark ? '#1d1d1d' : '#ffffff'; // the words on today's forest (parchment by night) square
+  const kinds: { value: Kind; label: string }[] = [
+    { value: 'hijri', label: t('calHijri') },
+    { value: 'gregorian', label: t('calGregorian') },
+  ];
 
-        <Card elevated>
+  // a list inside a glass card: a row's title and the line under it, a hairline between rows
+  const list = (items: { key: string; title: string; sub: string }[]) => (
+    <Glass gradient style={{ paddingHorizontal: space.md, paddingVertical: space.xs }}>
+      {items.map((it, i) => (
+        <View key={it.key} style={[{ paddingVertical: 13, gap: 2 }, i < items.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: k.hairline }]}>
+          <Txt size={16} weight={700} color={k.ink}>
+            {it.title}
+          </Txt>
+          <Txt size={13.5} color={k.meta}>
+            {it.sub}
+          </Txt>
+        </View>
+      ))}
+    </Glass>
+  );
+
+  return (
+    <View style={{ flex: 1, backgroundColor: k.paper }}>
+      <HomeBackdrop />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <HifHeader title={DASH.calendar()} />
+      <ScrollView contentContainerStyle={{ padding: space.md, paddingBottom: insets.bottom + 28, gap: space.md }}>
+        {/* Hijri / Gregorian: a track, the chosen one raised (as on the Plans page) */}
+        <View style={[styles.tabs, { backgroundColor: k.well }]} accessibilityRole="tablist">
+          {kinds.map((o) => (
+            <Pressable key={o.value} onPress={() => switchKind(o.value)} accessibilityRole="tab" accessibilityState={{ selected: kind === o.value }} style={[styles.tab, kind === o.value && { backgroundColor: k.glass, boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.14)' }]}>
+              <Txt size={14.5} weight={kind === o.value ? 700 : 500} center color={kind === o.value ? k.ink : k.meta} numberOfLines={1}>
+                {o.label}
+              </Txt>
+            </Pressable>
+          ))}
+        </View>
+
+        <Glass gradient style={{ padding: space.md, gap: 14 }}>
           {/* the month, with arrows */}
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Pressable onPress={() => step(-1)} hitSlop={10} accessibilityLabel={t('calPrev')} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
-              <BackIcon color={c.ink} size={20} rtl={isEnglish} />
+            <Pressable onPress={() => step(-1)} hitSlop={10} accessibilityLabel={t('calPrev')} style={[styles.arrow, { backgroundColor: k.well }]}>
+              <BackIcon color={k.ink} size={18} rtl={isEnglish} />
             </Pressable>
             <View style={{ flex: 1, alignItems: 'center' }}>
-              <Txt size={20} weight={800} lineHeight={28} color={c.ink} center>
+              <Txt size={20} weight={800} lineHeight={28} color={k.ink} center>
                 {title}
               </Txt>
-              <Txt size={12.5} color={c.meta} center>
+              <Txt size={12.5} color={k.meta} center>
                 {other}
               </Txt>
             </View>
-            <Pressable onPress={() => step(1)} hitSlop={10} accessibilityLabel={t('calNext')} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', transform: [{ scaleX: -1 }] }}>
-              <BackIcon color={c.ink} size={20} rtl={isEnglish} />
+            <Pressable onPress={() => step(1)} hitSlop={10} accessibilityLabel={t('calNext')} style={[styles.arrow, { backgroundColor: k.well, transform: [{ scaleX: -1 }] }]}>
+              <BackIcon color={k.ink} size={18} rtl={isEnglish} />
             </Pressable>
           </View>
 
           <View style={{ flexDirection: 'row' }}>
             {days.map((d) => (
-              <Txt key={d} size={12} weight={700} color={c.meta} center style={{ flex: 1 }}>
+              <Txt key={d} size={12} weight={700} color={k.meta} center style={{ flex: 1 }}>
                 {d}
               </Txt>
             ))}
@@ -149,25 +175,25 @@ export default function CalendarScreen() {
                   const isSel = !!selected && sameDay(cell.date, selected.date);
                   const occasion = !!hijri.occasionOn(cell.h);
                   const fast = hijri.fastOn(cell.h, cell.date);
-                  const mark = occasion ? c.accent : fast ? (fast.fard ? c.accent : c.meta) : null;
+                  const mark = occasion ? k.accent : fast ? (fast.fard ? k.accent : k.meta) : null;
                   return (
                     <Pressable
                       key={j}
                       onPress={() => setSelected(isSel ? null : cell)}
                       accessibilityLabel={`${cell.big}`}
                       style={[
-                        { flex: 1, aspectRatio: 1, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-                        isToday && { backgroundColor: c.accent },
-                        !isToday && isSel && { backgroundColor: c.accentSoft, borderWidth: 1.5, borderColor: c.accent },
+                        { flex: 1, aspectRatio: 1, borderRadius: 13, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
+                        isToday && { backgroundColor: k.fill },
+                        !isToday && isSel && { backgroundColor: k.well, borderWidth: 1.5, borderColor: k.fill },
                       ]}
                     >
-                      <Txt size={16} weight={isToday ? 800 : 600} color={isToday ? c.onInk : c.ink} center>
+                      <Txt size={16} weight={isToday ? 800 : 600} color={isToday ? todayInk : k.ink} center>
                         {num(cell.big)}
                       </Txt>
-                      <Txt size={9.5} color={isToday ? c.onInk : c.meta} center style={{ opacity: 0.85 }}>
+                      <Txt size={9.5} color={isToday ? todayInk : k.meta} center style={{ opacity: 0.85 }}>
                         {num(cell.small)}
                       </Txt>
-                      {!!mark && <View style={{ position: 'absolute', bottom: 3, width: 5, height: 5, borderRadius: 3, backgroundColor: isToday ? c.onInk : mark }} />}
+                      {!!mark && <View style={{ position: 'absolute', bottom: 3, width: 5, height: 5, borderRadius: 3, backgroundColor: isToday ? todayInk : mark }} />}
                     </Pressable>
                   );
                 })}
@@ -175,67 +201,65 @@ export default function CalendarScreen() {
             ))}
           </View>
 
-          {/* the key */}
+          {/* the key, and back to today */}
           <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
             {[
-              [c.accent, `${t('calLegendOccasion')} · ${t('calLegendRamadan')}`],
-              [c.meta, t('calLegendSunnah')],
+              [k.accent, `${t('calLegendOccasion')} · ${t('calLegendRamadan')}`],
+              [k.meta, t('calLegendSunnah')],
             ].map(([col, label]) => (
               <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: col }} />
-                <Txt size={12} color={c.meta}>
+                <Txt size={12} color={k.meta}>
                   {label}
                 </Txt>
               </View>
             ))}
           </View>
           <Pressable onPress={backToToday} hitSlop={8} style={{ alignSelf: 'flex-start' }}>
-            <Txt size={13.5} weight={700} color={c.accent}>
+            <Txt size={13.5} weight={700} color={k.accent}>
               {t('calBackToday')}
             </Txt>
           </Pressable>
-        </Card>
+        </Glass>
 
         {shownDay && (
-          <Card quiet>
-            <Txt size={17} weight={800} color={c.ink}>
+          <Glass gradient style={{ padding: space.md, gap: 4 }}>
+            <Txt size={17} weight={800} color={k.ink}>
               {shownDay[0]}
             </Txt>
-            <Txt size={13.5} color={c.meta}>
+            <Txt size={13.5} color={k.meta}>
               {shownDay[1]}
             </Txt>
             {shownNote.map((n) => (
-              <Txt key={n} size={14} weight={600} color={c.text}>
+              <Txt key={n} size={14} weight={600} color={k.ink}>
                 {n}
               </Txt>
             ))}
-          </Card>
+          </Glass>
         )}
 
         <View style={{ gap: space.sm }}>
-          <Txt size={13} weight={700} color={c.meta}>
+          <Txt size={15} weight={700} color={k.ink} style={{ paddingHorizontal: space.xs }}>
             {t('calEvents')}
           </Txt>
-          <Card style={{ paddingVertical: space.xs, gap: 0 }}>
-            {events.map((e, i) => (
-              <Row key={e.key} title={t(e.key)} sub={`${when(e.date, e.days)} · ${num(e.h.d)} ${hijri.monthName(e.h.m)}`} last={i === events.length - 1} />
-            ))}
-          </Card>
+          {list(events.map((e) => ({ key: e.key, title: t(e.key), sub: `${when(e.date, e.days)} · ${num(e.h.d)} ${hijri.monthName(e.h.m)}` })))}
         </View>
 
         {fasts.length > 0 && (
           <View style={{ gap: space.sm }}>
-            <Txt size={13} weight={700} color={c.meta}>
+            <Txt size={15} weight={700} color={k.ink} style={{ paddingHorizontal: space.xs }}>
               {t('calFasting')}
             </Txt>
-            <Card style={{ paddingVertical: space.xs, gap: 0 }}>
-              {fasts.map((f, i) => (
-                <Row key={`${f.fast.key}${f.days}`} title={t(f.fast.key)} sub={when(f.date, f.days)} last={i === fasts.length - 1} />
-              ))}
-            </Card>
+            {list(fasts.map((f) => ({ key: `${f.fast.key}${f.days}`, title: t(f.fast.key), sub: when(f.date, f.days) })))}
           </View>
         )}
       </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  tabs: { flexDirection: 'row', borderRadius: 16, borderCurve: 'continuous', padding: 3 },
+  tab: { flex: 1, minHeight: 38, borderRadius: 13, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
+  arrow: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+});

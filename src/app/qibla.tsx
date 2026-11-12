@@ -1,5 +1,5 @@
 // «القبلة»: a compass towards the Kaaba (the website's src/home/qibla.js and qibla.css, rebuilt for the
-// phone), on the home screen's background.
+// phone), in Home's look: the flat page, the large heading, the place and the compass on glass cards.
 //
 // The direction: the great-circle bearing from the member's place (src/lib/prayer.js, the same place as
 // the prayer times) to the Kaaba. On a phone the dial turns with the phone (expo-location's heading), so
@@ -24,15 +24,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, G, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { BackIcon, PinIcon } from '@/components/icons';
+import { Glass } from '@/components/home/Glass';
+import { HomeBackdrop } from '@/components/home/HomeBackdrop';
+import { HifHeader } from '@/components/hifdh/HifHeader';
 import { PlaceSheet } from '@/components/PlaceSheet';
-import { ScreenHeader } from '@/components/ScreenHeader';
-import { ScreenBackground } from '@/components/Stars';
 import { Txt } from '@/components/Txt';
 import { HOME } from '@/i18n/home';
 import { isEnglish, L, t } from '@/i18n/i18n';
 import { locate, place, placeName } from '@/lib/prayer';
 import { ui } from '@/theme/fonts';
+import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
+import { space } from '@/theme/tokens';
 
 const KAABA_IMG = require('@/assets/images/qibla/kaaba-medallion.webp');
 const KAABA = { lat: 21.4225, lng: 39.8262 };
@@ -60,7 +63,8 @@ const QC = {
 type QColours = (typeof QC)['light'];
 
 export default function Qibla() {
-  const { c, isDark } = useTheme();
+  const { isDark } = useTheme();
+  const k = useSkin();
   const q = isDark ? QC.dark : QC.light;
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -136,53 +140,52 @@ export default function Qibla() {
   };
 
   const placeLine = here ? (placeName(here) ?? t('calMyLocation')) : t('qbNoPlace');
-  const size = Math.min(width * 0.84, 360);
+  const size = Math.min(width - 2 * space.md - 2 * space.lg, 330);
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.screen }}>
-      <ScreenBackground />
-      <ScreenHeader title={HOME.qibla()} />
+    <View style={{ flex: 1, backgroundColor: k.paper }}>
+      <HomeBackdrop />
+      <HifHeader title={HOME.qibla()} />
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 28 }]} showsVerticalScrollIndicator={false}>
-        {/* the place: a card of glass (a tap changes it) */}
+        {/* the place: a glass card (a tap changes it) */}
         <Pressable
           onPress={() => {
             setFailed(false);
             setPlaceOpen(true);
           }}
-          style={({ pressed }) => [
-            styles.place,
-            { backgroundColor: isDark ? c.card : '#ffffff', boxShadow: q.shadow },
-            pressed && styles.pressed,
-          ]}
+          style={({ pressed }) => pressed && styles.pressed}
           accessibilityLabel={HOME.setPlace()}
         >
-          <PinIcon color={q.gold} size={20} />
-          <Txt size={16} weight={700} color={c.ink} numberOfLines={1} style={{ flex: 1 }}>
-            {placeLine}
-          </Txt>
-          <BackIcon color={c.meta} size={18} rtl={isEnglish} />
+          <Glass gradient radius={24} style={styles.place}>
+            <PinIcon color={q.gold} size={20} />
+            <Txt size={16} weight={700} color={k.ink} numberOfLines={1} style={{ flex: 1 }}>
+              {placeLine}
+            </Txt>
+            <BackIcon color={k.meta} size={18} rtl={isEnglish} />
+          </Glass>
         </Pressable>
 
-        {/* the compass: the dial turns with the phone, the needle on it points to the qibla */}
-        <View style={[styles.compass, { width: size, height: size }]}>
-          <Animated.View style={[StyleSheet.absoluteFill, rotorStyle]}>
-            <View style={[StyleSheet.absoluteFill, { borderRadius: size / 2, boxShadow: q.shadow }]} />
-            <Dial q={q} size={size} />
-            <View style={[StyleSheet.absoluteFill, { transform: [{ rotate: `${qibla}deg` }], opacity: here ? 1 : 0 }]}>
-              <Needle q={q} size={size} aligned={aligned} />
-            </View>
-          </Animated.View>
-          <Image
-            source={KAABA_IMG}
-            style={[
-              styles.kaaba,
-              { width: size * 0.17, height: size * 0.17, borderRadius: size * 0.085, left: size * 0.415, top: size * 0.415 },
-              { boxShadow: aligned ? '0px 0px 14px rgba(255, 226, 150, 0.85)' : '0px 4px 10px rgba(0, 0, 0, 0.25)' },
-            ]}
-          />
-        </View>
+        {/* the compass, on a glass card: the dial turns with the phone, the needle on it points to the qibla */}
+        <Glass gradient style={styles.card}>
+          <View style={[styles.compass, { width: size, height: size }]}>
+            <Animated.View style={[StyleSheet.absoluteFill, rotorStyle]}>
+              <Dial q={q} size={size} />
+              <View style={[StyleSheet.absoluteFill, { transform: [{ rotate: `${qibla}deg` }], opacity: here ? 1 : 0 }]}>
+                <Needle q={q} size={size} aligned={aligned} />
+              </View>
+            </Animated.View>
+            <Image
+              source={KAABA_IMG}
+              style={[
+                styles.kaaba,
+                { width: size * 0.17, height: size * 0.17, borderRadius: size * 0.085, left: size * 0.415, top: size * 0.415 },
+                { boxShadow: aligned ? '0px 0px 14px rgba(255, 226, 150, 0.85)' : '0px 4px 10px rgba(0, 0, 0, 0.25)' },
+              ]}
+            />
+          </View>
 
-        {here && Platform.OS !== 'web' && <Calibrate q={q} bg={c.screen} meta={c.meta} />}
+          {here && Platform.OS !== 'web' && <Calibrate q={q} bg={k.surface} meta={k.meta} />}
+        </Glass>
       </ScrollView>
 
       <PlaceSheet
@@ -346,20 +349,13 @@ function Calibrate({ q, bg, meta }: { q: QColours; bg: string; meta: string }) {
 }
 
 const styles = StyleSheet.create({
-  page: { width: '100%', maxWidth: 460, alignSelf: 'center', paddingHorizontal: 22, paddingTop: 4 },
-  place: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    minHeight: 50,
-    marginTop: 14,
-    paddingHorizontal: 16,
-    borderRadius: 24,
-  },
+  page: { width: '100%', maxWidth: 460, alignSelf: 'center', paddingHorizontal: space.md, paddingTop: space.xs, gap: space.md },
+  place: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 54, paddingHorizontal: 16 },
   pressed: { opacity: 0.88, transform: [{ scale: 0.99 }] },
-  compass: { alignSelf: 'center', marginTop: 56, marginBottom: 26 },
+  card: { alignItems: 'center', paddingVertical: space.lg, paddingHorizontal: space.md, gap: space.lg },
+  compass: { alignSelf: 'center' },
   kaaba: { position: 'absolute' },
-  calib: { alignItems: 'center', gap: 12, marginTop: 6 },
+  calib: { alignItems: 'center', gap: 12 },
   eight: { width: 200, height: 100 },
   phone: {
     position: 'absolute',
