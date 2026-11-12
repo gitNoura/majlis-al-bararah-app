@@ -85,7 +85,9 @@ function Day({ phase, sun, width }: { phase: Phase; sun: number; width: number }
   const low = f < 0.12 || f > 0.88; // near the horizon: redder and larger
   const up = f > 0 && f < 1;
   const colour = phase === 'sunset' || low ? '#f08a55' : phase === 'midday' ? '#ffe6a3' : '#f6b46f';
-  const cloud = phase === 'sunset' ? 'rgba(255, 214, 196, 0.42)' : phase === 'midday' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.55)';
+  const soft = phase === 'afternoon'; // the warm afternoon: a wide, faint glow instead of a hard orange disc, and warm-white clouds
+  const cloud =
+    phase === 'sunset' ? 'rgba(255, 214, 196, 0.42)' : phase === 'midday' ? 'rgba(255, 255, 255, 0.7)' : soft ? 'rgba(255, 244, 232, 0.6)' : 'rgba(255, 255, 255, 0.55)';
   return (
     <>
       <Svg style={[StyleSheet.absoluteFill, !isEnglish && styles.mirror]} viewBox="0 0 360 160" preserveAspectRatio="xMidYMid slice">
@@ -95,8 +97,8 @@ function Day({ phase, sun, width }: { phase: Phase; sun: number; width: number }
             <Stop offset="1" stopColor={colour} stopOpacity={0} />
           </RadialGradient>
         </Defs>
-        <Circle cx={x} cy={y} r={low ? 56 : 46} fill="url(#box-sun-glow)" />
-        {up && <Circle cx={x} cy={y} r={low ? 17 : 14} fill={colour} opacity={0.4} />}
+        <Circle cx={x} cy={y} r={soft ? 66 : low ? 56 : 46} fill="url(#box-sun-glow)" />
+        {up && <Circle cx={x} cy={y} r={low ? 17 : 14} fill={colour} opacity={soft ? 0.2 : 0.4} />}
       </Svg>
       {width > 0 && CLOUDS.map((c, i) => <Cloud key={i} {...c} colour={cloud} room={width} />)}
     </>

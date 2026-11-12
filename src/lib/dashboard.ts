@@ -56,7 +56,7 @@ export const SKIES: Record<Phase, Sky> = {
   night: { sky: ['#101b26', '#1b2b38', '#2a3c45'], ...NIGHT_INK },
   dawn: { sky: ['#f3cfc4', '#f7e3d3', '#e6eef0'], ...LIGHT_INK },
   midday: { sky: ['#c9e1ec', '#e0eef0', '#eef3e6'], ...LIGHT_INK },
-  afternoon: { sky: ['#f4d6b8', '#f3e6d2', '#e8ebdb'], ...LIGHT_INK },
+  afternoon: { sky: ['#f4d6b8', '#f6e2cc', '#f3e3d6'], ...LIGHT_INK }, // peach into cream into soft rose: no green in the warm sky
   sunset: { sky: ['#e69a6c', '#c97a6c', '#7a5a72'], ...NIGHT_INK },
 };
 // In dark mode the card does not dim the day's sky (a grey layer over a bright sky looks muddy): it has its own deep sky for each
