@@ -16,6 +16,7 @@ import { LANG, t } from '@/i18n/i18n';
 import { prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
 import { locate } from '@/lib/prayer';
 import { ltr, ltrStart } from '@/theme/ltr';
+import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
@@ -23,6 +24,7 @@ const RADIUS = 26;
 const EDGE = 'rgba(48, 48, 48, 0.62)'; // dark mode: the grey at the very edge of the card (the vignette); lower the 0.62 for a lighter one
 
 export function PrayerCard() {
+  const k = useSkin();
   const [view, setView] = useState<PrayerView>(prayerView);
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
