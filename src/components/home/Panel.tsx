@@ -10,17 +10,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { GlassBack } from '@/components/home/Glass';
 import { useSkin } from '@/theme/homeSkin';
-import { useTheme } from '@/theme/theme';
 
 type Props = { tone?: 'surface' | 'soft' | 'done'; raised?: boolean; style?: StyleProp<ViewStyle>; children?: ReactNode };
 
 export function Panel({ tone, raised, style, children }: Props) {
   const k = useSkin();
-  const { isDark } = useTheme();
   const radius = StyleSheet.flatten(style)?.borderRadius ?? 20;
 
-  // at night a raised panel is the same lit glass as Home's cards (gradient, layered shadow, no outline)
-  if (raised && isDark && tone !== 'done') {
+  // a raised panel (not a finished one) is the same lit glass as Home's cards (gradient, layered shadow, no outline)
+  if (raised && tone !== 'done') {
     const r = typeof radius === 'number' ? radius : 20;
     return (
       <View style={[style, { backgroundColor: k.glass, borderCurve: 'continuous', boxShadow: k.cardShadow }]}>

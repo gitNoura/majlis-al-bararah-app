@@ -45,14 +45,14 @@ export type HomePalette = {
 };
 
 const light: HomePalette = {
-  screen: '#f6f8f5',
+  screen: '#f4f5f3',
   card: '#ffffff',
   cardLine: 'rgba(20, 50, 38, 0.08)',
   well: '#eef2ee',
   ink: '#14261e',
   meta: '#5d6d64',
-  forest: '#173f32',
-  forestInk: '#fffdf5',
+  forest: '#094A3D', // the green of Home's buttons (goBg)
+  forestInk: '#ffffff',
   forestSoft: 'rgba(255, 253, 245, 0.72)',
   forestLine: 'rgba(255, 253, 245, 0.22)',
   lime: '#fffdf5',
@@ -74,7 +74,7 @@ const light: HomePalette = {
   tileInk: '#173f32',
   mint: '#eff4f2',
   mintLine: 'rgba(31, 90, 69, 0.22)',
-  leaf: '#1f5a45',
+  leaf: '#094A3D',
   amber: '#9a6a14',
   sand: '#f8f1df',
   sandLine: 'rgba(154, 106, 20, 0.28)',
@@ -149,5 +149,6 @@ export function HifdhTint({ children }: { children: ReactNode }) {
 export function useHome(): HomePalette {
   const isDark = useTheme().isDark;
   const tint = useContext(HifdhTintContext);
-  return isDark ? dark : tint ? { ...light, ...hifdhLight } : light;
+  void tint; // (the neutral Hifdh look is now every page's light look)
+  return isDark ? dark : { ...light, ...hifdhLight };
 }

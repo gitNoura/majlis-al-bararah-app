@@ -200,5 +200,6 @@ const hifdhLight: Partial<HomeSkin> = {
 export const useSkin = (): HomeSkin => {
   const isDark = useTheme().isDark;
   const tint = useContext(HifdhTintContext);
-  return isDark ? dark : tint ? { ...light, ...hifdhLight } : light;
+  void tint; // (the neutral Hifdh look is now every page's light look)
+  return isDark ? dark : { ...light, ...hifdhLight };
 };
