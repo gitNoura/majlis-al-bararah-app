@@ -16,7 +16,10 @@ import { useTheme } from '@/theme/theme';
 // the Home screen's BlurTargetView (Android): what the glass blurs. null elsewhere.
 export const GlassTarget = createContext<RefObject<View | null> | null>(null);
 
-const LIQUID = Platform.OS === 'ios' && isLiquidGlassAvailable();
+// iOS 26's native Liquid Glass has no intensity or opacity control (only style, tint and colour scheme), so it can't be calmed down:
+// it is off, and iOS uses the same tunable BlurView glass as the rest. Set this to true to bring the system glass back.
+const USE_LIQUID_GLASS = false;
+const LIQUID = USE_LIQUID_GLASS && Platform.OS === 'ios' && isLiquidGlassAvailable();
 
 // `tint`: a soft colour inside the glass (two colours: the lit top corner, then clear), drawn over the fill and sheen so the colour shows
 type Props = { radius?: number; intensity?: number; tint?: readonly [string, string]; style?: StyleProp<ViewStyle>; children?: ReactNode };
