@@ -106,7 +106,7 @@ const light: HomeSkin = {
   tabBar: '#ffffff',
   glassTrack: 'rgba(9, 74, 61, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
-  well: '#eeeeea', // a neutral off-white, the page's own: no tint
+  well: '#e3e3e0', // a clean neutral grey: no tint
   mark: '#2e3230',
   markSoft: '#b4b7b3',
   hue: '#2e3230', // the progress bars and today's activity bar: a neutral charcoal in light mode, no green

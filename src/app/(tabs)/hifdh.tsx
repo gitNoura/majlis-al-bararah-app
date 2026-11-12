@@ -52,7 +52,6 @@ function openQuran(mode: 'listen' | 'recite', row: Row | null) {
 function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; seg: Seg; setSeg: (s: Seg) => void; setup: Setup; open: (s: Setup) => void; exit: () => void }) {
   const insets = useSafeAreaInsets();
   const k = useSkin();
-  const { isDark } = useTheme();
   useHif(); // subscribing here redraws the whole screen when `rev` changes
 
   if (screen === 'pace') return <View style={{ flex: 1, paddingBottom: TAB_BAR_H + insets.bottom }}><PlanSetup type={setup.type} id={setup.id} onExit={exit} /></View>;
@@ -65,7 +64,7 @@ function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; s
         <Txt {...T.greeting} size={26} lineHeight={34} color={k.ink} numberOfLines={1}>
           {HIF.title()}
         </Txt>
-        <View style={styles.tabs} accessibilityRole="tablist">
+        <View style={[styles.tabs, { backgroundColor: k.well }]} accessibilityRole="tablist">
           {(
             [
               ['today', HIF.segToday()],
@@ -73,8 +72,8 @@ function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; s
               ['progress', HIF.progress()],
             ] as [Seg, string][]
           ).map(([v, label]) => (
-            <Pressable key={v} onPress={() => setSeg(v)} accessibilityRole="tab" accessibilityState={{ selected: seg === v }} style={[styles.tab, { backgroundColor: seg === v ? k.fill : 'transparent' }]}>
-              <Txt {...T.button} size={14} weight={seg === v ? 700 : 500} color={seg === v ? (isDark ? k.buttonInk : k.goInk) : k.meta}>
+            <Pressable key={v} onPress={() => setSeg(v)} accessibilityRole="tab" accessibilityState={{ selected: seg === v }} style={[styles.tab, seg === v && { backgroundColor: k.glass, boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.14)' }]}>
+              <Txt {...T.button} size={14} weight={seg === v ? 700 : 500} color={seg === v ? k.ink : k.meta}>
                 {label}
               </Txt>
             </Pressable>
@@ -162,6 +161,6 @@ function HifdhScreen() {
 }
 
 const styles = StyleSheet.create({
-  tabs: { flexDirection: 'row', gap: 6 },
-  tab: { flex: 1, minHeight: 38, borderRadius: 19, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
+  tabs: { flexDirection: 'row', borderRadius: 16, borderCurve: 'continuous', padding: 3 },
+  tab: { flex: 1, minHeight: 38, borderRadius: 13, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
 });
