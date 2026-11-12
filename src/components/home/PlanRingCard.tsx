@@ -22,13 +22,13 @@ export function PlanRingCard({ label, title, pace, foot, percent, onPress, a11y 
       <Txt size={12} weight={700} color={k.meta} style={ltrStart()}>
         {label}
       </Txt>
-      <Txt size={20} weight={800} lineHeight={28} color={k.pageInk} numberOfLines={2} style={ltrStart()}>
+      <Txt size={18} weight={700} lineHeight={26} color={k.pageInk} numberOfLines={2} style={ltrStart()}>
         {title}
       </Txt>
       <Txt size={12} weight={500} color={k.meta} numberOfLines={2} style={ltrStart()}>
         {pace}
       </Txt>
-      <Txt size={13} weight={700} color={k.pageInk} numberOfLines={2} style={[ltrStart(), styles.foot]}>
+      <Txt size={13} weight={600} color={k.pageInk} numberOfLines={2} style={[ltrStart(), styles.foot]}>
         {foot}
       </Txt>
     </View>

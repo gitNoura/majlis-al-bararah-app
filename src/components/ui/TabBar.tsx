@@ -28,7 +28,7 @@ export function TabBar({ tabs, hidden }: { tabs: TabItem[]; hidden?: boolean }) 
   if (hidden) return null;
   return (
     <View style={[styles.wrap, { height: TAB_BAR_H + insets.bottom, paddingBottom: Math.max(insets.bottom, 8) }]} pointerEvents="box-none">
-      <Glass radius={32} style={styles.bar}>
+      <Glass radius={32} style={[styles.bar, { backgroundColor: k.tabBar }]}>
         {tabs.map((tab) => {
           const color = tab.focused ? k.pageInk : k.meta; // the chosen tab: the page's dark ink on the white pill, no colour
           return (

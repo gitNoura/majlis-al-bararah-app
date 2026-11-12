@@ -22,7 +22,7 @@ export function HomeRing({ percent, size = 88 }: { percent: number; size?: numbe
   const arc = useAnimatedProps(() => ({ strokeDashoffset: CIRC * (1 - progress.get()) }));
 
   const layer = (width: number, opacity: number, key: string) => (
-    <AnimatedCircle key={key} cx={48} cy={48} r={R} stroke={k.hue} strokeOpacity={opacity} strokeWidth={width} fill="none" strokeLinecap="round" strokeDasharray={CIRC} animatedProps={arc} transform="rotate(-90 48 48)" />
+    <AnimatedCircle key={key} cx={48} cy={48} r={R} stroke={k.vivid} strokeOpacity={opacity} strokeWidth={width} fill="none" strokeLinecap="round" strokeDasharray={CIRC} animatedProps={arc} transform="rotate(-90 48 48)" />
   );
 
   return (
@@ -32,7 +32,7 @@ export function HomeRing({ percent, size = 88 }: { percent: number; size?: numbe
         {pct > 0 && [layer(17, 0.07, 'g2'), layer(12, 0.13, 'g1'), layer(7, 1, 'arc')]}
       </Svg>
       <View style={styles.inside} pointerEvents="none">
-        <Txt size={size * 0.22} weight={800} color={k.pageInk}>
+        <Txt size={size * 0.2} weight={800} color={k.pageInk}>
           {`${pct}%`}
         </Txt>
       </View>

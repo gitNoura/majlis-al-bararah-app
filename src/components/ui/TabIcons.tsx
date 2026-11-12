@@ -31,12 +31,12 @@ export const TabQuranIcon = (p: Props) => (
   </Frame>
 );
 
-// Memorize: a sparkle (a bright four-point star and a small one)
-const STAR = 'M10.5 5c.6 4.4 2.5 6.4 7 7-4.5.6-6.4 2.6-7 7-.6-4.4-2.5-6.4-7-7 4.5-.6 6.4-2.6 7-7Z';
+// Memorize: a plan (a clipboard with its checklist)
 export const TabHifdhIcon = (p: Props) => (
-  <Frame {...p} fill={(f) => <Path {...f} stroke="none" d={STAR} />}>
-    <Path d={STAR} />
-    <Path d="M18.5 3.5v4M16.5 5.5h4" />
+  <Frame {...p} fill={(f) => <Rect {...f} stroke="none" x={4.8} y={4.6} width={14.4} height={16.2} rx={2.4} />}>
+    <Rect x={4.8} y={4.6} width={14.4} height={16.2} rx={2.4} />
+    <Rect x={8.8} y={2.8} width={6.4} height={3.6} rx={1.2} />
+    <Path d="M8.4 11.2h.01M8.4 15.4h.01M11.6 11.2h4M11.6 15.4h4" />
   </Frame>
 );
 
