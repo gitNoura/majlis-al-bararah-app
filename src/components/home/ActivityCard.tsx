@@ -1,24 +1,25 @@
-// HOME, activity this week: a card of the prayer card's family. Its head is the title with «5 of 7» at the end; under it seven
-// tinted day pills in a strip, Monday first, as the prayer card has its five times. Each holds a capsule as tall as the reading of
-// that day (the ayat the wird counted; a day the reader only opened the mushaf or Hifdh is a middle height), a day without
-// activity a short stub. Today is the one dark pill. A day counts when the reader opened the mushaf or Hifdh, or logged the
-// wird (src/lib/activity.js). The capsules draw in once with the rest of Home.
+// HOME, activity this week: open on the page, no box. The title with «3 of 7» at the end, then seven capsules, one per day, Monday
+// first, as tall as the reading of that day (the ayat the wird counted; a day the reader only opened the mushaf or Hifdh is a middle
+// height), a day without activity a short stub, a day still to come a fainter one. A day with activity is the prayer card's yellow.
+// Today's letter is bold with a dot under it. A day counts when the reader opened the mushaf or Hifdh, or logged the wird
+// (src/lib/activity.js). The capsules draw in once with the rest of Home.
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
 import { StyleSheet, View } from 'react-native';
 
 import { Grow } from '@/components/home/Grow';
-import { HomeCard, useCardSky } from '@/components/home/HomeCard';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { LANG } from '@/i18n/i18n';
 import { activityGrid } from '@/lib/dashboard';
+import { useSkin } from '@/theme/homeSkin';
+import { space } from '@/theme/tokens';
 
 const digits = (n: number) => n.toLocaleString('en');
-const BAR = 48; // the height of the tallest capsule
-const STUB = 6;
+const BAR = 56; // the height of the tallest capsule
+const STUB = 8;
 
 export function ActivityCard() {
-  const c = useCardSky();
+  const k = useSkin();
   const week = activityGrid().slice(21, 28); // the current week, Monday first
   const on = week.map((d) => !d.future && d.level > 0);
   const count = on.filter(Boolean).length;
@@ -29,46 +30,45 @@ export function ActivityCard() {
   const height = (i: number) => (week[i].ayat > 0 ? BAR * (0.34 + 0.66 * (week[i].ayat / most)) : BAR * 0.4);
 
   return (
-    <HomeCard>
+    <View style={styles.wrap}>
       <View style={styles.head}>
-        <Txt size={15} weight={700} color={c.ink}>
+        <Txt size={15} weight={700} color={k.ink}>
           {DASH.activity()}
         </Txt>
-        <Txt size={14} weight={700} color={c.ink}>
+        <Txt size={14} weight={700} color={k.ink}>
           {DASH.activityOf7(digits(count))}
         </Txt>
       </View>
-      <View style={styles.strip} accessible accessibilityLabel={`${count}/7`}>
+      <View style={styles.bars} accessible accessibilityLabel={`${count}/7`}>
         {week.map((d, i) => {
           const today = i === todayIndex;
-          const ink = today ? c.hiInk : c.ink;
           return (
-            <View key={d.day} style={[styles.day, { backgroundColor: today ? c.hi : c.pill }]}>
+            <View key={d.day} style={styles.col}>
               <View style={styles.slot}>
                 {on[i] ? (
-                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: ink, opacity: today ? 1 : 0.55 }]} />
+                  <Grow axis="y" to={height(i)} delay={200 + i * 60} style={[styles.bar, { backgroundColor: k.yellow, boxShadow: k.yellowShadow }]} />
                 ) : (
-                  <View style={[styles.bar, { height: STUB, backgroundColor: today ? c.hiInk : c.track, opacity: d.future ? 0.5 : 1 }]} />
+                  <View style={[styles.bar, { height: STUB, backgroundColor: k.pillTrack, opacity: d.future ? 0.5 : 1 }]} />
                 )}
               </View>
-              <Txt size={11} weight={today ? 700 : 500} color={today ? c.hiInk : c.soft} center>
+              <Txt size={12} weight={today ? 800 : 500} color={today ? k.ink : k.meta} center>
                 {letter(d.day)}
               </Txt>
+              <View style={[styles.dot, { backgroundColor: today ? k.ink : 'transparent' }]} />
             </View>
           );
         })}
       </View>
-      <Txt size={12} weight={500} color={c.soft}>
-        {DASH.activityCaption()}
-      </Txt>
-    </HomeCard>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrap: { gap: space.sm, paddingHorizontal: space.xs },
   head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  strip: { flexDirection: 'row', gap: 4 },
-  day: { flex: 1, borderRadius: 10, paddingVertical: 6, alignItems: 'center', gap: 4 },
+  bars: { flexDirection: 'row', gap: space.xs },
+  col: { flex: 1, alignItems: 'center', gap: space.xs },
   slot: { height: BAR, justifyContent: 'flex-end', alignItems: 'center' },
-  bar: { width: 12, borderRadius: 6 },
+  bar: { width: 18, borderRadius: 9 },
+  dot: { width: 5, height: 5, borderRadius: 3 },
 });

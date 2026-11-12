@@ -5,9 +5,9 @@
 //   4 the hadith of the reader, as a quiet note                       5 activity (this week), the last
 //   (the adhkar and ahadith libraries are the Library tab)
 // The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a quiet neutral page at the app's everyday sizes (12 to 26),
-// one deep forest, and a single fresher green that only ever marks "where you are now". Four cards of ONE family (HomeCard):
-// the prayer card wears the sky of the moment; Reading, Memorization and Activity wear the same card (the same radius, shadow
-// and small tinted pills, one dark pill for what is current) in the page's own calm green. The hadith closes the page as a quiet note. The one moment of motion is the marks drawing themselves in
+// one deep forest, and the prayer card's cream-yellow as the one highlight (Continue, the plans' bars, the week's capsules). The
+// prayer card is the one card and the only thing that changes with the day (its sky). Everything under it sits open on the page,
+// in the page's one font: Reading, the two plans (the prayer card's small tinted pills), the hadith, then Activity. The one moment of motion is the marks drawing themselves in
 // (Grow). Each section reads the saved state when it draws, so Home redraws every time it comes into view. It also keeps
 // one behaviour of the old home screen: after a change of narration the app opens again, and must land on the Quran tab
 // at the same place, not on Home.

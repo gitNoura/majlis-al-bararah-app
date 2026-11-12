@@ -1,14 +1,12 @@
-// HOME, reading: a card of the prayer card's family. Its head is the surah being read (in Amiri in Arabic) with «Reading» over
-// it and the khatma's percentage at the end, as the prayer card has the next prayer and the time left; under it the same pair
-// of pills: the page and juz (tinted), and the one dark pill «Continue reading» with an arrow. A tap anywhere opens the
-// Quran at the marker.
+// HOME, reading: open on the page, no box. «Reading» and the surah's name (in the page's one font) with the khatma's percentage at
+// the end, as the prayer card has the next prayer and the time left; the page, hizb and juz as plain words under it (not a pill);
+// then «Continue reading», the one yellow pill (the prayer card's next-prayer yellow). A tap anywhere opens the Quran at the marker.
 'use no memo'; // reads saved state (the marker) when it draws, which the React Compiler cannot see change
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { HomeCard, useCardSky } from '@/components/home/HomeCard';
 import { placeOf } from '@/components/quran/QuranHeader';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
@@ -17,6 +15,8 @@ import { isEnglish, isFrench, LANG } from '@/i18n/i18n';
 import { surahsOn } from '@/lib/boxes';
 import { readingView } from '@/lib/dashboard';
 import { SURAHS } from '@/lib/quran';
+import { useSkin } from '@/theme/homeSkin';
+import { space } from '@/theme/tokens';
 
 const digits = (n: number) => n.toLocaleString('en');
 
@@ -37,7 +37,7 @@ function Arrow({ color }: { color: string }) {
 }
 
 export function ReadingCard() {
-  const c = useCardSky();
+  const k = useSkin();
   const r = readingView();
   const where = placeOf(r.page);
   // the page, then the hizb and juz
@@ -50,40 +50,36 @@ export function ReadingCard() {
   };
 
   return (
-    <HomeCard onPress={open} label={`${DASH.reading()} ${action}`}>
+    <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={`${DASH.reading()} ${action}`} style={({ pressed }) => [styles.wrap, pressed && { opacity: 0.85 }]}>
       <View style={styles.head}>
         <View style={styles.words}>
-          <Txt size={12} weight={700} color={c.soft}>
+          <Txt size={12} weight={700} color={k.meta}>
             {DASH.reading()}
           </Txt>
-          <Txt serif={LANG === 'ar'} size={21} weight={800} lineHeight={LANG === 'ar' ? 34 : 28} color={c.ink} numberOfLines={1}>
+          <Txt size={24} weight={800} lineHeight={34} color={k.ink} numberOfLines={1}>
             {surahLine(r.page)}
           </Txt>
-        </View>
-        <Txt size={14} weight={700} color={c.ink}>
-          {`${digits(r.percent)}%`}
-        </Txt>
-      </View>
-      <View style={styles.buttons}>
-        <View style={[styles.btn, { backgroundColor: c.pill }]}>
-          <Txt size={12} weight={500} color={c.soft} numberOfLines={1}>
+          <Txt size={12} weight={500} color={k.meta} numberOfLines={1}>
             {sub}
           </Txt>
         </View>
-        <View style={[styles.btn, { backgroundColor: c.hi }]}>
-          <Txt size={13} weight={700} color={c.hiInk} numberOfLines={1}>
-            {action}
-          </Txt>
-          <Arrow color={c.hiInk} />
-        </View>
+        <Txt size={14} weight={700} color={k.ink}>
+          {`${digits(r.percent)}%`}
+        </Txt>
       </View>
-    </HomeCard>
+      <View style={[styles.go, { backgroundColor: k.yellow }]}>
+        <Txt size={14} weight={700} color={k.yellowInk}>
+          {action}
+        </Txt>
+        <Arrow color={k.yellowInk} />
+      </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
-  words: { flex: 1 },
-  buttons: { flexDirection: 'row', gap: 8 },
-  btn: { flex: 1, minHeight: 34, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 12 },
+  wrap: { gap: space.cozy, paddingHorizontal: space.xs },
+  head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: space.md },
+  words: { flex: 1, gap: 1 },
+  go: { minHeight: 42, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, paddingHorizontal: space.md },
 });
