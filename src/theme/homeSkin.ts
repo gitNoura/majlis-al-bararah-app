@@ -50,6 +50,8 @@ export type HomeSkin = {
   glassShadow: string; // and their soft shadow
   glassTrack: string; // an empty progress bar inside a glass card
   glassBtn: string; // the round arrow button inside a glass card
+  mark: string; // Home's progress bars and today's activity bar: a neutral charcoal (parchment at night), no green
+  markSoft: string; // the other days' activity bars
 };
 
 const PAGE = { pageInk: '#173f32', pageLine: 'rgba(23, 63, 50, 0.32)', pageBead: 'rgba(23, 63, 50, 0.14)', pageButton: '#ffffff' };
@@ -86,6 +88,8 @@ const light: HomeSkin = {
   glassShadow: 'rgba(20, 50, 38, 0.10)',
   glassTrack: 'rgba(23, 63, 50, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
+  mark: '#2e3230',
+  markSoft: '#b4b7b3',
   ...PAGE,
 };
 
@@ -125,6 +129,8 @@ const dark: HomeSkin = {
   glassShadow: 'rgba(0, 0, 0, 0.35)',
   glassTrack: 'rgba(255, 255, 255, 0.14)',
   glassBtn: 'rgba(255, 255, 255, 0.12)',
+  mark: '#e9dfbd',
+  markSoft: '#5c6660',
   goBg: '#343635',
   goInk: '#ece4c8',
   buttonInk: '#1d1d1d',
