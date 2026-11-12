@@ -235,6 +235,18 @@ function Chip({ on, text, onPress }: { on: boolean; text: string; onPress: () =>
   );
 }
 
+// «Select all» / «Clear»: a plain text button, no pill or border
+function SelectAll({ on, onPress }: { on: boolean; onPress: () => void }) {
+  const h = useHome();
+  return (
+    <Pressable onPress={onPress} hitSlop={10} accessibilityRole="button">
+      <Txt size={14} weight={700} color={h.forest}>
+        {on ? HIF.clearAll() : HIF.selectAll()}
+      </Txt>
+    </Pressable>
+  );
+}
+
 // The weekdays as a list, Monday first, one row each with a tick box; a tap turns a day on or off
 function DayList({ days, onToggle }: { days: number[]; onToggle: (d: number) => void }) {
   const h = useHome();
@@ -454,7 +466,6 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
           <Opt
             on={pace.scopeSel === 'part'}
             text={HIF.scopeSpecific()}
-            sub={HIF.scopeSpecificSub()}
             onPress={() => patch({ scopeSel: 'part', range: core.bitsToRanges(pace.bits).length ? core.bitsToRanges(pace.bits) : null })}
           />
         </>
@@ -468,7 +479,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
                 {pace.range ? rangeLabel(pace.range, pace.type) : HIF.scopeSpecificSub()}
               </Txt>
             </Txt>
-            {revise && <Chip on={allOn} text={allOn ? HIF.clearAll() : HIF.selectAll()} onPress={() => pickAll(!allOn)} />}
+            {revise && <SelectAll on={allOn} onPress={() => pickAll(!allOn)} />}
           </View>
           <MemorizedPicker
             bits={pace.bits}
@@ -556,7 +567,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
         <Txt size={14} color={c.meta}>
           {HIF.selectedDays(pace.days.length)}
         </Txt>
-        <Chip on={pace.days.length === 7} text={pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll()} onPress={() => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] })} />
+        <SelectAll on={pace.days.length === 7} onPress={() => patch({ days: pace.days.length === 7 ? [] : [...ALL_DAYS] })} />
       </View>
       <Card flush>
         <DayList days={pace.days} onToggle={(d) => patch({ days: pace.days.includes(d) ? pace.days.filter((x) => x !== d) : [...pace.days, d].sort() })} />
@@ -745,7 +756,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
                 <Txt size={14} color={c.meta}>
                   {HIF.selectedDays(pace.days.length)}
                 </Txt>
-                <Chip on={pace.days.length === 7} text={pace.days.length === 7 ? HIF.clearAll() : HIF.selectAll()} onPress={toggleDays} />
+                <SelectAll on={pace.days.length === 7} onPress={toggleDays} />
               </View>
               <DayChips days={pace.days} onToggle={(d) => patch({ days: pace.days.includes(d) ? pace.days.filter((x) => x !== d) : [...pace.days, d].sort() })} />
               {aboutLine()}
@@ -774,12 +785,11 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
       return {
         body: (
           <View style={{ gap: 14 }}>
-            <Question title={HIF.whatToDo()} sub={HIF.whatToDoSub()} />
-            <Opt on={!revise} text={HIF.memorizeOpt()} sub={HIF.memorizeOptSub()} onPress={() => patch({ type: 'memorize', range: null, scopeSel: null, bits: emptyBits() })} />
+            <Question title={HIF.whatToDo()} />
+            <Opt on={!revise} text={HIF.memorizeOpt()} onPress={() => patch({ type: 'memorize', range: null, scopeSel: null, bits: emptyBits() })} />
             <Opt
               on={revise}
               text={HIF.reviseOpt()}
-              sub={HIF.reviseOptSub()}
               onPress={() => patch({ type: 'revise', range: null, scopeSel: null, bits: emptyBits() })}
             />
           </View>
@@ -791,7 +801,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
       return {
         body: (
           <View style={{ gap: 14 }}>
-            <Question title={HIF.scopeQuestion(revise)} sub={HIF.scopeSub(revise)} />
+            <Question title={HIF.scopeQuestion(revise)} />
             {scopeBlock()}
           </View>
         ),
@@ -802,7 +812,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
       return {
         body: (
           <View style={{ gap: 14 }}>
-            <Question title={amountTitle} sub={HIF.amountSub()} />
+            <Question title={amountTitle} />
             {amountBlock()}
             {toDate()}
           </View>

@@ -1,15 +1,14 @@
-// HOME, activity this week: on the page itself, no box. The title and «3 of 7» at the end, then seven bars, one per day,
-// Monday first, as tall as the reading of that day (the ayat the
-// wird counted; a day the reader only opened the mushaf or Hifdh is a middle height, a day without activity a short stub, a day still to
-// come a fainter one). The bars are buttons: a tap picks a day (today is picked
-// first) and the line under the bars tells that day: its name and its ayat. The picked day's name is bold. A day counts when the reader opened the mushaf or Hifdh, or logged the wird (src/lib/activity.js).
-// Under that line, when the streak is two days or more, one quiet line says it: the flame and «5-day streak».
+// HOME, activity this week: a glass card like the others. Top: the title and «3 of 7». Middle: seven bars, one per day,
+// Monday first, as tall as the reading of that day (a day the reader only opened the mushaf or Hifdh is a middle height, a day without
+// activity a short stub, a day still to come a fainter one). The bars are buttons: a tap picks a day (today first). Bottom: one row,
+// the picked day and its ayat on one side, the streak (two days or more) on the other.
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { FlameIcon } from '@/components/icons';
+import { Glass } from '@/components/home/Glass';
 import { Grow } from '@/components/home/Grow';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
@@ -45,12 +44,12 @@ export function ActivityCard() {
   };
 
   return (
-    <View style={styles.wrap}>
+    <Glass gradient style={styles.card}>
       <View style={styles.head}>
-        <Txt size={15} weight={700} color={k.ink}>
+        <Txt size={16} weight={800} color={k.ink}>
           {DASH.activity()}
         </Txt>
-        <Txt size={14} weight={700} color={k.ink}>
+        <Txt size={14} weight={700} color={k.meta}>
           {DASH.activityOf7(digits(count))}
         </Txt>
       </View>
@@ -75,28 +74,34 @@ export function ActivityCard() {
         })}
       </View>
 
-      {chosen && (
-        <Txt size={13.5} weight={600} color={k.meta} center>
-          {dayName(chosen.day, 'long')} · {chosen.ayat > 0 ? DASH.activityAyat(chosen.ayat) : on[sel] ? DASH.activityVisit() : DASH.activityNone()}
-        </Txt>
-      )}
-
-      {run > 1 && (
-        <View style={styles.streak}>
-          <FlameIcon color="#e8903a" size={14} />
-          <Txt size={13} weight={700} color={k.ink}>
-            {DASH.activityStreak(run)}
-          </Txt>
+      {(chosen || run > 1) && (
+        <View style={styles.foot}>
+          {chosen ? (
+            <Txt size={13.5} weight={600} color={k.meta} style={{ flex: 1 }}>
+              {dayName(chosen.day, 'long')} · {chosen.ayat > 0 ? DASH.activityAyat(chosen.ayat) : on[sel] ? DASH.activityVisit() : DASH.activityNone()}
+            </Txt>
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
+          {run > 1 && (
+            <View style={styles.streak}>
+              <FlameIcon color="#e8903a" size={14} />
+              <Txt size={13} weight={700} color={k.ink}>
+                {DASH.activityStreak(run)}
+              </Txt>
+            </View>
+          )}
         </View>
       )}
-    </View>
+    </Glass>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space.md, paddingHorizontal: space.xs, paddingVertical: space.sm },
+  card: { padding: space.md, gap: space.md },
   head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  streak: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 },
+  foot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
+  streak: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   bars: { flexDirection: 'row', gap: space.xs },
   col: { flex: 1, alignItems: 'center', gap: 8 },
   slot: { height: BAR, justifyContent: 'flex-end', alignItems: 'center' },

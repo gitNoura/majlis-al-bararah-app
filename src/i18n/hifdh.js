@@ -5,7 +5,7 @@ import { L } from './i18n.js';
 
 export const HIF = {
   // titles
-  title: () => L('الحفظ', 'Memorization', 'Mémorisation'),
+  title: () => L('الخطط', 'Plans', 'Plans'),
   segToday: () => L('اليوم', 'Today', 'Aujourd’hui'),
   segPlan: () => L('الخطة', 'Plan', 'Plan'),
   recitePortion: () => L('سمّع هذا الورد', 'Recite this portion', 'Réciter cette portion'),

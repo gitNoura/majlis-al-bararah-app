@@ -42,7 +42,7 @@ export const HOME = {
   // the bar along the bottom
   tabHome: () => L('الرئيسية', 'Home', 'Accueil'),
   tabQuran: () => L('القرآن', 'Quran', 'Coran'),
-  tabMemorize: () => L('الحفظ', 'Memorize', 'Mémoriser'),
+  tabMemorize: () => L('الخطط', 'Plans', 'Plans'),
   profile: () => L('حسابي', 'My account', 'Mon compte'),
   tabSettings: () => L('الإعدادات', 'Settings', 'Paramètres'),
   coming: () => L('هذا القسم في الطريق إن شاء الله.', 'This section is coming soon, in sha Allah.', 'Cette section arrive bientôt, in sha Allah.'),
