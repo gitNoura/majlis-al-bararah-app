@@ -55,13 +55,16 @@ function initPace(type: PlanType | null, id: string | null): Pace {
     const v = core.versionAt(existing, today);
     const weekly = existing.period === 'week';
     const perWeek = weekly ? v.amount : Math.round(core.weeklyTotal(v) * 100) / 100; // the question is «how much a week»
+    // a revision plan always names what it covers: an old «everything I know» one opens as what the ledger holds now
+    const ledger: number[][] = plan.get().ledger;
+    const range: number[][] | null = existing.range ?? (existing.type === 'revise' && ledger.length ? ledger.map((r) => [...r]) : null);
     return {
       id: existing.id,
       type: existing.type,
       period: 'day', // plans are daily: today's plan follows the days you chose, not the week
-      range: existing.range,
-      scopeSel: existing.range ? 'part' : 'all',
-      bits: Array.from(core.rangesToBits(existing.range || [], plan.units().N)) as number[],
+      range,
+      scopeSel: range ? 'part' : 'all',
+      bits: Array.from(core.rangesToBits(range || [], plan.units().N)) as number[],
       unit: v.unit,
       divide: core.isBlock(v) ? v.divide : null,
       amtText: String(perWeek),
@@ -384,8 +387,11 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   // a new amount, unit or set of days starts the split over: the even share is the default
   const patch = (next: Partial<Pace>) => setPace((p) => ({ ...p, ...(('amtText' in next || 'unit' in next || 'divide' in next || 'days' in next || 'mode' in next) && !('perDay' in next) ? { perDay: null } : {}), ...next }));
 
-  const known = plan.memorizedCount() > 0;
   const revise = pace.type === 'revise';
+  // A revision plan always picks what it covers (the reader may know it from outside the app, so nothing has to be in the
+  // ledger); a memorizing one may take the whole Quran or pick.
+  const picking = revise || pace.scopeSel === 'part';
+  const allOn = pace.bits.every((b) => b === 1);
   const editing = pace.id != null;
   const keys = stepKeys(pace);
   const key = keys[pace.step];
@@ -402,7 +408,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
   const { unit, amount, perDay, days, divide, tooBig } = calc(pace);
   const draft = () => core.draftPlan({ ...pace, unit, amount, days, perDay, divide }, plan.today());
   const finish: string | null = (key === 'summary' || editing) && amount > 0 ? plan.forecast(draft()) : null;
-  const scopeReady = pace.scopeSel === 'all' || (pace.scopeSel === 'part' && pace.bits.some((b) => b === 1));
+  const scopeReady = picking ? pace.bits.some((b) => b === 1) : pace.scopeSel === 'all';
 
   const save = () => {
     if (!days.length) return toast(HIF.pickADay());
@@ -434,36 +440,45 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
 
   // ----- the pieces, shared by the questions and the edit page -----
 
+  // every ayah in or out at once (the picker's «Select all»)
+  const pickAll = (on: boolean) => {
+    const N: number = plan.units().N;
+    patch({ bits: new Array<number>(N).fill(on ? 1 : 0), range: on ? [[0, N]] : null });
+  };
+
   const scopeBlock = () => (
     <View>
-      <Opt
-        on={pace.scopeSel === 'all'}
-        text={rangeLabel(null, revise && known ? 'revise' : 'memorize')}
-        onPress={() => patch({ scopeSel: 'all', range: revise && !known ? [[0, plan.units().N]] : null })} // with nothing memorized, «all» is the whole Quran itself
-      />
-      <Opt
-        on={pace.scopeSel === 'part'}
-        text={HIF.scopeSpecific()}
-        sub={HIF.scopeSpecificSub()}
-        onPress={() => patch({ scopeSel: 'part', range: core.bitsToRanges(pace.bits).length ? core.bitsToRanges(pace.bits) : null })}
-      />
-      {pace.scopeSel === 'part' && (
-        <View style={{ gap: 10, paddingTop: 6 }}>
-          <Txt size={14} color={c.meta}>
-            {pace.range ? `${HIF.covers()}: ` : ''}
-            <Txt size={14} weight={700} color={c.ink}>
-              {pace.range ? rangeLabel(pace.range, pace.type) : HIF.scopeSpecificSub()}
+      {!revise && (
+        <>
+          <Opt on={pace.scopeSel === 'all'} text={rangeLabel(null, 'memorize')} onPress={() => patch({ scopeSel: 'all', range: null })} />
+          <Opt
+            on={pace.scopeSel === 'part'}
+            text={HIF.scopeSpecific()}
+            sub={HIF.scopeSpecificSub()}
+            onPress={() => patch({ scopeSel: 'part', range: core.bitsToRanges(pace.bits).length ? core.bitsToRanges(pace.bits) : null })}
+          />
+        </>
+      )}
+      {picking && (
+        <View style={{ gap: 10, paddingTop: revise ? 0 : 6 }}>
+          <View style={styles.daysHead}>
+            <Txt size={14} color={c.meta} style={{ flex: 1 }}>
+              {pace.range ? `${HIF.covers()}: ` : ''}
+              <Txt size={14} weight={700} color={c.ink}>
+                {pace.range ? rangeLabel(pace.range, pace.type) : HIF.scopeSpecificSub()}
+              </Txt>
             </Txt>
-          </Txt>
-        <MemorizedPicker
-          bits={pace.bits}
-          onSet={(from, to, on) => {
-            const bits = pace.bits.slice();
-            bits.fill(on ? 1 : 0, from, to);
-            const ranges = core.bitsToRanges(bits);
-            patch({ bits, range: ranges.length ? ranges : null });
-          }}
-        />
+            {revise && <Chip on={allOn} text={allOn ? HIF.clearAll() : HIF.selectAll()} onPress={() => pickAll(!allOn)} />}
+          </View>
+          <MemorizedPicker
+            bits={pace.bits}
+            onSet={(from, to, on) => {
+              const bits = pace.bits.slice();
+              bits.fill(on ? 1 : 0, from, to);
+              const ranges = core.bitsToRanges(bits);
+              patch({ bits, range: ranges.length ? ranges : null });
+            }}
+          />
         </View>
       )}
     </View>
@@ -776,7 +791,7 @@ export function PlanSetup({ type, id, onExit }: { type: PlanType | null; id: str
       return {
         body: (
           <View style={{ gap: 14 }}>
-            <Question title={HIF.scopeQuestion(revise)} sub={HIF.scopeSub()} />
+            <Question title={HIF.scopeQuestion(revise)} sub={HIF.scopeSub(revise)} />
             {scopeBlock()}
           </View>
         ),

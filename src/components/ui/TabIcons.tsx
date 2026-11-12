@@ -5,7 +5,7 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 type Props = { color: string; active?: boolean; size?: number };
 
-function Frame({ color, active, size = 24, children, fill }: Props & { children: ReactNode; fill: (props: { fill: string; fillOpacity: number }) => ReactNode }) {
+function Frame({ color, active, size = 24, children, fill }: Props & { children: ReactNode; fill?: (props: { fill: string; fillOpacity: number }) => ReactNode }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
       {children}
@@ -31,12 +31,14 @@ export const TabQuranIcon = (p: Props) => (
   </Frame>
 );
 
-// Memorize: a plan (a clipboard with its checklist)
+// Memorize: a notepad with a pencil writing on it. The pad's right edge is left open where the pencil crosses it.
+const PAD = 'M17.2 14.2v4a2.4 2.4 0 0 1-2.4 2.4H6a2.4 2.4 0 0 1-2.4-2.4V5.8A2.4 2.4 0 0 1 6 3.4h8.8a2.4 2.4 0 0 1 2.4 2.4v.5';
 export const TabHifdhIcon = (p: Props) => (
-  <Frame {...p} fill={(f) => <Rect {...f} stroke="none" x={4.8} y={4.6} width={14.4} height={16.2} rx={2.4} />}>
-    <Rect x={4.8} y={4.6} width={14.4} height={16.2} rx={2.4} />
-    <Rect x={8.8} y={2.8} width={6.4} height={3.6} rx={1.2} />
-    <Path d="M8.4 11.2h.01M8.4 15.4h.01M11.6 11.2h4M11.6 15.4h4" />
+  <Frame {...p}>
+    <Path d={PAD} />
+    <Path d="M7 8.2h4.6M7 11.4h4.6M7 14.6h3M7 17.8h1.6" />
+    <Path d="M21.06 7.07 18.14 5.33 12.77 14.38 12.6 18 15.69 16.12Z" />
+    <Path d="M17.02 7.22 19.94 8.96" />
   </Frame>
 );
 

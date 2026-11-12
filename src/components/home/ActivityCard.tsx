@@ -1,8 +1,9 @@
-// HOME, activity this week: on the page itself, no box. The title (with the streak's flame and number beside it when there is one) and «3 of 7»
-// at the end, then seven bars, one per day, Monday first, as tall as the reading of that day (the ayat the
+// HOME, activity this week: on the page itself, no box. The title and «3 of 7» at the end, then seven bars, one per day,
+// Monday first, as tall as the reading of that day (the ayat the
 // wird counted; a day the reader only opened the mushaf or Hifdh is a middle height, a day without activity a short stub, a day still to
 // come a fainter one). The bars are buttons: a tap picks a day (today is picked
 // first) and the line under the bars tells that day: its name and its ayat. The picked day's name is bold. A day counts when the reader opened the mushaf or Hifdh, or logged the wird (src/lib/activity.js).
+// Under that line, when the streak is two days or more, one quiet line says it: the flame and «5-day streak».
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
@@ -46,19 +47,9 @@ export function ActivityCard() {
   return (
     <View style={styles.wrap}>
       <View style={styles.head}>
-        <View style={styles.title}>
-          <Txt size={15} weight={700} color={k.ink}>
-            {DASH.activity()}
-          </Txt>
-          {run > 1 && (
-            <View style={styles.streak}>
-              <FlameIcon color="#e8903a" size={14} />
-              <Txt size={13} weight={700} color={k.ink}>
-                {digits(run)}
-              </Txt>
-            </View>
-          )}
-        </View>
+        <Txt size={15} weight={700} color={k.ink}>
+          {DASH.activity()}
+        </Txt>
         <Txt size={14} weight={700} color={k.ink}>
           {DASH.activityOf7(digits(count))}
         </Txt>
@@ -89,6 +80,15 @@ export function ActivityCard() {
           {dayName(chosen.day, 'long')} · {chosen.ayat > 0 ? DASH.activityAyat(chosen.ayat) : on[sel] ? DASH.activityVisit() : DASH.activityNone()}
         </Txt>
       )}
+
+      {run > 1 && (
+        <View style={styles.streak}>
+          <FlameIcon color="#e8903a" size={14} />
+          <Txt size={13} weight={700} color={k.ink}>
+            {DASH.activityStreak(run)}
+          </Txt>
+        </View>
+      )}
     </View>
   );
 }
@@ -96,8 +96,7 @@ export function ActivityCard() {
 const styles = StyleSheet.create({
   wrap: { gap: space.md, paddingHorizontal: space.xs, paddingVertical: space.sm },
   head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  title: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  streak: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  streak: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 },
   bars: { flexDirection: 'row', gap: space.xs },
   col: { flex: 1, alignItems: 'center', gap: 8 },
   slot: { height: BAR, justifyContent: 'flex-end', alignItems: 'center' },

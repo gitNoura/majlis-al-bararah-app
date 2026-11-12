@@ -58,12 +58,6 @@ export const HIF = {
   // revision
   reviseHint: () =>
     L('ثبّت ما حفظتَه بخطة مراجعة منتظمة.', 'Keep what you know fresh with a steady revision plan.', 'Consolidez ce que vous savez avec un plan de révision régulier.'),
-  reviseLocked: () =>
-    L(
-      'أضف محفوظك أولاً لتبدأ المراجعة.',
-      'Revision opens once you’ve memorized something.',
-      'La révision s’ouvre dès que vous avez mémorisé quelque chose.',
-    ),
   startRevision: () => L('ابدأ خطة مراجعة', 'Start a revision plan', 'Commencer un plan de révision'),
   noRevision: () => L('لا مراجعة عليك اليوم.', 'No revision planned for today.', 'Pas de révision prévue aujourd’hui.'),
 
@@ -115,14 +109,14 @@ export const HIF = {
   memorizeOptSub: () => L('ما لم تحفظه بعد', 'Ayat you don’t know yet', 'Des versets que vous ne connaissez pas encore'),
   reviseOpt: () => L('مراجعة', 'Revise', 'Réviser'),
   reviseOptSub: () => L('ما حفظتَه من قبل', 'Keep what you know fresh', 'Consolider ce que vous savez'),
-  reviseOptLocked: () =>
-    L('سجّل ما حفظتَه أولًا.', 'Add what you’ve memorized first to unlock this.', 'Ajoutez d’abord ce que vous avez mémorisé.'),
   scopeQuestion: (revise) =>
     revise
       ? L('ماذا تريد أن تراجع؟', 'What will you revise?', 'Que voulez-vous réviser ?')
       : L('ماذا تريد أن تحفظ؟', 'What are you memorizing now?', 'Que mémorisez-vous maintenant ?'),
-  scopeSub: () =>
-    L('القرآن كاملاً أو سور تختارها.', 'The whole Quran, or only the thumun you choose.', 'Tout le Coran, ou seulement les thumun choisis.'),
+  scopeSub: (revise) =>
+    revise
+      ? L('اختر السور أو الأجزاء أو الأثمان التي تريد مراجعتها.', 'Choose the surahs, juz or thumun you want to revise.', 'Choisissez les sourates, juz ou thumun à réviser.')
+      : L('القرآن كاملاً أو سور تختارها.', 'The whole Quran, or only the thumun you choose.', 'Tout le Coran, ou seulement les thumun choisis.'),
   scopeSpecific: () => L('جزء من القرآن', 'Specific surahs', 'Des sourates précises'),
   scopeSpecificSub: () => L('اختر السور أو الأجزاء', 'Choose surahs or juz', 'Choisissez sourates ou juz'),
   nothingToRevise: () => L('لا يوجد ما تراجعه هنا.', 'Nothing to revise in this selection.', 'Rien à réviser dans cette sélection.'),
