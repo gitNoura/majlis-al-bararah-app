@@ -14,7 +14,6 @@ import { HOME } from '@/i18n/home';
 import { t } from '@/i18n/i18n';
 import { prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
 import { locate } from '@/lib/prayer';
-import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
@@ -55,11 +54,10 @@ export function PrayerCard() {
   };
 
   const { isDark } = useTheme();
-  const k = useSkin();
   const phase = view?.phase ?? skyByClock();
   const sky = SKIES[phase];
-  const nextBg = isDark ? k.pageButton : sky.next; // dark mode: the next prayer is the cream-yellow of the Continue reading button
-  const nextInk = isDark ? k.buttonInk : sky.nextIcon; // the card wears the sky of the moment, the same in light and dark mode
+  const nextBg = sky.next; // the next prayer is the same cream-yellow in every sky, light or dark mode
+  const nextInk = sky.nextIcon;
   return (
     // the rounded clip is on the OUTER view and on the sky's own layer: the animated stars and clouds (moving layers)
     // are not cut by the gradient view's own corners on every phone, which showed the card square
