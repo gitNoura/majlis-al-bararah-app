@@ -2,7 +2,7 @@
 // Home's look: a plan is a white panel with a hairline and 20 px corners; the actions sit in one row, and «Modify» is the
 // one filled (pill) button.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
-import { GlassBack } from '@/components/home/Glass';
+import { Panel } from '@/components/home/Panel';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { useHif } from '@/components/hifdh/HifProvider';
@@ -12,7 +12,6 @@ import { HIF } from '@/i18n/hifdh';
 import * as core from '@/lib/hifdh/core';
 import { kindOf, paceText, rangeLabel } from '@/lib/hifdh/labels';
 import * as plan from '@/lib/hifdh/plan';
-import { useHome } from '@/theme/home';
 import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 
@@ -20,7 +19,6 @@ const DANGER = '#b3402f';
 
 export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onAdd: () => void }) {
   const { c } = useTheme();
-  const h = useHome();
   const k = useSkin();
   const { refresh } = useHif(); // also redraws the list whenever `rev` changes
   const plans = plan.get().plans as { id: string; type: string; range: number[][] | null }[];
@@ -49,8 +47,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
       {plans.map((p) => {
         const paused = core.pausedNow(p);
         return (
-          <View key={p.id} style={[styles.plan, { borderWidth: 0 }, paused && { opacity: 0.75 }]}>
-            <GlassBack radius={20} />
+          <Panel raised key={p.id} style={[styles.plan, paused && { opacity: 0.75 }]}>
             <View style={styles.kindRow}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Txt size={13} weight={700} color={k.meta}>
@@ -65,8 +62,8 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
               {paceText(p)}
             </Txt>
             <View style={styles.actions}>
-              <Pressable onPress={() => onEdit(p.id)} accessibilityRole="button" style={[styles.modify, { backgroundColor: h.forest }]}>
-                <Txt size={15} weight={700} color={h.forestInk}>
+              <Pressable onPress={() => onEdit(p.id)} accessibilityRole="button" style={[styles.modify, { backgroundColor: k.goBg }]}>
+                <Txt size={15} weight={700} color={k.goInk}>
                   {HIF.modify()}
                 </Txt>
               </Pressable>
@@ -89,7 +86,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
                 </Txt>
               </Pressable>
             </View>
-          </View>
+          </Panel>
         );
       })}
 
@@ -101,7 +98,7 @@ export function PlansList({ onEdit, onAdd }: { onEdit: (id: string) => void; onA
 }
 
 const styles = StyleSheet.create({
-  plan: { gap: 14, padding: 16, borderRadius: 20, borderCurve: 'continuous', borderWidth: StyleSheet.hairlineWidth },
+  plan: { gap: 14, padding: 16, borderRadius: 20, borderCurve: 'continuous' },
   kindRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 18 },
   modify: { minHeight: 40, paddingHorizontal: 22, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },

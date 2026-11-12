@@ -1,7 +1,7 @@
 // The parts of a settings page, as in the phone's own apps (the app's settings, the Quran's): groups of
 // rows on white cards under their names, a row with an icon, its name and a line under it, and at its
 // end a switch, a mark, a tag or an arrow; a row of choices side by side (day / night / device...).
-import { GlassBack } from '@/components/home/Glass';
+import { Panel } from '@/components/home/Panel';
 import { type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -21,10 +21,9 @@ export function Section({ title, note, children }: { title: string; note?: strin
       <Txt size={13.5} weight={700} color={c.meta} style={styles.sectionTitle}>
         {title}
       </Txt>
-      <View style={[styles.card, { borderWidth: 0 }]}>
-        <GlassBack radius={20} />
+      <Panel raised style={styles.card}>
         {children}
-      </View>
+      </Panel>
       {!!note && (
         <Txt size={12.5} color={c.meta} style={styles.note}>
           {note}
@@ -114,7 +113,7 @@ export function Tag({ label }: { label: string }) {
 const styles = StyleSheet.create({
   section: { marginTop: 18 },
   sectionTitle: { marginBottom: 8, marginHorizontal: 6 },
-  card: { borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, overflow: 'hidden' },
+  card: { borderRadius: 20, borderCurve: 'continuous', paddingHorizontal: 14, overflow: 'hidden' },
   note: { marginTop: 8, marginHorizontal: 6 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, minHeight: 58 },
   icon: { width: 36, height: 36, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },

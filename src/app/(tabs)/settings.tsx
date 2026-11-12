@@ -17,7 +17,8 @@ import { Avatar } from '@/components/Avatar';
 import { CheckIcon } from '@/components/icons';
 import { Toggle } from '@/components/Toggle';
 import { Txt } from '@/components/Txt';
-import { Card, Row, SegmentedControl } from '@/components/ui';
+import { Panel } from '@/components/home/Panel';
+import { Row, SegmentedControl } from '@/components/ui';
 import { ACCOUNT } from '@/i18n/account';
 import { LANG, isEnglish, isFrench, t } from '@/i18n/i18n';
 import { READER } from '@/i18n/reader';
@@ -29,6 +30,8 @@ import { setNightPage, useNightPage } from '@/lib/nightPage';
 import { chooseCity, cityChoices, locate, place, placeName } from '@/lib/prayer';
 import { HAFS, setRiwaya } from '@/lib/riwaya';
 import { setSource, SOURCES, tafsirSources } from '@/lib/sources';
+import { useSkin } from '@/theme/homeSkin';
+import { T } from '@/theme/homeType';
 import { useTheme, type ThemeMode } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
@@ -46,7 +49,9 @@ function Group({ title, note, children }: { title: string; note?: string; childr
       <Txt size={13} weight={700} color={c.meta}>
         {title}
       </Txt>
-      <Card style={{ paddingVertical: space.xs, gap: 0 }}>{children}</Card>
+      <Panel raised style={styles.group}>
+        {children}
+      </Panel>
       {!!note && (
         <Txt size={12.5} color={c.meta}>
           {note}
@@ -58,6 +63,7 @@ function Group({ title, note, children }: { title: string; note?: string; childr
 
 export default function SettingsTab() {
   const { c, isDark, mode, setMode, quranMode, setQuranMode } = useTheme();
+  const k = useSkin();
   const insets = useSafeAreaInsets();
   const account = useAccount();
   const member = account.profile ?? account.cached;
@@ -114,7 +120,7 @@ export default function SettingsTab() {
         contentContainerStyle={{ padding: space.md, paddingTop: insets.top + space.lg, paddingBottom: TAB_BAR_H + insets.bottom + space.md, gap: space.lg }}
         keyboardShouldPersistTaps="handled"
       >
-        <Txt size={30} weight={800} lineHeight={40} color={c.ink}>
+        <Txt {...T.greeting} size={26} lineHeight={34} color={k.ink}>
           {SETTINGS.title()}
         </Txt>
 
@@ -247,6 +253,7 @@ export default function SettingsTab() {
 }
 
 const styles = StyleSheet.create({
+  group: { paddingHorizontal: space.md, paddingVertical: space.xs, borderRadius: 20, borderCurve: 'continuous', overflow: 'hidden' },
   block: { gap: space.sm, paddingVertical: space.sm + 4 },
   between: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   city: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 4 },

@@ -79,7 +79,7 @@ export function Section({ title, titleColor, tone, children, style, first, plain
   return (
     <View style={[styles.outer, compact && styles.outerCompact, style]}>
       {head}
-      <Panel tone={tone === 'done' ? 'soft' : 'surface'} style={[styles.box, compact && styles.boxCompact]}>
+      <Panel raised tone={tone === 'done' ? 'done' : 'surface'} style={[styles.box, compact && styles.boxCompact]}>
         {children}
       </Panel>
     </View>
@@ -115,16 +115,16 @@ export function Hint({ children }: { children: ReactNode }) {
 }
 
 export function PrimaryButton({ label, onPress, disabled, square }: { label: string; onPress: () => void; disabled?: boolean; square?: boolean }) {
-  const h = useHome();
+  const k = useSkin(); // Home's own button green (goBg / goInk), the same as «Create plan» on Home
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
-      style={[styles.btn, square && styles.square, { backgroundColor: h.forest, opacity: disabled ? 0.45 : 1 }]}
+      style={[styles.btn, square && styles.square, { backgroundColor: k.goBg, opacity: disabled ? 0.45 : 1 }]}
     >
-      <Txt size={15} weight={700} color={h.forestInk}>
+      <Txt size={15} weight={700} color={k.goInk}>
         {label}
       </Txt>
     </Pressable>

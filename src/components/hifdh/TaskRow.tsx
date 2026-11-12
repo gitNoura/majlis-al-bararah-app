@@ -137,12 +137,12 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
             accessibilityHint={HIF.holdHint()}
             style={[
               styles.complete,
-              done ? { backgroundColor: k.soft } : { backgroundColor: h.forest },
+              done ? { backgroundColor: k.doneBg } : { backgroundColor: k.goBg },
               locked && { opacity: 0.45 },
             ]}
           >
             {done && <CheckIcon color={k.ink} size={18} strokeWidth={2.4} />}
-            <Txt size={15} weight={700} color={done ? k.ink : h.forestInk}>
+            <Txt size={15} weight={700} color={done ? k.ink : k.goInk}>
               {done ? STATUS.done() : HIF.complete()}
             </Txt>
           </Pressable>

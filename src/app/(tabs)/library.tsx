@@ -35,7 +35,7 @@ function Cover({ title, sub, onPress, soft }: { title: string; sub: string; onPr
   };
   return (
     <Pressable onPress={go} accessibilityRole="button" accessibilityLabel={title} style={({ pressed }) => pressed && { opacity: 0.88 }}>
-      <Panel tone={soft ? 'soft' : 'surface'} style={styles.card}>
+      <Panel raised tone={soft ? 'soft' : 'surface'} style={styles.card}>
         <View style={styles.words}>
           <Txt {...T.big} size={22} lineHeight={30} color={k.ink} numberOfLines={1}>
             {title}

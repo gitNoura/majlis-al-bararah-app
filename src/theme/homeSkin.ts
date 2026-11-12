@@ -60,6 +60,8 @@ export type HomeSkin = {
   glowOpacity: number;
   glassGlint: string; // a faint light along the glass's bottom edge, like light passing through
   glassEdge: string; // the glass's thin lit edge, so a pale panel still reads against a pale page
+  doneBg: string; // a card whose work is finished: a light green fill...
+  doneLine: string; // ...and its green edge
 };
 
 const PAGE = { pageInk: '#173f32', pageLine: 'rgba(23, 63, 50, 0.32)', pageBead: 'rgba(23, 63, 50, 0.14)', pageButton: '#ffffff' };
@@ -106,6 +108,8 @@ const light: HomeSkin = {
   glowOpacity: 0.07,
   glassGlint: 'rgba(255, 255, 255, 0.10)',
   glassEdge: 'rgba(255, 255, 255, 0.85)',
+  doneBg: '#e0efe6',
+  doneLine: 'rgba(15, 107, 88, 0.30)',
   ...PAGE,
 };
 
@@ -155,6 +159,8 @@ const dark: HomeSkin = {
   glowOpacity: 0.12,
   glassGlint: 'rgba(255, 255, 255, 0)',
   glassEdge: 'rgba(255, 255, 255, 0.05)',
+  doneBg: '#23302a',
+  doneLine: 'rgba(155, 194, 173, 0.32)',
   goBg: '#343635',
   goInk: '#ece4c8',
   buttonInk: '#1d1d1d',

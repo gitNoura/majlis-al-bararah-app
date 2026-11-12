@@ -1,12 +1,38 @@
-// A panel of Home's, the Library's and the Hifdh page's: now Home's glass (a frosted, see-through box with a soft light along its
+// A panel of Home's, the Library's and the Hifdh page's: Home's glass (a frosted, see-through box with a soft light along its
 // edges), the same for the white (`surface`) and the `soft` tone, so no box is green. `tone` is kept for the callers.
+//   raised  a solid box with a hairline edge and a soft shadow, so it stands off the page instead of blending into it (the Hifdh page).
+//           tone `soft` is Home's light green; tone `done` a slightly deeper one: the work in it is finished.
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import type { ReactNode } from 'react';
 
 import { GlassBack } from '@/components/home/Glass';
+import { useSkin } from '@/theme/homeSkin';
 
-export function Panel({ style, children }: { tone?: 'surface' | 'soft'; style?: StyleProp<ViewStyle>; children?: ReactNode }) {
+type Props = { tone?: 'surface' | 'soft' | 'done'; raised?: boolean; style?: StyleProp<ViewStyle>; children?: ReactNode };
+
+export function Panel({ tone, raised, style, children }: Props) {
+  const k = useSkin();
   const radius = StyleSheet.flatten(style)?.borderRadius ?? 20;
+
+  if (raised) {
+    const done = tone === 'done';
+    const look = {
+      backgroundColor: done ? k.doneBg : tone === 'soft' ? k.soft : k.surface,
+      borderWidth: StyleSheet.hairlineWidth * 2,
+      borderColor: done ? k.doneLine : k.hairline,
+      boxShadow: `0px 4px 16px ${k.glassShadow}`,
+    } as const;
+    // a card that has just been completed fades its green in
+    return done ? (
+      <Animated.View entering={FadeIn.duration(350)} style={[style, look]}>
+        {children}
+      </Animated.View>
+    ) : (
+      <View style={[style, look]}>{children}</View>
+    );
+  }
+
   return (
     <View style={style}>
       <GlassBack radius={typeof radius === 'number' ? radius : 20} />
