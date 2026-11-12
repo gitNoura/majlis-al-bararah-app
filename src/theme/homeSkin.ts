@@ -53,7 +53,7 @@ export type HomeSkin = {
   glassTint: readonly [string, string]; // a soft colour inside the plan cards' glass (lit corner, then clear)
   mark: string; // Home's progress bars and today's activity bar: a neutral charcoal (parchment at night), no green
   markSoft: string; // the other days' activity bars
-  hue: string; // the one accent colour (light green): the progress bars, and today's activity bar
+  hue: string; // the progress bars, and today's activity bar (a neutral charcoal in light mode, parchment in dark)
   hueSoft: string; // its paler partner: the other active days' bars
   hueDeep: string; // a deeper, quieter shade of it: the hadith's words
   glow: string; // the soft halo around the green progress bars and today's activity bar
@@ -101,10 +101,10 @@ const light: HomeSkin = {
   glassTint: ['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.02)'],
   mark: '#2e3230',
   markSoft: '#b4b7b3',
-  hue: '#2F8A74', // the one accent, a light green (progress bars, today's activity bar)
-  hueSoft: '#c6ddd0',
+  hue: '#2e3230', // the progress bars and today's activity bar: a neutral charcoal in light mode, no green
+  hueSoft: '#c4c7c3', // the other active days' bars
   hueDeep: '#094A3D',
-  glow: '#3A9C85',
+  glow: '#2e3230',
   glowOpacity: 0.07,
   glassGlint: 'rgba(255, 255, 255, 0.10)',
   glassEdge: 'rgba(255, 255, 255, 0.85)',

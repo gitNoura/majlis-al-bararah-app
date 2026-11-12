@@ -1,28 +1,20 @@
 // HOME's page: its own off-white with three large, faint pools of grey and white that stay still while the cards scroll over
 // them, so the glass has something to blur and show through. The Home screen puts this inside the BlurTargetView on Android.
 import { LinearGradient } from 'expo-linear-gradient';
-import { useContext } from 'react';
 import { StyleSheet } from 'react-native';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
-import { HifdhTintContext } from '@/theme/home';
 import { useSkin } from '@/theme/homeSkin';
 import { useTheme } from '@/theme/theme';
 
-// each pool: its colour, where its centre is (0 to 1 across and down the page) and how strong it is. A bright white page with a
-// white highlight and two faint ivory pools (no grey); the dark page keeps its charcoal pools.
+// each pool: its colour, where its centre is (0 to 1 across and down the page) and how strong it is. The light page is neutral
+// (white and very faint greys, no green or warm tint, so it sits with every sky of the prayer card); the dark page keeps its charcoal pools.
 const POOLS = {
   light: [
     { color: '#ffffff', x: 0.1, y: 0.3, o: 1 },
-    { color: '#dae9e0', x: 0.92, y: 0.14, o: 0.6 }, // a hardly-noticeable sage, just enough for the glass to blur
-    { color: '#f0e8d4', x: 0.08, y: 0.62, o: 0.5 }, // a faint warm ivory
-    { color: '#e0ede6', x: 0.9, y: 0.82, o: 0.5 },
-  ],
-  neutral: [
-    { color: '#ffffff', x: 0.1, y: 0.3, o: 1 },
-    { color: '#e9e9e6', x: 0.92, y: 0.14, o: 0.5 },
-    { color: '#f0ede4', x: 0.08, y: 0.62, o: 0.4 },
-    { color: '#e9e9e6', x: 0.9, y: 0.82, o: 0.4 },
+    { color: '#ecece9', x: 0.92, y: 0.14, o: 0.45 }, // just enough grey for the glass to blur and show through
+    { color: '#efefec', x: 0.08, y: 0.62, o: 0.35 },
+    { color: '#ecece9', x: 0.9, y: 0.82, o: 0.35 },
   ],
   dark: [
     { color: '#4a4d4a', x: 0.92, y: 0.12, o: 0.4 },
@@ -30,13 +22,12 @@ const POOLS = {
     { color: '#3d403d', x: 0.9, y: 0.78, o: 0.3 },
   ],
 };
-const LIGHT_WASH = ['#fbfaf7', '#fdfdfb', '#fbfaf7'] as const; // a clean, bright white with a trace of warmth
+const LIGHT_WASH = ['#fafafa', '#fcfcfc', '#fafafa'] as const; // a clean, neutral off-white
 
 export function HomeBackdrop() {
   const k = useSkin();
   const { isDark } = useTheme();
-  const hifdh = useContext(HifdhTintContext);
-  const pools = isDark ? POOLS.dark : hifdh ? POOLS.neutral : POOLS.light; // the Hifdh tab's light page has no green in it
+  const pools = isDark ? POOLS.dark : POOLS.light;
   return (
     <>
       <LinearGradient colors={isDark ? k.wash : LIGHT_WASH} style={StyleSheet.absoluteFill} />
