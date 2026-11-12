@@ -113,7 +113,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
           onPress={() => listen(findRow(key) ?? row)}
           accessibilityRole="button"
           accessibilityLabel={HIF.listenPortion()}
-          style={[styles.icon, { backgroundColor: k.pillTrack }]}
+          style={[styles.icon, { backgroundColor: k.well }]}
         >
           <PlayIcon color={h.ink} size={20} />
         </Pressable>
@@ -121,7 +121,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
           onPress={() => recite(findRow(key) ?? row)}
           accessibilityRole="button"
           accessibilityLabel={HIF.recitePortion()}
-          style={[styles.icon, { backgroundColor: k.pillTrack }]}
+          style={[styles.icon, { backgroundColor: k.well }]}
         >
           <MicIcon color={h.ink} size={20} />
         </Pressable>
@@ -137,7 +137,7 @@ export function TaskRow({ row, locked = false, ahead = false, first = false }: {
             accessibilityHint={HIF.holdHint()}
             style={[
               styles.complete,
-              done ? { backgroundColor: k.pillTrack } : { backgroundColor: isDark ? k.fill : k.goBg },
+              done ? { backgroundColor: k.well } : { backgroundColor: isDark ? k.fill : k.goBg },
               locked && { opacity: 0.45 },
             ]}
           >

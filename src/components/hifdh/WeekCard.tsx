@@ -1,5 +1,5 @@
 // «Your week»: how many of the seven days (Monday first) had something done. Drawn (the title with «3 of 7»
-// at its end), straight on the page with no card behind it: the day's name over a tall rounded capsule for each day: kept (the page's own charcoal by day, parchment by night, with a check), today (a ring), missed since the first plan began
+// at its end), straight on the page with no card behind it: the day's name over a slim rounded capsule for each day: kept (the page's own forest green by day, parchment by night, with a check), today (a ring), missed since the first plan began
 // (a faint disc with a cross), or still to come (a fainter one). No green anywhere.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { StyleSheet, View } from 'react-native';
@@ -28,7 +28,7 @@ export function WeekCard() {
   const k = useSkin();
   const { days, kept, today, started } = weekInfo();
   const n = days.filter((d: string) => kept.has(d)).length;
-  const checkInk = isDark ? '#1d1d1d' : '#ffffff';
+  const checkInk = isDark ? '#1d1d1d' : '#ffffff'; // a kept day: the forest green by day (k.fill), parchment by night
 
   return (
     <View style={styles.card}>
@@ -56,12 +56,12 @@ export function WeekCard() {
               <View
                 style={[
                   styles.capsule,
-                  { backgroundColor: state === 'on' ? k.hue : k.pillTrack },
+                  { backgroundColor: state === 'on' ? k.fill : k.well },
                   state === 'now' && { backgroundColor: 'transparent', borderWidth: 2, borderColor: k.ink },
                   state === 'idle' && { opacity: 0.55 },
                 ]}
               >
-                {state === 'on' && <CheckIcon color={checkInk} size={17} strokeWidth={2.4} />}
+                {state === 'on' && <CheckIcon color={checkInk} size={16} strokeWidth={2.4} />}
                 {state === 'miss' && <CloseMark color={k.meta} />}
               </View>
             </View>
@@ -77,6 +77,6 @@ const styles = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   count: { flexDirection: 'row', alignItems: 'baseline', gap: 5 },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 4 },
-  day: { flex: 1, alignItems: 'center', gap: 10 },
-  capsule: { width: '100%', maxWidth: 54, height: 52, borderRadius: 27, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
+  day: { flex: 1, alignItems: 'center', gap: 8 },
+  capsule: { width: 30, height: 44, borderRadius: 15, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
 });

@@ -64,7 +64,7 @@ function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; s
         <Txt {...T.greeting} size={26} lineHeight={34} color={k.ink} numberOfLines={1}>
           {HIF.title()}
         </Txt>
-        <View style={[styles.tabs, { backgroundColor: k.pillTrack }]} accessibilityRole="tablist">
+        <View style={[styles.tabs, { backgroundColor: k.well }]} accessibilityRole="tablist">
           {(
             [
               ['today', HIF.segToday()],

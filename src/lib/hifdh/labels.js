@@ -122,7 +122,7 @@ export const startsAt = (segs) => {
 
 export function rangeLabel(ranges, type) {
   const U = plan.units();
-  if (!ranges) return type === 'revise' ? s('كل ما حفظتُه', 'Everything I know', 'Tout ce que je sais') : s('القرآن كله', 'The whole Quran', 'Tout le Coran');
+  if (!ranges) return type === 'revise' ? s('كل ما حفظتُه', 'Everything I know', 'Tout ce que je sais') : s('القرآن كاملاً', 'The whole Quran', 'Tout le Coran');
   const norm = core.normRanges(ranges, U.N);
   if (!norm.length) return '—';
   const one = (a, b) => {

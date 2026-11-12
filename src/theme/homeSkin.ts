@@ -55,6 +55,7 @@ export type HomeSkin = {
   tabBar: string; // the bottom bar's own surface (solid, so the page never shows through it)
   glassTrack: string; // an empty progress bar inside a glass card
   glassBtn: string; // the round arrow button inside a glass card
+  well: string; // the Hifdh page's empty chips: the top tabs' track, a day not kept, the listen / recite buttons (a clean tint, never a grey wash)
   mark: string; // Home's progress bars and today's activity bar: a neutral charcoal (parchment at night), no green
   markSoft: string; // the other days' activity bars
   hue: string; // the progress bars, and today's activity bar (a neutral charcoal in light mode, parchment in dark)
@@ -105,6 +106,7 @@ const light: HomeSkin = {
   tabBar: '#ffffff',
   glassTrack: 'rgba(9, 74, 61, 0.12)',
   glassBtn: 'rgba(255, 255, 255, 0.92)',
+  well: '#e1eae4',
   mark: '#2e3230',
   markSoft: '#b4b7b3',
   hue: '#2e3230', // the progress bars and today's activity bar: a neutral charcoal in light mode, no green
@@ -159,6 +161,7 @@ const dark: HomeSkin = {
   tabBar: '#202020',
   glassTrack: 'rgba(255, 255, 255, 0.14)',
   glassBtn: 'rgba(255, 255, 255, 0.12)',
+  well: 'rgba(255, 255, 255, 0.16)',
   mark: '#e9dfbd',
   markSoft: '#5c6660',
   hue: '#e9dfbd', // dark mode: a deeper light green

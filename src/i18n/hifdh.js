@@ -122,7 +122,7 @@ export const HIF = {
       ? L('ماذا تريد أن تراجع؟', 'What will you revise?', 'Que voulez-vous réviser ?')
       : L('ماذا تريد أن تحفظ؟', 'What are you memorizing now?', 'Que mémorisez-vous maintenant ?'),
   scopeSub: () =>
-    L('القرآن كله أو سور تختارها.', 'The whole Quran, or only the thumun you choose.', 'Tout le Coran, ou seulement les thumun choisis.'),
+    L('القرآن كاملاً أو سور تختارها.', 'The whole Quran, or only the thumun you choose.', 'Tout le Coran, ou seulement les thumun choisis.'),
   scopeSpecific: () => L('جزء من القرآن', 'Specific surahs', 'Des sourates précises'),
   scopeSpecificSub: () => L('اختر السور أو الأجزاء', 'Choose surahs or juz', 'Choisissez sourates ou juz'),
   nothingToRevise: () => L('لا يوجد ما تراجعه هنا.', 'Nothing to revise in this selection.', 'Rien à réviser dans cette sélection.'),
