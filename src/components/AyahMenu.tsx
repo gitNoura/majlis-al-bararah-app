@@ -4,6 +4,7 @@
 // highlight» when it has one. Frosted glass with a thin light rim and a soft shadow, as the website's;
 // it opens with a small rise. A tap anywhere else closes it.
 import { useEffect, useState, type ReactNode } from 'react';
+import { FrostBack } from '@/components/home/Glass';
 import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -59,7 +60,6 @@ export function AyahMenu({ at, onClose, onTafsir, onNote }: { at: MenuAt | null;
           {
             left,
             top,
-            backgroundColor: isDark ? 'rgba(44, 44, 44, 0.97)' : 'rgba(252, 250, 245, 0.98)',
             borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
             boxShadow: isDark
               ? '0px 0px 0px 1px rgba(0, 0, 0, 0.3), 0px 18px 44px rgba(0, 0, 0, 0.45)'
@@ -68,6 +68,7 @@ export function AyahMenu({ at, onClose, onTafsir, onNote }: { at: MenuAt | null;
           shown,
         ]}
       >
+        <FrostBack radius={18} />
         <Txt size={15} weight={700} color={c.goldStrong} style={[styles.title, { fontFamily: serif(700), borderBottomColor: c.divider }]} numberOfLines={1}>
           {t('ayahTitle', name, at.a)}
         </Txt>

@@ -2,7 +2,7 @@
 // tabs - the tafsir and the translation (each with the sources chosen, src/lib/sources.js) and the similar ayat
 // (src/components/SimilarList.tsx). The texts are in the interface's own font (Tajawal), the ayat they quote in the Quran's (Amiri) and their own colour, each
 // source's name under its text. Previous (on the left) and next (on the right) go from ayah to ayah.
-import { GlassBack } from '@/components/home/Glass';
+import { FrostBack } from '@/components/home/Glass';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Animated, Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -74,7 +74,7 @@ export function AyahSheet({ ayah, onClose, onMove, onGo }: { ayah: Ayah | null; 
           },
         ]}
       >
-        <GlassBack topOnly radius={28} />
+        <FrostBack topOnly radius={28} />
         <View style={[styles.grip, { backgroundColor: c.line }]} />
         <View style={styles.head}>
           <Txt size={18} weight={700} color={c.ink} style={{ flex: 1 }} numberOfLines={1}>

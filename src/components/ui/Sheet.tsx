@@ -1,7 +1,7 @@
 // A sheet: a panel that rises from the bottom edge over a dimmed screen, with an optional title. It closes on
 // a tap outside it, on the phone's back button, and on `onClose`. Its content scrolls when it is taller than
 // 88 % of the screen. The bottom safe area is padded.
-import { GlassBack } from '@/components/home/Glass';
+import { FrostBack, GlassBack } from '@/components/home/Glass';
 import type { ReactNode } from 'react';
 import { Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,9 +11,10 @@ import { LANG } from '@/i18n/i18n';
 import { useTheme } from '@/theme/theme';
 import { radius, space } from '@/theme/tokens';
 
-type Props = { open: boolean; onClose: () => void; title?: string; children: ReactNode };
+// `frost`: real frosted glass (the Quran's sheets) instead of the solid lit glass
+type Props = { open: boolean; onClose: () => void; title?: string; frost?: boolean; children: ReactNode };
 
-export function Sheet({ open, onClose, title, children }: Props) {
+export function Sheet({ open, onClose, title, frost, children }: Props) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   return (
@@ -21,7 +22,7 @@ export function Sheet({ open, onClose, title, children }: Props) {
       <Pressable style={[styles.backdrop, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }, Platform.OS !== 'web' && { direction: LANG === 'ar' ? 'rtl' : 'ltr' }]} onPress={onClose} accessibilityLabel={title}>
         {/* a tap inside the sheet must not reach the backdrop */}
         <Pressable onPress={() => {}} style={[styles.sheet, { paddingBottom: insets.bottom + space.md }]}>
-          <GlassBack topOnly radius={radius.sheet} />
+          {frost ? <FrostBack topOnly radius={radius.sheet} /> : <GlassBack topOnly radius={radius.sheet} />}
           <View style={[styles.handle, { backgroundColor: c.surface3 }]} />
           {!!title && (
             <Txt size={18} weight={700} color={c.ink} style={styles.title}>

@@ -76,7 +76,7 @@ export function MarksSheet({ open, tab, onClose, onGo, pin }: { open: boolean; t
   const comments = noteList();
 
   return (
-    <Sheet open={open} onClose={onClose} title={{ pages: QURAN.marksPages(), highlights: QURAN.marksHighlights(), comments: QURAN.marksComments() }[tab]}>
+    <Sheet frost open={open} onClose={onClose} title={{ pages: QURAN.marksPages(), highlights: QURAN.marksHighlights(), comments: QURAN.marksComments() }[tab]}>
       <View style={styles.list}>
         {tab === 'pages' && (
           <>

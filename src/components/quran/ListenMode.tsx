@@ -9,7 +9,6 @@
 // The engine (steps, two players taking turns, the log) is `Listener` in src/lib/hifdh/listen.js and is only alive while
 // this mode is on. Nothing here writes 'lastPage' except through the page turn the Quran tab already handles.
 'use no memo'; // reads the Listener's own state (a class), which the React Compiler cannot see change: it would keep the first drawing
-import { GlassBack } from '@/components/home/Glass';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
@@ -23,6 +22,7 @@ import { ayatOn, pageOf } from '@/lib/boxes';
 import { available, counts, keysFromTo, Listener, MAX_TYPED, METHODS, ordered, parse, pos, QUICK, reciterOf, SPEEDS, times, together } from '@/lib/hifdh/listen';
 import { SURAHS } from '@/lib/quran';
 import { ui } from '@/theme/fonts';
+import { useBarLook } from '@/theme/barLook';
 import { useTheme } from '@/theme/theme';
 import { radius, space } from '@/theme/tokens';
 
@@ -199,7 +199,7 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
     all: [HIF.lsMethodAll(), HIF.lsMethodAllD()],
   };
   const sheet = (
-    <Sheet open={active && open} onClose={() => (picker ? setPicker(null) : setOpen(false))} title={picker ? HIF.lsSurah() : HIF.lsSettings()}>
+    <Sheet frost open={active && open} onClose={() => (picker ? setPicker(null) : setOpen(false))} title={picker ? HIF.lsSurah() : HIF.lsSettings()}>
       {picker ? (
         SURAHS.map((su: { number: number }) => (
           <SurahRow
@@ -258,10 +258,9 @@ export function useListen(active: boolean, page: number, follow: (page: number) 
 // ---------- small parts ----------
 
 function Pill({ children }: { children: ReactNode }) {
-  const { c } = useTheme();
+  const look = useBarLook('0px 8px 22px');
   return (
-    <View style={[styles.pill, { borderWidth: 0 }]}>
-      <GlassBack radius={LISTEN_BAR_H / 2} />
+    <View style={[styles.pill, look]}>
       {children}
     </View>
   );
@@ -463,7 +462,7 @@ function GoButton({ label, onPress }: { label: string; onPress: () => void }) {
 
 const styles = StyleSheet.create({
   barBox: { paddingHorizontal: space.md, paddingVertical: space.sm, alignItems: 'center' },
-  pill: { alignSelf: 'stretch', maxWidth: 520, height: LISTEN_BAR_H, borderRadius: LISTEN_BAR_H / 2, borderWidth: StyleSheet.hairlineWidth, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: space.sm, boxShadow: '0px 8px 22px rgba(20, 50, 38, 0.14)' },
+  pill: { alignSelf: 'stretch', maxWidth: 520, height: LISTEN_BAR_H, borderRadius: LISTEN_BAR_H / 2, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: space.sm },
   summary: { flex: 1, minWidth: 0, paddingVertical: 6, paddingHorizontal: 10, gap: 1 },
   btn: { alignItems: 'center', justifyContent: 'center' },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, alignItems: 'center' },

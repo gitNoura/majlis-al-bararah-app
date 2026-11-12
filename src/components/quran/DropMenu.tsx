@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { CheckIcon } from '@/components/icons';
+import { FrostBack } from '@/components/home/Glass';
 import { Txt } from '@/components/Txt';
 import { LANG } from '@/i18n/i18n';
 import { useHome } from '@/theme/home';
@@ -22,7 +23,8 @@ export function DropMenu({ open, onClose, top, side, items }: Props) {
       {/* a Modal is its own window: the language's direction is set again inside it */}
       <View style={[StyleSheet.absoluteFill, Platform.OS !== 'web' && { direction: LANG === 'ar' ? 'rtl' : 'ltr' }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={items[0]?.label} />
-        <View style={[styles.menu, { top, [side]: space.md, backgroundColor: h.card, borderColor: h.cardLine }]}>
+        <View style={[styles.menu, { top, [side]: space.md, borderColor: h.cardLine }]}>
+          <FrostBack radius={22} />
           {items.map((item, i) => (
             <Pressable
               key={item.key}

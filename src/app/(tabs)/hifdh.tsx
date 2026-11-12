@@ -64,7 +64,7 @@ function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; s
         <Txt {...T.greeting} size={26} lineHeight={34} color={k.ink} numberOfLines={1}>
           {HIF.title()}
         </Txt>
-        <View style={[styles.tabs, { backgroundColor: k.soft }]} accessibilityRole="tablist">
+        <View style={[styles.tabs, { backgroundColor: k.pillTrack }]} accessibilityRole="tablist">
           {(
             [
               ['today', HIF.segToday()],
@@ -72,7 +72,7 @@ function Content({ screen, seg, setSeg, setup, open, exit }: { screen: Screen; s
               ['progress', HIF.progress()],
             ] as [Seg, string][]
           ).map(([v, label]) => (
-            <Pressable key={v} onPress={() => setSeg(v)} accessibilityRole="tab" accessibilityState={{ selected: seg === v }} style={[styles.tab, seg === v && { backgroundColor: k.surface, boxShadow: '0px 1px 3px rgba(20, 50, 38, 0.14)' }]}>
+            <Pressable key={v} onPress={() => setSeg(v)} accessibilityRole="tab" accessibilityState={{ selected: seg === v }} style={[styles.tab, seg === v && { backgroundColor: k.glass, boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.16)' }]}>
               <Txt {...T.button} size={14} weight={seg === v ? 700 : 500} color={seg === v ? k.ink : k.meta}>
                 {label}
               </Txt>

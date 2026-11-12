@@ -6,7 +6,6 @@
 //   a tap on an ayah starts again from that ayah (the ones before it are shown)
 // Any page can be recited: it is the page on screen, and turning the page starts that page afresh. The logic is
 // src/lib/hifdh/recite.js; the cover is PageCurl's `veils`; the words' real edges are read from the page picture (ink.ts).
-import { GlassBack } from '@/components/home/Glass';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
@@ -17,6 +16,7 @@ import { ayatOn } from '@/lib/boxes';
 import { loadInk } from '@/lib/hifdh/ink';
 import { begin, jumpTo, showAyah, showWord, veilFor, wordsOf } from '@/lib/hifdh/recite';
 import { TOTAL_PAGES } from '@/lib/quran';
+import { useBarLook } from '@/theme/barLook';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
@@ -56,6 +56,7 @@ const around = (p: number) => [p, p + 1, p - 1].filter((n) => n >= 1 && n <= TOT
 
 export function useRecite(active: boolean, page: number) {
   const { c } = useTheme();
+  const look = useBarLook('0px 8px 22px');
   const keys = useMemo(() => keysOfPage(page), [page]);
   const [st, setSt] = useState(() => begin(keys));
   // the session of the page on screen: a page just turned to starts afresh at once, not a frame later
@@ -135,8 +136,7 @@ export function useRecite(active: boolean, page: number) {
   const shown = sess.finished ? n : Math.min(sess.i + 1, n);
   const bar = (
     <View style={styles.box}>
-      <View style={[styles.row, { borderWidth: 0 }]}>
-        <GlassBack radius={32} />
+      <View style={[styles.row, look]}>
         <Round onPress={eye} label={override === 'hide' ? HIF.reciteShowAll() : HIF.reciteHideAll()}>
           {override === 'hide' ? <EyeOpen color={c.ink} /> : <EyeClosed color={c.ink} />}
         </Round>
@@ -182,7 +182,7 @@ function Round({ children, onPress, label, disabled, big, fill }: { children: Re
 const styles = StyleSheet.create({
   box: { paddingHorizontal: space.md, paddingVertical: space.sm, alignItems: 'center' },
   // the buttons keep the same left-to-right order in every language (as Murajaa)
-  row: { alignSelf: 'stretch', maxWidth: 460, height: RECITE_BAR_H - space.sm * 2 + 8, borderRadius: 32, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: space.sm, flexDirection: 'row', alignItems: 'center', gap: 8, direction: 'ltr', boxShadow: '0px 8px 22px rgba(20, 50, 38, 0.14)' },
+  row: { alignSelf: 'stretch', maxWidth: 460, height: RECITE_BAR_H - space.sm * 2 + 8, borderRadius: 32, paddingHorizontal: space.sm, flexDirection: 'row', alignItems: 'center', gap: 8, direction: 'ltr' },
   round: { alignItems: 'center', justifyContent: 'center' },
   counter: { flex: 1, height: 44, borderRadius: 22, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
   fill: { position: 'absolute', left: 0, top: 0, bottom: 0 },

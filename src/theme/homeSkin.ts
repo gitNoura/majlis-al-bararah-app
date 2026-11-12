@@ -166,8 +166,8 @@ const dark: HomeSkin = {
   hueDeep: '#cfc6a3',
   glow: '#ece4c8',
   glowOpacity: 0.12,
-  doneBg: '#23302a',
-  doneLine: 'rgba(155, 194, 173, 0.32)',
+  doneBg: '#262626', // dark mode: a finished card stays neutral (no green), edged in the parchment
+  doneLine: 'rgba(233, 223, 189, 0.28)',
   goBg: '#343635',
   goInk: '#ece4c8',
   buttonInk: '#1d1d1d',

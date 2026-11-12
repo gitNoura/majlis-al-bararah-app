@@ -15,6 +15,7 @@ import { isEnglish, surahName, t } from '@/i18n/i18n';
 import { QURAN } from '@/i18n/quran';
 import { surahsOn } from '@/lib/boxes';
 import { hizbForPage, juzForPage, SURAHS } from '@/lib/quran';
+import { useBarLook } from '@/theme/barLook';
 import { useHome } from '@/theme/home';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
@@ -50,14 +51,14 @@ type Props = {
 
 // one of the round paper buttons (the header's, and the page's own at its bottom corners)
 export function Tool({ label, onPress, children, size = 40 }: { label: string; onPress: () => void; children: ReactNode; size?: number }) {
-  const h = useHome();
+  const look = useBarLook();
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
       hitSlop={4}
-      style={[styles.round, { width: size, height: size, borderRadius: size / 2, backgroundColor: h.card, borderColor: h.cardLine, borderWidth: StyleSheet.hairlineWidth, boxShadow: `0px 4px 12px ${h.shadow}` }]}
+      style={[styles.round, { width: size, height: size, borderRadius: size / 2 }, look]}
     >
       {children}
     </Pressable>
@@ -67,6 +68,7 @@ export function Tool({ label, onPress, children, size = 40 }: { label: string; o
 export function QuranHeader({ page, mode, onBack, onIndex, onMode, onSearch }: Props) {
   const { c } = useTheme();
   const h = useHome();
+  const look = useBarLook();
   const insets = useSafeAreaInsets();
   const here = placeOf(page);
   return (
@@ -84,7 +86,7 @@ export function QuranHeader({ page, mode, onBack, onIndex, onMode, onSearch }: P
           <Tool label={QURAN.search()} onPress={onSearch}>
             <SearchIcon color={c.ink} size={20} />
           </Tool>
-          <Pressable onPress={onMode} accessibilityRole="button" accessibilityLabel={mode} hitSlop={6} style={[styles.pill, { backgroundColor: h.card, borderColor: h.cardLine, borderWidth: StyleSheet.hairlineWidth, boxShadow: `0px 4px 12px ${h.shadow}` }]}>
+          <Pressable onPress={onMode} accessibilityRole="button" accessibilityLabel={mode} hitSlop={6} style={[styles.pill, look]}>
             <Txt size={14} weight={700} color={c.ink} numberOfLines={1}>
               {mode}
             </Txt>
