@@ -8,6 +8,7 @@ import { router, Tabs, type Href } from 'expo-router';
 import type { ComponentProps, ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 
+import { HomeBackdrop } from '@/components/home/HomeBackdrop';
 import { TabBar, type TabItem, TabHifdhIcon, TabHomeIcon, TabLibraryIcon, TabQuranIcon, TabSettingsIcon } from '@/components/ui';
 import { DASH } from '@/i18n/dashboard';
 import { HOME } from '@/i18n/home';
@@ -41,7 +42,7 @@ function AppTabBar({ state, descriptors }: BarProps) {
         },
       };
     });
-  return <TabBar tabs={tabs} hidden={hidden} />;
+  return <TabBar tabs={tabs} hidden={hidden} backdrop={current.name === 'index' ? <HomeBackdrop /> : undefined} />; // on Home the bar sits on Home's own page
 }
 
 export default function TabsLayout() {

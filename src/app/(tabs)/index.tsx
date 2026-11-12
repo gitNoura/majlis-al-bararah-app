@@ -14,7 +14,7 @@
 import { BlurTargetView } from 'expo-blur';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActivityCard } from '@/components/home/ActivityCard';
@@ -39,6 +39,7 @@ import { space } from '@/theme/tokens';
 export default function HomeTab() {
   const k = useSkin();
   const insets = useSafeAreaInsets();
+  const screenH = useWindowDimensions().height; // the page is as tall as the screen: it runs on under the tab bar, which shows the same page (see (tabs)/_layout.tsx)
   const [, setRev] = useState(0); // bumped on focus: redraws the sections
   const target = useRef<View | null>(null); // Android: the page behind the glass, which the glass blurs
 
@@ -80,7 +81,7 @@ export default function HomeTab() {
   return (
     <GlassTarget.Provider value={Platform.OS === 'android' ? target : null}>
       <View style={{ flex: 1, backgroundColor: k.paper }}>
-        <Backdrop ref={target} style={StyleSheet.absoluteFill}>
+        <Backdrop ref={target} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: screenH }}>
           <HomeBackdrop />
         </Backdrop>
         <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.md, paddingBottom: space.lg, gap: space.md }}>

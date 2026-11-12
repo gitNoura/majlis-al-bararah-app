@@ -82,7 +82,7 @@ const light: HomeSkin = {
   page: '#f9f7ee',
   pageSoft: 'rgba(23, 63, 50, 0.74)',
   pageHere: '#2a9266',
-  wash: ['#f1f2ef', '#f4f5f3', '#f6f8f5'], // Home's own off-white (paper), ending on the page colour the tab bar sits on
+  wash: ['#f1f2ef', '#f4f5f3', '#f4f5f3'], // Home's own off-white (paper)
   glass: 'rgba(255, 255, 255, 0.34)',
   glassSheen: 'rgba(255, 255, 255, 0.55)',
   glassShadow: 'rgba(20, 50, 38, 0.10)',
@@ -123,7 +123,7 @@ const dark: HomeSkin = {
   pageBead: 'rgba(255, 255, 255, 0.1)',
   pageHere: '#a8c4ae',
   pageButton: '#ece4c8',
-  wash: ['#141414', '#151515', '#161616'], // near-black, ending on the dark page colour the tab bar sits on
+  wash: ['#141414', '#151515', '#151515'], // near-black
   glass: 'rgba(255, 255, 255, 0.06)',
   glassSheen: 'rgba(255, 255, 255, 0.10)',
   glassShadow: 'rgba(0, 0, 0, 0.35)',
