@@ -44,6 +44,12 @@ export type HomeSkin = {
   pageBead: string; // an empty juz mark
   pageHere: string; // the juz being read (a fresher green, to read beside the forest ones)
   pageButton: string; // the white button
+  wash: readonly [string, string, string]; // Home's page: a soft mint wash (top, middle, bottom) for the glass to sit on
+  glass: string; // the glass panels' fill (over the blur)
+  glassEdge: string; // their thin bright edge
+  glassShadow: string; // and their soft shadow
+  glassTrack: string; // an empty progress bar inside a glass card
+  glassBtn: string; // the round arrow button inside a glass card
 };
 
 const PAGE = { pageInk: '#173f32', pageLine: 'rgba(23, 63, 50, 0.32)', pageBead: 'rgba(23, 63, 50, 0.14)', pageButton: '#ffffff' };
@@ -74,6 +80,12 @@ const light: HomeSkin = {
   page: '#f9f7ee',
   pageSoft: 'rgba(23, 63, 50, 0.74)',
   pageHere: '#2a9266',
+  wash: ['#d9eae2', '#ebf3ef', '#f6f8f5'], // ends on the page colour the tab bar sits on
+  glass: 'rgba(255, 255, 255, 0.55)',
+  glassEdge: 'rgba(255, 255, 255, 0.9)',
+  glassShadow: 'rgba(20, 50, 38, 0.10)',
+  glassTrack: 'rgba(23, 63, 50, 0.12)',
+  glassBtn: 'rgba(255, 255, 255, 0.92)',
   ...PAGE,
 };
 
@@ -107,6 +119,12 @@ const dark: HomeSkin = {
   pageBead: 'rgba(255, 255, 255, 0.1)',
   pageHere: '#a8c4ae',
   pageButton: '#ece4c8',
+  wash: ['#0e1814', '#131c18', '#161616'], // ends on the dark page colour the tab bar sits on
+  glass: 'rgba(255, 255, 255, 0.07)',
+  glassEdge: 'rgba(255, 255, 255, 0.14)',
+  glassShadow: 'rgba(0, 0, 0, 0.35)',
+  glassTrack: 'rgba(255, 255, 255, 0.14)',
+  glassBtn: 'rgba(255, 255, 255, 0.12)',
   goBg: '#343635',
   goInk: '#ece4c8',
   buttonInk: '#1d1d1d',

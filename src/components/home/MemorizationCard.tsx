@@ -1,88 +1,45 @@
-// HOME, memorization and revision: the two plans side by side as two see-through pills inside the sage card (SageCard), the way the prayer card has its five times. Each shows how far its plan is through its WHOLE run (not today's portions): a large
-// percentage, a thin bar that draws in once, and the days done out of all its days; the memorization pill also says how many
-// juz are memorized. With no plan of that kind yet it is a plain invitation to create one; a plan not begun says «Start
-// today». A tap on a pill opens the Hifdh tab. Everything is read from the plan's saved state.
+// HOME, memorization and revision: two glass cards (PlanCard), each showing TODAY'S portion of its plan, named the way the Hifdh page
+// names it (the surah and ayat, and under it the hizb · thumun or the pages), with how far the plan is through its whole run: the
+// percentage, the bar, and the days done out of all its days. With no plan of that kind yet the card is a plain invitation to create
+// one; a day with nothing planned says so. A tap opens the Hifdh tab. Everything is read from the plans' saved state.
 'use no memo'; // reads saved state (the plans) when it draws, which the React Compiler cannot see change
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Grow } from '@/components/home/Grow';
-import { useSage } from '@/components/home/SageCard';
-import { Txt } from '@/components/Txt';
+import { PlanCard } from '@/components/home/PlanCard';
 import { DASH } from '@/i18n/dashboard';
-import { hifdhOverview, memorizedCells } from '@/lib/dashboard';
-import { useSkin } from '@/theme/homeSkin';
+import { HIF } from '@/i18n/hifdh';
+import { hifdhOverview } from '@/lib/dashboard';
+import * as core from '@/lib/hifdh/core';
+import { rangeLines } from '@/lib/hifdh/labels';
+import * as plan from '@/lib/hifdh/plan';
 
 const digits = (n: number) => n.toLocaleString('en');
 
+type Kind = 'memorize' | 'revise';
 type Part = { has: boolean; progress: number | null; days: { done: number; total: number } | null };
 
-function Plan({ title, part, emptyText, extra }: { title: string; part: Part; emptyText: string; extra?: string }) {
-  const k = useSkin();
-  const sage = useSage();
-  const pct = part.progress == null ? 0 : Math.round(part.progress * 100);
-  const running = part.has && part.progress != null;
-  const notBegun = running && part.days?.done === 0;
-  const caption = part.progress == null ? DASH.planIdle() : part.days ? DASH.planDays(digits(part.days.done), digits(part.days.total)) : DASH.planOverall();
-  return (
-    <Pressable
-      onPress={() => router.navigate('/hifdh')}
-      accessibilityRole="button"
-      accessibilityLabel={`${title} ${running ? `${pct}%` : emptyText}`}
-      style={({ pressed }) => [styles.plan, { backgroundColor: sage.tone }, pressed && { opacity: 0.7 }]}
-    >
-      <Txt size={12} weight={700} color={k.meta} numberOfLines={1}>
-        {title}
-      </Txt>
-      {part.has ? (
-        <>
-          <Txt size={26} weight={800} lineHeight={32} color={running ? k.ink : k.meta}>
-            {running ? `${digits(pct)}%` : '–'}
-          </Txt>
-          <View style={[styles.track, { backgroundColor: sage.track }]}>
-            {running && pct > 0 && <Grow axis="x" to={Math.max(pct, 4) / 100} delay={300} style={{ height: '100%', borderRadius: 4, backgroundColor: k.fill }} />}
-          </View>
-          <Txt size={12} weight={500} color={k.meta} numberOfLines={2}>
-            {caption}
-          </Txt>
-          {notBegun && (
-            <Txt size={12} weight={700} color={k.ink} numberOfLines={1}>
-              {DASH.planBegin()}
-            </Txt>
-          )}
-          {!!extra && (
-            <Txt size={12} weight={700} color={k.ink} numberOfLines={2}>
-              {extra}
-            </Txt>
-          )}
-        </>
-      ) : (
-        <>
-          <Txt size={14} weight={700} lineHeight={20} color={k.ink} numberOfLines={3}>
-            {emptyText}
-          </Txt>
-          <Txt size={12} weight={700} color={k.ink} numberOfLines={1}>
-            {DASH.createPlan()}
-          </Txt>
-        </>
-      )}
-    </Pressable>
-  );
+function Plan({ kind, label, part, none, nothingToday }: { kind: Kind; label: string; part: Part; none: string; nothingToday: string }) {
+  const open = () => router.navigate('/hifdh');
+  const pct = part.progress == null ? null : part.progress * 100;
+
+  if (!part.has) return <PlanCard label={label} title={none} sub={DASH.createPlan()} onPress={open} a11y={`${label} ${none}`} />;
+
+  // today's first portion of this kind of plan (a weekly plan that is complete has none left to name)
+  const row = plan.todayRows().find((r: { plan: { type: string } }) => r.plan.type === kind);
+  const lines = row?.segs.length ? rangeLines(row.segs, core.shownUnit(row.version)) : null;
+  const title = lines?.title ?? (row?.week != null ? HIF.weekComplete() : nothingToday);
+  const days = part.days ? DASH.planDays(digits(part.days.done), digits(part.days.total)) : null;
+  const sub = [lines?.sub, days].filter(Boolean).join(' · ');
+
+  return <PlanCard label={label} title={title} sub={sub} percent={pct ?? 0} onPress={open} a11y={`${label} ${title}`} />;
 }
 
 export function MemorizationCard() {
   const o = hifdhOverview();
-  const juz = Math.round(memorizedCells().reduce((a, b) => a + b, 0) * 10) / 10;
   return (
-    <View style={styles.row}>
-      <Plan title={DASH.memorizePlan()} part={o.memorize} emptyText={DASH.noMemorizePlan()} extra={juz > 0 ? `${digits(juz)} ${DASH.memorizedOf()}` : undefined} />
-      <Plan title={DASH.revisionPlan()} part={o.revise} emptyText={DASH.noRevisionPlan()} />
-    </View>
+    <>
+      <Plan kind="memorize" label={HIF.cardHifdh()} part={o.memorize} none={HIF.noHifdhPlan()} nothingToday={HIF.nothingToday()} />
+      <Plan kind="revise" label={HIF.cardMurajaa()} part={o.revise} none={HIF.noRevPlan()} nothingToday={HIF.noRevision()} />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 8 },
-  plan: { flex: 1, gap: 4, padding: 14, borderRadius: 18 },
-  track: { height: 8, borderRadius: 4, overflow: 'hidden', flexDirection: 'row', marginVertical: 4 },
-});

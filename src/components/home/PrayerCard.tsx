@@ -1,4 +1,5 @@
-// HOME, card 1: the next prayer, the time left to it, the day's five times and a button to the qibla.
+// HOME, card 1: the next prayer with its time and the time left, and the two buttons (qibla, calendar), as one glass box that keeps
+// the sky of the moment behind it (a white veil over the sky, a bright edge, white glass pills). The day's five times are in the calendar.
 // With no place chosen yet it asks for one (the phone's location, or a city from the settings).
 'use no memo'; // reads saved state (the place) when it draws, which the React Compiler cannot see change
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,16 +12,19 @@ import { PrayerSky } from '@/components/PrayerSky';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
 import { HOME } from '@/i18n/home';
-import { t } from '@/i18n/i18n';
+import { LANG, t } from '@/i18n/i18n';
 import { prayerView, SKIES, skyByClock, type PrayerView } from '@/lib/dashboard';
 import { locate } from '@/lib/prayer';
+import { ltr } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
+import { useSkin } from '@/theme/homeSkin';
 import { space } from '@/theme/tokens';
 
-const RADIUS = 22;
+const RADIUS = 30;
 const EDGE = 'rgba(48, 48, 48, 0.62)'; // dark mode: the grey at the very edge of the card (the vignette); lower the 0.62 for a lighter one
 
 export function PrayerCard() {
+  const k = useSkin();
   const [view, setView] = useState<PrayerView>(prayerView);
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -56,15 +60,37 @@ export function PrayerCard() {
   const { isDark } = useTheme();
   const phase = view?.phase ?? skyByClock();
   const sky = SKIES[phase];
-  const nextBg = sky.next; // the next prayer is the same cream-yellow in every sky, light or dark mode
-  const nextInk = sky.nextIcon;
+  const pill = (label: string, onPress: () => void, key: string) => (
+    <Pressable key={key} onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.btn, { backgroundColor: sky.btn, borderColor: k.glassEdge }, pressed && { opacity: 0.7 }]}>
+      <Txt size={15} weight={700} color={sky.ink}>
+        {label}
+      </Txt>
+    </Pressable>
+  );
+
+  // the next prayer: «Next prayer · 4h 33m» over «Dhuhr · 12:20»
+  const next = view?.list.find((p) => p.next);
+  const info = view && (
+    <View key="info" style={styles.info}>
+      <Txt size={12} weight={500} color={sky.soft}>
+        {`${HOME.nextPrayer()} · ${DASH.left(view.h, view.m)}`}
+      </Txt>
+      <Txt size={22} weight={800} lineHeight={30} color={sky.ink}>
+        {next ? `${view.next} · ${next.at}` : view.next}
+      </Txt>
+    </View>
+  );
+  const qibla = pill(HOME.qibla(), () => router.push('/qibla'), 'qibla');
+  const calendar = pill(DASH.calendar(), () => router.push('/calendar'), 'calendar');
+
   return (
     // the rounded clip is on the OUTER view and on the sky's own layer: the animated stars and clouds (moving layers)
     // are not cut by the gradient view's own corners on every phone, which showed the card square
-    <View style={styles.card}>
+    <View style={[styles.card, { borderColor: k.glassEdge, boxShadow: `0px 8px 24px ${k.glassShadow}` }]}>
       <LinearGradient colors={sky.sky} style={StyleSheet.absoluteFill} />
       <View style={styles.skyClip} pointerEvents="none">
         <PrayerSky phase={phase} sun={view?.sun ?? 0.5} />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: sky.veil }]} />
         {isDark && (
           // dark mode: the card is as in light mode; only a soft grey vignette round its edges, to blend it into the dark page
           // (four edge gradients: the corners get two of them, so they are the darkest)
@@ -77,56 +103,15 @@ export function PrayerCard() {
         )}
       </View>
       {view ? (
-        <>
-          <View style={styles.head}>
-            <View>
-              <Txt size={12} weight={700} color={sky.soft}>
-                {HOME.nextPrayer()}
-              </Txt>
-              <Txt size={21} weight={800} lineHeight={28} color={sky.ink}>
-                {view.next}
-              </Txt>
-            </View>
-            <Txt size={14} weight={700} color={sky.ink}>
-              {DASH.left(view.h, view.m)}
-            </Txt>
-          </View>
-          <View style={styles.strip}>
-            {view.list.map((p) => (
-              <View key={p.key} style={[styles.time, { backgroundColor: p.next ? nextBg : sky.circle }, p.next && styles.timeNow]}>
-                <Txt size={11} weight={p.next ? 700 : 500} color={p.next ? nextInk : sky.soft} center>
-                  {p.name}
-                </Txt>
-                <Txt size={13} weight={p.next ? 700 : 500} color={p.next ? nextInk : sky.ink} center style={p.past && !p.next ? { opacity: 0.62 } : undefined}>
-                  {p.at}
-                </Txt>
-              </View>
-            ))}
-          </View>
-          <View style={styles.buttons}>
-            <Pressable onPress={() => router.push('/qibla')} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
-              <Txt size={13} weight={700} color={sky.ink}>
-                {HOME.qibla()}
-              </Txt>
-            </Pressable>
-            <Pressable onPress={() => router.push('/calendar')} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
-              <Txt size={13} weight={700} color={sky.ink}>
-                {DASH.calendar()}
-              </Txt>
-            </Pressable>
-          </View>
-        </>
+        // left to right on the screen in every language: in Arabic the prayer is at the right edge, then qibla, then calendar
+        <View style={[styles.row, ltr()]}>{LANG === 'ar' ? [calendar, qibla, info] : [info, qibla, calendar]}</View>
       ) : (
-        <>
+        <View style={styles.ask}>
           <Txt size={15} color={sky.ink}>
             {t('calPlaceAsk')}
           </Txt>
-          <Pressable onPress={() => setAsking(true)} accessibilityRole="button" style={[styles.btn, { backgroundColor: sky.circle }]}>
-            <Txt size={15} weight={700} color={sky.ink}>
-              {HOME.setPlace()}
-            </Txt>
-          </Pressable>
-        </>
+          {pill(HOME.setPlace(), () => setAsking(true), 'place')}
+        </View>
       )}
       <PlaceSheet open={asking} busy={busy} failed={failed} onClose={() => setAsking(false)} onLocate={findPlace} onChooseCity={chooseCity} />
     </View>
@@ -134,13 +119,11 @@ export function PrayerCard() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: space.cozy, gap: space.sm, overflow: 'hidden', boxShadow: '0px 8px 20px rgba(20, 50, 38, 0.16)' },
+  card: { borderRadius: RADIUS, borderCurve: 'continuous', borderWidth: 1, padding: space.md, overflow: 'hidden' },
   edge: { position: 'absolute' },
   skyClip: { ...StyleSheet.absoluteFill, borderRadius: RADIUS, borderCurve: 'continuous', overflow: 'hidden' },
-  buttons: { flexDirection: 'row', gap: space.sm },
-  btn: { flex: 1, minHeight: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md },
-  head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
-  strip: { flexDirection: 'row', gap: space.xs },
-  time: { flex: 1, borderRadius: 10, paddingVertical: 5, gap: 0 },
-  timeNow: { boxShadow: '0px 2px 6px rgba(20, 30, 25, 0.22)' }, // lifts the current prayer a little off its sky
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  info: { flex: 1, gap: 1 },
+  ask: { gap: space.sm },
+  btn: { minHeight: 44, borderRadius: 22, borderWidth: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.md, boxShadow: '0px 4px 12px rgba(20, 50, 38, 0.10)' },
 });

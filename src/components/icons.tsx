@@ -264,6 +264,15 @@ export function BackIcon({ size = 24, color, rtl }: IconProps & { rtl: boolean }
   );
 }
 
+// «go on»: an arrow pointing the way the line runs (left in Arabic, right in English/French)
+export function ArrowIcon({ size = 22, color, strokeWidth = 2, rtl }: IconProps & { rtl: boolean }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <Path d={rtl ? 'M19 12H5M11 6l-6 6 6 6' : 'M5 12h14M13 6l6 6-6 6'} />
+    </Svg>
+  );
+}
+
 // The Hifdh tabs: «Listen» (a play triangle) and «Recite» (a microphone)
 export const PlayIcon = (p: IconProps) => (
   <Line {...p}>

@@ -1,4 +1,4 @@
-// HOME, activity this week: open on the page, no box. The title with «3 of 7» at the end, then seven capsules, one per day, Monday
+// HOME, activity this week: a glass card. The title with «3 of 7» at the end, then seven capsules, one per day, Monday
 // first, as tall as the reading of that day (the ayat the wird counted; a day the reader only opened the mushaf or Hifdh is a middle
 // height), a day without activity a short stub, a day still to come a fainter one. A day with activity is sage green (today's the forest).
 // Today's letter is bold with a dot under it. A day counts when the reader opened the mushaf or Hifdh, or logged the wird
@@ -6,6 +6,7 @@
 'use no memo'; // reads saved state (the days) when it draws, which the React Compiler cannot see change
 import { StyleSheet, View } from 'react-native';
 
+import { Glass } from '@/components/home/Glass';
 import { Grow } from '@/components/home/Grow';
 import { Txt } from '@/components/Txt';
 import { DASH } from '@/i18n/dashboard';
@@ -30,7 +31,7 @@ export function ActivityCard() {
   const height = (i: number) => (week[i].ayat > 0 ? BAR * (0.34 + 0.66 * (week[i].ayat / most)) : BAR * 0.4);
 
   return (
-    <View style={styles.wrap}>
+    <Glass style={styles.wrap}>
       <View style={styles.head}>
         <Txt size={15} weight={700} color={k.ink}>
           {DASH.activity()}
@@ -59,12 +60,12 @@ export function ActivityCard() {
           );
         })}
       </View>
-    </View>
+    </Glass>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space.sm, paddingHorizontal: space.xs },
+  wrap: { gap: space.sm, padding: space.md },
   head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
   bars: { flexDirection: 'row', gap: space.xs },
   col: { flex: 1, alignItems: 'center', gap: space.xs },

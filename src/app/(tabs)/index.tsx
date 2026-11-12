@@ -1,36 +1,38 @@
 // HOME tab: the dashboard, an overview of where the reader is, not a launcher and not a to-do list. Top to bottom:
-//   greeting and the date
-//   1 the next prayer (on the sky of the moment, with the day's five times, the qibla and the calendar)   2 reading (a small mushaf page: the khatma as thirty juz marks)
-//   3 memorization and revision (how far each plan is through its whole run; the tasks are in Hifdh)
-//   4 the hadith of the reader, as a quiet note                       5 activity (this week), the last
+//   1 the next prayer (a glass box on the sky of the moment: its time, the time left, qibla and calendar)
+//   greeting and the date, with the profile icon at the far end
+//   the hadith of the reader, centred
+//   2 reading, 3 memorization, 4 revision (three glass cards: today's portion and how far each is; the tasks are in Hifdh)
+//   5 activity (this week), the last, also glass
 //   (the adhkar and ahadith libraries are the Library tab)
-// The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a quiet neutral page at the app's everyday sizes (12 to 26),
-// one deep forest, and the prayer card's cream-yellow (its next prayer, in every sky). The
-// prayer card is the one card and the only thing that changes with the day (its sky). Everything under it sits open on the page,
-// in the page's one font. Under it, ONE sage card built like it (SageCard: Reading with its ring, Continue, the two plans as pills), then the hadith and Activity open on the page. The one moment of motion is the marks drawing themselves in
-// (Grow). Each section reads the saved state when it draws, so Home redraws every time it comes into view. It also keeps
-// one behaviour of the old home screen: after a change of narration the app opens again, and must land on the Quran tab
-// at the same place, not on Home.
+// The look is Home's own (src/theme/homeSkin.ts, homeType.ts): a soft mint wash for a page, with everything on it in glass
+// (components/home/Glass.tsx), one deep forest for words and one fresher green for progress. The prayer card is the only thing that
+// changes with the day (its sky). The one moment of motion is the marks drawing themselves in (Grow). Each section reads the saved
+// state when it draws, so Home redraws every time it comes into view. It also keeps one behaviour of the old home screen: after a
+// change of narration the app opens again, and must land on the Quran tab at the same place, not on Home.
 'use no memo'; // the sections read saved state (modules), which the React Compiler cannot see change
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActivityCard } from '@/components/home/ActivityCard';
+import { Glass } from '@/components/home/Glass';
 import { HadithNote } from '@/components/home/HadithNote';
-import { SageCard } from '@/components/home/SageCard';
 import { MemorizationCard } from '@/components/home/MemorizationCard';
 import { PrayerCard } from '@/components/home/PrayerCard';
 import { ReadingCard } from '@/components/home/ReadingCard';
-import { Avatar } from '@/components/Avatar';
+import { PersonIcon } from '@/components/icons';
 import { Txt } from '@/components/Txt';
 import { HOME } from '@/i18n/home';
+import { LANG } from '@/i18n/i18n';
 import { dateLine } from '@/lib/dashboard';
 import { stayInQuran } from '@/lib/riwaya';
 import { writeJSON } from '@/lib/storage';
 import { useSkin } from '@/theme/homeSkin';
 import { T } from '@/theme/homeType';
+import { ltr } from '@/theme/ltr';
 import { space } from '@/theme/tokens';
 
 export default function HomeTab() {
@@ -53,30 +55,42 @@ export default function HomeTab() {
     }, []),
   );
 
+  // the date and the greeting start the language's line (right in Arabic); the profile icon is at the other end
+  const words = (
+    <View key="words" style={styles.words}>
+      <Txt {...T.date} color={k.meta}>
+        {dateLine()}
+      </Txt>
+      <Txt size={34} weight={800} lineHeight={46} color={k.pageInk}>
+        {HOME.salam()}
+      </Txt>
+    </View>
+  );
+  const profile = (
+    <Pressable key="profile" onPress={() => router.push('/profile')} accessibilityRole="button" accessibilityLabel={HOME.profile()} hitSlop={8}>
+      <Glass radius={26} style={styles.profile}>
+        <PersonIcon color={k.pageInk} size={24} />
+      </Glass>
+    </Pressable>
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: k.paper }}>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: space.lg, gap: space.lg }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md }}>
-          <View style={{ flex: 1 }}>
-            <Txt {...T.date} color={k.meta}>
-              {dateLine()}
-            </Txt>
-            <Txt {...T.greeting} color={k.ink}>
-              {HOME.salam()}
-            </Txt>
-          </View>
-          <Pressable onPress={() => router.push('/profile')} accessibilityRole="button" accessibilityLabel={HOME.profile()} hitSlop={8}>
-            <Avatar size={40} />
-          </Pressable>
-        </View>
+      <LinearGradient colors={k.wash} style={StyleSheet.absoluteFill} />
+      <ScrollView contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.md, paddingBottom: space.lg, gap: space.md }}>
         <PrayerCard />
-        <SageCard>
-          <ReadingCard />
-          <MemorizationCard />
-        </SageCard>
+        <View style={[styles.head, ltr()]}>{LANG === 'ar' ? [profile, words] : [words, profile]}</View>
         <HadithNote />
+        <ReadingCard />
+        <MemorizationCard />
         <ActivityCard />
       </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  head: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: space.md },
+  words: { flex: 1 },
+  profile: { width: 52, height: 52, alignItems: 'center', justifyContent: 'center' },
+});
