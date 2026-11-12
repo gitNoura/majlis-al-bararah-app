@@ -7,5 +7,5 @@ import { useTheme } from '@/theme/theme';
 export function HomeBackdrop() {
   const k = useSkin();
   const { isDark } = useTheme();
-  return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? k.wash[1] : '#f4f4f2' }]} />;
+  return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? k.wash[1] : '#eeeeea' }]} />;
 }
