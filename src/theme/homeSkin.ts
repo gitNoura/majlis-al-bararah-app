@@ -18,7 +18,7 @@ export type HomeSkin = {
   paper: string;
   pill: string; // a small tinted pill on the page (the prayer card's `circle`, on the page itself)
   pillTrack: string; // an empty bar on such a pill
-  gold: string; // the section titles: the prayer card's cream-yellow (a deeper gold of it on the light page, where the cream could not be read)
+  gold: string; // the section titles: the prayer card's cream-yellow, the same in light and dark
   surface: string;
   soft: string; // the light green of a soft panel (the memorization card)
   softTrack: string; // an empty bar on that soft panel
@@ -53,7 +53,7 @@ const light: HomeSkin = {
   paper: '#f4f5f3',
   pill: 'rgba(23, 63, 50, 0.08)',
   pillTrack: 'rgba(23, 63, 50, 0.14)',
-  gold: '#8f6d12',
+  gold: '#f3e2b0',
   surface: '#ffffff',
   soft: '#dce9df',
   softTrack: 'rgba(255, 255, 255, 0.75)',
