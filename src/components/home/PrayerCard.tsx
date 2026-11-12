@@ -93,7 +93,7 @@ export function PrayerCard() {
           </View>
           <View style={styles.strip}>
             {view.list.map((p) => (
-              <View key={p.key} style={[styles.time, { backgroundColor: p.next ? nextBg : sky.circle }]}>
+              <View key={p.key} style={[styles.time, { backgroundColor: p.next ? nextBg : sky.circle }, p.next && styles.timeNow]}>
                 <Txt size={11} weight={p.next ? 700 : 500} color={p.next ? nextInk : sky.soft} center>
                   {p.name}
                 </Txt>
@@ -142,4 +142,5 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   strip: { flexDirection: 'row', gap: space.xs },
   time: { flex: 1, borderRadius: 10, paddingVertical: 5, gap: 0 },
+  timeNow: { boxShadow: '0px 2px 6px rgba(20, 30, 25, 0.2)' }, // the frosted white lifts off every sky
 });

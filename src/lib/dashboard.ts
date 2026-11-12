@@ -49,8 +49,8 @@ export type PrayerView = {
 // The prayers card takes the sky of the moment, whatever the app's day / night: worked out from the sun at the place
 // (skyNow: the night from the dusk's end to al-Fajr, the dawn, midday, the warm afternoon, the sunset's glow).
 export type Sky = { sky: readonly [string, string, string]; ink: string; soft: string; circle: string; next: string; nextIcon: string };
-const LIGHT_INK = { ink: '#173f32', soft: '#5f6650', circle: 'rgba(23, 63, 50, 0.08)', next: '#23805a', nextIcon: '#ffffff' }; // the next prayer is the same mid green in every sky (it stands out on all five: pale dawn to night)
-const NIGHT_INK = { ink: '#f6eedb', soft: '#d6cbb0', circle: 'rgba(255, 255, 255, 0.12)', next: '#23805a', nextIcon: '#ffffff' };
+const LIGHT_INK = { ink: '#173f32', soft: '#5f6650', circle: 'rgba(23, 63, 50, 0.08)', next: 'rgba(255, 255, 255, 0.92)', nextIcon: '#173f32' }; // the next prayer is the same neutral frosted white in every sky
+const NIGHT_INK = { ink: '#f6eedb', soft: '#d6cbb0', circle: 'rgba(255, 255, 255, 0.12)', next: 'rgba(255, 255, 255, 0.92)', nextIcon: '#173f32' };
 export const SKIES: Record<Phase, Sky> = {
   night: { sky: ['#101b26', '#1b2b38', '#2a3c45'], ...NIGHT_INK },
   dawn: { sky: ['#f3cfc4', '#f7e3d3', '#e6eef0'], ...LIGHT_INK },

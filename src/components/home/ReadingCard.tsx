@@ -1,6 +1,6 @@
 // HOME, reading: open on the page, no box. «Reading» and the surah's name (in the page's one font) with the khatma's percentage at
 // the end, as the prayer card has the next prayer and the time left; the page, hizb and juz as plain words under it (not a pill);
-// then «Continue reading» as the one dark pill (cream in dark mode, as on the prayer card). A tap anywhere opens the Quran at the marker.
+// then «Continue reading» as a soft tinted pill with a round arrow at its end. A tap anywhere opens the Quran at the marker.
 'use no memo'; // reads saved state (the marker) when it draws, which the React Compiler cannot see change
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
@@ -69,11 +69,13 @@ export function ReadingCard() {
           {`${digits(r.percent)}%`}
         </Txt>
       </View>
-      <View style={[styles.go, { backgroundColor: isDark ? k.pageButton : k.goBg }]}>
-        <Txt size={14} weight={700} color={isDark ? k.buttonInk : k.goInk}>
+      <View style={[styles.go, { backgroundColor: k.pill }]}>
+        <Txt size={14} weight={700} color={k.ink}>
           {action}
         </Txt>
-        <Arrow color={isDark ? k.buttonInk : k.goInk} />
+        <View style={[styles.round, { backgroundColor: isDark ? k.pageButton : '#ffffff' }]}>
+          <Arrow color={isDark ? k.buttonInk : k.fill} />
+        </View>
       </View>
     </Pressable>
   );
@@ -83,5 +85,6 @@ const styles = StyleSheet.create({
   wrap: { gap: space.cozy, paddingHorizontal: space.xs },
   head: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: space.md },
   words: { flex: 1, gap: 1 },
-  go: { minHeight: 42, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, paddingHorizontal: space.md },
+  go: { height: 46, borderRadius: 23, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingStart: space.md, paddingEnd: 6 },
+  round: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', boxShadow: '0px 2px 6px rgba(20, 50, 38, 0.18)' },
 });
