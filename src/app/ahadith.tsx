@@ -72,8 +72,7 @@ export default function Ahadith() {
       />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 28, gap: 18 }} keyboardShouldPersistTaps="handled">
         {/* the search, in Arabic in every language */}
-        <View style={[styles.search, { borderWidth: 0 }]}>
-          <GlassBack radius={25} />
+        <View style={[styles.search, { backgroundColor: c.surface, borderColor: c.line }]}>
           <SearchIcon color={c.meta} size={20} />
           <TextInput
             value={query}

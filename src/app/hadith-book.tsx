@@ -13,7 +13,6 @@ import { ScreenHeader } from '@/components/ScreenHeader';
 import { Txt } from '@/components/Txt';
 import { isEnglish, t } from '@/i18n/i18n';
 import { bookName, kitabName, loadBooks, type Book, type BookId, type Kitab } from '@/lib/hadith';
-import { serif } from '@/theme/fonts';
 import { textSide } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 
@@ -71,11 +70,11 @@ export default function HadithBook() {
                   </Txt>
                 </View>
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Txt size={other ? 15.5 : 17} weight={700} color={c.ink} style={!other && { fontFamily: serif(700) }} lineHeight={other ? 22 : 30}>
+                  <Txt size={16} weight={700} color={c.ink} lineHeight={22}>
                     {name}
                   </Txt>
                   {other && (
-                    <Txt size={14} color={c.meta} style={{ fontFamily: serif(400), writingDirection: 'rtl', textAlign: textSide('left') }}>
+                    <Txt size={14} color={c.meta} style={{ writingDirection: 'rtl', textAlign: textSide('left') }}>
                       {k.title}
                     </Txt>
                   )}
