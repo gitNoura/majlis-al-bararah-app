@@ -23,7 +23,7 @@ function Plan({ kind, label, part, invite, inviteSub, nothingToday }: { kind: Ki
   const pct = part.progress == null ? null : part.progress * 100;
 
   // no plan yet: an invitation that says what this is for, words only (no arrow)
-  if (!part.has) return <PlanCard label={label} title={invite} sub={inviteSub} arrow={false} onPress={open} a11y={`${label} ${invite}`} />;
+  if (!part.has) return <PlanCard label={label} title={invite} sub={inviteSub} action={DASH.createPlan()} arrow={false} onPress={open} a11y={`${label} ${invite}`} />;
 
   // today's first portion of this kind of plan (a weekly plan that is complete has none left to name)
   const row = plan.todayRows().find((r: { plan: { type: string } }) => r.plan.type === kind);

@@ -18,6 +18,7 @@ type Props = {
   title: string;
   sub?: string;
   percent?: number | null; // 0 to 100; null or left out: no bar (nothing to measure yet)
+  action?: string; // a solid button-pill under the words (first-run cards): what a tap does
   arrow?: boolean; // the round arrow button (default on); off for the first-run invitations, which are words only
   onPress: () => void;
   a11y: string;
@@ -25,7 +26,7 @@ type Props = {
 
 const digits = (n: number) => n.toLocaleString('en');
 
-export function PlanCard({ label, title, sub, percent = null, arrow: showArrow = true, onPress, a11y }: Props) {
+export function PlanCard({ label, title, sub, percent = null, arrow: showArrow = true, action, onPress, a11y }: Props) {
   const k = useSkin();
   const ar = LANG === 'ar';
   const pct = percent == null ? 0 : Math.round(percent);
@@ -62,9 +63,18 @@ export function PlanCard({ label, title, sub, percent = null, arrow: showArrow =
   );
 
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={a11y} style={({ pressed }) => pressed && { opacity: 0.85 }}>
-      <Glass style={styles.card}>
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={a11y} style={({ pressed }) => pressed && { transform: [{ scale: 0.985 }] }}>
+      <Glass native interactive style={styles.card}>
         <View style={[styles.head, ltr()]}>{!showArrow ? words : ar ? [arrow, words] : [words, arrow]}</View>
+        {!!action && (
+          <View style={[styles.cta, ltr(), { justifyContent: ar ? 'flex-end' : 'flex-start' }]}>
+            <View style={[styles.pill, { backgroundColor: k.goBg }]}>
+              <Txt size={14} weight={700} color={k.goInk}>
+                {action}
+              </Txt>
+            </View>
+          </View>
+        )}
         {percent != null && <View style={[styles.meter, ltr()]}>{ar ? [figure, track] : [track, figure]}</View>}
       </Glass>
     </Pressable>
@@ -76,6 +86,8 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   words: { flex: 1, gap: 2 },
   go: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', boxShadow: '0px 4px 12px rgba(20, 50, 38, 0.10)' },
+  cta: { flexDirection: 'row' },
+  pill: { height: 38, paddingHorizontal: 20, borderRadius: 19, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
   meter: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   figure: { minWidth: 34 },
   track: { flex: 1, height: 6, borderRadius: 3, flexDirection: 'row' },

@@ -16,23 +16,25 @@ import { useTheme } from '@/theme/theme';
 // the Home screen's BlurTargetView (Android): what the glass blurs. null elsewhere.
 export const GlassTarget = createContext<RefObject<View | null> | null>(null);
 
-// iOS 26's native Liquid Glass has no intensity or opacity control (only style, tint and colour scheme), so it can't be calmed down:
-// it is off, and iOS uses the same tunable BlurView glass as the rest. Set this to true to bring the system glass back.
+// iOS 26's native Liquid Glass has no intensity or opacity control (only style, tint and colour scheme), so it can't be calmed down.
+// It is off by default (iOS uses the same tunable BlurView glass as the rest); a glass asks for it with `native` (the plan cards do),
+// and this flag turns it on for every glass at once.
 const USE_LIQUID_GLASS = false;
-const LIQUID = USE_LIQUID_GLASS && Platform.OS === 'ios' && isLiquidGlassAvailable();
+const CAN_LIQUID = Platform.OS === 'ios' && isLiquidGlassAvailable();
 
 // `tint`: a soft colour inside the glass (two colours: the lit top corner, then clear), drawn over the fill and sheen so the colour shows
-type Props = { radius?: number; intensity?: number; tint?: readonly [string, string]; style?: StyleProp<ViewStyle>; children?: ReactNode };
+// `native`: the system's Liquid Glass on iOS 26+ (the blur glass elsewhere); `interactive`: it reacts to touch (iOS 26+ only)
+type Props = { radius?: number; intensity?: number; tint?: readonly [string, string]; native?: boolean; interactive?: boolean; style?: StyleProp<ViewStyle>; children?: ReactNode };
 
-export function Glass({ radius = 28, intensity = 60, tint, style, children }: Props) {
+export function Glass({ radius = 28, intensity = 60, tint, native, interactive, style, children }: Props) {
   const k = useSkin();
   const { isDark } = useTheme();
   const target = useContext(GlassTarget);
   const shape = { borderRadius: radius, borderCurve: 'continuous' } as const;
 
-  if (LIQUID) {
+  if (CAN_LIQUID && (native ?? USE_LIQUID_GLASS)) {
     return (
-      <GlassView glassEffectStyle="regular" colorScheme={isDark ? 'dark' : 'light'} style={[shape, style]}>
+      <GlassView glassEffectStyle="regular" isInteractive={interactive} colorScheme={isDark ? 'dark' : 'light'} style={[shape, style]}>
         {tint && (
           <View style={[StyleSheet.absoluteFill, shape, { overflow: 'hidden' }]} pointerEvents="none">
             <LinearGradient colors={tint} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />

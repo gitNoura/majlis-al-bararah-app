@@ -31,10 +31,11 @@ export function ReadingCard() {
 
   const open = () => {
     Haptics.selectionAsync().catch(() => {});
-    router.navigate({ pathname: '/quran', params: r.started ? { resume: String(r.page), n: String(Date.now()) } : undefined });
+    // the page of the wird's mark; no mark yet: al-Fatiha (r.page is 1 then). The Quran tab in the bar does not do this: it opens where the reader last was.
+    router.navigate({ pathname: '/quran', params: { resume: String(r.page), n: String(Date.now()) } });
   };
 
   // first run: an invitation (what the app is for), with no page line, no 0% bar and no arrow
-  if (!r.started) return <PlanCard label={DASH.reading()} title={DASH.startWird()} arrow={false} onPress={open} a11y={`${DASH.reading()} ${action}`} />;
+  if (!r.started) return <PlanCard label={DASH.reading()} title={DASH.startWird()} action={DASH.startReading()} arrow={false} onPress={open} a11y={`${DASH.reading()} ${action}`} />;
   return <PlanCard label={DASH.reading()} title={surahLine(r.page)} sub={sub} percent={r.percent} onPress={open} a11y={`${DASH.reading()} ${action}`} />;
 }
