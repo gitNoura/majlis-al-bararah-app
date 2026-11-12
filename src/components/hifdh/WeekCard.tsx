@@ -1,4 +1,4 @@
-// «Your week»: how many of the seven days (Monday first) had something done, and a pill for each day:
+// «Your week»: how many of the seven days (Monday first) had something done, and a capsule for each day:
 // kept (check), today, missed since the first plan began (cross), or still to come.
 'use no memo'; // reads the plan's own state (a module), which the React Compiler cannot see change: it would keep the first drawing
 import { StyleSheet, View } from 'react-native';
@@ -32,8 +32,8 @@ export function WeekCard() {
   // Complete button, and today is ringed in soft white
   const keptBg = isDark ? '#e9dfbd' : h.forest;
   const keptInk = isDark ? '#1d1d1d' : h.forestInk;
-  const emptyBg = k.soft;
-  const todayRing = isDark ? 'rgba(255, 255, 255, 0.7)' : k.spark;
+  const emptyBg = k.pillTrack; // clearly visible on the card, light or dark
+  const todayRing = isDark ? '#e9dfbd' : k.goBg;
   const n = days.filter((d: string) => kept.has(d)).length;
 
   return (
@@ -63,10 +63,10 @@ export function WeekCard() {
                 style={[
                   styles.pill,
                   { backgroundColor: state === 'on' ? keptBg : state === 'now' ? 'transparent' : emptyBg },
-                  state === 'now' && { borderWidth: 2, borderColor: todayRing },
+                  state === 'now' && { borderWidth: 2, borderColor: todayRing, backgroundColor: k.pill },
                 ]}
               >
-                {state === 'on' && <CheckIcon color={keptInk} size={16} strokeWidth={2.4} />}
+                {state === 'on' && <CheckIcon color={keptInk} size={18} strokeWidth={2.4} />}
                 {state === 'miss' && <CloseMark color={c.meta} />}
               </View>
             </View>
@@ -83,5 +83,5 @@ const styles = StyleSheet.create({
   count: { alignItems: 'flex-end' },
   week: { flexDirection: 'row', justifyContent: 'space-between', gap: 6 },
   day: { flex: 1, alignItems: 'center', gap: 6 },
-  pill: { width: '100%', maxWidth: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  pill: { width: '100%', maxWidth: 38, height: 52, borderRadius: 14, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
 });
