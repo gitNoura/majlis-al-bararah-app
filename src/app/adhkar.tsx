@@ -1,13 +1,13 @@
 // «الأذكار» (Hisn al-Muslim). At the top the two daily ones as painted cards - the morning in a warm
 // dawn, the evening in a deep dusk, each with its drawing and «start» to read it at once; under them
 // «my groups» (the liked adhkar, the member's own groups, a new one) in a row that scrolls sideways;
-// then the categories, soft tiles of their own colours with their drawn icons. A tile opens its
+// then the categories, each its whole painting in a rounded tile, three to a line. A tile opens its
 // chapters (/adhkar-category), or its one chapter at once. The globe: Arabic, English or both.
 import { GlassBack } from '@/components/home/Glass';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Art, tone } from '@/components/AdhkarArt';
@@ -25,8 +25,8 @@ import { isEnglish } from '@/i18n/i18n';
 import { categories, createGroup, fillDailyGroups, groupName, loadIndex, useAdhkarStore, type CategoryView, type Group } from '@/lib/adhkar';
 import { useTheme } from '@/theme/theme';
 
-// a category's painted round
-const ROUND = 62;
+// a category's painting is shown whole (the picture is 200 × 180), three tiles to a line
+const RATIO = 180 / 200;
 
 const openGroup = (id: string) => router.push({ pathname: '/adhkar-group', params: { g: id } });
 const readGroup = (id: string) => router.push({ pathname: '/adhkar-read', params: { g: id } });
@@ -225,16 +225,19 @@ function GroupChip({ wash, ink, icon, name, sub, onPress }: { wash: string; ink:
 // subject), its name under it
 function CategoryTile({ cat, onPress }: { cat: CategoryView; onPress: () => void }) {
   const { c } = useTheme();
+  const { width } = useWindowDimensions();
+  const w = Math.floor((width - 32 - 2 * 12) / 3); // 16 at each side, 12 between the tiles
+  const h = Math.round(w * RATIO);
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.tile, pressed && { opacity: 0.6 }]}>
-      <View style={[styles.tileRound, { borderColor: c.chosenLine }]}>
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.tile, { width: w }, pressed && { opacity: 0.7 }]}>
+      <View style={[styles.tileArt, { width: w, height: h, borderColor: c.chosenLine }]}>
         {cat.key === 'daily' ? (
-          <MorningEvening width={ROUND} height={ROUND} mirrored={!isEnglish} />
+          <MorningEvening width={w} height={h} mirrored={!isEnglish} />
         ) : (
-          <CategoryPainting name={cat.key} width={ROUND} height={ROUND} mirrored={!isEnglish} />
+          <CategoryPainting name={cat.key} width={w} height={h} mirrored={!isEnglish} />
         )}
       </View>
-      <Txt size={12} weight={600} center color={c.text} numberOfLines={2} lineHeight={16}>
+      <Txt size={13} weight={600} center color={c.text} numberOfLines={2} lineHeight={17}>
         {cat.name}
       </Txt>
     </Pressable>
@@ -243,7 +246,7 @@ function CategoryTile({ cat, onPress }: { cat: CategoryView; onPress: () => void
 
 const styles = StyleSheet.create({
   misbaha: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 16, marginTop: 14, borderRadius: 22, padding: 12 },
-  misbahaRound: { width: 54, height: 54, borderRadius: 27, borderWidth: 1, overflow: 'hidden' },
+  misbahaRound: { width: 54, height: 54, borderRadius: 16, borderCurve: 'continuous', borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
   daily: { flexDirection: 'row', gap: 12, paddingHorizontal: 16, marginTop: 4 },
   dailyCard: { flex: 1, height: 132, borderRadius: 24, overflow: 'hidden', padding: 14, justifyContent: 'space-between', boxShadow: '0px 10px 22px rgba(60, 45, 30, 0.14)' },
   startPill: { alignSelf: 'flex-start', paddingHorizontal: 14, paddingVertical: 5, borderRadius: 999 },
@@ -252,7 +255,7 @@ const styles = StyleSheet.create({
   groups: { paddingHorizontal: 16, gap: 10 },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, borderRadius: 22, paddingHorizontal: 16 },
   newChip: { borderWidth: 1.2, borderStyle: 'dashed' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 10, rowGap: 16 },
-  tile: { width: '25%', alignItems: 'center', gap: 7, paddingHorizontal: 3 },
-  tileRound: { width: ROUND + 2, height: ROUND + 2, borderRadius: ROUND, borderWidth: 1, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, columnGap: 12, rowGap: 18 },
+  tile: { alignItems: 'center', gap: 8 },
+  tileArt: { borderRadius: 18, borderCurve: 'continuous', borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
 });

@@ -4,7 +4,7 @@
 // One picture (200 × 180) fits a small round (its middle) and a page's head (its full width, the top
 // left left as open sky for the page's words); `mirrored` turns it round for the Arabic layout.
 import type { ReactNode } from 'react';
-import Svg, { Circle, ClipPath, Defs, Ellipse, G, LinearGradient, Path, Polygon, Rect, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 
 const W = 200;
 const H = 180;
@@ -245,29 +245,19 @@ const PAINTINGS: Record<string, () => ReactNode> = {
     </>
   ),
 
-  // the weather and the moon in one picture, as «morning and evening»: on one side a storm - its cloud,
-  // the rain, a lightning bolt - over the hills; beyond a slant the night, the crescent and the stars
+  // the weather: one storm over the hills - two grey clouds, a lightning bolt, the rain falling in even slanted lines
   weather: () => (
     <>
-      <Defs>
-        <ClipPath id="p-wx-cut">
-          <Polygon points="118,-40 240,-40 240,220 82,220" />
-        </ClipPath>
-      </Defs>
-      <Sky id="p-wx" top="#8ea3bd" mid="#c4d0db" low="#e3e4dc" />
-      <Path d="M42 62q4-14 20-12q8-12 26-6q16-2 18 12q12 2 10 12H38q-8-2 4-6z" fill="#6f7d92" />
-      <Path d="M70 68l-8 16h7l-6 16 16-22h-8l6-10z" fill="#f6d77a" />
-      {[50, 58, 84, 94, 104].map((x) => (
-        <Path key={x} d={`M${x} 70l-5 16M${x - 2} 92l-4 12`} stroke="#9fb0c6" strokeWidth={1.1} strokeLinecap="round" />
+      <Sky id="p-wx" top="#7f93ae" mid="#b7c4d2" low="#dfe1da" />
+      <Hills far="#c3ccb6" mid="#a4b895" near="#869e7c" />
+      {/* the far cloud, then the great one in front of it */}
+      <Path d="M112 56q2-12 16-11q7-10 22-5q14 0 15 11q10 2 8 11H108q-7-2 4-6z" fill="#8795a9" />
+      <Path d="M50 76q4-16 22-14q9-14 29-7q19-1 21 14q14 3 11 15H44q-9-2 6-8z" fill="#5f6d83" />
+      {/* the rain, in rows that follow the cloud's width */}
+      {[54, 66, 78, 114, 126, 138].map((x, i) => (
+        <Path key={x} d={`M${x} ${96 + (i % 2) * 6}l-4 14M${x + 5} ${116 + (i % 2) * 4}l-3 10`} stroke="#8fa3bc" strokeWidth={1.4} strokeLinecap="round" />
       ))}
-      <Hills />
-      {/* the night beyond the slant */}
-      <G clipPath="url(#p-wx-cut)">
-        <Sky id="p-wx-night" top="#26305c" mid="#3c3f6e" low="#6a5a86" />
-        <Crescent x={158} y={54} r={13} />
-        <Stars points={[[128, 40, 1.1], [184, 36, 0.9], [176, 84, 0.9], [134, 88, 0.8], [196, 60, 0.8], [120, 66, 0.7]]} />
-        <Hills far="#3a3a62" mid="#2a2b4d" near="#22223f" />
-      </G>
+      <Path d="M100 88l-9 18h8l-6 18 17-24h-9l7-12z" fill="#f6d77a" />
     </>
   ),
 

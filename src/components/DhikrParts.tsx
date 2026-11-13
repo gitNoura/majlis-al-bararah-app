@@ -111,7 +111,7 @@ const textOf = (d: Dhikr, lang: ReadLang, morning?: boolean, evening?: boolean) 
   return lang === 'ar' || !en ? arabic : lang === 'en' ? en : `${arabic}\n\n${en}`;
 };
 
-// A dhikr as on a page of a Hisn al-Muslim booklet - no box: a small gold flourish before it (`first`:
+// A dhikr as on a page of a Hisn al-Muslim booklet - no box and no line between two (`first`:
 // none), how many times in small gold words, its text on the page, and its buttons quietly under it.
 // `onRemove`: in a group, a remove button instead of +
 export function DhikrCard({
@@ -144,8 +144,7 @@ export function DhikrCard({
   const times = repeatOf(d);
   const t = tone(tint ?? 'gold', isDark);
   return (
-    <View style={styles.entry}>
-      {!first && <Flourish color={c.gold} />}
+    <View style={[styles.entry, !first && { marginTop: 26 }]}>
       {times > 1 && (
         <Txt size={12.5} weight={700} center color={t.ink} style={{ marginBottom: 6, letterSpacing: 0.3 }}>
           {ADHKAR.times(times)}
@@ -233,19 +232,6 @@ export function ListenButton({ audio, size = 36, tint }: { audio?: string; size?
           </Txt>
         </Pressable>
       )}
-    </View>
-  );
-}
-
-// between two adhkar: a short gold line, a small diamond, a short gold line
-export function Flourish({ color }: { color: string }) {
-  return (
-    <View style={styles.flourish}>
-      <View style={[styles.flLine, { backgroundColor: color }]} />
-      <View style={[styles.flDot, { backgroundColor: color }]} />
-      <View style={[styles.flDiamond, { borderColor: color }]} />
-      <View style={[styles.flDot, { backgroundColor: color }]} />
-      <View style={[styles.flLine, { backgroundColor: color }]} />
     </View>
   );
 }
@@ -569,22 +555,6 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   entry: { paddingHorizontal: 6, paddingBottom: 6 },
-  flourish: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    marginVertical: 18,
-    opacity: 0.75,
-  },
-  flLine: { width: 44, height: 1 },
-  flDot: { width: 3, height: 3, borderRadius: 1.5 },
-  flDiamond: {
-    width: 8,
-    height: 8,
-    borderWidth: 1.2,
-    transform: [{ rotate: '45deg' }],
-  },
   enLine: {
     marginTop: 4,
     paddingTop: 10,
