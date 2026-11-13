@@ -20,7 +20,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { BackIcon } from '@/components/icons';
 import { Glass } from '@/components/home/Glass';
@@ -34,7 +34,6 @@ import { locate, place, placeName } from '@/lib/prayer';
 import { ui } from '@/theme/fonts';
 import { useSkin } from '@/theme/homeSkin';
 import { lineStart } from '@/theme/ltr';
-import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
 const KAABA = { lat: 21.4225, lng: 39.8262 };
@@ -54,13 +53,12 @@ function bearing(p: { lat: number; lng: number }) {
 // the short way from one angle to another (-180..180)
 const shortWay = (from: number, to: number) => ((((to - from) % 360) + 540) % 360) - 180;
 
-// the dial's colours come from Home's own palette (useSkin); only the Kaaba's black and its band are fixed
-type QColours = { ink: string; meta: string; ring: string; needle: string; tail: string; spark: string; cube: string; band: string };
+// the dial's colours come from Home's own palette (useSkin)
+type QColours = { ink: string; meta: string; ring: string; needle: string; tail: string; spark: string };
 
 export default function Qibla() {
-  const { isDark } = useTheme();
   const k = useSkin();
-  const q: QColours = { ink: k.ink, meta: k.meta, ring: k.track, needle: k.fill, tail: k.markSoft, spark: k.spark, cube: isDark ? '#0d0d0d' : '#1a1a1a', band: '#c5a15a' };
+  const q: QColours = { ink: k.ink, meta: k.meta, ring: k.track, needle: k.fill, tail: k.markSoft, spark: k.spark };
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
 
@@ -249,15 +247,14 @@ function Dial({ q, size, aligned }: { q: QColours; size: number; aligned: boolea
   );
 }
 
-// the needle: a slim forest line from the centre to the Kaaba (a small black cube with its gold band) on the rim, a pale tail behind
+// the needle: a slim forest line from the centre to the rim, a pale tail behind
 function Needle({ q, size, aligned }: { q: QColours; size: number; aligned: boolean }) {
   return (
     <View style={[StyleSheet.absoluteFill, { filter: aligned ? 'drop-shadow(0px 0px 6px rgba(15, 107, 88, 0.45))' : 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.12))' }]}>
       <Svg width={size} height={size} viewBox="0 0 200 200">
         <Line x1={100} y1={100} x2={100} y2={128} stroke={q.tail} strokeWidth={3} strokeLinecap="round" />
-        <Line x1={100} y1={100} x2={100} y2={44} stroke={aligned ? q.spark : q.needle} strokeWidth={3.4} strokeLinecap="round" />
-        <Rect x={91} y={24} width={18} height={18} rx={3.5} fill={q.cube} />
-        <Rect x={91} y={29.5} width={18} height={3.2} fill={q.band} />
+        <Line x1={100} y1={100} x2={100} y2={33} stroke={aligned ? q.spark : q.needle} strokeWidth={3.4} strokeLinecap="round" />
+        <Path d="M100 22l6 11H94z" fill={aligned ? q.spark : q.needle} />
         <Circle cx={100} cy={100} r={7} fill={aligned ? q.spark : q.needle} />
         <Circle cx={100} cy={100} r={2.6} fill="#ffffff" />
       </Svg>
