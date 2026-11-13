@@ -10,7 +10,7 @@
 // Examples are written as [plain, coloured, plain, ...] in the Hafs text
 // (public/data/surah-hafs): every second part is shown in the rule's colour.
 
-export const SUB = { ar: 'برواية حفص عن عاصم', en: 'Narration of Hafs from ʿAsim' };
+export const SUB = { ar: 'برواية حفص عن عاصم', en: 'Narration of Hafs from ʿAsim', fr: 'Lecture de Hafs d’après ʿÂsim' };
 
 export const COLORS = {
   lazim: '#b00062', // مد 6 حركات لزوماً
@@ -325,5 +325,146 @@ export const SECTIONS_EN = [
       ['Madd al-badal', 'Read with two counts only (a natural madd), unlike Warsh.'],
     ],
     note: 'This is a simple guide to the colours of the mushaf. To master recitation in the Hafs narration, learn from a qualified teacher.',
+  },
+];
+
+// ---------- French ----------
+// Terms follow the French tajwid courses (Khaled Bouchafaa's course on IslamHouse; the «Règles de Tajwîd» notes on
+// quran-uni.com): ikhfâ’ = dissimulation, idghâm = assimilation, iqlâb = substitution, ghunna = nasalisation,
+// qalqala = agitation, madd = prolongation, ikhfâ’ chafawî = dissimulation labiale, noun sâkina / tanwîn.
+// A «count» (haraka) is a «temps».
+
+export const LEGEND_FR = [
+  { name: 'Madd lâzim (nécessaire)', length: '6 temps, toujours' },
+  { name: 'Madd wâjib (obligatoire)', length: '4 ou 5 temps' },
+  { name: 'Madd permis (jâ’iz)', length: '2, 4 ou 6 temps' },
+  { name: 'Madd aslî (d’origine)', length: '2 temps' },
+  { name: 'Ikhfâ’ et ghunna', length: '2 temps' },
+  { name: 'Idghâm et lettres muettes', length: 'non prononcée' },
+  { name: 'Tafkhîm (emphase)', length: 'emphatique' },
+  { name: 'Qalqala (agitation)', length: 'avec agitation' },
+];
+
+export const SECTIONS_FR = [
+  {
+    title: 'Comment lire les couleurs',
+    intro:
+      'Ce mushaf utilise trois couleurs principales : les nuances de rouge pour le madd (prolongation), le vert pour la ghunna (nasalisation) et le bleu pour le tafkhîm (bleu foncé) et la qalqala (bleu clair). Le gris signale les lettres qui ne sont pas prononcées. Regardez la couleur d’une lettre avant de la dire : vous savez alors quelle règle appliquer.',
+    steps: [
+      ['Regardez la couleur de la lettre', 'Avant de dire le mot, repérez sa lettre colorée.'],
+      ['Nuances de rouge : prolongez', 'Plus le rouge est foncé, plus le madd est long ; l’orange est un madd dont vous choisissez la durée à l’arrêt.'],
+      ['Vert : ghunna', 'Laissez le son passer par le nez pendant deux temps.'],
+      ['Bleu foncé : rendez-la emphatique', 'Ouvrez la bouche et relevez l’arrière de la langue pour que le son soit plein.'],
+      ['Bleu clair : qalqala', 'Dites la lettre sans voyelle avec un léger rebond, sans lui ajouter de voyelle.'],
+      ['Gris : ne la prononcez pas', 'La lettre est écrite, mais elle se fond dans la suivante ou reste muette.'],
+    ],
+    note: 'Un temps (haraka) est la durée qu’il faut pour plier ou déplier un doigt à un rythme modéré. Deux temps, c’est la durée de deux doigts ; six temps, celle de six.',
+  },
+  {
+    title: 'Madd (prolongation)',
+    rules: [
+      {
+        name: 'Madd lâzim (nécessaire)',
+        length: '6 temps',
+        when: 'Une lettre de madd suivie d’un soukoun d’origine ou d’une lettre doublée (chadda) dans le même mot, y compris les lettres au début de certaines sourates.',
+        how: 'Toujours six temps, en continuant comme à l’arrêt ; aucune autre durée n’est permise.',
+      },
+      {
+        name: 'Madd muttasil et munfasil (dans le mot et entre deux mots)',
+        length: '4 ou 5 temps',
+        when: 'Une lettre de madd suivie d’une hamza : dans le même mot (muttasil, obligatoire) ou au début du mot suivant (munfasil).',
+        how: 'Hafs, par la voie d’al-Shatibiyya, lit les deux avec quatre ou cinq temps. Choisissez une durée et gardez-la tout au long de votre récitation.',
+      },
+      {
+        name: 'Madd permis (ʿârid et lîn)',
+        length: '2, 4 ou 6',
+        when: 'ʿÂrid : une lettre de madd suivie d’une lettre qui devient muette à l’arrêt. Lîn : un waw ou un ya sâkin après une fatha, lorsqu’on s’arrête sur la lettre qui suit.',
+        how: 'Seulement à l’arrêt (comme sur «نستعين») : court (2), moyen (4) ou long (6). En continuant, c’est deux temps.',
+      },
+      {
+        name: 'Madd aslî (d’origine)',
+        length: '2 temps',
+        when: 'Une lettre de madd sans hamza ni soukoun après elle, y compris le madd al-badal (une hamza suivie d’une lettre de madd) chez Hafs, et le ha du pronom attaché entre deux lettres voyellées.',
+        how: 'Exactement deux temps, ni plus ni moins.',
+      },
+    ],
+  },
+  {
+    title: 'Ghunna et noun sâkina',
+    rules: [
+      {
+        name: 'Ikhfâ’ (dissimulation)',
+        length: 'ghunna, 2 temps',
+        when: 'Un noun sâkina (sans voyelle) ou un tanwîn suivi de l’une des quinze lettres de l’ikhfâ’ (comme ت ث د ذ ز س ش ص ض ط ظ ف ق ك ج).',
+        how: 'Le noun est dit entre clair et fondu : la langue ne touche pas son point d’articulation, avec une ghunna de deux temps.',
+      },
+      {
+        name: 'Ghunna sur noun et mim doublés',
+        length: '2 temps',
+        when: 'Tout noun ou mim portant une chadda.',
+        how: 'Tenez le son nasal pendant deux temps avant de passer à la lettre suivante.',
+      },
+      {
+        name: 'Iqlâb (substitution)',
+        length: 'ghunna, 2 temps',
+        when: 'Un noun sâkina ou un tanwîn suivi de ba.',
+        how: 'Le noun devient un mim dissimulé devant le ba, avec une ghunna de deux temps et les lèvres doucement fermées.',
+      },
+      {
+        name: 'Idghâm avec ghunna',
+        length: 'ghunna, 2 temps',
+        when: 'Un noun sâkina ou un tanwîn suivi de l’une des lettres de «ينمو» dans le mot suivant.',
+        how: 'Le noun se fond dans la lettre suivante, qui devient une seule lettre doublée, avec une ghunna de deux temps.',
+      },
+      {
+        name: 'Ikhfâ’ labial (chafawî)',
+        length: 'ghunna, 2 temps',
+        when: 'Un mim sâkin suivi de ba.',
+        how: 'Le mim est dissimulé devant le ba avec une ghunna de deux temps, les lèvres légèrement fermées.',
+      },
+    ],
+  },
+  {
+    title: 'Idghâm et lettres muettes',
+    rules: [
+      {
+        name: 'La lettre grise',
+        length: 'non prononcée',
+        when: 'Une lettre qui se fond dans la suivante (comme un noun sâkin devant lam et ra), ou une lettre écrite mais non lue, comme la hamzat al-wasl au milieu d’une phrase et le lam solaire.',
+        how: 'Passez-la et allez directement à la lettre suivante ; celle-ci est doublée si la lettre grise s’y est fondue.',
+      },
+    ],
+  },
+  {
+    title: 'Tafkhîm et qalqala',
+    rules: [
+      {
+        name: 'Tafkhîm (lettres emphatiques)',
+        length: 'emphatique',
+        when: 'Les sept lettres d’élévation (emphatiques) réunies dans «خُصَّ ضَغْطٍ قِظْ», le ra emphatique, et le lam du nom d’Allah après une fatha ou une damma.',
+        how: 'Relevez l’arrière de la langue vers le palais pour que la bouche se remplisse de son. L’emphase est la plus forte avec fatha suivie d’un alif, puis fatha, damma, soukoun, et la plus légère avec kasra.',
+      },
+      {
+        name: 'Qalqala (agitation)',
+        length: 'avec agitation',
+        when: 'L’une des lettres de «قُطْبُ جَدٍّ» lorsqu’elle n’a pas de voyelle, à l’intérieur d’un mot ou à l’arrêt.',
+        how: 'Dites la lettre avec un léger rebond pour qu’elle résonne, sans lui donner de voyelle. Elle est plus forte à l’arrêt, comme sur «الفلق» et «أحد».',
+      },
+    ],
+  },
+  {
+    title: 'Particularités de la lecture de Hafs',
+    intro:
+      'La lecture de Hafs d’après ʿÂsim (par la voie d’al-Shatibiyya) comporte des endroits particuliers, marqués dans l’écriture du mushaf, où elle diffère des autres lectures. Voici les plus connus :',
+    features: [
+      ['Sakt (courte pause)', 'Une légère pause, sans reprendre son souffle, en quatre endroits : «عوجا» (al-Kahf), «مرقدنا» (Ya-Sin), «من راق» (al-Qiyama) et «بل ران» (al-Mutaffifin).'],
+      ['Imâla', 'Le ra et l’alif qui le suit sont dits avec une imâla complète à un seul endroit : «مجريها» (Hud).'],
+      ['Tashîl (adoucissement)', 'La seconde hamza est adoucie entre hamza et alif dans «ءأعجمي» (Fussilat).'],
+      ['Ishmâm', 'Les lèvres sont arrondies pendant que le noun est fondu dans «تأمنّا» (Yusuf), pour indiquer la damma du premier noun.'],
+      ['Deux façons dans «ضعف»', 'Le dad peut être lu avec fatha ou damma dans «ضعف», à ses trois endroits dans al-Rum.'],
+      ['Sin et sad', '«ويبصط» (al-Baqara) et «بصطة» (al-Aʿraf) se lisent avec sin ; «المصيطرون» (al-Tur) avec sin ou sad.'],
+      ['Madd al-badal', 'Lu avec deux temps seulement (un madd aslî), contrairement à Warsh.'],
+    ],
+    note: 'Ceci est un guide simple des couleurs du mushaf. Pour maîtriser la récitation selon Hafs, apprenez auprès d’un enseignant qualifié.',
   },
 ];

@@ -12,7 +12,7 @@ import { FrostBack } from '@/components/home/Glass';
 import { Txt } from '@/components/Txt';
 import { L, t } from '@/i18n/i18n';
 import { forDisplay } from '@/lib/search';
-import { guideSub, legend, sections } from '@/lib/tajweed';
+import { getGuide } from '@/lib/tajweed';
 import { lineStart } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 
@@ -26,8 +26,6 @@ type Section = {
   features?: string[][];
   note?: string;
 };
-
-const SECTIONS = sections as Section[];
 
 // «plain, coloured, plain, ...»: every second part in the rule's colour
 function Example({ parts, color }: { parts: string[]; color: string }) {
@@ -79,6 +77,10 @@ function RuleCard({ rule }: { rule: Rule }) {
 }
 
 export function TajweedGuide({ open, onClose }: { open: boolean; onClose: () => void }) {
+  // the language is read now (not when the file loads), so the guide is always in the app's current language
+  const guide = getGuide();
+  const { guideSub, legend } = guide;
+  const SECTIONS = guide.sections as Section[];
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
