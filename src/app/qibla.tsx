@@ -1,5 +1,5 @@
-// «القبلة»: a compass towards the Kaaba (the website's src/home/qibla.js and qibla.css, rebuilt for the
-// phone), in Home's look: the flat page, the large heading, the place and the compass on glass cards.
+// «القبلة»: a compass towards the Kaaba, in Home's look: the flat page, the large heading, plain cards with a small
+// caption over a bold figure, forest green for the needle and nothing ornamental (no gold, no photograph).
 //
 // The direction: the great-circle bearing from the member's place (src/lib/prayer.js, the same place as
 // the prayer times) to the Kaaba. On a phone the dial turns with the phone (expo-location's heading), so
@@ -7,7 +7,6 @@
 // north up and the needle shows the bearing. Within 5° the needle and the Kaaba glow. No place yet: the
 // place sheet asks for it (the phone's location, or a city). Under the compass, on phones, how to
 // calibrate it: a little phone going round a figure of eight, tilting as it goes.
-import { Image } from 'expo-image';
 import * as Location from 'expo-location';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -21,9 +20,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, G, Line, Path, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 
-import { BackIcon, PinIcon } from '@/components/icons';
+import { BackIcon } from '@/components/icons';
 import { Glass } from '@/components/home/Glass';
 import { HomeBackdrop } from '@/components/home/HomeBackdrop';
 import { HifHeader } from '@/components/hifdh/HifHeader';
@@ -34,10 +33,10 @@ import { isEnglish, L, t } from '@/i18n/i18n';
 import { locate, place, placeName } from '@/lib/prayer';
 import { ui } from '@/theme/fonts';
 import { useSkin } from '@/theme/homeSkin';
+import { lineStart } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
-const KAABA_IMG = require('@/assets/images/qibla/kaaba-medallion.webp');
 const KAABA = { lat: 21.4225, lng: 39.8262 };
 const rad = (d: number) => (d * Math.PI) / 180;
 const deg = (r: number) => (r * 180) / Math.PI;
@@ -55,17 +54,13 @@ function bearing(p: { lat: number; lng: number }) {
 // the short way from one angle to another (-180..180)
 const shortWay = (from: number, to: number) => ((((to - from) % 360) + 540) % 360) - 180;
 
-// the dial's and the needle's colours (the website's --ix-ink, --quran-gold), by day and by night
-const QC = {
-  light: { ink: '#173f32', gold: '#c5a15a', face: 'rgba(255, 255, 255, 0.62)', headShade: '#b5862b', mark: '#b5862b', shadow: '0px 10px 24px rgba(68, 55, 43, 0.1)' },
-  dark: { ink: '#ffffff', gold: '#c5a15a', face: 'rgba(44, 44, 44, 0.85)', headShade: '#c39436', mark: '#f3d78e', shadow: '0px 12px 30px rgba(0, 0, 0, 0.4)' },
-};
-type QColours = (typeof QC)['light'];
+// the dial's colours come from Home's own palette (useSkin); only the Kaaba's black and its band are fixed
+type QColours = { ink: string; meta: string; ring: string; needle: string; tail: string; spark: string; cube: string; band: string };
 
 export default function Qibla() {
   const { isDark } = useTheme();
   const k = useSkin();
-  const q = isDark ? QC.dark : QC.light;
+  const q: QColours = { ink: k.ink, meta: k.meta, ring: k.track, needle: k.fill, tail: k.markSoft, spark: k.spark, cube: isDark ? '#0d0d0d' : '#1a1a1a', band: '#c5a15a' };
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
 
@@ -140,52 +135,74 @@ export default function Qibla() {
   };
 
   const placeLine = here ? (placeName(here) ?? t('calMyLocation')) : t('qbNoPlace');
-  const size = Math.min(width - 2 * space.md - 2 * space.lg, 330);
+  const size = Math.min(width - 4 * space.md, 300);
+  const degrees = Math.round(qibla);
 
   return (
     <View style={{ flex: 1, backgroundColor: k.paper }}>
       <HomeBackdrop />
       <HifHeader title={HOME.qibla()} />
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 28 }]} showsVerticalScrollIndicator={false}>
-        {/* the place: a glass card (a tap changes it) */}
+        {/* the place: a card (a tap changes it) */}
         <Pressable
           onPress={() => {
             setFailed(false);
             setPlaceOpen(true);
           }}
           style={({ pressed }) => pressed && styles.pressed}
+          accessibilityRole="button"
           accessibilityLabel={HOME.setPlace()}
         >
-          <Glass gradient radius={24} style={styles.place}>
-            <PinIcon color={q.gold} size={20} />
-            <Txt size={16} weight={700} color={k.ink} numberOfLines={1} style={{ flex: 1 }}>
-              {placeLine}
-            </Txt>
+          <Glass radius={24} style={styles.place}>
+            <View style={{ flex: 1, gap: 1 }}>
+              <Txt size={12} weight={500} color={k.meta} style={lineStart()}>
+                {L('المكان', 'Place', 'Lieu')}
+              </Txt>
+              <Txt size={16} weight={700} color={k.ink} numberOfLines={1} style={lineStart()}>
+                {placeLine}
+              </Txt>
+            </View>
             <BackIcon color={k.meta} size={18} rtl={isEnglish} />
           </Glass>
         </Pressable>
 
-        {/* the compass, on a glass card: the dial turns with the phone, the needle on it points to the qibla */}
-        <Glass gradient style={styles.card}>
+        {/* the compass: the dial turns with the phone, the needle on it points to the qibla */}
+        <Glass style={styles.card}>
+          <View style={styles.figures}>
+            <View style={{ flex: 1, gap: 1 }}>
+              <Txt size={12} weight={500} color={k.meta} style={lineStart()}>
+                {L('اتجاه القبلة', 'Qibla direction', 'Direction de la qibla')}
+              </Txt>
+              <Txt size={26} weight={700} lineHeight={32} color={aligned ? k.spark : k.ink} style={lineStart()}>
+                {here ? `${degrees.toLocaleString(L('ar', 'en', 'fr'))}°` : '—'}
+              </Txt>
+            </View>
+            {aligned && (
+              <View style={[styles.pill, { backgroundColor: k.pill }]}>
+                <Txt size={13} weight={700} color={k.accent}>
+                  {L('القبلة أمامك', 'Qibla ahead', 'Qibla en face')}
+                </Txt>
+              </View>
+            )}
+          </View>
           <View style={[styles.compass, { width: size, height: size }]}>
             <Animated.View style={[StyleSheet.absoluteFill, rotorStyle]}>
-              <Dial q={q} size={size} />
+              <Dial q={q} size={size} aligned={aligned} />
               <View style={[StyleSheet.absoluteFill, { transform: [{ rotate: `${qibla}deg` }], opacity: here ? 1 : 0 }]}>
                 <Needle q={q} size={size} aligned={aligned} />
               </View>
             </Animated.View>
-            <Image
-              source={KAABA_IMG}
-              style={[
-                styles.kaaba,
-                { width: size * 0.17, height: size * 0.17, borderRadius: size * 0.085, left: size * 0.415, top: size * 0.415 },
-                { boxShadow: aligned ? '0px 0px 14px rgba(255, 226, 150, 0.85)' : '0px 4px 10px rgba(0, 0, 0, 0.25)' },
-              ]}
-            />
           </View>
-
-          {here && Platform.OS !== 'web' && <Calibrate q={q} bg={k.surface} meta={k.meta} />}
         </Glass>
+
+        {here && Platform.OS !== 'web' && (
+          <Glass style={styles.calibCard}>
+            <Txt size={12} weight={500} color={k.meta} style={lineStart()}>
+              {L('معايرة البوصلة', 'Calibrate the compass', 'Calibrer la boussole')}
+            </Txt>
+            <Calibrate q={q} bg={k.surface} meta={k.meta} />
+          </Glass>
+        )}
       </ScrollView>
 
       <PlaceSheet
@@ -209,46 +226,22 @@ const LETTER_AT = [
   [40, 100],
 ];
 
-function Dial({ q, size }: { q: QColours; size: number }) {
+function Dial({ q, size, aligned }: { q: QColours; size: number; aligned: boolean }) {
   const letters = L(['ش', 'ق', 'ج', 'غ'], ['N', 'E', 'S', 'W'], ['N', 'E', 'S', 'O']) as string[];
   const ticks = [];
   for (let i = 0; i < 72; i++) {
     const a = i * 5;
-    if (a % 90 === 0) continue; // the four diamonds instead
     const major = a % 30 === 0;
     ticks.push(
-      <Line
-        key={a}
-        x1={100}
-        y1={12}
-        x2={100}
-        y2={100 - (major ? 80 : 84)}
-        stroke={q.ink}
-        strokeWidth={major ? 1.1 : 0.5}
-        strokeOpacity={major ? 0.75 : 0.4}
-        transform={`rotate(${a} 100 100)`}
-      />,
+      <Line key={a} x1={100} y1={13} x2={100} y2={major ? 22 : 18} stroke={q.meta} strokeWidth={major ? 1.4 : 0.8} strokeOpacity={major ? 0.8 : 0.45} strokeLinecap="round" transform={`rotate(${a} 100 100)`} />,
     );
   }
   return (
     <Svg width={size} height={size} viewBox="0 0 200 200" style={StyleSheet.absoluteFill}>
-      <Circle cx={100} cy={100} r={96} fill="none" stroke={q.gold} strokeWidth={1.4} />
-      <Circle cx={100} cy={100} r={92} fill={q.face} />
-      <Circle cx={100} cy={100} r={27} fill="none" stroke={q.gold} strokeOpacity={0.45} strokeWidth={0.6} />
+      <Circle cx={100} cy={100} r={96} fill="none" stroke={aligned ? q.spark : q.ring} strokeWidth={aligned ? 2.4 : 2} />
       {ticks}
-      {[0, 90, 180, 270].map((a) => (
-        <Path key={a} d="M100 9l3.4 9-3.4 9-3.4-9z" fill={q.gold} transform={`rotate(${a} 100 100)`} />
-      ))}
       {letters.map((l, i) => (
-        <SvgText
-          key={l + i}
-          x={LETTER_AT[i][0]}
-          y={LETTER_AT[i][1] + 5}
-          fill={q.ink}
-          fontSize={15}
-          fontFamily={ui(700)}
-          textAnchor="middle"
-        >
+        <SvgText key={l + i} x={LETTER_AT[i][0]} y={LETTER_AT[i][1] + 5} fill={i === 0 ? q.ink : q.meta} fontSize={i === 0 ? 16 : 14} fontFamily={ui(700)} textAnchor="middle">
           {l}
         </SvgText>
       ))}
@@ -256,28 +249,17 @@ function Dial({ q, size }: { q: QColours; size: number }) {
   );
 }
 
-// the needle: a slim gold spear lit on one side (two tones, like cut metal), a fine green tail; and a
-// gold marker on the rim where the qibla is
+// the needle: a slim forest line from the centre to the Kaaba (a small black cube with its gold band) on the rim, a pale tail behind
 function Needle({ q, size, aligned }: { q: QColours; size: number; aligned: boolean }) {
   return (
-    <View
-      style={[
-        StyleSheet.absoluteFill,
-        {
-          filter: aligned
-            ? 'drop-shadow(0px 0px 6px rgba(255, 226, 150, 0.95)) drop-shadow(0px 0px 16px rgba(228, 201, 120, 0.6))'
-            : 'drop-shadow(0px 3px 5px rgba(0, 0, 0, 0.25))',
-        },
-      ]}
-    >
+    <View style={[StyleSheet.absoluteFill, { filter: aligned ? 'drop-shadow(0px 0px 6px rgba(15, 107, 88, 0.45))' : 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.12))' }]}>
       <Svg width={size} height={size} viewBox="0 0 200 200">
-        <G>
-          <Path d="M100 8.5l-4-6.5h8z" fill={q.mark} />
-          <Path d="M100 24L95.6 96L100 100z" fill="#f6dd95" />
-          <Path d="M100 24L104.4 96L100 100z" fill={q.headShade} />
-          <Path d="M100 100L97.4 103L100 148z" fill="#4a5346" />
-          <Path d="M100 100L102.6 103L100 148z" fill={q.ink === '#ffffff' ? '#173f32' : q.ink} />
-        </G>
+        <Line x1={100} y1={100} x2={100} y2={128} stroke={q.tail} strokeWidth={3} strokeLinecap="round" />
+        <Line x1={100} y1={100} x2={100} y2={44} stroke={aligned ? q.spark : q.needle} strokeWidth={3.4} strokeLinecap="round" />
+        <Rect x={91} y={24} width={18} height={18} rx={3.5} fill={q.cube} />
+        <Rect x={91} y={29.5} width={18} height={3.2} fill={q.band} />
+        <Circle cx={100} cy={100} r={7} fill={aligned ? q.spark : q.needle} />
+        <Circle cx={100} cy={100} r={2.6} fill="#ffffff" />
       </Svg>
     </View>
   );
@@ -334,11 +316,11 @@ function Calibrate({ q, bg, meta }: { q: QColours; bg: string; meta: string }) {
     <View style={styles.calib}>
       <View style={styles.eight}>
         <Svg width={200} height={100} viewBox="0 0 200 100" style={StyleSheet.absoluteFill}>
-          <Path d={EIGHT} fill="none" stroke={q.ink} strokeWidth={5} strokeOpacity={0.8} strokeLinecap="round" strokeLinejoin="round" />
-          <Path d={ARROW} fill="none" stroke={q.gold} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
+          <Path d={EIGHT} fill="none" stroke={q.meta} strokeWidth={4} strokeOpacity={0.45} strokeLinecap="round" strokeLinejoin="round" />
+          <Path d={ARROW} fill="none" stroke={q.needle} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
         </Svg>
-        <Animated.View style={[styles.phone, { borderColor: q.ink, backgroundColor: bg }, phone]}>
-          <View style={[styles.phoneButton, { backgroundColor: q.ink }]} />
+        <Animated.View style={[styles.phone, { borderColor: q.meta, backgroundColor: bg }, phone]}>
+          <View style={[styles.phoneButton, { backgroundColor: q.meta }]} />
         </Animated.View>
       </View>
       <Txt size={13} center color={meta} lineHeight={21} style={{ maxWidth: 300 }}>
@@ -350,11 +332,13 @@ function Calibrate({ q, bg, meta }: { q: QColours; bg: string; meta: string }) {
 
 const styles = StyleSheet.create({
   page: { width: '100%', maxWidth: 460, alignSelf: 'center', paddingHorizontal: space.md, paddingTop: space.xs, gap: space.md },
-  place: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 54, paddingHorizontal: 16 },
+  place: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingHorizontal: 18, paddingVertical: 10 },
   pressed: { opacity: 0.88, transform: [{ scale: 0.99 }] },
-  card: { alignItems: 'center', paddingVertical: space.lg, paddingHorizontal: space.md, gap: space.lg },
-  compass: { alignSelf: 'center' },
-  kaaba: { position: 'absolute' },
+  card: { padding: space.md, gap: space.md },
+  figures: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  pill: { minHeight: 32, borderRadius: 16, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
+  compass: { alignSelf: 'center', marginBottom: space.xs },
+  calibCard: { padding: space.md, gap: space.sm },
   calib: { alignItems: 'center', gap: 12 },
   eight: { width: 200, height: 100 },
   phone: {

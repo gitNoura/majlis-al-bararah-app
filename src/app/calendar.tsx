@@ -1,4 +1,4 @@
-// CALENDAR (التقويم), in Home's look (the flat page, the large heading, glass cards): a month at a time, in the Hijri calendar or the Gregorian, each day with the other date small
+// CALENDAR (التقويم), in Home's look (the flat page, today's date under the heading, plain cards with a small caption, Home's pill switch and round buttons): a month at a time, in the Hijri calendar or the Gregorian, each day with the other date small
 // under it; today lit; the occasions and the fasts marked; and what is coming. The data is src/lib/hijri.js (Umm al-Qura
 // where the phone has it, the country's own start of the months, the ±1 day the reader sets in the Settings).
 'use no memo'; // reads the Hijri settings (a module) when it draws, which the React Compiler cannot see change
@@ -12,10 +12,12 @@ import { Glass } from '@/components/home/Glass';
 import { HomeBackdrop } from '@/components/home/HomeBackdrop';
 import { HifHeader } from '@/components/hifdh/HifHeader';
 import { Txt } from '@/components/Txt';
+import { SegmentedControl } from '@/components/ui';
 import { DASH } from '@/i18n/dashboard';
 import { isEnglish, L, LANG, t } from '@/i18n/i18n';
 import * as hijri from '@/lib/hijri';
 import { useSkin } from '@/theme/homeSkin';
+import { lineStart } from '@/theme/ltr';
 import { useTheme } from '@/theme/theme';
 import { space } from '@/theme/tokens';
 
@@ -99,7 +101,9 @@ export default function CalendarScreen() {
     ? [hijri.occasionOn(selected.h) ? t(hijri.occasionOn(selected.h) as string) : '', (() => { const f = hijri.fastOn(selected.h, selected.date); return f ? t(f.key) : ''; })()].filter(Boolean)
     : [];
 
-  const when = (d: Date, n: number) => (n === 0 ? t('calIsToday') : t('calInDays', n)) + ` · ${d.toLocaleDateString(LANG, { day: 'numeric', month: 'short' })}`;
+  const rel = (n: number) => (n === 0 ? t('calIsToday') : t('calInDays', n));
+  const short = (d: Date) => d.toLocaleDateString(LANG, { day: 'numeric', month: 'short' });
+  const todayLine = `${num(todayH.d)} ${hijri.monthName(todayH.m)} ${num(todayH.y)} · ${now.toLocaleDateString(LANG, { weekday: 'long' })}`;
 
   const todayInk = isDark ? '#1d1d1d' : '#ffffff'; // the words on today's forest (parchment by night) square
   const kinds: { value: Kind; label: string }[] = [
@@ -107,17 +111,27 @@ export default function CalendarScreen() {
     { value: 'gregorian', label: t('calGregorian') },
   ];
 
-  // a list inside a glass card: a row's title and the line under it, a hairline between rows
-  const list = (items: { key: string; title: string; sub: string }[]) => (
-    <Glass gradient style={{ paddingHorizontal: space.md, paddingVertical: space.xs }}>
+  // a card of Home's manner: a small caption, then rows (a bold name, its date under it, and at the end how soon, in a pill)
+  const list = (caption: string, items: { key: string; title: string; sub: string; soon: string }[]) => (
+    <Glass gradient style={{ padding: space.md, gap: space.xs }}>
+      <Txt size={12} weight={500} color={k.meta} style={lineStart()}>
+        {caption}
+      </Txt>
       {items.map((it, i) => (
-        <View key={it.key} style={[{ paddingVertical: 13, gap: 2 }, i < items.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: k.hairline }]}>
-          <Txt size={16} weight={700} color={k.ink}>
-            {it.title}
-          </Txt>
-          <Txt size={13.5} color={k.meta}>
-            {it.sub}
-          </Txt>
+        <View key={it.key} style={[styles.event, i < items.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: k.hairline }]}>
+          <View style={{ flex: 1, gap: 1 }}>
+            <Txt size={15} weight={700} color={k.ink} style={lineStart()}>
+              {it.title}
+            </Txt>
+            <Txt size={13} color={k.meta} style={lineStart()}>
+              {it.sub}
+            </Txt>
+          </View>
+          <View style={[styles.soon, { backgroundColor: k.pill }]}>
+            <Txt size={12} weight={700} color={k.accent} numberOfLines={1}>
+              {it.soon}
+            </Txt>
+          </View>
         </View>
       ))}
     </Glass>
@@ -127,23 +141,15 @@ export default function CalendarScreen() {
     <View style={{ flex: 1, backgroundColor: k.paper }}>
       <HomeBackdrop />
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <HifHeader title={DASH.calendar()} />
-      <ScrollView contentContainerStyle={{ padding: space.md, paddingBottom: insets.bottom + 28, gap: space.md }}>
-        {/* Hijri / Gregorian: a track, the chosen one raised (as on the Plans page) */}
-        <View style={[styles.tabs, { backgroundColor: k.well }]} accessibilityRole="tablist">
-          {kinds.map((o) => (
-            <Pressable key={o.value} onPress={() => switchKind(o.value)} accessibilityRole="tab" accessibilityState={{ selected: kind === o.value }} style={[styles.tab, kind === o.value && { backgroundColor: k.glass, boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.14)' }]}>
-              <Txt size={14.5} weight={kind === o.value ? 700 : 500} center color={kind === o.value ? k.ink : k.meta} numberOfLines={1}>
-                {o.label}
-              </Txt>
-            </Pressable>
-          ))}
-        </View>
+      <HifHeader title={DASH.calendar()} subtitle={todayLine} />
+      <ScrollView contentContainerStyle={{ padding: space.md, paddingBottom: insets.bottom + 28, gap: space.md }} showsVerticalScrollIndicator={false}>
+        {/* Hijri / Gregorian: Home's pill switch */}
+        <SegmentedControl<Kind> pill value={kind} onChange={switchKind} options={kinds} />
 
         <Glass gradient style={{ padding: space.md, gap: 14 }}>
           {/* the month, with arrows */}
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Pressable onPress={() => step(-1)} hitSlop={10} accessibilityLabel={t('calPrev')} style={[styles.arrow, { backgroundColor: k.well }]}>
+            <Pressable onPress={() => step(-1)} hitSlop={10} accessibilityLabel={t('calPrev')} style={[styles.arrow, { backgroundColor: k.pill }]}>
               <BackIcon color={k.ink} size={18} rtl={isEnglish} />
             </Pressable>
             <View style={{ flex: 1, alignItems: 'center' }}>
@@ -154,7 +160,7 @@ export default function CalendarScreen() {
                 {other}
               </Txt>
             </View>
-            <Pressable onPress={() => step(1)} hitSlop={10} accessibilityLabel={t('calNext')} style={[styles.arrow, { backgroundColor: k.well, transform: [{ scaleX: -1 }] }]}>
+            <Pressable onPress={() => step(1)} hitSlop={10} accessibilityLabel={t('calNext')} style={[styles.arrow, { backgroundColor: k.pill, transform: [{ scaleX: -1 }] }]}>
               <BackIcon color={k.ink} size={18} rtl={isEnglish} />
             </Pressable>
           </View>
@@ -182,9 +188,9 @@ export default function CalendarScreen() {
                       onPress={() => setSelected(isSel ? null : cell)}
                       accessibilityLabel={`${cell.big}`}
                       style={[
-                        { flex: 1, aspectRatio: 1, borderRadius: 13, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
+                        { flex: 1, aspectRatio: 1, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
                         isToday && { backgroundColor: k.fill },
-                        !isToday && isSel && { backgroundColor: k.well, borderWidth: 1.5, borderColor: k.fill },
+                        !isToday && isSel && { backgroundColor: k.pill, borderWidth: 1.5, borderColor: k.fill },
                       ]}
                     >
                       <Txt size={16} weight={isToday ? 800 : 600} color={isToday ? todayInk : k.ink} center>
@@ -223,43 +229,34 @@ export default function CalendarScreen() {
         </Glass>
 
         {shownDay && (
-          <Glass gradient style={{ padding: space.md, gap: 4 }}>
-            <Txt size={17} weight={800} color={k.ink}>
-              {shownDay[0]}
-            </Txt>
-            <Txt size={13.5} color={k.meta}>
+          <Glass gradient style={{ padding: space.md, gap: 2 }}>
+            <Txt size={12} weight={500} color={k.meta} style={lineStart()}>
               {shownDay[1]}
             </Txt>
+            <Txt size={20} weight={700} lineHeight={28} color={k.ink} style={lineStart()}>
+              {shownDay[0]}
+            </Txt>
             {shownNote.map((n) => (
-              <Txt key={n} size={14} weight={600} color={k.ink}>
+              <Txt key={n} size={14} weight={600} color={k.accent} style={lineStart()}>
                 {n}
               </Txt>
             ))}
           </Glass>
         )}
 
-        <View style={{ gap: space.sm }}>
-          <Txt size={15} weight={700} color={k.ink} style={{ paddingHorizontal: space.xs }}>
-            {t('calEvents')}
-          </Txt>
-          {list(events.map((e) => ({ key: e.key, title: t(e.key), sub: `${when(e.date, e.days)} · ${num(e.h.d)} ${hijri.monthName(e.h.m)}` })))}
-        </View>
-
-        {fasts.length > 0 && (
-          <View style={{ gap: space.sm }}>
-            <Txt size={15} weight={700} color={k.ink} style={{ paddingHorizontal: space.xs }}>
-              {t('calFasting')}
-            </Txt>
-            {list(fasts.map((f) => ({ key: `${f.fast.key}${f.days}`, title: t(f.fast.key), sub: when(f.date, f.days) })))}
-          </View>
+        {list(
+          t('calEvents'),
+          events.map((e) => ({ key: e.key, title: t(e.key), sub: `${short(e.date)} · ${num(e.h.d)} ${hijri.monthName(e.h.m)}`, soon: rel(e.days) })),
         )}
+
+        {fasts.length > 0 && list(t('calFasting'), fasts.map((f) => ({ key: `${f.fast.key}${f.days}`, title: t(f.fast.key), sub: short(f.date), soon: rel(f.days) })))}
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  tabs: { flexDirection: 'row', borderRadius: 16, borderCurve: 'continuous', padding: 3 },
-  tab: { flex: 1, minHeight: 38, borderRadius: 13, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
+  event: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
+  soon: { minHeight: 28, borderRadius: 14, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
   arrow: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
 });

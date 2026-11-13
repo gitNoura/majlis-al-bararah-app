@@ -1,25 +1,27 @@
-// SETTINGS tab: one grouped list, like the phone's own Settings: a large title, then groups of white rows, each with a small line
-// icon, its name, its present value and an arrow. A row opens its own page inside this tab (the same back button as the Hifdh pages):
+// SETTINGS tab: one page, in the manner of the phone's own Settings: a large title, then each setting under its own name,
+// its choices listed right there on a card (the chosen one marked at its end), and a short note under the card when the
+// setting needs one. No icons and no drilling into pages: everything can be seen and changed on this one page.
 //   Account      the profile (or log in)
+//   Appearance   light / night / auto
+//   Language     Arabic / English / French
 //   Narration    Hafs / Warsh
-//   Quran        the Quran's night mode and its night page, the tafsirs and the translations shown on an ayah
-//   Appearance   light / night / auto, the language, the Hijri date's adjustment
+//   Night mode   the Quran's night mode and its night page
+//   Tafsirs, Translations   the ones shown when an ayah is tapped
+//   Hijri date   the adjustment
 //   Prayer       where the prayer times are for (the phone's location or a city from the list)
 // The data and logic are unchanged (theme, language, hijri, prayer, riwaya, sources, nightPage). Saved items stay in their own features.
 'use no memo'; // reads saved state (modules) when it draws, which the React Compiler cannot see change
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useState, type ReactNode } from 'react';
-import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useRef, useState, type ReactNode } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type ScrollViewInstance } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 
-import { Avatar } from '@/components/Avatar';
-import { HifHeader } from '@/components/hifdh/HifHeader';
 import { Glass } from '@/components/home/Glass';
 import { HomeBackdrop } from '@/components/home/HomeBackdrop';
-import { CheckIcon } from '@/components/icons';
 import { Toggle } from '@/components/Toggle';
 import { Txt } from '@/components/Txt';
-import { Chevron, Row, SegmentedControl, TAB_BAR_H } from '@/components/ui';
+import { Chevron, TAB_BAR_H } from '@/components/ui';
 import { ACCOUNT } from '@/i18n/account';
 import { L, LANG, isEnglish, isFrench, t } from '@/i18n/i18n';
 import { READER } from '@/i18n/reader';
@@ -38,70 +40,92 @@ import { space } from '@/theme/tokens';
 
 type City = { i: number; name: string; country: string | number };
 type Source = { id: string; name: string; nameEn: string; nameFr?: string; about: string; aboutEn: string; aboutFr?: string; kind?: string };
-type Page = null | 'riwaya' | 'appearance' | 'language' | 'hijri' | 'prayer' | 'night' | 'tafsirs' | 'translations';
 
 const label = (s: Source) => (isEnglish ? (isFrench && s.nameFr) || s.nameEn : s.name);
 const about = (s: Source) => (isEnglish ? (isFrench && s.aboutFr) || s.aboutEn : s.about);
 const chosenIds = () => new Set((tafsirSources() as Source[]).map((s) => s.id));
 const LANGUAGES: Record<string, string> = { ar: 'العربية', en: 'English', fr: 'Français' };
 
-// a group: one lit glass card holding its rows
-function Group({ children }: { children: ReactNode }) {
-  return (
-    <Glass radius={26} style={styles.group}>
-      {children}
-    </Glass>
-  );
-}
-
-// a row of the list: a line icon, the name, the present value, the arrow; a hairline under it that starts after the icon
-function Item({ icon, title, sub, value, onPress, last }: { icon?: ReactNode; title: string; sub?: string; value?: string; onPress: () => void; last?: boolean }) {
+// a setting: its name, its card, and the note under the card
+function Section({ title, note, children, onLayout }: { title: string; note?: string; children: ReactNode; onLayout?: (e: LayoutChangeEvent) => void }) {
   const k = useSkin();
   return (
-    <>
-      <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={title} style={({ pressed }) => [styles.item, pressed && { opacity: 0.6 }]}>
-        {!!icon && <View style={styles.iconBox}>{icon}</View>}
-        <View style={{ flex: 1, gap: 1 }}>
-          <Txt size={16.5} weight={500} color={k.ink} style={lineStart()} numberOfLines={1}>
-            {title}
-          </Txt>
-          {!!sub && (
-            <Txt size={12.5} color={k.meta} style={lineStart()} numberOfLines={1}>
-              {sub}
-            </Txt>
-          )}
-        </View>
-        {!!value && (
-          <Txt size={15} color={k.meta} numberOfLines={1} style={styles.value}>
-            {value}
-          </Txt>
-        )}
-        <Chevron color={k.meta} size={16} />
-      </Pressable>
-      {!last && <View style={[styles.line, { backgroundColor: k.hairline }, !!icon && { marginStart: 40 }]} />}
-    </>
-  );
-}
-
-// a page opened from the list: the back button and its name at the top, its content under it
-function Detail({ title, onBack, children }: { title: string; onBack: () => void; children: ReactNode }) {
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={{ flex: 1 }}>
-      <HifHeader title={title} onBack={onBack} />
-      <ScrollView contentContainerStyle={{ padding: space.md, paddingBottom: TAB_BAR_H + insets.bottom + space.md, gap: space.md }} keyboardShouldPersistTaps="handled">
+    <View style={styles.section} onLayout={onLayout}>
+      <Txt size={17} weight={700} lineHeight={24} color={k.ink} style={[lineStart(), styles.heading]}>
+        {title}
+      </Txt>
+      <Glass radius={24} style={styles.card}>
         {children}
-      </ScrollView>
+      </Glass>
+      {!!note && (
+        <Txt size={12.5} color={k.meta} style={[lineStart(), styles.note]}>
+          {note}
+        </Txt>
+      )}
     </View>
   );
 }
 
-function Note({ children }: { children: string }) {
+// the mark at a row's end: a round one for "one of these" (filled when chosen), a plain tick for "any of these"
+function Mark({ on, kind }: { on: boolean; kind: 'radio' | 'tick' }) {
   const k = useSkin();
+  const { isDark } = useTheme();
+  const tick = (stroke: string) => (
+    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M5 12.5l4.5 4.5L19 7.5" />
+    </Svg>
+  );
+  if (kind === 'tick') return <View style={styles.mark}>{on && tick(k.fill)}</View>;
   return (
-    <Txt size={12.5} color={k.meta} style={[lineStart(), { marginHorizontal: 8 }]}>
-      {children}
-    </Txt>
+    <View style={[styles.mark, styles.radio, on ? { backgroundColor: k.fill, borderColor: k.fill } : { borderColor: k.meta, opacity: 0.55 }]}>{on && tick(isDark ? '#1d1d1d' : '#ffffff')}</View>
+  );
+}
+
+// a row of a card: its name (and a line under it), what is at its end, a hairline under it
+function Line({
+  title,
+  sub,
+  end,
+  onPress,
+  last,
+  role,
+  checked,
+}: {
+  title: string;
+  sub?: string;
+  end?: ReactNode;
+  onPress?: () => void;
+  last?: boolean;
+  role?: 'radio' | 'checkbox';
+  checked?: boolean;
+}) {
+  const k = useSkin();
+  const inside = (
+    <>
+      <View style={styles.words}>
+        <Txt size={16} weight={500} color={k.ink} style={lineStart()}>
+          {title}
+        </Txt>
+        {!!sub && (
+          <Txt size={12.5} color={k.meta} style={lineStart()}>
+            {sub}
+          </Txt>
+        )}
+      </View>
+      {end}
+    </>
+  );
+  return (
+    <>
+      {onPress ? (
+        <Pressable onPress={onPress} accessibilityRole={role ?? 'button'} accessibilityState={role ? { checked } : undefined} accessibilityLabel={title} style={({ pressed }) => [styles.line, pressed && { opacity: 0.6 }]}>
+          {inside}
+        </Pressable>
+      ) : (
+        <View style={styles.line}>{inside}</View>
+      )}
+      {!last && <View style={[styles.rule, { backgroundColor: k.hairline }]} />}
+    </>
   );
 }
 
@@ -114,7 +138,7 @@ export default function SettingsTab() {
   const signedIn = !!(account.user || member);
 
   const asked = useLocalSearchParams<{ cities?: string }>().cities === '1'; // Home / qibla ask to choose a city
-  const [page, setPage] = useState<Page>(asked ? 'prayer' : null);
+  const scroll = useRef<ScrollViewInstance>(null);
   const [here, setHere] = useState(place);
   const [cities, setCities] = useState(asked);
   const [locating, setLocating] = useState(false);
@@ -124,19 +148,7 @@ export default function SettingsTab() {
   const nightPage = useNightPage();
   const sources = SOURCES as Source[];
 
-  // the phone's back button closes a page before it leaves the tab
-  useFocusEffect(
-    useCallback(() => {
-      const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-        if (!page) return false;
-        setPage(null);
-        return true;
-      });
-      return () => sub.remove();
-    }, [page]),
-  );
-
-  const useLocation = () => {
+  const findMe = () => {
     setLocating(true);
     setFailed(false);
     locate()
@@ -164,197 +176,143 @@ export default function SettingsTab() {
     setChosen(chosenIds());
   };
   const nightOn = quranMode ? quranMode === 'dark' : isDark;
-  const rowsOf = (kind: string) => sources.filter((s) => (s.kind ?? 'tafsir') === kind);
-  const countOf = (kind: string) => String(rowsOf(kind).filter((s) => chosen.has(s.id)).length);
-  const sourceRows = (kind: string) =>
-    rowsOf(kind).map((s, i, all) => <Row key={s.id} title={label(s)} sub={about(s)} end={<Toggle value={chosen.has(s.id)} onChange={(on) => toggleSource(s.id, on)} />} last={i === all.length - 1} />);
-
-  const modeName = { light: SETTINGS.light(), dark: SETTINGS.dark(), auto: SETTINGS.auto() }[mode];
-  const riwayaName = HAFS ? L('حفص', 'Hafs', 'Hafs') : L('ورش', 'Warsh', 'Warsh');
-  const where = here ? (placeName(here) ?? t('calMyLocation')) : SETTINGS.noPlace();
-  const tick = <CheckIcon color={k.accent} />;
-  const back = () => setPage(null);
-
-  const detail = () => {
-    switch (page) {
-      case 'riwaya':
-        return (
-          <Detail title={READER.riwaya()} onBack={back}>
-            <Group>
-              <Row title={READER.hafs()} end={HAFS ? tick : undefined} onPress={HAFS ? undefined : () => setRiwaya('hafs')} />
-              <Row title={READER.warsh()} end={!HAFS ? tick : undefined} onPress={HAFS ? () => setRiwaya('warsh') : undefined} last />
-            </Group>
-            <Note>{READER.riwayaSub()}</Note>
-          </Detail>
-        );
-      case 'appearance':
-        return (
-          <Detail title={SETTINGS.appearance()} onBack={back}>
-            <Group>
-              {(['light', 'dark', 'auto'] as ThemeMode[]).map((m, i) => (
-                <Row key={m} title={{ light: SETTINGS.light(), dark: SETTINGS.dark(), auto: SETTINGS.auto() }[m]} end={mode === m ? tick : undefined} onPress={() => setMode(m)} last={i === 2} />
-              ))}
-            </Group>
-          </Detail>
-        );
-      case 'language':
-        return (
-          <Detail title={SETTINGS.language()} onBack={back}>
-            <Group>
-              {(['ar', 'en', 'fr'] as const).map((l, i) => (
-                <Row key={l} title={LANGUAGES[l]} end={LANG === l ? tick : undefined} onPress={() => l !== LANG && changeLanguage(l)} last={i === 2} />
-              ))}
-            </Group>
-          </Detail>
-        );
-      case 'hijri':
-        return (
-          <Detail title={SETTINGS.hijri()} onBack={back}>
-            <Group>
-              <View style={styles.block}>
-                <View style={styles.between}>
-                  <Txt size={13} color={k.meta}>
-                    {SETTINGS.today()}
-                  </Txt>
-                  <Txt size={15} weight={700} color={k.ink}>
-                    {today}
-                  </Txt>
-                </View>
-                <SegmentedControl<number>
-                  value={shift}
-                  onChange={(n) => {
-                    hijri.setAdjustment(n);
-                    setShift(n);
-                  }}
-                  options={[
-                    { value: -1, label: '−1' },
-                    { value: 0, label: '0' },
-                    { value: 1, label: '+1' },
-                  ]}
-                />
-              </View>
-            </Group>
-            <Note>{SETTINGS.hijriNote()}</Note>
-          </Detail>
-        );
-      case 'prayer':
-        return (
-          <Detail title={SETTINGS.prayer()} onBack={back}>
-            <Group>
-              <Row title={SETTINGS.myLocation()} end={locating ? <ActivityIndicator color={c.ctlText} /> : here?.source === 'gps' ? tick : undefined} onPress={locating ? undefined : useLocation} />
-              <Row title={SETTINGS.chooseCity()} chevron onPress={() => setCities((v) => !v)} last={!cities} />
-              {cities &&
-                shown.map((x, n) => (
-                  <Pressable
-                    key={x.i}
-                    onPress={() => {
-                      chooseCity(x.i);
-                      setHere(place());
-                      setCities(false);
-                    }}
-                    style={({ pressed }) => [styles.city, n < shown.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.divider }, pressed && { opacity: 0.6 }]}
-                  >
-                    <Txt size={15} color={k.ink} style={{ flex: 1 }}>
-                      {x.name}
-                    </Txt>
-                    {here?.source === 'city' && here.city === x.i && tick}
-                  </Pressable>
-                ))}
-            </Group>
-            <Note>{failed ? t('calLocateFailed') : here ? t('stPlaceNow', placeName(here) ?? t('calMyLocation'), hijri.countryName(here.country || hijri.calendarCountry())) : SETTINGS.noPlace()}</Note>
-          </Detail>
-        );
-      case 'night':
-        return (
-          <Detail title={READER.night()} onBack={back}>
-            <Group>
-              <Row title={READER.night()} sub={READER.nightSub()} end={<Toggle value={nightOn} onChange={(on) => setQuranMode(on ? 'dark' : 'light')} />} last={!nightOn} />
-              {nightOn && (
-                <View style={styles.block}>
-                  <Txt size={13} color={k.meta}>
-                    {READER.nightPage()}
-                  </Txt>
-                  <SegmentedControl<string>
-                    value={nightPage}
-                    onChange={(v) => setNightPage(v as 'normal' | 'dim')}
-                    options={[
-                      { value: 'normal', label: READER.normalPage() },
-                      { value: 'dim', label: READER.dimPage() },
-                    ]}
-                  />
-                </View>
-              )}
-            </Group>
-          </Detail>
-        );
-      case 'tafsirs':
-        return (
-          <Detail title={READER.tafsirs()} onBack={back}>
-            <Group>{sourceRows('tafsir')}</Group>
-            <Note>{READER.sourcesSub()}</Note>
-          </Detail>
-        );
-      case 'translations':
-        return (
-          <Detail title={READER.translations()} onBack={back}>
-            <Group>{sourceRows('translation')}</Group>
-          </Detail>
-        );
-      default:
-        return null;
-    }
+  const sourceRows = (kind: string) => {
+    const rows = sources.filter((s) => (s.kind ?? 'tafsir') === kind);
+    return rows.map((s, i) => <Line key={s.id} title={label(s)} sub={about(s)} role="checkbox" checked={chosen.has(s.id)} end={<Mark kind="tick" on={chosen.has(s.id)} />} onPress={() => toggleSource(s.id, !chosen.has(s.id))} last={i === rows.length - 1} />);
   };
+
+  const modes: [ThemeMode, string][] = [
+    ['auto', SETTINGS.auto()],
+    ['light', SETTINGS.light()],
+    ['dark', SETTINGS.dark()],
+  ];
+  const shifts: [number, string][] = [
+    [-1, L('يوم أقل (−١)', 'One day earlier (−1)', 'Un jour plus tôt (−1)')],
+    [0, L('بدون تعديل', 'No adjustment', 'Aucun ajustement')],
+    [1, L('يوم أكثر (+١)', 'One day later (+1)', 'Un jour plus tard (+1)')],
+  ];
+  const nights: [string, string][] = [
+    ['normal', READER.normalPage()],
+    ['dim', READER.dimPage()],
+  ];
+  const placeNote = failed ? t('calLocateFailed') : here ? t('stPlaceNow', placeName(here) ?? t('calMyLocation'), hijri.countryName(here.country || hijri.calendarCountry())) : SETTINGS.noPlace();
 
   return (
     <View style={{ flex: 1, backgroundColor: k.paper }}>
       <HomeBackdrop />
-      {page ? (
-        detail()
-      ) : (
-        <ScrollView contentContainerStyle={{ padding: space.md, paddingTop: insets.top + space.lg, paddingBottom: TAB_BAR_H + insets.bottom + space.md, gap: 22 }} keyboardShouldPersistTaps="handled">
-          <Txt size={32} weight={700} lineHeight={40} color={k.ink} style={{ marginBottom: 4 }}>
-            {SETTINGS.title()}
-          </Txt>
+      <ScrollView ref={scroll} contentContainerStyle={{ paddingHorizontal: space.md, paddingTop: insets.top + space.lg, paddingBottom: TAB_BAR_H + insets.bottom + space.lg }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <Txt size={32} weight={700} lineHeight={40} color={k.ink} style={lineStart()}>
+          {SETTINGS.title()}
+        </Txt>
 
-          <Group>
-            <Item
-              icon={<Avatar name={member?.display_name} size={30} />}
-              title={signedIn ? (member?.display_name ?? account.user?.email ?? ACCOUNT.title()) : SETTINGS.signIn()}
-              sub={signedIn ? (account.user?.email ?? undefined) : SETTINGS.signInSub()}
-              onPress={() => router.push(signedIn ? '/profile' : '/login')}
-              last
+        <Section title={SETTINGS.account()}>
+          <Line
+            title={signedIn ? (member?.display_name ?? account.user?.email ?? ACCOUNT.title()) : SETTINGS.signIn()}
+            sub={signedIn ? (account.user?.email ?? undefined) : SETTINGS.signInSub()}
+            end={<Chevron color={k.meta} size={16} />}
+            onPress={() => router.push(signedIn ? '/profile' : '/login')}
+            last
+          />
+        </Section>
+
+        <Section title={SETTINGS.appearance()} note={L('التلقائي يتبع مظهر جهازك.', 'Auto follows your device’s appearance.', 'Auto suit l’apparence de votre appareil.')}>
+          {modes.map(([m, name], i) => (
+            <Line key={m} title={name} role="radio" checked={mode === m} end={<Mark kind="radio" on={mode === m} />} onPress={() => setMode(m)} last={i === modes.length - 1} />
+          ))}
+        </Section>
+
+        <Section title={SETTINGS.language()}>
+          {(['ar', 'en', 'fr'] as const).map((l, i) => (
+            <Line key={l} title={LANGUAGES[l]} role="radio" checked={LANG === l} end={<Mark kind="radio" on={LANG === l} />} onPress={() => l !== LANG && changeLanguage(l)} last={i === 2} />
+          ))}
+        </Section>
+
+        <Section title={READER.riwaya()} note={READER.riwayaSub()}>
+          <Line title={READER.hafs()} role="radio" checked={HAFS} end={<Mark kind="radio" on={HAFS} />} onPress={HAFS ? undefined : () => setRiwaya('hafs')} />
+          <Line title={READER.warsh()} role="radio" checked={!HAFS} end={<Mark kind="radio" on={!HAFS} />} onPress={HAFS ? () => setRiwaya('warsh') : undefined} last />
+        </Section>
+
+        <Section title={READER.night()} note={READER.nightSub()}>
+          <Line title={READER.night()} end={<Toggle value={nightOn} onChange={(on) => setQuranMode(on ? 'dark' : 'light')} label={READER.night()} />} last />
+        </Section>
+
+        {nightOn && (
+          <Section title={READER.nightPage()}>
+            {nights.map(([v, name], i) => (
+              <Line key={v} title={name} role="radio" checked={nightPage === v} end={<Mark kind="radio" on={nightPage === v} />} onPress={() => setNightPage(v as 'normal' | 'dim')} last={i === nights.length - 1} />
+            ))}
+          </Section>
+        )}
+
+        <Section title={READER.tafsirs()} note={READER.sourcesSub()}>
+          {sourceRows('tafsir')}
+        </Section>
+
+        <Section title={READER.translations()}>{sourceRows('translation')}</Section>
+
+        <Section title={SETTINGS.hijri()} note={SETTINGS.hijriNote()}>
+          <Line title={SETTINGS.today()} end={<Txt size={15} weight={700} color={k.ink}>{today}</Txt>} />
+          {shifts.map(([n, name], i) => (
+            <Line
+              key={n}
+              title={name}
+              role="radio"
+              checked={shift === n}
+              end={<Mark kind="radio" on={shift === n} />}
+              onPress={() => {
+                hijri.setAdjustment(n);
+                setShift(n);
+              }}
+              last={i === shifts.length - 1}
             />
-          </Group>
+          ))}
+        </Section>
 
-          <Group>
-            <Item title={READER.riwaya()} value={riwayaName} onPress={() => setPage('riwaya')} />
-            <Item title={READER.night()} value={nightOn ? L('مفعّل', 'On', 'Activé') : L('معطّل', 'Off', 'Désactivé')} onPress={() => setPage('night')} />
-            <Item title={READER.tafsirs()} value={countOf('tafsir')} onPress={() => setPage('tafsirs')} />
-            <Item title={READER.translations()} value={countOf('translation')} onPress={() => setPage('translations')} last />
-          </Group>
-
-          <Group>
-            <Item title={SETTINGS.appearance()} value={modeName} onPress={() => setPage('appearance')} />
-            <Item title={SETTINGS.language()} value={LANGUAGES[LANG]} onPress={() => setPage('language')} last />
-          </Group>
-
-          <Group>
-            <Item title={SETTINGS.hijri()} value={`${shift > 0 ? '+' : ''}${shift}`} onPress={() => setPage('hijri')} />
-            <Item title={SETTINGS.prayer()} value={where} onPress={() => setPage('prayer')} last />
-          </Group>
-        </ScrollView>
-      )}
+        <Section title={SETTINGS.prayer()} note={placeNote} onLayout={asked ? (e) => scroll.current?.scrollTo({ y: Math.max(0, e.nativeEvent.layout.y - space.md), animated: false }) : undefined}>
+          <Line title={SETTINGS.myLocation()} role="radio" checked={here?.source === 'gps'} end={locating ? <ActivityIndicator color={c.ctlText} /> : <Mark kind="radio" on={here?.source === 'gps'} />} onPress={locating ? undefined : findMe} />
+          <Line
+            title={SETTINGS.chooseCity()}
+            end={
+              <View style={{ transform: [{ rotate: cities ? '90deg' : '0deg' }] }}>
+                <Chevron color={k.meta} size={16} />
+              </View>
+            }
+            onPress={() => setCities((v) => !v)}
+            last={!cities}
+          />
+          {cities &&
+            shown.map((x, n) => {
+              const on = here?.source === 'city' && here.city === x.i;
+              return (
+                <Line
+                  key={x.i}
+                  title={x.name}
+                  role="radio"
+                  checked={on}
+                  end={<Mark kind="radio" on={on} />}
+                  onPress={() => {
+                    chooseCity(x.i);
+                    setHere(place());
+                    setCities(false);
+                  }}
+                  last={n === shown.length - 1}
+                />
+              );
+            })}
+        </Section>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  group: { paddingHorizontal: 16, borderCurve: 'continuous', overflow: 'hidden' },
-  item: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 58, paddingVertical: 10 },
-  iconBox: { width: 26, alignItems: 'center', justifyContent: 'center' },
-  value: { maxWidth: '45%', textAlign: 'right' },
-  line: { height: StyleSheet.hairlineWidth },
-  block: { gap: space.sm, paddingVertical: space.sm + 4 },
-  between: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  city: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 4 },
+  section: { marginTop: 26 },
+  heading: { marginBottom: 10, marginHorizontal: 4 },
+  card: { paddingHorizontal: 16, borderCurve: 'continuous', overflow: 'hidden' },
+  note: { marginTop: 8, marginHorizontal: 8 },
+  line: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, paddingVertical: 10 },
+  words: { flex: 1, gap: 1 },
+  rule: { height: StyleSheet.hairlineWidth },
+  mark: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
+  radio: { borderRadius: 12, borderWidth: 1.5 },
 });
