@@ -180,7 +180,7 @@ export function TajweedGuide({ open, onClose }: { open: boolean; onClose: () => 
               <Txt size={19} weight={700} color={c.ink} style={start}>
                 {s.title}
               </Txt>
-              {!!s.intro && !s.steps && (
+              {!!s.intro && s.id !== 'colors' && (
                 <Txt size={15} lineHeight={25} color={c.text} style={start}>
                   {s.intro}
                 </Txt>
@@ -198,20 +198,6 @@ export function TajweedGuide({ open, onClose }: { open: boolean; onClose: () => 
                           {l.length}
                         </Txt>
                       </View>
-                    </View>
-                  ))}
-                </View>
-              )}
-              {!!s.steps && (
-                <View style={styles.grid}>
-                  {s.steps.map(([title, text], i) => (
-                    <View key={i} style={[styles.cell, { backgroundColor: c.soft, gap: 2 }]}>
-                      <Txt size={14} weight={700} color={c.ink} style={start}>
-                        {title}
-                      </Txt>
-                      <Txt size={13} lineHeight={20} color={c.meta} style={start}>
-                        {text}
-                      </Txt>
                     </View>
                   ))}
                 </View>

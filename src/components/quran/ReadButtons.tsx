@@ -18,7 +18,7 @@ import { space } from '@/theme/tokens';
 export const READ_BAR_H = 64;
 
 // The bar wears the same surface as the round buttons at the top of the page and as the main bottom bar, and the same icon family
-// as that bar (src/components/ui/TabIcons.tsx): a fine outline over a short name.
+// as that bar (src/components/ui/TabIcons.tsx): a slim solid glyph over a short name.
 export function ReadButtons({ onMarks }: { onMarks: (tab: Tab) => void }) {
   const h = useHome();
   const look = useBarLook('0px 8px 22px');

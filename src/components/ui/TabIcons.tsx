@@ -8,7 +8,7 @@ type Props = { color: string; active?: boolean; size?: number };
 
 function Frame({ color, size = 24, children }: Props & { children: ReactNode }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="-2.5 -2.5 29 29" fill={color}>
       {children}
     </Svg>
   );
@@ -59,13 +59,13 @@ export const TabSettingsIcon = (p: Props) => (
     <Defs>
       <Mask id="gearHole">
         <Rect width={24} height={24} fill="#fff" />
-        <Circle cx={12} cy={12} r={3.2} fill="#000" />
+        <Circle cx={12} cy={12} r={3} fill="#000" />
       </Mask>
     </Defs>
     <G mask="url(#gearHole)">
-      <Circle cx={12} cy={12} r={7.2} />
+      <Circle cx={12} cy={12} r={6.4} />
       {[0, 60, 120].map((a) => (
-        <Rect key={a} x={9.7} y={2.3} width={4.6} height={19.4} rx={1.6} transform={`rotate(${a} 12 12)`} />
+        <Rect key={a} x={10.2} y={2.6} width={3.6} height={18.8} rx={1.3} transform={`rotate(${a} 12 12)`} />
       ))}
     </G>
   </Frame>
