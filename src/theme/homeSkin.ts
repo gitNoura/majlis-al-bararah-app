@@ -100,7 +100,7 @@ const light: HomeSkin = {
   glassShadow: 'rgba(0, 0, 0, 0.07)',
   cardShadow: '0px 1px 2px rgba(0, 0, 0, 0.05), 0px 4px 10px rgba(0, 0, 0, 0.05), 0px 14px 28px rgba(0, 0, 0, 0.07)',
   glassTop: '#ffffff',
-  glassBottom: '#eef0ec',
+  glassBottom: '#f4f4f4', // white fading to a neutral light grey (no green)
   vivid: '#12A88A', // (light mode takes the prayer card's sky instead: components/home/useSkyAccent.ts)
   halo: 'rgba(18, 168, 138, 0.5)',
   tabBar: '#ffffff',

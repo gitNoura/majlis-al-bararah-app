@@ -31,9 +31,9 @@ type Section = {
 function Example({ parts, color }: { parts: string[]; color: string }) {
   const { c } = useTheme();
   return (
-    <Txt serif size={24} lineHeight={44} color={c.text} style={{ textAlign: 'auto', writingDirection: 'rtl' }}>
+    <Txt serif size={22} lineHeight={40} color={c.text} center style={{ writingDirection: 'rtl' }}>
       {parts.map((part, i) => (
-        <Txt key={i} serif size={24} lineHeight={44} color={i % 2 ? color : c.text}>
+        <Txt key={i} serif size={22} lineHeight={40} color={i % 2 ? color : c.text}>
           {forDisplay(part)}
         </Txt>
       ))}
@@ -41,9 +41,36 @@ function Example({ parts, color }: { parts: string[]; color: string }) {
   );
 }
 
-function RuleCard({ rule }: { rule: Rule }) {
+// the examples of a rule side by side: as many to a line as fit, then they wrap
+function Examples({ list, color }: { list: string[][]; color: string }) {
+  const { c } = useTheme();
+  return (
+    <View style={styles.examples}>
+      {list.map((e, i) => (
+        <View key={i} style={[styles.example, { borderColor: c.line }]}>
+          <Example parts={e} color={color} />
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// «When? ...» and «How to read it ...» as two short paragraphs with their label in front (no label lines of their own)
+function Point({ label, text }: { label: string; text: string }) {
   const { c } = useTheme();
   const start = lineStart();
+  return (
+    <Txt size={14.5} lineHeight={23} color={c.text} style={start}>
+      <Txt size={14.5} weight={700} color={c.meta}>
+        {label}{'  '}
+      </Txt>
+      {text}
+    </Txt>
+  );
+}
+
+function RuleCard({ rule }: { rule: Rule }) {
+  const { c } = useTheme();
   return (
     <View style={[styles.card, { backgroundColor: c.soft, borderStartColor: rule.color }]}>
       <View style={styles.row}>
@@ -55,23 +82,9 @@ function RuleCard({ rule }: { rule: Rule }) {
           {rule.length}
         </Txt>
       </View>
-      <Txt size={14} weight={700} color={c.meta}>
-        {t('tjWhen')}
-      </Txt>
-      <Txt size={15} lineHeight={25} color={c.text} style={start}>
-        {rule.when}
-      </Txt>
-      <Txt size={14} weight={700} color={c.meta}>
-        {t('tjHow')}
-      </Txt>
-      <Txt size={15} lineHeight={25} color={c.text} style={start}>
-        {rule.how}
-      </Txt>
-      <View style={{ gap: 2, marginTop: 4 }}>
-        {rule.examples.map((e, i) => (
-          <Example key={i} parts={e} color={rule.color} />
-        ))}
-      </View>
+      <Point label={t('tjWhen')} text={rule.when} />
+      <Point label={t('tjHow')} text={rule.how} />
+      <Examples list={rule.examples} color={rule.color} />
     </View>
   );
 }
@@ -167,43 +180,42 @@ export function TajweedGuide({ open, onClose }: { open: boolean; onClose: () => 
               <Txt size={19} weight={700} color={c.ink} style={start}>
                 {s.title}
               </Txt>
-              {!!s.intro && (
+              {!!s.intro && !s.steps && (
                 <Txt size={15} lineHeight={25} color={c.text} style={start}>
                   {s.intro}
                 </Txt>
               )}
               {s.id === 'colors' && (
-                <View style={{ gap: 8 }}>
+                <View style={styles.grid}>
                   {legend.map((l) => (
-                    <View key={l.name} style={styles.row}>
+                    <View key={l.name} style={[styles.cell, styles.row, { backgroundColor: c.soft }]}>
                       <View style={[styles.dot, { backgroundColor: l.color }]} />
-                      <Txt size={15} weight={700} color={c.ink} style={{ flex: 1 }}>
-                        {l.name}
+                      <View style={{ flex: 1 }}>
+                        <Txt size={14} weight={700} color={c.ink} numberOfLines={2} style={start}>
+                          {l.name}
+                        </Txt>
+                        <Txt size={12} color={c.meta} numberOfLines={1} style={start}>
+                          {l.length}
+                        </Txt>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+              {!!s.steps && (
+                <View style={styles.grid}>
+                  {s.steps.map(([title, text], i) => (
+                    <View key={i} style={[styles.cell, { backgroundColor: c.soft, gap: 2 }]}>
+                      <Txt size={14} weight={700} color={c.ink} style={start}>
+                        {title}
                       </Txt>
-                      <Txt size={13} color={c.meta}>
-                        {l.length}
+                      <Txt size={13} lineHeight={20} color={c.meta} style={start}>
+                        {text}
                       </Txt>
                     </View>
                   ))}
                 </View>
               )}
-              {s.steps?.map(([title, text], i) => (
-                <View key={i} style={styles.row}>
-                  <View style={[styles.num, { backgroundColor: c.soft }]}>
-                    <Txt size={13} weight={700} color={c.ink} center>
-                      {i + 1}
-                    </Txt>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Txt size={15} weight={700} color={c.ink} style={start}>
-                      {title}
-                    </Txt>
-                    <Txt size={14} lineHeight={22} color={c.meta} style={start}>
-                      {text}
-                    </Txt>
-                  </View>
-                </View>
-              ))}
               {s.rules?.map((r) => <RuleCard key={r.name} rule={r} />)}
               {s.features?.map(([title, text, example]) => (
                 <View key={title} style={[styles.card, { backgroundColor: c.soft, borderStartColor: c.line }]}>
@@ -213,7 +225,7 @@ export function TajweedGuide({ open, onClose }: { open: boolean; onClose: () => 
                   <Txt size={15} lineHeight={25} color={c.text} style={start}>
                     {text}
                   </Txt>
-                  <Example parts={[example]} color={c.text} />
+                  <Examples list={[[example]]} color={c.text} />
                 </View>
               ))}
               {!!s.note && (
@@ -251,5 +263,9 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dot: { width: 14, height: 14, borderRadius: 7 },
   num: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
-  card: { gap: 4, padding: 14, borderRadius: 16, borderStartWidth: 4 },
+  card: { gap: 8, padding: 14, borderRadius: 16, borderStartWidth: 4 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  cell: { flexGrow: 1, flexBasis: '45%', padding: 12, borderRadius: 14, borderCurve: 'continuous' },
+  examples: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 2 },
+  example: { flexGrow: 1, flexBasis: '30%', paddingHorizontal: 6, borderRadius: 12, borderCurve: 'continuous', borderWidth: StyleSheet.hairlineWidth, alignItems: 'center', justifyContent: 'center' },
 });

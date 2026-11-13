@@ -20,10 +20,15 @@ export function BookIcon({ size = 18, color, strokeWidth = 1.6 }: IconProps) {
   );
 }
 
+// A solid flame with a smaller flame cut out of it: one calm colour (the caller picks it; Home and the profile use their ink)
 export function FlameIcon({ size = 14, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.2 2-4.2.3 1.3 1 2 2 2.2C10.5 8 11 5.5 12 3Z" fill={color} />
+      <Path
+        fill={color}
+        fillRule="evenodd"
+        d="M12.9 2.4c.4 2.7 1.7 4.1 3.1 5.6 1.5 1.6 3 3.3 3 6.1a7 7 0 0 1-14 0c0-2.3.9-3.9 2.2-5.1.2 1.4.9 2.2 1.9 2.5-.3-4.1.5-7.1 3.8-9.1Z M12 19.4a2.9 2.9 0 0 0 2.9-2.9c0-1.6-1-2.4-1.9-3.4-.3 1-.9 1.5-1.6 1.7-.9-.5-1.2-1.4-1.1-2.3-1.2.8-1.2 2.1-1.2 4a2.9 2.9 0 0 0 2.9 2.9Z"
+      />
     </Svg>
   );
 }

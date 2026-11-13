@@ -50,7 +50,7 @@ export function ActivityCard() {
         </Txt>
         {run > 1 && (
           <View style={styles.streak}>
-            <FlameIcon color="#e8903a" size={14} />
+            <FlameIcon color={k.meta} size={15} />
             <Txt size={13} weight={700} color={k.ink}>
               {DASH.activityStreak(run)}
             </Txt>

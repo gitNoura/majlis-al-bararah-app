@@ -80,7 +80,7 @@ function ProfileView() {
       {/* the days of reading */}
       <Section title={ACCOUNT.myJourney()}>
         <View style={styles.stats}>
-          <Stat icon={<FlameIcon color="#e8903a" size={18} />} value={streak(days)} label={ACCOUNT.daysInRow()} />
+          <Stat icon={<FlameIcon color={c.ink} size={18} />} value={streak(days)} label={ACCOUNT.daysInRow()} />
           <View style={[styles.statLine, { backgroundColor: c.divider }]} />
           <Stat icon={<PersonIcon color={c.gold} size={18} />} value={days.size} label={ACCOUNT.daysRead()} />
         </View>
