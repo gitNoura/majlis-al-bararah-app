@@ -234,7 +234,7 @@ function CategoryTile({ cat, onPress }: { cat: CategoryView; onPress: () => void
         {cat.key === 'daily' ? (
           <MorningEvening width={w} height={h} mirrored={!isEnglish} />
         ) : (
-          <CategoryPainting name={cat.key} width={w} height={h} mirrored={!isEnglish} />
+          <CategoryPainting name={cat.key} width={w} height={h} mirrored={!isEnglish} focus />
         )}
       </View>
       <Txt size={13} weight={600} center color={c.text} numberOfLines={2} lineHeight={17}>

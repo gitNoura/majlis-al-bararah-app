@@ -870,6 +870,38 @@ const PAINTINGS: Record<string, () => ReactNode> = {
   ),
 };
 
+// `focus` (the tiles on the Adhkar page): the picture framed on its subject - [x, y, width] of the part of the 200 × 180 picture shown,
+// its height 0.9 of the width - so the subject fills the tile instead of sitting small in empty sky and floor.
+const FOCUS: Record<string, [number, number, number]> = {
+  home: [70, 50, 130],
+  food: [80, 58, 125],
+  illness: [30, 30, 170],
+  worry: [50, 28, 140],
+  weather: [30, 30, 140],
+  sleep: [35, 28, 160],
+  prayer: [60, 40, 140],
+  purif: [70, 50, 130],
+  mosque: [45, 38, 150],
+  clothing: [60, 14, 150],
+  manners: [40, 50, 150],
+  dhikr: [50, 30, 150],
+  travel: [60, 50, 140],
+  hajj: [40, 40, 160],
+  death: [25, 30, 150],
+  fasting: [30, 30, 170],
+  whisper: [55, 45, 135],
+  fear: [70, 50, 125],
+  family: [55, 60, 145],
+  protect: [70, 55, 125],
+  people: [40, 24, 160],
+  news: [20, 20, 170],
+  library: [30, 5, 170],
+  book_bukhari: [40, 25, 150],
+  book_muslim: [40, 25, 150],
+  book_nawawi: [40, 25, 150],
+  other: [60, 60, 120],
+};
+
 export const hasPainting = (key: string) => key in PAINTINGS;
 
 // whether the painting is a night one (its words drawn light over it)
@@ -878,12 +910,13 @@ export const isNightPainting = (key: string) => NIGHT.has(key);
 
 // `tall`: a whole page - the picture whole at its bottom, its sky going on up
 // `ground`: a wide frame (a page's head) - the picture kept to its ground, where its people and things are
-export function CategoryPainting({ name, width, height, mirrored, tall, ground }: { name: string; width: number; height: number; mirrored?: boolean; tall?: boolean; ground?: boolean }) {
+export function CategoryPainting({ name, width, height, mirrored, tall, ground, focus }: { name: string; width: number; height: number; mirrored?: boolean; tall?: boolean; ground?: boolean; focus?: boolean }) {
   const paint = PAINTINGS[name] ?? PAINTINGS.other;
   // a whole page: as wide as the page, the picture whole at the bottom, its sky going on above it
   const sky = tall ? (W * height) / width - H : 0;
+  const f = focus && !tall && !ground ? FOCUS[name] : undefined;
   return (
-    <Svg width={width} height={height} viewBox={tall ? `0 ${-sky} ${W} ${H + sky}` : `0 0 ${W} ${H}`} preserveAspectRatio={tall ? 'xMidYMax meet' : ground ? 'xMidYMax slice' : 'xMidYMid slice'} style={mirrored ? { transform: [{ scaleX: -1 }] } : undefined}>
+    <Svg width={width} height={height} viewBox={tall ? `0 ${-sky} ${W} ${H + sky}` : f ? `${f[0]} ${f[1]} ${f[2]} ${f[2] * 0.9}` : `0 0 ${W} ${H}`} preserveAspectRatio={tall ? 'xMidYMax meet' : ground ? 'xMidYMax slice' : 'xMidYMid slice'} style={mirrored ? { transform: [{ scaleX: -1 }] } : undefined}>
       {paint()}
     </Svg>
   );
