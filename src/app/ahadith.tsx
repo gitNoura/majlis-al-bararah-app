@@ -11,7 +11,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenBackground } from '@/components/Stars';
 import { BookmarkIcon, SearchIcon } from '@/components/icons';
-import { HadithFrontispiece } from '@/components/HadithFrontispiece';
 import { Note, openBook, openHadith, ReadLangButton } from '@/components/HadithParts';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { PrimaryButton } from '@/components/hifdh/Section';
@@ -72,9 +71,6 @@ export default function Ahadith() {
         }
       />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 28, gap: 18 }} keyboardShouldPersistTaps="handled">
-        {/* the heading, as the first page of a manuscript */}
-        <HadithFrontispiece />
-
         {/* the search, in Arabic in every language */}
         <View style={[styles.search, { backgroundColor: c.surface, borderColor: c.line }]}>
           <SearchIcon color={c.meta} size={20} />

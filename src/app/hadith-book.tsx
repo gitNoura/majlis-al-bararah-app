@@ -7,7 +7,6 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenBackground } from '@/components/Stars';
-import { HadithFrontispiece } from '@/components/HadithFrontispiece';
 import { Note, openHadith, useToTop } from '@/components/HadithParts';
 import { BackIcon } from '@/components/icons';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -50,13 +49,10 @@ export default function HadithBook() {
           keyExtractor={(k) => String(k.n)}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 40 }}
           ListHeaderComponent={
-            // the book's name on a manuscript's heading, how many hadiths under it
-            <View style={{ marginBottom: 14, gap: 10 }}>
-              <HadithFrontispiece compact label={bookName(b)} />
-              <Txt size={13.5} center color={c.meta}>
-                {t('ahHadithCount', book.count)}
-              </Txt>
-            </View>
+            // the book's name in the top bar (as before), how many hadiths under it
+            <Txt size={13.5} center color={c.meta} style={{ marginBottom: 14 }}>
+              {t('ahHadithCount', book.count)}
+            </Txt>
           }
           renderItem={({ item: k, index }) => {
             const name = kitabName(b, k);
